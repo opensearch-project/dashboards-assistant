@@ -9,7 +9,7 @@ import { IndicesGetMappingResponse } from '@opensearch-project/opensearch/api/ty
 export const wrap = (str: string) => '`' + str + '`';
 
 /**
- * Flatten mappings response to a list of fields and types.
+ * Flatten mappings response to an object of fields and types.
  *
  * @template T = unknown - Context
  * @param mappings - mapping from get mappings request
