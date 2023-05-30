@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ChatAnthropic } from 'langchain/chat_models/anthropic';
 import { BaseLanguageModel } from 'langchain/dist/base_language';
 import { Embeddings } from 'langchain/dist/embeddings/base';
