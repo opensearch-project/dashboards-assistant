@@ -9,11 +9,13 @@ import { request as requestPPLGenerator } from '../chains/ppl_generator';
 interface GeneratePPLOptions {
   question: string;
   index: string;
+  timeField: string;
   fields: Record<string, string>;
 }
-export const generatePPL = async ({ question, index, fields }: GeneratePPLOptions) => {
-  const entitiesHints = await requestEntities(question, fields);
-  const input = question + entitiesHints + ' index is ' + index;
+export const generatePPL = async (options: GeneratePPLOptions) => {
+  const entitiesHints = await requestEntities(options.question, options.fields);
+  // const input = `${options.question} ${entitiesHints}, time field is \`${options.timeField}\`, index is \`${options.index}\``;
+  const input = `${options.question} ${entitiesHints}, index is \`${options.index}\``;
   console.info('❗input:', input);
   const ppl = await requestPPLGenerator(input);
   console.info('❗ppl:', ppl);

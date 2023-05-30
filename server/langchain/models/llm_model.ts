@@ -10,22 +10,41 @@ import { HuggingFaceInferenceEmbeddings } from 'langchain/embeddings/hf';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { OpenAI } from 'langchain/llms/openai';
 
+type ModelName = 'claude' | 'openai';
+
 class LLMModel {
-  model: BaseLanguageModel;
-  embeddings: Embeddings;
-  constructor(llm: 'claude' | 'openai' = 'claude') {
-    switch (llm) {
+  name: ModelName;
+  #model?: BaseLanguageModel;
+  #embeddings?: Embeddings;
+
+  constructor(name: ModelName = 'claude') {
+    this.name = name;
+  }
+
+  lazyInit() {
+    if (this.#model && this.#embeddings) return;
+    switch (this.name) {
       case 'openai':
-        this.model = new OpenAI({ temperature: 0.1 });
-        this.embeddings = new OpenAIEmbeddings();
+        this.#model = new OpenAI({ temperature: 0.1 });
+        this.#embeddings = new OpenAIEmbeddings();
         break;
 
       case 'claude':
       default:
-        this.model = new ChatAnthropic({ temperature: 0.1 });
-        this.embeddings = new HuggingFaceInferenceEmbeddings();
+        this.#model = new ChatAnthropic({ temperature: 0.1 });
+        this.#embeddings = new HuggingFaceInferenceEmbeddings();
         break;
     }
+  }
+
+  public get model() {
+    this.lazyInit();
+    return this.#model!;
+  }
+
+  public get embeddings() {
+    this.lazyInit();
+    return this.#embeddings!;
   }
 }
 

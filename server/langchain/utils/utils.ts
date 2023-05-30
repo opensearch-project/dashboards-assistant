@@ -7,13 +7,6 @@ import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { IndicesGetMappingResponse } from '@opensearch-project/opensearch/api/types';
 
 /**
- * Wrap string with backticks.
- *
- * @param str - string
- */
-export const wrap = (str: string) => '`' + str + '`';
-
-/**
  * Flatten mappings response to an object of fields and types.
  *
  * @template T = unknown - Context
