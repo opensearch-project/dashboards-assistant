@@ -7,3 +7,4 @@ coverage/
 .cypress/downloads
 common/query_manager/antlr/output
 .eslintcache
+.logs
