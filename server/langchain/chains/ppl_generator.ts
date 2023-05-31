@@ -22,10 +22,10 @@ Give me 10 documents in index 'accounts'
 source=\`accounts\` | head 10
 
 Give me 5 oldest people in index 'accounts'
-source=\`accounts\` | sort - age | head 5
+source=\`accounts\` | sort -age | head 5
 
 Give me first names of 5 youngest people in index 'accounts'
-source=\`accounts\` | sort age | head 5 | fields \`firstname\`
+source=\`accounts\` | sort +age | head 5 | fields \`firstname\`
 
 Give me some addresses in index 'accounts'. field for addresses is 'address'
 source=\`accounts\` | fields \`address\`
@@ -40,34 +40,32 @@ Find the document in index 'accounts' where firstname is not 'Hattie' and lastna
 source=\`accounts\` | where \`firstname\` != 'Hattie' and \`lastname\` != 'frank'
 
 Count the number of documents in index 'accounts'
-source=\`accounts\` | stats count() as count
+source=\`accounts\` | stats count() as \`count\`
 
 Count the number of people with firstname 'Amber' in index 'accounts'
-source=\`accounts\` | where \`firstname\` ='Amber' | stats count() as count
+source=\`accounts\` | where \`firstname\` ='Amber' | stats count() as \`count\`
 
 How many people are older than 33? index is 'accounts', age fields is 'age'
-source=\`accounts\` | where \`age\` > 33 | stats count() as count
+source=\`accounts\` | where \`age\` > 33 | stats count() as \`count\`
 
 How many males and females in index 'accounts'? gender fields is 'gender'
-source=\`accounts\` | stats count() as count by \`gender\`
+source=\`accounts\` | stats count() as \`count\` by \`gender\`
 
 What is the average, minimum, maximum age in 'accounts' index?
-source=\`accounts\` | stats avg(\`age\`) as avg_age, min(\`age\`) as min_age, max(\`age\` as max_age
+source=\`accounts\` | stats avg(\`age\`) as \`avg_age\`, min(\`age\`) as \`min_age\`, max(\`age\` as \`max_age\`
 
 Show all states sorted by average balance. balance field is 'balance', states field is 'state', index is 'accounts'
-source=\`accounts\` | stats avg(\`balance\`) as avg_balance by \`state\` | sort avg_balance
+source=\`accounts\` | stats avg(\`balance\`) as \`avg_balance\` by \`state\` | sort +avg_balance
 
 What is the average price of products ordered in the last 7 days? price field is 'taxful_total_price', ordered date field is 'order_date', index is 'ecommerce'
-source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 7 DAY) | stats avg(\`taxful_total_price\`) as avg_price
+source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 7 DAY) | stats avg(\`taxful_total_price\`) as \`avg_price\`
 
 What is the average price of products ordered in the last 24 hours by every 2 hours? price field is 'taxful_total_price', ordered date field is 'order_date', index is 'ecommerce'
-source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 24 HOUR) | stats avg(\`taxful_total_price\`) as avg_price by span(\`order_date\`, 2h)
+source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 24 HOUR) | stats avg(\`taxful_total_price\`) as \`avg_price\` by span(\`order_date\`, 2h)
 
 ----------------
 
-#01 For \`sort\` command, do not wrap backtick around the field
-#02 For \`sort\` command, use \`sort - field\` instead of \`sort field desc\` to sort in descending order
-#03 Only use fields that appear in the question
+#01 Only use fields that appear in the question
 
 {format_instructions}
 
