@@ -4,8 +4,11 @@
  */
 
 import { promises as fs } from 'fs';
+import process from 'process';
 import { request as requestEntities } from '../chains/entities_finder';
 import { request as requestPPLGenerator } from '../chains/ppl_generator';
+
+process.env.LANGCHAIN_TRACING = 'true';
 
 interface GeneratePPLOptions {
   question: string;
