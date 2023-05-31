@@ -10,7 +10,7 @@ interface GeneratePPLOptions {
   question: string;
   index: string;
   timeField: string;
-  fields: Record<string, string>;
+  fields: string;
 }
 export const generatePPL = async (options: GeneratePPLOptions) => {
   const entitiesHints = await requestEntities(options.question, options.fields);
