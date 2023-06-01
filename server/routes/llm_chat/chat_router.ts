@@ -6,7 +6,7 @@
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema } from '@osd/config-schema';
 import { IOpenSearchDashboardsResponse, IRouter } from '../../../../../src/core/server';
-import { OBSERVABILITY_BASE } from '../../../common/constants/shared';
+import { CHAT_API } from '../../../common/constants/llm';
 import {
   CHAT_SAVED_OBJECT,
   IChat,
@@ -18,7 +18,7 @@ export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
   router.post(
     {
-      path: `${OBSERVABILITY_BASE}/chat/send`,
+      path: CHAT_API.LLM,
       validate: {
         body: schema.object({
           chatId: schema.maybe(schema.string()),

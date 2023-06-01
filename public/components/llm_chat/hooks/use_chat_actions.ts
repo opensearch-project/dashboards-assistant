@@ -5,7 +5,7 @@
 
 import { produce } from 'immer';
 import { useContext } from 'react';
-import { OBSERVABILITY_BASE } from '../../../../common/constants/shared';
+import { CHAT_API } from '../../../../common/constants/llm';
 import {
   IMessage,
   ISuggestedAction,
@@ -35,16 +35,13 @@ export const useChatActions = () => {
       })
     );
     try {
-      const response = await coreServicesContext.http.post<SendResponse>(
-        `${OBSERVABILITY_BASE}/chat/send`,
-        {
-          body: JSON.stringify({
-            chatId: chatContext.chatId,
-            messages: chatStateContext.chatState.messages,
-            input,
-          }),
-        }
-      );
+      const response = await coreServicesContext.http.post<SendResponse>(CHAT_API.LLM, {
+        body: JSON.stringify({
+          chatId: chatContext.chatId,
+          messages: chatStateContext.chatState.messages,
+          input,
+        }),
+      });
       if (abortController.signal.aborted) return;
       chatContext.setChatId(response.chatId);
       chatStateContext.setChatState({
