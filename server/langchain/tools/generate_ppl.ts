@@ -4,7 +4,6 @@
  */
 
 import { promises as fs } from 'fs';
-import { request as requestEntities } from '../chains/entities_finder';
 import { request as requestPPLGenerator } from '../chains/ppl_generator';
 
 interface GeneratePPLOptions {
@@ -15,8 +14,7 @@ interface GeneratePPLOptions {
 }
 export const generatePPL = async (options: GeneratePPLOptions) => {
   try {
-    const entitiesHints = await requestEntities(options.question, options.fields);
-    const input = `${options.question}\n${entitiesHints}, index is \`${options.index}\``;
+    const input = `${options.question}\nindex is \`${options.index}\`\nFields:\n${options.fields}`;
     const ppl = await requestPPLGenerator(input);
     logToFile({ question: options.question, input, ppl });
     ppl.query = ppl.query.replace(/^source\s*=\s*`(.+?)`/, 'source=$1'); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509
@@ -27,6 +25,7 @@ export const generatePPL = async (options: GeneratePPLOptions) => {
 };
 
 const logToFile = async (status: object) => {
+  console.info('❗status:', status);
   await fs.mkdir(`${__dirname}/../../../.logs`, { recursive: true });
   fs.appendFile(
     `${__dirname}/../../../.logs/ppl_generator.log`,
