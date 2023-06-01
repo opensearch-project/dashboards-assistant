@@ -25,6 +25,7 @@ export const generateFieldContext = <T = unknown, U = unknown>(
   const source = hits.body.hits.hits[0]._source;
 
   return Object.entries(flattenedFields)
+    .filter(([, type]) => type !== 'alias') // PPL doesn't support 'alias' type
     .map(([field, type]) => {
       return `- ${field}: ${type} (${extractValue(source, field, type)})`;
     })
