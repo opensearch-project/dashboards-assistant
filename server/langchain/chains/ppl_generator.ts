@@ -32,21 +32,6 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\`
-
-Question: Give me 10 documents in index 'accounts'
-Fields:
-- account_number: long (101)
-- address: text ("880 Holmes Lane")
-- age: long (32)
-- balance: long (39225)
-- city: text ("Brogan")
-- email: text ("amberduke@pyrami.com")
-- employer: text ("Pyrami")
-- firstname: text ("Amber")
-- gender: text ("M")
-- lastname: text ("Duke")
-- state: text ("IL")
 PPL: source=\`accounts\` | head 10
 
 Question: Give me 5 oldest people in index 'accounts'
@@ -109,7 +94,7 @@ Fields:
 - state: text ("IL")
 PPL: source=\`accounts\` | where \`firstname\` = 'Hattie'
 
-Question: Find the emails in index 'accounts' where firstname is 'Hattie' or lastname is 'Frank'. email field is 'email'
+Question: Find the emails that contain '.com' in index 'accounts' where firstname is 'Hattie' or lastname is 'Frank'. email field is 'email'
 Fields:
 - account_number: long (101)
 - address: text ("880 Holmes Lane")
@@ -122,7 +107,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | where \`firstname\` = 'Hattie' or \`lastname\` = 'frank' | fields \`email\`
+PPL: source=\`accounts\` | where MATCH(\`email\`, '.com') | where \`firstname\` = 'Hattie' OR \`lastname\` = 'frank' | fields \`email\`
 
 Question: Find the document in index 'accounts' where firstname is not 'Hattie' and lastname is not 'Frank'
 Fields:
@@ -137,7 +122,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | where \`firstname\` != 'Hattie' and \`lastname\` != 'frank'
+PPL: source=\`accounts\` | where \`firstname\` != 'Hattie' AND \`lastname\` != 'frank'
 
 Question: Count the number of documents in index 'accounts'
 Fields:
@@ -152,7 +137,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | stats count() as \`count\`
+PPL: source=\`accounts\` | stats COUNT() AS \`count\`
 
 Question: Count the number of people with firstname 'Amber' in index 'accounts'
 Fields:
@@ -167,7 +152,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | where \`firstname\` ='Amber' | stats count() as \`count\`
+PPL: source=\`accounts\` | where \`firstname\` ='Amber' | stats COUNT() AS \`count\`
 
 Question: How many people are older than 33? index is 'accounts'
 Fields:
@@ -182,7 +167,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | where \`age\` > 33 | stats count() as \`count\`
+PPL: source=\`accounts\` | where \`age\` > 33 | stats COUNT() AS \`count\`
 
 Question: How many males and females in index 'accounts'?
 Fields:
@@ -197,7 +182,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | stats count() as \`count\` by \`gender\`
+PPL: source=\`accounts\` | stats COUNT() AS \`count\` BY \`gender\`
 
 Question: What is the average, minimum, maximum age in 'accounts' index?
 Fields:
@@ -212,7 +197,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | stats avg(\`age\`) as \`avg_age\`, min(\`age\`) as \`min_age\`, max(\`age\` as \`max_age\`
+PPL: source=\`accounts\` | stats AVG(\`age\`) AS \`avg_age\`, MIN(\`age\`) AS \`min_age\`, MAX(\`age\`) AS \`max_age\`
 
 Question: Show all states sorted by average balance. index is 'accounts'
 Fields:
@@ -227,9 +212,9 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | stats avg(\`balance\`) as \`avg_balance\` by \`state\` | sort +avg_balance
+PPL: source=\`accounts\` | stats AVG(\`balance\`) AS \`avg_balance\` BY \`state\` | sort +avg_balance
 
-Question: What is the average price of products ordered in the last 7 days? index is 'ecommerce'
+Question: What is the average price of products in clothing category ordered in the last 7 days? index is 'ecommerce'
 Fields:
 - category: text ("Men's Clothing")
 - currency: keyword ("EUR")
@@ -277,9 +262,9 @@ Fields:
 - total_unique_products: integer (2)
 - type: keyword ("order")
 - user: keyword ("eddie")
-PPL: source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 7 DAY) | stats avg(\`taxful_total_price\`) as \`avg_price\`
+PPL: source=\`ecommerce\` | where MATCH(\`category\`, 'clothing') AND \`order_date\` < DATE_SUB(NOW(), INTERVAL 7 DAY) | stats AVG(\`taxful_total_price\`) AS \`avg_price\`
 
-Question: What is the average price of products ordered in the last 24 hours by every 2 hours? index is 'ecommerce'
+Question: What is the average price of products ordered today by every 2 hours? index is 'ecommerce'
 Fields:
 - category: text ("Men's Clothing")
 - currency: keyword ("EUR")
@@ -327,15 +312,19 @@ Fields:
 - total_unique_products: integer (2)
 - type: keyword ("order")
 - user: keyword ("eddie")
-PPL: source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 24 HOUR) | stats avg(\`taxful_total_price\`) as \`avg_price\` by span(\`order_date\`, 2h)
+PPL: source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 24 HOUR) | stats AVG(\`taxful_total_price\`) AS \`avg_price\` by SPAN(\`order_date\`, 2h)
 
 ----------------
 
 Use the following steps to generate the PPL query:
+#01 Find all entities in the question.
+#02 Pick the fields that are relevant to the question from the provided fields list using entities.
+#03 Use the choosen fields to write the PPL query.
 
-#01 Find all entities in the question
-#02 Pick the fields that are relevant to the question from the provided fields list using entities
-#03 Use the choosen fields to write a PPL query
+Remember the rules when writing a PPL query:
+#01 Always use comparisons to filter date/time, eg. 'where \`timestamp\` < DATE_SUB(NOW(), INTERVAL 1 DAY)'.
+#02 Only use fields appeared in the question or in the provided fields list.
+#03 Only use syntax and keywords appeared in the question or in the examples.
 
 {format_instructions}
 
