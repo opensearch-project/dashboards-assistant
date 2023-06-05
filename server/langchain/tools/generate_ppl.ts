@@ -14,7 +14,7 @@ interface GeneratePPLOptions {
 }
 export const generatePPL = async (options: GeneratePPLOptions) => {
   try {
-    const input = `${options.question}\nindex is \`${options.index}\`\nFields:\n${options.fields}`;
+    const input = `Fields:\n${options.fields}\nQuestion: ${options.question}? index is \`${options.index}\``;
     const ppl = await requestPPLGenerator(input);
     logToFile({ question: options.question, input, ppl });
     ppl.query = ppl.query.replace(/^source\s*=\s*`(.+?)`/, 'source=$1'); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509
