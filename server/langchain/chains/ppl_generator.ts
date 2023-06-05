@@ -32,7 +32,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | head 10
+PPL: source=\`accounts\` | head
 
 Question: Give me 5 oldest people in index 'accounts'
 Fields:
@@ -109,7 +109,7 @@ Fields:
 - state: text ("IL")
 PPL: source=\`accounts\` | where MATCH(\`email\`, '.com') | where \`firstname\` = 'Hattie' OR \`lastname\` = 'frank' | fields \`email\`
 
-Question: Find the document in index 'accounts' where firstname is not 'Hattie' and lastname is not 'Frank'
+Question: Find the document in index 'accounts' where firstname is not 'Hattie' and lastname is not 'Frank' and has an email
 Fields:
 - account_number: long (101)
 - address: text ("880 Holmes Lane")
@@ -122,7 +122,7 @@ Fields:
 - gender: text ("M")
 - lastname: text ("Duke")
 - state: text ("IL")
-PPL: source=\`accounts\` | where \`firstname\` != 'Hattie' AND \`lastname\` != 'frank'
+PPL: source=\`accounts\` | where \`firstname\` != 'Hattie' AND \`lastname\` != 'frank' AND NOT ISNULL(\`email\`)
 
 Question: Count the number of documents in index 'accounts'
 Fields:
@@ -318,13 +318,16 @@ PPL: source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 24 H
 
 Use the following steps to generate the PPL query:
 #01 Find all entities in the question.
-#02 Pick the fields that are relevant to the question from the provided fields list using entities.
+#02 Pick the fields that are relevant to the question from the provided fields list using entities. Consider the field name, its type, and the sample value. For example, if filtering on date is needed, look for a relevant field name with type \`date\`. You must only pick fields that are relevant, and must pick the whole field name.
 #03 Use the choosen fields to write the PPL query.
 
 Remember the rules when writing a PPL query:
 #01 Always use comparisons to filter date/time, eg. 'where \`timestamp\` < DATE_SUB(NOW(), INTERVAL 1 DAY)'.
 #02 Only use fields appeared in the question or in the provided fields list.
 #03 Only use syntax and keywords appeared in the question or in the examples.
+#04 Syntax for SPAN is 'SPAN(\`<field>\`, interval), eg. 'SPAN(\`timestamp\`, 1s).
+#05 If user asks for current status, filter the time field for last 5 minutes.
+#06 Use 'MATCH(\`<field>\`, "<string>")' to filter for values in the field that contain the string.
 
 {format_instructions}
 

@@ -25,13 +25,13 @@ class LLMModel {
     if (this.#model && this.#embeddings) return;
     switch (this.name) {
       case 'openai':
-        this.#model = new OpenAI({ temperature: 0.1 });
+        this.#model = new OpenAI({ temperature: 0.0000001 });
         this.#embeddings = new OpenAIEmbeddings();
         break;
 
       case 'claude':
       default:
-        this.#model = new ChatAnthropic({ temperature: 0.1 });
+        this.#model = new ChatAnthropic({ temperature: 0.0000001 });
         this.#embeddings = new HuggingFaceInferenceEmbeddings();
         break;
     }
