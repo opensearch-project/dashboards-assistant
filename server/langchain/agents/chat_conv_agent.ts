@@ -1,15 +1,15 @@
+import { AgentExecutor, initializeAgentExecutorWithOptions, ZeroShotAgent } from 'langchain/agents';
 import { LLMChain } from 'langchain/chains';
-import { ZeroShotAgent, AgentExecutor, initializeAgentExecutorWithOptions } from 'langchain/agents';
-import { DynamicTool } from 'langchain/tools';
+import { BaseLanguageModel } from 'langchain/dist/base_language';
 import {
   ChatPromptTemplate,
-  SystemMessagePromptTemplate,
   HumanMessagePromptTemplate,
+  SystemMessagePromptTemplate,
 } from 'langchain/prompts';
-import { BaseLanguageModel } from 'langchain/dist/base_language';
-import { OSAPITools } from '../tools/os_apis';
+import { DynamicTool } from 'langchain/tools';
 import { IScopedClusterClient } from '../../../../../src/core/server/opensearch/client';
 import { llmModel } from '../models/llm_model';
+import { OSAPITools } from '../tools/os_apis';
 import {
   ZEROSHOT_HUMAN_PROMPT_TEMPLATE,
   ZEROSHOT_PROMPT_PREFIX,
@@ -68,10 +68,13 @@ export class AgentFactory {
   }
 
   public run = async (question: string) => {
+    if (!this.executor) {
+      throw new Error('Agent executor not initialized.');
+    }
     const response =
       this.executorType === 'zeroshot'
-        ? await this.executor?.run(question)
-        : await this.executor?.call({ input: question });
+        ? await this.executor.run(question)
+        : await this.executor.call({ input: question });
     return response;
   };
 }

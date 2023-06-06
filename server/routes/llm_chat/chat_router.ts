@@ -12,7 +12,6 @@ import {
   IChat,
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
-import { getOutputs } from './mock';
 import { AgentFactory } from '../../langchain/agents/chat_conv_agent';
 
 export function registerChatRoute(router: IRouter) {
@@ -52,7 +51,7 @@ export function registerChatRoute(router: IRouter) {
         const outputs = [
           {
             type: 'output',
-            content: agentResponse?.output,
+            content: typeof agentResponse === 'string' ? agentResponse : agentResponse.output,
             contentType: 'markdown',
           },
         ];
