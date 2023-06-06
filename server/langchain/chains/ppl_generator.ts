@@ -212,8 +212,9 @@ const prompt = new PromptTemplate({
   partialVariables: { format_instructions: formatInstructions },
 });
 
-export const request = async (question: string) => {
-  const chain = new LLMChain({ llm: llmModel.model, prompt });
+const chain = new LLMChain({ llm: llmModel.model, prompt });
+
+export const requestPPLGeneratorChain = async (question: string) => {
   const output = await chain.call({ question });
   return parser.parse(output.text);
 };

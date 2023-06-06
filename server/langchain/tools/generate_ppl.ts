@@ -3,35 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { promises as fs } from 'fs';
-import { request as requestPPLGenerator } from '../chains/ppl_generator';
+import { OpenSearchClient } from '../../../../../src/core/server';
+import { requestPPLGeneratorChain } from '../chains/ppl_generator';
+import { generateFieldContext } from '../utils/ppl_generator';
+import { logToFile } from '../utils/utils';
 
 interface GeneratePPLOptions {
-  question: string;
   index: string;
-  timeField: string;
-  fields: string;
+  question: string;
 }
-export const generatePPL = async (options: GeneratePPLOptions) => {
+
+export const generatePPL = async (client: OpenSearchClient, options: GeneratePPLOptions) => {
   try {
-    const input = `Fields:\n${options.fields}\nQuestion: ${options.question}? index is \`${options.index}\``;
-    const ppl = await requestPPLGenerator(input);
-    logToFile({ question: options.question, input, ppl });
+    const mappings = await client.indices.getMapping({ index: options.index });
+    const sampleDoc = await client.search({ index: options.index, size: 1 });
+    const fields = generateFieldContext(mappings, sampleDoc);
+
+    const input = `Fields:\n${fields}\nQuestion: ${options.question}? index is \`${options.index}\``;
+    const ppl = await requestPPLGeneratorChain(input);
+    logToFile({ question: options.question, input, ppl }, 'ppl_generator');
     ppl.query = ppl.query.replace(/^source\s*=\s*`(.+?)`/, 'source=$1'); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509
     return ppl;
   } catch (error) {
-    logToFile({ question: options.question, error });
+    logToFile({ question: options.question, error }, 'ppl_generator');
   }
-};
-
-const logToFile = async (status: object) => {
-  console.info('❗status:', status);
-  await fs.mkdir(`${__dirname}/../../../.logs`, { recursive: true });
-  fs.appendFile(
-    `${__dirname}/../../../.logs/ppl_generator.log`,
-    JSON.stringify({
-      timestamp: new Date().toISOString(),
-      ...status,
-    }) + '\n'
-  );
 };

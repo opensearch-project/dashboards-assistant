@@ -10,9 +10,8 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { LANGCHAIN_API } from '../../../common/constants/llm';
-import { generatePPL } from '../../langchain/tools/generate_ppl';
-import { generateFieldContext } from '../../langchain/utils/utils';
 import { AgentFactory } from '../../langchain/agents/chat_conv_agent';
+import { generatePPL } from '../../langchain/tools/generate_ppl';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(
@@ -22,7 +21,6 @@ export function registerLangChainRoutes(router: IRouter) {
         body: schema.object({
           index: schema.string(),
           question: schema.string(),
-          timeField: schema.string(),
         }),
       },
     },
@@ -32,16 +30,11 @@ export function registerLangChainRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        const { index, question, timeField } = request.body;
-        const mappings = await context.core.opensearch.client.asCurrentUser.indices.getMapping({
-          index: request.body.index,
+        const { index, question } = request.body;
+        const ppl = await generatePPL(context.core.opensearch.client.asCurrentUser, {
+          question,
+          index,
         });
-        const sampleDoc = await context.core.opensearch.client.asCurrentUser.search({
-          index: request.body.index,
-          size: 1,
-        });
-        const fields = generateFieldContext(mappings, sampleDoc);
-        const ppl = await generatePPL({ question, index, timeField, fields });
         return response.ok({ body: ppl });
       } catch (error) {
         return response.custom({
