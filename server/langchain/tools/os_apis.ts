@@ -18,7 +18,7 @@ export class OSAPITools {
     new DynamicTool({
       name: 'OpenSearch Index check',
       description:
-        'use this tool to check if a data stream, index, or alias exists in the OpenSearch cluster.',
+        'use this tool to check if a data stream, index, or alias exists in the OpenSearch cluster. This tool takes the index name as input',
       func: (indexName: string) => this.index_exists(indexName),
     }),
   ];
@@ -40,7 +40,7 @@ export class OSAPITools {
     });
 
     return indexExistsResponse.body
-      ? 'All targets exist in the OpenSearch Cluster'
-      : 'One or more specified targets do not exist';
+      ? 'Index exists in the OpenSearch Cluster'
+      : 'One or more specified Index do not exist';
   }
 }

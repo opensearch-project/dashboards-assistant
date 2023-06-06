@@ -13,6 +13,7 @@ import {
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
 import { getOutputs } from './mock';
+import { AgentFactory } from '../../langchain/agents/chat_conv_agent';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -45,8 +46,16 @@ export function registerChatRoute(router: IRouter) {
         const chatId = request.body.chatId;
         const input = request.body.input;
         const messages = request.body.messages;
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        const outputs = await getOutputs(chatId);
+        const agent = new AgentFactory(context.core.opensearch.client);
+        await agent.init();
+        const agentResponse = await agent.run(input.content);
+        const outputs = [
+          {
+            type: 'output',
+            content: agentResponse?.output,
+            contentType: 'markdown',
+          },
+        ];
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
             title: input.content.substring(0, 50),

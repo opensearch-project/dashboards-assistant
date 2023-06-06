@@ -69,7 +69,7 @@ export function registerLangChainRoutes(router: IRouter) {
       try {
         const { question } = request.body;
         const agent = new AgentFactory(context.core.opensearch.client);
-        agent.init();
+        await agent.init();
         const agentResponse = await agent.run(question);
         return response.ok({ body: agentResponse });
       } catch (error) {
