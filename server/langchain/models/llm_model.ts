@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Client } from '@opensearch-project/opensearch';
 import { ChatAnthropic } from 'langchain/chat_models/anthropic';
 import { BaseLanguageModel } from 'langchain/dist/base_language';
 import { Embeddings } from 'langchain/dist/embeddings/base';
 import { HuggingFaceInferenceEmbeddings } from 'langchain/embeddings/hf';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { OpenAI } from 'langchain/llms/openai';
+import { OpenSearchVectorStore } from 'langchain/vectorstores/opensearch';
+import { OpenSearchClient } from '../../../../../src/core/server';
 
 type ModelName = 'claude' | 'openai';
 
@@ -32,7 +35,9 @@ class LLMModel {
       case 'claude':
       default:
         this.#model = new ChatAnthropic({ temperature: 0.0000001 });
-        this.#embeddings = new HuggingFaceInferenceEmbeddings();
+        this.#embeddings = new HuggingFaceInferenceEmbeddings({
+          model: 'sentence-transformers/all-mpnet-base-v2',
+        });
         break;
     }
   }
@@ -45,6 +50,10 @@ class LLMModel {
   public get embeddings() {
     this.lazyInit();
     return this.#embeddings!;
+  }
+
+  public createVectorStore(client: OpenSearchClient, indexName = 'documents') {
+    return new OpenSearchVectorStore(this.embeddings, { client: client as Client, indexName });
   }
 }
 
