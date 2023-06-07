@@ -16,7 +16,14 @@ Here is a sample PPL query:
 source=\`<index>\` | where \`<field>\` = '\`<value>\`'
 
 Here are some sample questions and the PPL query to retrieve the information. The format for fields is
+\`\`\`
 - field_name: field_type (sample field value)
+\`\`\`
+
+For example, below is a field called \`timestamp\`, it has a field type of \`date\`, and a sample value of it could look like \`1686000665919\`.
+\`\`\`
+- timestamp: date (1686000665919)
+\`\`\`
 ----------------
 
 The following text contains fields and questions/answers for the 'accounts' index
@@ -185,10 +192,12 @@ Step 1. Find all field entities in the question.
 
 Step 2. Pick the fields that are relevant to the question from the provided fields list using entities. Rules:
 #01 Consider the field name, the field type, and the sample value when picking relevant fields. For example, if you need to filter flights departed from 'JFK', look for a \`text\` or \`keyword\` field with a field name such as 'departedAirport', and the sample value should be a 3 letter IATA airport code. Similarly, if you need a date field, look for a relevant field name with type \`date\` and not \`long\`.
-#02 You must not use the sample value in PPL query, unless it is relevant to the question.
-#03 You must only pick fields that are relevant, and must pick the whole field name from the fields list.
-#04 You must not use fields that are not in the fields list.
-#05 You must not use the sample values unless relevant to the question.
+#02 You must pick a field with \`date\` type when filtering on date/time.
+#03 You must pick a field with \`date\` type when aggregating by time interval.
+#04 You must not use the sample value in PPL query, unless it is relevant to the question.
+#05 You must only pick fields that are relevant, and must pick the whole field name from the fields list.
+#06 You must not use fields that are not in the fields list.
+#07 You must not use the sample values unless relevant to the question.
 
 Step 3. Use the choosen fields to write the PPL query. Rules:
 #01 Always use comparisons to filter date/time, eg. 'where \`timestamp\` < DATE_SUB(NOW(), INTERVAL 1 DAY)'.
