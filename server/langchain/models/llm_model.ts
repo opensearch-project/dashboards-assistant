@@ -52,7 +52,7 @@ class LLMModel {
     return this.#embeddings!;
   }
 
-  public createVectorStore(client: OpenSearchClient, indexName = 'documents') {
+  public createVectorStore(client: OpenSearchClient, indexName = '.llm-vector-store') {
     return new OpenSearchVectorStore(this.embeddings, { client: client as Client, indexName });
   }
 }

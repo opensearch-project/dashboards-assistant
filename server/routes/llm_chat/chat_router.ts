@@ -42,9 +42,7 @@ export function registerChatRoute(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const client = context.core.savedObjects.client;
-        const chatId = request.body.chatId;
-        const input = request.body.input;
-        const messages = request.body.messages;
+        const { chatId, input, messages } = request.body;
         const agent = new AgentFactory(context.core.opensearch.client);
         await agent.init();
         const agentResponse = await agent.run(input.content);

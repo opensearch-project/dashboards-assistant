@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { AgentExecutor, initializeAgentExecutorWithOptions, ZeroShotAgent } from 'langchain/agents';
 import { LLMChain } from 'langchain/chains';
 import { BaseLanguageModel } from 'langchain/dist/base_language';
@@ -9,6 +14,7 @@ import {
 import { DynamicTool } from 'langchain/tools';
 import { IScopedClusterClient } from '../../../../../src/core/server/opensearch/client';
 import { llmModel } from '../models/llm_model';
+import { KnowledgeTools } from '../tools/knowledges';
 import { OSAPITools } from '../tools/os_apis';
 import {
   ZEROSHOT_HUMAN_PROMPT_TEMPLATE,
@@ -22,16 +28,20 @@ export class AgentFactory {
   osAPITools: OSAPITools;
   agentTools: DynamicTool[] = [];
   model: BaseLanguageModel;
-  executor: AgentExecutor | undefined = undefined;
-  executorType: AgentTypes | undefined = undefined;
+  executor?: AgentExecutor;
+  executorType?: AgentTypes;
 
   constructor(userScopedClient: IScopedClusterClient) {
     this.osAPITools = new OSAPITools(userScopedClient);
     this.model = llmModel.model;
-    this.agentTools = this.osAPITools.toolsList;
+    this.agentTools = [
+      ...this.osAPITools.toolsList,
+      ...new KnowledgeTools(userScopedClient.asCurrentUser).toolsList,
+    ];
   }
 
   public async init(agentType: AgentTypes = 'chat') {
+    this.executorType = agentType;
     switch (agentType) {
       case 'zeroshot':
         const prompt = ZeroShotAgent.createPrompt(this.agentTools, {
