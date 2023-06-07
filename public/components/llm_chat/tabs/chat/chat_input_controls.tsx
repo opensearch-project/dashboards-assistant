@@ -58,7 +58,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           placeholder="Ask me anything..."
           inputRef={inputRef}
           onBlur={(e) => props.setInput(e.target.value)}
-          style={{ minHeight: 40 }}
+          style={{ minHeight: 40, maxHeight: 400 }}
           onKeyPress={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();

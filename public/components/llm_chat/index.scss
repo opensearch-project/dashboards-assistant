@@ -76,6 +76,7 @@
 
 .euiPanel {
   &.llm-chat-bubble-panel {
+    word-break: break-word;
     border-radius: 8px;
     max-width: 291px;
   }

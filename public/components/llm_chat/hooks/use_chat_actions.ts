@@ -67,21 +67,7 @@ export const useChatActions = () => {
     chatContext.setSelectedTabId('chat');
     chatStateContext.setChatState({
       llmResponding: false,
-      messages: [
-        {
-          content: `Hello, I'm the Observability assistant.\n\nHow may I help you?`,
-          contentType: 'markdown',
-          type: 'output',
-          suggestedActions: [
-            { message: 'Answer questions about my system', actionType: 'send_as_input' },
-            {
-              message:
-                "I'm noticing some issues in the error rate of a service, would you like to dive in?",
-              actionType: 'send_as_input',
-            },
-          ],
-        },
-      ],
+      messages: [],
       persisted: false,
     });
   };
