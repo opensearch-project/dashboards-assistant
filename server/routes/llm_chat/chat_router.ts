@@ -5,7 +5,11 @@
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema } from '@osd/config-schema';
-import { IOpenSearchDashboardsResponse, IRouter } from '../../../../../src/core/server';
+import {
+  ILegacyScopedClusterClient,
+  IOpenSearchDashboardsResponse,
+  IRouter,
+} from '../../../../../src/core/server';
 import { CHAT_API } from '../../../common/constants/llm';
 import {
   CHAT_SAVED_OBJECT,
@@ -43,7 +47,13 @@ export function registerChatRoute(router: IRouter) {
       try {
         const client = context.core.savedObjects.client;
         const { chatId, input, messages } = request.body;
-        const agent = new AgentFactory(context.core.opensearch.client);
+        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+          request
+        );
+        const agent = new AgentFactory(
+          context.core.opensearch.client,
+          opensearchObservabilityClient
+        );
         await agent.init();
         const agentResponse = await agent.run(input.content);
         const outputs = [

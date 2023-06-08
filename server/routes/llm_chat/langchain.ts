@@ -5,6 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import {
+  ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
   IRouter,
   ResponseError,
@@ -61,7 +62,13 @@ export function registerLangChainRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const { question } = request.body;
-        const agent = new AgentFactory(context.core.opensearch.client);
+        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+          request
+        );
+        const agent = new AgentFactory(
+          context.core.opensearch.client,
+          opensearchObservabilityClient
+        );
         await agent.init();
         const agentResponse = await agent.run(question);
         return response.ok({ body: agentResponse });

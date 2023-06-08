@@ -21,21 +21,29 @@ import {
   ZEROSHOT_PROMPT_PREFIX,
   ZEROSHOT_PROMPT_SUFFIX,
 } from './zeroshot_agent_prompt';
+import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
+import { OSAlertingTools } from '../tools/aleritng_apis';
 
 type AgentTypes = 'zeroshot' | 'chat';
 
 export class AgentFactory {
   osAPITools: OSAPITools;
+  osAlertingTools: OSAlertingTools;
   agentTools: DynamicTool[] = [];
   model: BaseLanguageModel;
   executor?: AgentExecutor;
   executorType?: AgentTypes;
 
-  constructor(userScopedClient: IScopedClusterClient) {
-    this.osAPITools = new OSAPITools(userScopedClient);
+  constructor(
+    userScopedClient: IScopedClusterClient,
+    OpenSearchObservabilityClient: ILegacyScopedClusterClient
+  ) {
     this.model = llmModel.model;
+    this.osAPITools = new OSAPITools(userScopedClient);
+    this.osAlertingTools = new OSAlertingTools(OpenSearchObservabilityClient);
     this.agentTools = [
       ...this.osAPITools.toolsList,
+      ...this.osAlertingTools.toolsList,
       ...new KnowledgeTools(userScopedClient.asCurrentUser).toolsList,
     ];
   }

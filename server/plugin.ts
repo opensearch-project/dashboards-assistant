@@ -12,6 +12,7 @@ import {
   PluginInitializerContext,
   SavedObjectsType,
 } from '../../../src/core/server';
+import { OpenSearchAlertingPlugin } from './adaptors/opensearch_alerting_plugin';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
 import { setupRoutes } from './routes/index';
@@ -33,7 +34,7 @@ export class ObservabilityPlugin
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
       'opensearch_observability',
       {
-        plugins: [PPLPlugin, OpenSearchObservabilityPlugin],
+        plugins: [PPLPlugin, OpenSearchObservabilityPlugin, OpenSearchAlertingPlugin],
       }
     );
 
