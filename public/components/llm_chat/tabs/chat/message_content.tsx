@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiText, getDefaultOuiMarkdownParsingPlugins } from '@elastic/eui';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { DashboardContainerInput } from '../../../../../../../src/plugins/dashboard/public';
@@ -32,8 +32,15 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       return <EuiText style={{ whiteSpace: 'pre-line' }}>{props.message.content}</EuiText>;
 
     case 'markdown':
-      // TODO maybe remove emoji from defaultParsingPlugins https://github.com/opensearch-project/oui/blob/8605d70ce89fa5633a90bdec0931c95d1683c48d/src/components/markdown_editor/plugins/markdown_default_plugins.tsx#LL66C31-L66C31
-      return <EuiMarkdownFormat>{props.message.content}</EuiMarkdownFormat>;
+      // remove emoji from defaultParsingPlugins https://github.com/opensearch-project/oui/blob/8605d70ce89fa5633a90bdec0931c95d1683c48d/src/components/markdown_editor/plugins/markdown_default_plugins.tsx#LL66C31-L66C31
+      const parsingPlugins = getDefaultOuiMarkdownParsingPlugins() as Array<[any, any]>; // Array<unified.PluginTuple<any[], unified.Settings>
+      const emojiPlugin = parsingPlugins.find(([, settings]) => settings.emoticon)?.at(1);
+      if (emojiPlugin) emojiPlugin.emoticon = false;
+      return (
+        <EuiMarkdownFormat parsingPluginList={parsingPlugins}>
+          {props.message.content}
+        </EuiMarkdownFormat>
+      );
 
     case 'visualization':
       const dateFormat = uiSettingsService.get('dateFormat');
