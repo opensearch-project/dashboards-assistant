@@ -15,7 +15,13 @@ export class KnowledgeTools {
       name: 'Get Nginx information',
       description:
         'Use this tool to get Nginx related information, including setting up nginx and troubleshooting access logs. This tool takes the Nginx question as input.',
-      func: (query: string) => this.ask_nginx(query),
+      func: (query: string) => this.askVectorStore(query),
+    }),
+    new DynamicTool({
+      name: 'Get OpenSearch PPL information',
+      description:
+        'Use this tool to get PPL related information. This tool takes the Nginx question as input.',
+      func: (query: string) => this.askVectorStore(query),
     }),
   ];
 
@@ -27,7 +33,7 @@ export class KnowledgeTools {
     );
   }
 
-  public async ask_nginx(query: string) {
+  public async askVectorStore(query: string) {
     const res = await this.chain.call({ query });
     return res.text;
   }
