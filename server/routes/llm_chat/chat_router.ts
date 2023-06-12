@@ -47,9 +47,8 @@ export function registerChatRoute(router: IRouter) {
       try {
         const client = context.core.savedObjects.client;
         const { chatId, input, messages } = request.body;
-        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-          request
-        );
+        const opensearchObservabilityClient: ILegacyScopedClusterClient =
+          context.observability_plugin.observabilityClient.asScoped(request);
         const agent = new AgentFactory(
           context.core.opensearch.client,
           opensearchObservabilityClient

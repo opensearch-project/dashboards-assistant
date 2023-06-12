@@ -12,7 +12,7 @@ import {
 } from '../../../../../src/core/server';
 import { LANGCHAIN_API } from '../../../common/constants/llm';
 import { AgentFactory } from '../../langchain/agents/chat_conv_agent';
-import { generatePPL } from '../../langchain/tools/generate_ppl';
+import { PPLTools } from '../../langchain/tools/ppl';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(
@@ -32,10 +32,11 @@ export function registerLangChainRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const { index, question } = request.body;
-        const ppl = await generatePPL(context.core.opensearch.client.asCurrentUser, {
-          question,
-          index,
-        });
+        const pplTools = new PPLTools(
+          context.core.opensearch.client.asCurrentUser,
+          context.core.opensearch.legacy.client
+        );
+        const ppl = await pplTools.generatePPL(question, index);
         return response.ok({ body: ppl });
       } catch (error) {
         return response.custom({
@@ -62,9 +63,8 @@ export function registerLangChainRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const { question } = request.body;
-        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-          request
-        );
+        const opensearchObservabilityClient: ILegacyScopedClusterClient =
+          context.observability_plugin.observabilityClient.asScoped(request);
         const agent = new AgentFactory(
           context.core.opensearch.client,
           opensearchObservabilityClient
