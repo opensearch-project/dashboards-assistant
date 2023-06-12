@@ -184,6 +184,12 @@ PPL: source=\`events\` | where \`http.response.status_code\` >= 300 AND MATCH(\`
 Question: What are the top traces with largest bytes? index is 'events'
 PPL: source=\`events\` | stats SUM(\`http.response.bytes\`) as \`sum_bytes\` by \`trace_id\` | sort -sum_bytes | head
 
+Question: Give me log patterns? index is 'events'
+PPL: source=\`events\` | patterns \`body\` | stats take(\`body\`, 1) as \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
+
+Question: Give me log patterns for logs with errors? index is 'events'
+PPL: source=\`events\` | where \`http.response.status_code\` >= 300 | patterns \`body\` | stats take(\`body\`, 1) as \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
+
 ----------------
 
 Use the following steps to generate the PPL query:
@@ -198,12 +204,14 @@ Step 2. Pick the fields that are relevant to the question from the provided fiel
 #05 You must only pick fields that are relevant, and must pick the whole field name from the fields list.
 #06 You must not use fields that are not in the fields list.
 #07 You must not use the sample values unless relevant to the question.
+#08 You must pick the field that contains a log line when asked about log patterns. Usually it is one of \`log\`, \`body\`, \`message\`.
 
 Step 3. Use the choosen fields to write the PPL query. Rules:
 #01 Always use comparisons to filter date/time, eg. 'where \`timestamp\` < DATE_SUB(NOW(), INTERVAL 1 DAY)'.
 #02 Only use PPL syntax and keywords appeared in the question or in the examples.
 #03 If user asks for current or recent status, filter the time field for last 5 minutes.
 #04 The field used in 'SPAN(\`<field>\`, <interval>)' must have type \`date\`, not \`long\`.
+#05 You must put values in quotes when filtering fields with \`text\` or \`keyword\` field type.
 
 ----------------
 {format_instructions}
