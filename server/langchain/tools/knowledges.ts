@@ -20,7 +20,7 @@ export class KnowledgeTools {
     new DynamicTool({
       name: 'Get OpenSearch PPL information',
       description:
-        'Use this tool to get PPL related information. This tool takes the Nginx question as input.',
+        'Use this tool to get PPL related information. This tool takes the PPL related question as input.',
       func: (query: string) => this.askVectorStore(query),
     }),
   ];
