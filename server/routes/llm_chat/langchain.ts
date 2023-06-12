@@ -32,9 +32,12 @@ export function registerLangChainRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const { index, question } = request.body;
+        const observabilityClient: ILegacyScopedClusterClient =
+          // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
+          context.observability_plugin.observabilityClient.asScoped(request);
         const pplTools = new PPLTools(
           context.core.opensearch.client.asCurrentUser,
-          context.core.opensearch.legacy.client
+          observabilityClient
         );
         const ppl = await pplTools.generatePPL(question, index);
         return response.ok({ body: ppl });
@@ -64,6 +67,7 @@ export function registerLangChainRoutes(router: IRouter) {
       try {
         const { question } = request.body;
         const opensearchObservabilityClient: ILegacyScopedClusterClient =
+          // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
           context.observability_plugin.observabilityClient.asScoped(request);
         const agent = new AgentFactory(
           context.core.opensearch.client,

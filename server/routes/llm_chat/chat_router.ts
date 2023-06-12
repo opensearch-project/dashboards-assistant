@@ -48,6 +48,7 @@ export function registerChatRoute(router: IRouter) {
         const client = context.core.savedObjects.client;
         const { chatId, input, messages } = request.body;
         const opensearchObservabilityClient: ILegacyScopedClusterClient =
+          // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
           context.observability_plugin.observabilityClient.asScoped(request);
         const agent = new AgentFactory(
           context.core.opensearch.client,

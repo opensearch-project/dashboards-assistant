@@ -15,7 +15,8 @@ From the given list of index names, pick the one that is the most relevant to th
 ----------------
 
 Question: {question}
-Index names: {indexNames}
+Index names:
+{indexNames}
 `.trim();
 
 const parser = StructuredOutputParser.fromNamesAndDescriptions({ index: 'This is the index name' });
@@ -30,6 +31,6 @@ const prompt = new PromptTemplate({
 const chain = new LLMChain({ llm: llmModel.model, prompt });
 
 export const requestGuessingIndexChain = async (question: string, indexNameList: string[]) => {
-  const output = await chain.call({ question, indexNames: indexNameList.join(', ') });
+  const output = await chain.call({ question, indexNames: indexNameList.join('\n') });
   return parser.parse(output.text);
 };
