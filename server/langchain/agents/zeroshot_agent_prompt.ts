@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const ZEROSHOT_PROMPT_PREFIX = `
     You are an Observability assistant helping users to work with their OpenSearch clusters. You have help them to dive into the cluster data like logs, traces and metrics.
     Also, you help them to check health, status and workings of the OpenSearch cluster itself.

@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentExecutor, initializeAgentExecutorWithOptions, ZeroShotAgent } from 'langchain/agents';
+import {
+  AgentExecutor,
+  initializeAgentExecutorWithOptions,
+  ZeroShotAgent,
+  ChatConversationalAgent,
+  ChatConversationalCreatePromptArgs,
+} from 'langchain/agents';
+import { BufferMemory } from 'langchain/memory';
 import { LLMChain } from 'langchain/chains';
 import { BaseLanguageModel } from 'langchain/dist/base_language';
 import {
@@ -11,7 +18,7 @@ import {
   HumanMessagePromptTemplate,
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
-import { DynamicTool } from 'langchain/tools';
+import { DynamicTool, Tool } from 'langchain/tools';
 import { IScopedClusterClient } from '../../../../../src/core/server/opensearch/client';
 import { llmModel } from '../models/llm_model';
 import { KnowledgeTools } from '../tools/knowledges';
@@ -23,35 +30,39 @@ import {
 } from './zeroshot_agent_prompt';
 import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
 import { OSAlertingTools } from '../tools/aleritng_apis';
+import { ALERTING_SYSTEM_MESSAGE, ALERTING_HUMAN_MESSGAE } from './alerting_conv_prompts';
+import { DEFAULT_SYSTEM_MESSAGE, DEFAULT_HUMAN_MESSAGE } from './default_chat_prompts';
 
-type AgentTypes = 'zeroshot' | 'chat';
+type AgentTypes = 'zeroshot' | 'chat' | 'chat-alerting';
 
 export class AgentFactory {
-  osAPITools: OSAPITools;
-  osAlertingTools: OSAlertingTools;
   agentTools: DynamicTool[] = [];
   model: BaseLanguageModel;
   executor?: AgentExecutor;
-  executorType?: AgentTypes;
+  executorType: AgentTypes = 'chat';
+  osAPITools: OSAPITools;
+  osAlertingTools: OSAlertingTools;
 
   constructor(
     userScopedClient: IScopedClusterClient,
-    OpenSearchObservabilityClient: ILegacyScopedClusterClient
+    OpenSearchObservabilityClient: ILegacyScopedClusterClient,
+    agentType: AgentTypes = 'chat'
   ) {
+    this.executorType = agentType;
     this.model = llmModel.model;
+
     this.osAPITools = new OSAPITools(userScopedClient);
     this.osAlertingTools = new OSAlertingTools(OpenSearchObservabilityClient);
     this.agentTools = [
       ...this.osAPITools.toolsList,
       ...this.osAlertingTools.toolsList,
-      ...new KnowledgeTools(userScopedClient.asCurrentUser).toolsList,
+      ...new KnowledgeTools(userScopedClient).toolsList,
     ];
   }
 
-  public async init(agentType: AgentTypes = 'chat') {
-    this.executorType = agentType;
-    switch (agentType) {
-      case 'zeroshot':
+  public async init() {
+    switch (this.executorType) {
+      case 'zeroshot': {
         const prompt = ZeroShotAgent.createPrompt(this.agentTools, {
           prefix: ZEROSHOT_PROMPT_PREFIX,
           suffix: ZEROSHOT_PROMPT_SUFFIX,
@@ -74,14 +85,46 @@ export class AgentFactory {
           verbose: true,
         });
         break;
+      }
 
-      case 'chat':
-      default:
-        this.executor = await initializeAgentExecutorWithOptions(this.agentTools, this.model, {
-          agentType: 'chat-conversational-react-description',
+      case 'chat-alerting': {
+        const memory = new BufferMemory({
+          returnMessages: true,
+          memoryKey: 'chat_history',
+          inputKey: 'input',
+        });
+        const convArgs: ChatConversationalCreatePromptArgs = {
+          systemMessage: ALERTING_SYSTEM_MESSAGE,
+          humanMessage: ALERTING_HUMAN_MESSGAE,
+        };
+        this.executor = AgentExecutor.fromAgentAndTools({
+          agent: ChatConversationalAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
+          tools: this.agentTools,
+          memory,
           verbose: true,
         });
         break;
+      }
+
+      case 'chat':
+      default: {
+        const memory = new BufferMemory({
+          returnMessages: true,
+          memoryKey: 'chat_history',
+          inputKey: 'input',
+        });
+        const convArgs: ChatConversationalCreatePromptArgs = {
+          systemMessage: DEFAULT_SYSTEM_MESSAGE,
+          humanMessage: DEFAULT_HUMAN_MESSAGE,
+        };
+        this.executor = AgentExecutor.fromAgentAndTools({
+          agent: ChatConversationalAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
+          tools: this.agentTools,
+          memory,
+          verbose: true,
+        });
+        break;
+      }
     }
   }
 

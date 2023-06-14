@@ -5,7 +5,7 @@
 
 import { BaseChain, RetrievalQAChain } from 'langchain/chains';
 import { DynamicTool } from 'langchain/tools';
-import { OpenSearchClient } from '../../../../../src/core/server';
+import { IScopedClusterClient } from '../../../../../src/core/server';
 import { llmModel } from '../models/llm_model';
 
 export class KnowledgeTools {
@@ -25,10 +25,10 @@ export class KnowledgeTools {
     }),
   ];
 
-  constructor(client: OpenSearchClient) {
+  constructor(userScopedClient: IScopedClusterClient) {
     this.chain = RetrievalQAChain.fromLLM(
       llmModel.model,
-      llmModel.createVectorStore(client).asRetriever(),
+      llmModel.createVectorStore(userScopedClient.asCurrentUser).asRetriever(),
       { returnSourceDocuments: false }
     );
   }
