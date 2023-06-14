@@ -8,3 +8,4 @@ coverage/
 common/query_manager/antlr/output
 .eslintcache
 .logs
+.env
