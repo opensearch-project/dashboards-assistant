@@ -3,13 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseChain, RetrievalQAChain } from 'langchain/chains';
+import { RetrievalQAChain } from 'langchain/chains';
 import { DynamicTool } from 'langchain/tools';
-import { IScopedClusterClient } from '../../../../../src/core/server';
-import { llmModel } from '../models/llm_model';
+import { llmModel } from '../../models/llm_model';
+import { PluginTools } from '../tools_factory/tools_factory';
 
-export class KnowledgeTools {
-  chain: BaseChain;
+export class KnowledgeTools extends PluginTools {
+  chain = RetrievalQAChain.fromLLM(
+    llmModel.model,
+    llmModel.createVectorStore(this.opensearchClient!).asRetriever(),
+    { returnSourceDocuments: false }
+  );
+
   toolsList = [
     new DynamicTool({
       name: 'Get Nginx information',
@@ -24,14 +29,6 @@ export class KnowledgeTools {
       func: (query: string) => this.askVectorStore(query),
     }),
   ];
-
-  constructor(userScopedClient: IScopedClusterClient) {
-    this.chain = RetrievalQAChain.fromLLM(
-      llmModel.model,
-      llmModel.createVectorStore(userScopedClient.asCurrentUser).asRetriever(),
-      { returnSourceDocuments: false }
-    );
-  }
 
   public async askVectorStore(query: string) {
     const res = await this.chain.call({ query });

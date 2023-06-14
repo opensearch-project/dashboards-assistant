@@ -4,12 +4,13 @@
  */
 
 import { DynamicTool } from 'langchain/tools';
-import { ILegacyScopedClusterClient, OpenSearchClient } from '../../../../../src/core/server';
-import { PPL_DATASOURCES_REQUEST } from '../../../common/constants/metrics';
-import { requestGuessingIndexChain } from '../chains/guessing_index';
-import { requestPPLGeneratorChain } from '../chains/ppl_generator';
-import { generateFieldContext } from '../utils/ppl_generator';
-import { logToFile } from '../utils/utils';
+import { ILegacyScopedClusterClient, OpenSearchClient } from '../../../../../../src/core/server';
+import { PPL_DATASOURCES_REQUEST } from '../../../../common/constants/metrics';
+import { requestGuessingIndexChain } from '../../chains/guessing_index';
+import { requestPPLGeneratorChain } from '../../chains/ppl_generator';
+import { generateFieldContext } from '../../utils/ppl_generator';
+import { logToFile } from '../../utils/utils';
+import { PluginTools } from '../tools_factory/tools_factory';
 
 interface PPLResponse {
   schema: Array<{ name: string; type: string }>;
@@ -18,9 +19,7 @@ interface PPLResponse {
   size: number;
 }
 
-export class PPLTools {
-  opensearchClient: OpenSearchClient;
-  observabilityClient: ILegacyScopedClusterClient;
+export class PPLTools extends PluginTools {
   toolsList = [
     new DynamicTool({
       name: 'Generate generic PPL query',
@@ -41,17 +40,11 @@ export class PPLTools {
         this.executePPL(query).then((result) => JSON.stringify(result, null, 2)),
     }),
   ];
-
-  constructor(opensearchClient: OpenSearchClient, observabilityClient: ILegacyScopedClusterClient) {
-    this.opensearchClient = opensearchClient;
-    this.observabilityClient = observabilityClient;
-  }
-
   /**
    * @returns non hidden OpenSearch index names as a list.
    */
   private async getIndexNameList() {
-    const response = await this.opensearchClient.cat.indices({ format: 'json' });
+    const response = await this.opensearchClient!.cat.indices({ format: 'json' });
     return response.body
       .map((index) => index.index)
       .filter((index) => index !== undefined && !index.startsWith('.')) as string[];
@@ -77,9 +70,12 @@ export class PPLTools {
   }
 
   public async executePPL(query: string) {
-    const response: PPLResponse = await this.observabilityClient.callAsCurrentUser('ppl.pplQuery', {
-      body: { query },
-    });
+    const response: PPLResponse = await this.observabilityClient!.callAsCurrentUser(
+      'ppl.pplQuery',
+      {
+        body: { query },
+      }
+    );
     return response;
   }
 
@@ -106,8 +102,8 @@ export class PPLTools {
 
     try {
       const [mappings, sampleDoc] = await Promise.all([
-        this.opensearchClient.indices.getMapping({ index }),
-        this.opensearchClient.search({ index, size: 1 }),
+        this.opensearchClient!.indices.getMapping({ index }),
+        this.opensearchClient!.search({ index, size: 1 }),
       ]);
       const fields = generateFieldContext(mappings, sampleDoc);
 

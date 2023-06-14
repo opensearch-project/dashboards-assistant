@@ -4,10 +4,9 @@
  */
 
 import { DynamicTool } from 'langchain/tools';
-import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
+import { PluginTools } from '../tools_factory/tools_factory';
 
-export class OSAlertingTools {
-  client: ILegacyScopedClusterClient;
+export class OSAlertingTools extends PluginTools {
   toolsList = [
     new DynamicTool({
       name: 'Search Alerting Monitors By Index',
@@ -21,10 +20,6 @@ export class OSAlertingTools {
       func: () => this.getAllAlerts(),
     }),
   ];
-
-  constructor(client: ILegacyScopedClusterClient) {
-    this.client = client;
-  }
 
   // TODO: This is temporarily a pass through call which needs to be deprecated
   public searchAlertMonitorsByIndex = async (indexName: string) => {
@@ -49,7 +44,10 @@ export class OSAlertingTools {
       };
 
       const params = { body: query };
-      const results = await this.client.callAsCurrentUser('alerting.getMonitors', params);
+      const results = await this.observabilityClient!.callAsCurrentUser(
+        'alerting.getMonitors',
+        params
+      );
       return JSON.stringify(results.hits.hits);
     } catch (err) {
       return 'Issue in Alerting - MonitorService - searchMonitor:' + err;
@@ -58,7 +56,7 @@ export class OSAlertingTools {
 
   public getAllAlerts = async () => {
     try {
-      const results = await this.client.callAsCurrentUser('alerting.getAlerts');
+      const results = await this.observabilityClient!.callAsCurrentUser('alerting.getAlerts');
       return JSON.stringify(results);
     } catch (err) {
       return 'Issue in Alerting - Alerts - getAlerts:' + err;

@@ -4,10 +4,9 @@
  */
 
 import { DynamicTool } from 'langchain/tools';
-import { IScopedClusterClient } from '../../../../../src/core/server';
+import { PluginTools } from '../tools_factory/tools_factory';
 
-export class OSAPITools {
-  userScopedClient: IScopedClusterClient;
+export class OSAPITools extends PluginTools {
   toolsList = [
     new DynamicTool({
       name: 'Get OpenSearch indices',
@@ -23,19 +22,15 @@ export class OSAPITools {
     }),
   ];
 
-  constructor(userScopedClient: IScopedClusterClient) {
-    this.userScopedClient = userScopedClient;
-  }
-
   public async cat_indices(indexName = '') {
-    const catResponse = await this.userScopedClient.asCurrentUser.cat.indices({
+    const catResponse = await this.opensearchClient!.cat.indices({
       index: indexName,
     });
     return JSON.stringify(catResponse.body);
   }
 
   public async index_exists(indexName: string) {
-    const indexExistsResponse = await this.userScopedClient.asCurrentUser.indices.exists({
+    const indexExistsResponse = await this.opensearchClient!.indices.exists({
       index: indexName,
     });
 
