@@ -35,6 +35,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
   return (
     <EuiFlyout
       className="llm-chat-flyout"
+      type="push"
       paddingSize="none"
       size="460px"
       ownFocus={false}
