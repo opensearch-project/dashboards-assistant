@@ -10,6 +10,7 @@ import {
   IMessage,
   ISuggestedAction,
 } from '../../../../common/types/observability_saved_object_attributes';
+import { PPLSavedQueryClient } from '../../../services/saved_objects/saved_object_client/ppl';
 import { ChatContext, ChatStateContext, CoreServicesContext } from '../chat_header_button';
 
 interface SendResponse {
@@ -72,7 +73,7 @@ export const useChatActions = () => {
     });
   };
 
-  const executeAction = (suggestAction: ISuggestedAction, message: IMessage) => {
+  const executeAction = async (suggestAction: ISuggestedAction, message: IMessage) => {
     switch (suggestAction.actionType) {
       case 'send_as_input':
         send({
@@ -80,6 +81,18 @@ export const useChatActions = () => {
           content: suggestAction.message,
           contentType: 'text',
         });
+        break;
+
+      case 'save_and_view_ppl_query':
+        const query = suggestAction.metadata.query;
+        const response = await PPLSavedQueryClient.getInstance().create({
+          query,
+          name: query.slice(0, 50),
+          dateRange: ['now-5y', 'now'],
+          fields: [],
+          timestamp: '',
+        });
+        window.location.replace(`/app/observability-logs#/explorer/${response.objectId}`);
         break;
 
       default:

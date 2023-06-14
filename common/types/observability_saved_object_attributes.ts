@@ -26,18 +26,28 @@ export interface IChat extends SavedObjectAttributes {
   messages: IMessage[];
 }
 
-// TODO separate input and output
-export interface IMessage extends SavedObjectAttributes {
-  type: 'input' | 'output';
-  contentType: 'text' | 'markdown' | 'visualization' | 'ppl_visualization';
+interface IInput extends SavedObjectAttributes {
+  type: 'input';
+  contentType: 'text';
   content: string;
-  suggestedActions?: ISuggestedAction[];
   context?: {
     appId?: string;
   };
 }
+interface IOutput extends SavedObjectAttributes {
+  type: 'output';
+  contentType: 'markdown' | 'visualization' | 'ppl_visualization';
+  content: string;
+  suggestedActions?: ISuggestedAction[];
+}
+export type IMessage = IInput | IOutput;
 
-export interface ISuggestedAction extends SavedObjectAttributes {
-  actionType: 'send_as_input' | 'save_ppl_visualzation' | 'copy';
+interface ISuggestedActionBase extends SavedObjectAttributes {
+  actionType: string;
   message: string;
 }
+export type ISuggestedAction = ISuggestedActionBase &
+  (
+    | { actionType: 'send_as_input' | 'copy' }
+    | { actionType: 'save_and_view_ppl_query'; metadata: { query: string } }
+  );
