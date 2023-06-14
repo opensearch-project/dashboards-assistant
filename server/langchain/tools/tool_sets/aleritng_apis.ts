@@ -4,9 +4,9 @@
  */
 
 import { DynamicTool } from 'langchain/tools';
-import { PluginTools } from '../tools_factory/tools_factory';
+import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
-export class OSAlertingTools extends PluginTools {
+export class OSAlertingTools extends PluginToolsFactory {
   toolsList = [
     new DynamicTool({
       name: 'Search Alerting Monitors By Index',

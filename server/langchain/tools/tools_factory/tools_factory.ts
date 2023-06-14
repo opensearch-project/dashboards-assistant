@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tool } from 'langchain/tools';
+import { DynamicTool } from 'langchain/tools';
 import { ILegacyScopedClusterClient, OpenSearchClient } from '../../../../../../src/core/server';
 
-export class PluginTools {
+export class PluginToolsFactory {
   opensearchClient?: OpenSearchClient;
   observabilityClient?: ILegacyScopedClusterClient;
-  toolsList?: Tool[];
+  toolsList?: DynamicTool[];
 
   public constructClients(
     opensearchClient: OpenSearchClient,

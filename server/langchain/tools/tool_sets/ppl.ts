@@ -4,13 +4,12 @@
  */
 
 import { DynamicTool } from 'langchain/tools';
-import { ILegacyScopedClusterClient, OpenSearchClient } from '../../../../../../src/core/server';
 import { PPL_DATASOURCES_REQUEST } from '../../../../common/constants/metrics';
 import { requestGuessingIndexChain } from '../../chains/guessing_index';
 import { requestPPLGeneratorChain } from '../../chains/ppl_generator';
 import { generateFieldContext } from '../../utils/ppl_generator';
 import { logToFile } from '../../utils/utils';
-import { PluginTools } from '../tools_factory/tools_factory';
+import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
 interface PPLResponse {
   schema: Array<{ name: string; type: string }>;
@@ -19,7 +18,7 @@ interface PPLResponse {
   size: number;
 }
 
-export class PPLTools extends PluginTools {
+export class PPLTools extends PluginToolsFactory {
   toolsList = [
     new DynamicTool({
       name: 'Generate generic PPL query',

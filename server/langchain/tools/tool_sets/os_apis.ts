@@ -4,9 +4,9 @@
  */
 
 import { DynamicTool } from 'langchain/tools';
-import { PluginTools } from '../tools_factory/tools_factory';
+import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
-export class OSAPITools extends PluginTools {
+export class OSAPITools extends PluginToolsFactory {
   toolsList = [
     new DynamicTool({
       name: 'Get OpenSearch indices',

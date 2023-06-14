@@ -6,9 +6,9 @@
 import { RetrievalQAChain } from 'langchain/chains';
 import { DynamicTool } from 'langchain/tools';
 import { llmModel } from '../../models/llm_model';
-import { PluginTools } from '../tools_factory/tools_factory';
+import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
-export class KnowledgeTools extends PluginTools {
+export class KnowledgeTools extends PluginToolsFactory {
   chain = RetrievalQAChain.fromLLM(
     llmModel.model,
     llmModel.createVectorStore(this.opensearchClient!).asRetriever(),

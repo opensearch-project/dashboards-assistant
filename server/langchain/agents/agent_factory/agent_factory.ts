@@ -17,7 +17,7 @@ import {
   SystemMessagePromptTemplate,
   HumanMessagePromptTemplate,
 } from 'langchain/prompts';
-import { DynamicTool } from 'langchain/tools';
+import { DynamicTool, Tool } from 'langchain/tools';
 import { llmModel } from '../../models/llm_model';
 import { DEFAULT_SYSTEM_MESSAGE, DEFAULT_HUMAN_MESSAGE } from '../default_chat_prompts';
 import {
@@ -44,7 +44,7 @@ interface AgentPrompts {
 export class AgentFactory {
   agentTools: DynamicTool[] = [];
   model: BaseLanguageModel;
-  executor?: AgentExecutor;
+  executor: AgentExecutor;
   executorType: AgentTypes;
   agentArgs: AgentPrompts;
   memory = new BufferMemory({
@@ -53,15 +53,18 @@ export class AgentFactory {
     inputKey: 'input',
   });
 
-  constructor(agentType: AgentTypes, agentTools: DynamicTool[], agentArgs: AgentPrompts) {
+  constructor(
+    agentType: AgentTypes,
+    agentTools: DynamicTool[],
+    agentArgs: AgentPrompts,
+    customAgentMemory?: BufferMemory
+  ) {
     this.executorType = agentType;
     this.model = llmModel.model;
     this.agentTools = [...agentTools];
     this.agentArgs = agentArgs;
-  }
 
-  public async init(customAgentMemory?: BufferMemory) {
-    switch (this.executorType) {
+    switch (agentType) {
       case 'zeroshot': {
         const prompt = ZeroShotAgent.createPrompt(this.agentTools, {
           prefix: this.agentArgs.zeroshot_prompt_prefix ?? ZEROSHOT_PROMPT_PREFIX,
@@ -107,9 +110,6 @@ export class AgentFactory {
   }
 
   public run = async (question: string) => {
-    if (!this.executor) {
-      throw new Error('Agent executor not initialized.');
-    }
     const response =
       this.executorType === 'zeroshot'
         ? await this.executor.run(question)
