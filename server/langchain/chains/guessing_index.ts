@@ -10,6 +10,7 @@ import { llmModel } from '../models/llm_model';
 
 const template = `
 From the given list of index names, pick the one that is the most relevant to the question.
+If the question contains the index, return the index as the response.
 
 {format_instructions}
 ----------------
@@ -28,9 +29,8 @@ const prompt = new PromptTemplate({
   partialVariables: { format_instructions: formatInstructions },
 });
 
-const chain = new LLMChain({ llm: llmModel.model, prompt });
-
 export const requestGuessingIndexChain = async (question: string, indexNameList: string[]) => {
+  const chain = new LLMChain({ llm: llmModel.model, prompt });
   const output = await chain.call({ question, indexNames: indexNameList.join('\n') });
   return parser.parse(output.text);
 };
