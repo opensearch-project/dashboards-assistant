@@ -17,6 +17,7 @@ import {
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
 import { AgentFactory } from '../../langchain/agents/chat_conv_agent';
+import { convertToOutputs } from '../../langchain/utils/data_model';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -47,22 +48,16 @@ export function registerChatRoute(router: IRouter) {
       try {
         const client = context.core.savedObjects.client;
         const { chatId, input, messages } = request.body;
-        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-          request
-        );
+        const opensearchObservabilityClient: ILegacyScopedClusterClient =
+          // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
+          context.observability_plugin.observabilityClient.asScoped(request);
         const agent = new AgentFactory(
           context.core.opensearch.client,
           opensearchObservabilityClient
         );
         await agent.init();
         const agentResponse = await agent.run(input.content);
-        const outputs = [
-          {
-            type: 'output',
-            content: typeof agentResponse === 'string' ? agentResponse : agentResponse.output,
-            contentType: 'markdown',
-          },
-        ];
+        const outputs = convertToOutputs(agentResponse);
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
             title: input.content.substring(0, 50),
