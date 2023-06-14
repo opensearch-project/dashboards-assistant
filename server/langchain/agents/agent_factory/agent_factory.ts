@@ -5,71 +5,73 @@
 
 import {
   AgentExecutor,
-  initializeAgentExecutorWithOptions,
   ZeroShotAgent,
-  ChatConversationalAgent,
   ChatConversationalCreatePromptArgs,
+  ChatConversationalAgent,
 } from 'langchain/agents';
-import { BufferMemory } from 'langchain/memory';
-import { LLMChain } from 'langchain/chains';
+import { LLMChain } from 'langchain/dist';
 import { BaseLanguageModel } from 'langchain/dist/base_language';
+import { BufferMemory } from 'langchain/memory';
 import {
   ChatPromptTemplate,
-  HumanMessagePromptTemplate,
   SystemMessagePromptTemplate,
+  HumanMessagePromptTemplate,
 } from 'langchain/prompts';
-import { DynamicTool, Tool } from 'langchain/tools';
-import { IScopedClusterClient } from '../../../../../src/core/server/opensearch/client';
-import { llmModel } from '../models/llm_model';
-import { KnowledgeTools } from '../tools/knowledges';
-import { OSAPITools } from '../tools/os_apis';
+import { DynamicTool } from 'langchain/tools';
+import { llmModel } from '../../models/llm_model';
+import { DEFAULT_SYSTEM_MESSAGE, DEFAULT_HUMAN_MESSAGE } from '../default_chat_prompts';
 import {
-  ZEROSHOT_HUMAN_PROMPT_TEMPLATE,
   ZEROSHOT_PROMPT_PREFIX,
   ZEROSHOT_PROMPT_SUFFIX,
-} from './zeroshot_agent_prompt';
-import { ILegacyScopedClusterClient } from '../../../../../src/core/server';
-import { OSAlertingTools } from '../tools/aleritng_apis';
-import { ALERTING_SYSTEM_MESSAGE, ALERTING_HUMAN_MESSGAE } from './alerting_conv_prompts';
-import { DEFAULT_SYSTEM_MESSAGE, DEFAULT_HUMAN_MESSAGE } from './default_chat_prompts';
+  ZEROSHOT_HUMAN_PROMPT_TEMPLATE,
+} from '../zeroshot_agent_prompt';
 
 type AgentTypes = 'zeroshot' | 'chat';
+
+interface AgentPrompts {
+  /** String to put before the list of tools for a Zero Shot Agent */
+  zeroshot_prompt_prefix?: string;
+  /** String to put after the list of tools for a Zero Shot Agent */
+  zeroshot_prompt_suffix?: string;
+  /** String to put as human prompt template for a Zero Shot Agent */
+  zeroshot_human_prompt?: string;
+  /** String to put before the list of tools for a ReAct conversation Agent */
+  default_system_message?: string;
+  /** String to put after the list of tools for a ReAct conversation Agent */
+  default_human_message?: string;
+}
 
 export class AgentFactory {
   agentTools: DynamicTool[] = [];
   model: BaseLanguageModel;
   executor?: AgentExecutor;
-  executorType: AgentTypes = 'chat';
-  osAPITools: OSAPITools;
-  osAlertingTools: OSAlertingTools;
+  executorType: AgentTypes;
+  agentArgs: AgentPrompts;
+  memory = new BufferMemory({
+    returnMessages: true,
+    memoryKey: 'chat_history',
+    inputKey: 'input',
+  });
 
-  constructor(
-    userScopedClient: IScopedClusterClient,
-    OpenSearchObservabilityClient: ILegacyScopedClusterClient,
-    agentType: AgentTypes = 'chat'
-  ) {
+  constructor(agentType: AgentTypes, agentTools: DynamicTool[], agentArgs: AgentPrompts) {
     this.executorType = agentType;
     this.model = llmModel.model;
-
-    this.osAPITools = new OSAPITools(userScopedClient);
-    this.osAlertingTools = new OSAlertingTools(OpenSearchObservabilityClient);
-    this.agentTools = [
-      ...this.osAPITools.toolsList,
-      ...this.osAlertingTools.toolsList,
-      ...new KnowledgeTools(userScopedClient).toolsList,
-    ];
+    this.agentTools = [...agentTools];
+    this.agentArgs = agentArgs;
   }
 
-  public async init() {
+  public async init(customAgentMemory?: BufferMemory) {
     switch (this.executorType) {
       case 'zeroshot': {
         const prompt = ZeroShotAgent.createPrompt(this.agentTools, {
-          prefix: ZEROSHOT_PROMPT_PREFIX,
-          suffix: ZEROSHOT_PROMPT_SUFFIX,
+          prefix: this.agentArgs.zeroshot_prompt_prefix ?? ZEROSHOT_PROMPT_PREFIX,
+          suffix: this.agentArgs.zeroshot_prompt_suffix ?? ZEROSHOT_PROMPT_SUFFIX,
         });
         const chatPrompt = ChatPromptTemplate.fromPromptMessages([
           new SystemMessagePromptTemplate(prompt),
-          HumanMessagePromptTemplate.fromTemplate(ZEROSHOT_HUMAN_PROMPT_TEMPLATE),
+          HumanMessagePromptTemplate.fromTemplate(
+            this.agentArgs.zeroshot_human_prompt ?? ZEROSHOT_HUMAN_PROMPT_TEMPLATE
+          ),
         ]);
         const llmChain = new LLMChain({
           prompt: chatPrompt,
@@ -89,19 +91,14 @@ export class AgentFactory {
 
       case 'chat':
       default: {
-        const memory = new BufferMemory({
-          returnMessages: true,
-          memoryKey: 'chat_history',
-          inputKey: 'input',
-        });
         const convArgs: ChatConversationalCreatePromptArgs = {
-          systemMessage: DEFAULT_SYSTEM_MESSAGE,
-          humanMessage: DEFAULT_HUMAN_MESSAGE,
+          systemMessage: this.agentArgs.default_system_message ?? DEFAULT_SYSTEM_MESSAGE,
+          humanMessage: this.agentArgs.default_human_message ?? DEFAULT_HUMAN_MESSAGE,
         };
         this.executor = AgentExecutor.fromAgentAndTools({
           agent: ChatConversationalAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
           tools: this.agentTools,
-          memory,
+          memory: customAgentMemory ?? this.memory,
           verbose: true,
         });
         break;
