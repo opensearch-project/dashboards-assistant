@@ -5,14 +5,20 @@
 
 import { schema } from '@osd/config-schema';
 import {
+  constructToolClients,
+  destructToolsClients,
+  initTools,
+} from 'server/langchain/tools/tools_helper';
+import {
   ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
 import { LANGCHAIN_API } from '../../../common/constants/llm';
-import { AgentFactory } from '../../langchain/agents/chat_conv_agent';
-import { PPLTools } from '../../langchain/tools/ppl';
+import { chatAgentInit } from '../../langchain/agents/agent_helpers';
+import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
+import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(
@@ -35,11 +41,15 @@ export function registerLangChainRoutes(router: IRouter) {
         const observabilityClient: ILegacyScopedClusterClient =
           // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
           context.observability_plugin.observabilityClient.asScoped(request);
-        const pplTools = new PPLTools(
+
+        const pplTools = new PPLTools();
+        pplTools.constructClients(
           context.core.opensearch.client.asCurrentUser,
           observabilityClient
         );
         const ppl = await pplTools.generatePPL(question, index);
+        pplTools.destructClients();
+
         return response.ok({ body: ppl });
       } catch (error) {
         return response.custom({
@@ -69,12 +79,19 @@ export function registerLangChainRoutes(router: IRouter) {
         const opensearchObservabilityClient: ILegacyScopedClusterClient =
           // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
           context.observability_plugin.observabilityClient.asScoped(request);
-        const agent = new AgentFactory(
-          context.core.opensearch.client,
-          opensearchObservabilityClient
+        const pluginTools = initTools();
+        const pluginAgentTools = pluginAgentsInit(pluginTools);
+        const chatAgent = chatAgentInit(pluginAgentTools);
+
+        constructToolClients(
+          context.core.opensearch.client.asCurrentUser,
+          opensearchObservabilityClient,
+          pluginTools
         );
-        await agent.init();
-        const agentResponse = await agent.run(question);
+
+        const agentResponse = await chatAgent.run(question);
+
+        destructToolsClients(pluginTools);
         return response.ok({ body: agentResponse });
       } catch (error) {
         return response.custom({

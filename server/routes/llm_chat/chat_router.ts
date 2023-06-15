@@ -16,8 +16,15 @@ import {
   IChat,
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
-import { AgentFactory } from '../../langchain/agents/chat_conv_agent';
 import { convertToOutputs } from '../../langchain/utils/data_model';
+import { chatAgentInit } from '../../langchain/agents/agent_helpers';
+import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
+import {
+  constructToolClients,
+  destructToolsClients,
+  initTools,
+} from '../../langchain/tools/tools_helper';
+import { AgentFactory } from '../../langchain/agents/agent_factory/agent_factory';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -51,12 +58,21 @@ export function registerChatRoute(router: IRouter) {
         const opensearchObservabilityClient: ILegacyScopedClusterClient =
           // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
           context.observability_plugin.observabilityClient.asScoped(request);
-        const agent = new AgentFactory(
-          context.core.opensearch.client,
-          opensearchObservabilityClient
+
+        const pluginTools = initTools();
+        const pluginAgentTools = pluginAgentsInit(pluginTools);
+        const chatAgent = chatAgentInit(pluginAgentTools);
+
+        constructToolClients(
+          context.core.opensearch.client.asCurrentUser,
+          opensearchObservabilityClient,
+          pluginTools
         );
-        await agent.init();
-        const agentResponse = await agent.run(input.content);
+
+        const agentResponse = await chatAgent.run(input.content);
+
+        destructToolsClients(pluginTools);
+
         const outputs = convertToOutputs(agentResponse);
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
