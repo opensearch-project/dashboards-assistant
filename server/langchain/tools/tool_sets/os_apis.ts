@@ -23,19 +23,27 @@ export class OSAPITools extends PluginToolsFactory {
   ];
 
   public async cat_indices(indexName = '') {
-    const catResponse = await this.opensearchClient!.cat.indices({
-      index: indexName,
-    });
-    return JSON.stringify(catResponse.body);
+    try {
+      const catResponse = await this.opensearchClient!.cat.indices({
+        index: indexName,
+      });
+      return JSON.stringify(catResponse.body);
+    } catch (error) {
+      return 'error in runnig cat indices' + error;
+    }
   }
 
   public async index_exists(indexName: string) {
-    const indexExistsResponse = await this.opensearchClient!.indices.exists({
-      index: indexName,
-    });
+    try {
+      const indexExistsResponse = await this.opensearchClient!.indices.exists({
+        index: indexName,
+      });
 
-    return indexExistsResponse.body
-      ? 'Index exists in the OpenSearch Cluster'
-      : 'One or more specified Index do not exist';
+      return indexExistsResponse.body
+        ? 'Index exists in the OpenSearch Cluster'
+        : 'One or more specified Index do not exist';
+    } catch (error) {
+      return 'error in checking indices' + error;
+    }
   }
 }

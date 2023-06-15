@@ -9,8 +9,6 @@ import {
   ChatConversationalCreatePromptArgs,
   ChatConversationalAgent,
 } from 'langchain/agents';
-import { LLMChain } from 'langchain/dist';
-import { BaseLanguageModel } from 'langchain/dist/base_language';
 import { BufferMemory } from 'langchain/memory';
 import {
   ChatPromptTemplate,
@@ -18,6 +16,8 @@ import {
   HumanMessagePromptTemplate,
 } from 'langchain/prompts';
 import { DynamicTool, Tool } from 'langchain/tools';
+import { LLMChain } from 'langchain/chains';
+import { BaseLanguageModel } from 'langchain/base_language';
 import { llmModel } from '../../models/llm_model';
 import { DEFAULT_SYSTEM_MESSAGE, DEFAULT_HUMAN_MESSAGE } from '../default_chat_prompts';
 import {

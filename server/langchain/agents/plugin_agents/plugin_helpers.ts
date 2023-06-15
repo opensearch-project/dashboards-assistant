@@ -18,25 +18,37 @@ export const pluginAgentsInit = (PluginTools: PluginToolsFactory[]) => {
       name: 'PPL Tools',
       description:
         'Use this tool to create a generic PPL Query, prometheus PPL query or execute a PPL Query in an OpenSearch cluster. This tool takes natural language as an input',
-      func: (question: string) => pplAgent.run(question),
+      func: async (question: string) => {
+        const response = await pplAgent.run(question);
+        return response.output;
+      },
     }),
     new DynamicTool({
       name: 'Alerting Tools',
       description:
         'Use this tool to search alerting monitors by index or search all alerts in an OpenSearch cluster. This tool takes natural language as an input',
-      func: (question: string) => alertingAgent.run(question),
+      func: async (question: string) => {
+        const response = await alertingAgent.run(question);
+        return response.output;
+      },
     }),
     new DynamicTool({
       name: 'Knowledge Tools',
       description:
         'Use this tool to get knowledge about PPL and Nginx information. This tool takes natural language as an input',
-      func: (question: string) => knowledgeAgent.run(question),
+      func: async (question: string) => {
+        const response = await knowledgeAgent.run(question);
+        return response.output;
+      },
     }),
     new DynamicTool({
       name: 'OpenSearch Tools',
       description:
-        'Use this tool to get information about opensearch index, datastreams or index aliases . This tool takes natural language as an input',
-      func: (question: string) => opensearchAgent.run(question),
+        'Use this tool to get information about opensearch index, datastreams or index aliases. This tool takes natural language as an input',
+      func: async (question: string) => {
+        const response = await opensearchAgent.run(question);
+        return response.output;
+      },
     }),
   ];
   return pluginAgentTools;

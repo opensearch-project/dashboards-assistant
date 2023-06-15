@@ -8,7 +8,7 @@ import {
   constructToolClients,
   destructToolsClients,
   initTools,
-} from 'server/langchain/tools/tools_helper';
+} from '../../langchain/tools/tools_helper';
 import {
   ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
@@ -75,6 +75,7 @@ export function registerLangChainRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
+        console.log('################## START CHAIN ###################');
         const { question } = request.body;
         const opensearchObservabilityClient: ILegacyScopedClusterClient =
           // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
@@ -92,6 +93,7 @@ export function registerLangChainRoutes(router: IRouter) {
         const agentResponse = await chatAgent.run(question);
 
         destructToolsClients(pluginTools);
+        console.log('################## END CHAIN ###################');
         return response.ok({ body: agentResponse });
       } catch (error) {
         return response.custom({
