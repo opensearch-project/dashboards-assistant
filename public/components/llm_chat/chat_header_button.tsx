@@ -10,6 +10,7 @@ import { useEffectOnce } from 'react-use';
 import {
   ApplicationStart,
   HttpStart,
+  OverlayStart,
   SavedObjectsClientContract,
 } from '../../../../../src/core/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
@@ -25,6 +26,7 @@ interface HeaderChatButtonProps {
 
 interface ICoreServicesContext {
   http: HttpStart;
+  overlays: OverlayStart;
   savedObjectsClient: SavedObjectsClientContract;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
 }

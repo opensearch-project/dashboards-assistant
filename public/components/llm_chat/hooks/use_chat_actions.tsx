@@ -4,14 +4,19 @@
  */
 
 import { produce } from 'immer';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
+import { toMountPoint } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { CHAT_API } from '../../../../common/constants/llm';
 import {
   IMessage,
   ISuggestedAction,
 } from '../../../../common/types/observability_saved_object_attributes';
-import { PPLSavedQueryClient } from '../../../services/saved_objects/saved_object_client/ppl';
+import {
+  PPLSavedQueryClient,
+  PPLSavedVisualizationClient,
+} from '../../../services/saved_objects/saved_object_client/ppl';
 import { ChatContext, ChatStateContext, CoreServicesContext } from '../chat_header_button';
+import { PPLVisualizationModal } from '../components/ppl_visualization_modal';
 
 interface SendResponse {
   chatId: string;
@@ -84,15 +89,30 @@ export const useChatActions = () => {
         break;
 
       case 'save_and_view_ppl_query':
-        const query = suggestAction.metadata.query;
-        const response = await PPLSavedQueryClient.getInstance().create({
-          query,
-          name: query.slice(0, 50),
-          dateRange: ['now-5y', 'now'],
-          fields: [],
-          timestamp: '',
-        });
-        window.location.replace(`/app/observability-logs#/explorer/${response.objectId}`);
+        const saveQueryResponse = await savePPLQuery(suggestAction.metadata.query);
+        window.location.replace(`/app/observability-logs#/explorer/${saveQueryResponse.objectId}`);
+        break;
+
+      case 'view_ppl_visualization':
+        const modal = coreServicesContext.overlays.openModal(
+          toMountPoint(
+            <div className="llm-modal-visualizations">
+              <PPLVisualizationModal
+                query={suggestAction.metadata.query}
+                onConfirm={async () => {
+                  const saveVisualizationResponse = await savePPLVisualization(
+                    suggestAction.metadata.query
+                  );
+                  window.location.replace(
+                    `/app/observability-logs#/explorer/${saveVisualizationResponse.objectId}`
+                  );
+                  modal.close();
+                }}
+                onClose={() => modal.close()}
+              />
+            </div>
+          )
+        );
         break;
 
       default:
@@ -101,4 +121,27 @@ export const useChatActions = () => {
   };
 
   return { send, openChat, executeAction };
+};
+
+const savePPLQuery = (query: string) => {
+  return PPLSavedQueryClient.getInstance().create({
+    query,
+    name: query.slice(0, 50),
+    dateRange: ['now-5y', 'now'],
+    fields: [],
+    timestamp: '',
+  });
+};
+
+const savePPLVisualization = (query: string) => {
+  const savedVisualization = {
+    query,
+    name: query.slice(0, 50),
+    dateRange: ['now-14d', 'now'],
+    fields: [],
+    timestamp: '',
+    type: 'line',
+    sub_type: 'visualization',
+  };
+  return PPLSavedVisualizationClient.getInstance().create(savedVisualization);
 };

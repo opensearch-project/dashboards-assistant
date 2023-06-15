@@ -7,11 +7,10 @@ import { EuiMarkdownFormat, EuiText, getDefaultOuiMarkdownParsingPlugins } from 
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { DashboardContainerInput } from '../../../../../../../src/plugins/dashboard/public';
-import { SavedVisualization } from '../../../../../common/types/explorer';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { uiSettingsService } from '../../../../../common/utils';
-import { SavedObjectVisualization } from '../../../visualizations/saved_object_visualization';
 import { CoreServicesContext } from '../../chat_header_button';
+import { PPLVisualization } from '../../components/ppl_visualization';
 
 interface MessageContentProps {
   message: IMessage;
@@ -61,25 +60,9 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       );
 
     case 'ppl_visualization':
-      const savedVisualization: SavedVisualization = {
-        query: props.message.content,
-        selected_date_range: { start: 'now-14d', end: 'now', text: '' },
-        selected_timestamp: { name: 'timestamp', type: 'timestamp' },
-        selected_fields: { tokens: [], text: '' },
-        name: 'Flight count by destination',
-        description: '',
-        type: 'line',
-        sub_type: 'visualization',
-      };
       return (
-        <div className="llm-chat-visualizations" style={{ minHeight: 450 }}>
-          <SavedObjectVisualization
-            savedVisualization={savedVisualization}
-            timeRange={{
-              from: savedVisualization.selected_date_range.start,
-              to: savedVisualization.selected_date_range.end,
-            }}
-          />
+        <div className="llm-chat-visualizations">
+          <PPLVisualization query={props.message.content} />
         </div>
       );
 
