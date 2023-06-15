@@ -13,19 +13,14 @@ type AgentResponse = Awaited<ReturnType<InstanceType<typeof AgentFactory>['run']
 
 export const convertToOutputs = (agentResponse: AgentResponse) => {
   const content = extractContent(agentResponse);
-  const outputs: IMessage[] = [
-    mergeWith(
-      {
-        type: 'output',
-        content,
-        contentType: 'markdown',
-      },
-      convertToSavePPLActions(extractPPLQueries(content)),
-      (obj, src) => {
-        if (Array.isArray(obj)) return obj.concat(src);
-      }
-    ),
+  let outputs: IMessage[] = [
+    {
+      type: 'output',
+      content,
+      contentType: 'markdown',
+    },
   ];
+  outputs = buildPPLOutputs(content, outputs);
   return outputs;
 };
 
@@ -34,24 +29,51 @@ export const extractContent = (agentResponse: AgentResponse) => {
 };
 
 const extractPPLQueries = (content: string) => {
-  return content.match(/(^|[\n\r])\s*(source\s*=\s*.+)/g) || [];
+  return (
+    Array.from(content.matchAll(/(^|[\n\r])\s*(source\s*=\s*.+)/g)).map((match) => match[2]) || []
+  );
+};
+
+const mergeMessages = (message: IMessage, ...messages: Array<Partial<IMessage>>) => {
+  return mergeWith(
+    message,
+    ...messages,
+    (obj: IMessage[keyof IMessage], src: IMessage[keyof IMessage]) => {
+      if (Array.isArray(obj)) return obj.concat(src);
+    }
+  ) as IMessage;
+};
+
+const buildPPLOutputs = (content: string, outputs: IMessage[]): IMessage[] => {
+  const ppls = extractPPLQueries(content);
+  if (!ppls.length) return outputs;
+
+  const statsPPLs = ppls.filter((ppl) => /\|\s*stats\s+/.test(ppl));
+  if (!statsPPLs.length) {
+    outputs[0] = mergeMessages(outputs[0], convertToSavePPLActions(ppls));
+    return outputs;
+  }
+
+  const visOutputs: IMessage[] = statsPPLs.map((query) => ({
+    type: 'output',
+    content: query,
+    contentType: 'ppl_visualization',
+    suggestedActions: [
+      {
+        message: 'View details',
+        actionType: 'view_ppl_visualization',
+        metadata: { query },
+      },
+    ],
+  }));
+
+  return outputs.concat(visOutputs);
 };
 
 const convertToSavePPLActions = (queries: string[]): Partial<IMessage> => {
-  if (queries.length === 1) {
-    return {
-      suggestedActions: [
-        {
-          message: 'Save and view in Event Analytics',
-          metadata: { query: queries[0] },
-          actionType: 'save_and_view_ppl_query',
-        },
-      ],
-    };
-  }
   return {
-    suggestedActions: queries.map((query, i) => ({
-      message: `Save query (${i}) and view in Event Analytics`,
+    suggestedActions: queries.map((query, i, arr) => ({
+      message: `Save query ${arr.length > 1 ? `(${i}) ` : ''}and view in Event Analytics`,
       metadata: { query },
       actionType: 'save_and_view_ppl_query',
     })),

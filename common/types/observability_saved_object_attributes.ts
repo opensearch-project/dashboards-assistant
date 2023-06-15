@@ -49,5 +49,8 @@ interface ISuggestedActionBase extends SavedObjectAttributes {
 export type ISuggestedAction = ISuggestedActionBase &
   (
     | { actionType: 'send_as_input' | 'copy' }
-    | { actionType: 'save_and_view_ppl_query'; metadata: { query: string } }
+    | {
+        actionType: 'save_and_view_ppl_query' | 'view_ppl_visualization';
+        metadata: { query: string };
+      }
   );
