@@ -5,9 +5,11 @@
 
 import {
   AgentExecutor,
+  ChatAgent,
   ChatConversationalAgent,
   ChatConversationalCreatePromptArgs,
   ZeroShotAgent,
+  ChatCreatePromptArgs,
 } from 'langchain/agents';
 import { BaseLanguageModel } from 'langchain/base_language';
 import { LLMChain } from 'langchain/chains';
@@ -25,20 +27,28 @@ import {
   ZEROSHOT_PROMPT_PREFIX,
   ZEROSHOT_PROMPT_SUFFIX,
 } from '../prompts/default_zeroshot_prompt';
+import {
+  ZEROSHOT_CHAT_PREFIX,
+  ZEROSHOT_CHAT_SUFFIX,
+} from '../prompts/default_zeroshot_chat_prompts';
 
-type AgentTypes = 'zeroshot' | 'chat';
+type AgentTypes = 'zeroshot' | 'chat' | 'chat-zeroshot';
 
 interface AgentPrompts {
-  /** String to put before the list of tools for a Zero Shot Agent */
+  /** String to put before the list of tools for a Zeroshot Agent */
   zeroshot_prompt_prefix?: string;
-  /** String to put after the list of tools for a Zero Shot Agent */
+  /** String to put after the list of tools for a Zeroshot Agent */
   zeroshot_prompt_suffix?: string;
-  /** String to put as human prompt template for a Zero Shot Agent */
+  /** String to put as human prompt template for a Zeroshot Agent */
   zeroshot_human_prompt?: string;
   /** String to put before the list of tools for a ReAct conversation Agent */
-  default_system_message?: string;
+  chat_system_message?: string;
   /** String to put after the list of tools for a ReAct conversation Agent */
-  default_human_message?: string;
+  chat_human_message?: string;
+  /** String to put before the list of tools for a Zeroshot chat Agent */
+  zeroshot_chat_prefix?: string;
+  /** String to put after the list of tools for a Zeroshot chat Agent */
+  zeroshot_chat_suffix?: string;
 }
 
 export class AgentFactory {
@@ -92,11 +102,24 @@ export class AgentFactory {
         break;
       }
 
+      case 'chat-zeroshot': {
+        const convArgs: ChatCreatePromptArgs = {
+          prefix: this.agentArgs.zeroshot_chat_prefix ?? ZEROSHOT_CHAT_PREFIX,
+          suffix: this.agentArgs.zeroshot_chat_suffix ?? ZEROSHOT_CHAT_SUFFIX,
+        };
+        this.executor = AgentExecutor.fromAgentAndTools({
+          agent: ChatAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
+          tools: this.agentTools,
+          verbose: true,
+        });
+        break;
+      }
+
       case 'chat':
       default: {
         const convArgs: ChatConversationalCreatePromptArgs = {
-          systemMessage: this.agentArgs.default_system_message ?? DEFAULT_SYSTEM_MESSAGE,
-          humanMessage: this.agentArgs.default_human_message ?? DEFAULT_HUMAN_MESSAGE,
+          systemMessage: this.agentArgs.chat_system_message ?? DEFAULT_SYSTEM_MESSAGE,
+          humanMessage: this.agentArgs.chat_human_message ?? DEFAULT_HUMAN_MESSAGE,
         };
         this.executor = AgentExecutor.fromAgentAndTools({
           agent: ChatConversationalAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),

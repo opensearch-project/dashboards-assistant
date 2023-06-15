@@ -23,13 +23,13 @@ export class PPLTools extends PluginToolsFactory {
     new DynamicTool({
       name: 'Generate generic PPL query',
       description:
-        'Use this tool to generate a PPL query for a general question. This tool takes the question as input.',
+        'Use this tool to generate a PPL query. This tool takes natural language question as input.',
       func: (query: string) => this.generatePPL(query),
     }),
     new DynamicTool({
       name: 'Generate prometheus PPL query',
       description:
-        'Use this tool to generate a PPL query for a question about metrics. This tool takes the question as input.',
+        'Use this tool to generate a PPL query about metrics and prometheus. This tool take natural language question as input.',
       func: (query: string) => this.generatePPL(query),
     }),
     new DynamicTool({
