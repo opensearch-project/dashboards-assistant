@@ -7,20 +7,12 @@ import { DynamicTool } from 'langchain/tools';
 import { ILegacyScopedClusterClient, OpenSearchClient } from '../../../../../../src/core/server';
 
 export abstract class PluginToolsFactory {
-  opensearchClient?: OpenSearchClient;
-  observabilityClient?: ILegacyScopedClusterClient;
+  opensearchClient: OpenSearchClient;
+  observabilityClient: ILegacyScopedClusterClient;
   abstract toolsList: DynamicTool[];
 
-  public constructClients(
-    opensearchClient: OpenSearchClient,
-    observabilityClient: ILegacyScopedClusterClient
-  ) {
+  constructor(opensearchClient: OpenSearchClient, observabilityClient: ILegacyScopedClusterClient) {
     this.opensearchClient = opensearchClient;
     this.observabilityClient = observabilityClient;
-  }
-
-  public destructClients() {
-    this.opensearchClient = undefined;
-    this.observabilityClient = undefined;
   }
 }

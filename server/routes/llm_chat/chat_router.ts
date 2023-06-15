@@ -18,11 +18,7 @@ import {
 } from '../../../common/types/observability_saved_object_attributes';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
-import {
-  constructToolClients,
-  destructToolsClients,
-  initTools,
-} from '../../langchain/tools/tools_helper';
+import { initTools } from '../../langchain/tools/tools_helper';
 import { convertToOutputs } from '../../langchain/utils/data_model';
 
 export function registerChatRoute(router: IRouter) {
@@ -58,19 +54,15 @@ export function registerChatRoute(router: IRouter) {
           request
         );
 
-        const pluginTools = initTools();
+        const pluginTools = initTools(
+          context.core.opensearch.client.asCurrentUser,
+          opensearchObservabilityClient
+        );
         const pluginAgentTools = pluginAgentsInit(pluginTools);
         const chatAgent = chatAgentInit(pluginAgentTools);
-
-        constructToolClients(
-          context.core.opensearch.client.asCurrentUser,
-          opensearchObservabilityClient,
-          pluginTools
-        );
         const agentResponse = await chatAgent.run(input.content);
-        destructToolsClients(pluginTools);
-
         const outputs = convertToOutputs(agentResponse);
+
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
             title: input.content.substring(0, 50),

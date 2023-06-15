@@ -10,24 +10,13 @@ import { KnowledgeTools } from './tool_sets/knowledges';
 import { OSAPITools } from './tool_sets/os_apis';
 import { PPLTools } from './tool_sets/ppl';
 
-export const initTools = (): PluginToolsFactory[] => {
-  const pplTools = new PPLTools();
-  const alertingTools = new OSAlertingTools();
-  const knowledgeTools = new KnowledgeTools();
-  const opensearchTools = new OSAPITools();
-  return [pplTools, alertingTools, knowledgeTools, opensearchTools];
-};
-
-export const constructToolClients = (
+export const initTools = (
   opensearchClient: OpenSearchClient,
-  observabilityClient: ILegacyScopedClusterClient,
-  toolObjects: PluginToolsFactory[]
-) => {
-  toolObjects.forEach((toolObject) =>
-    toolObject.constructClients(opensearchClient, observabilityClient)
-  );
-};
-
-export const destructToolsClients = (toolObjects: PluginToolsFactory[]) => {
-  toolObjects.forEach((toolObject) => toolObject.destructClients());
+  observabilityClient: ILegacyScopedClusterClient
+): PluginToolsFactory[] => {
+  const pplTools = new PPLTools(opensearchClient, observabilityClient);
+  const alertingTools = new OSAlertingTools(opensearchClient, observabilityClient);
+  const knowledgeTools = new KnowledgeTools(opensearchClient, observabilityClient);
+  const opensearchTools = new OSAPITools(opensearchClient, observabilityClient);
+  return [pplTools, alertingTools, knowledgeTools, opensearchTools];
 };

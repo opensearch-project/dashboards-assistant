@@ -24,7 +24,7 @@ export class OSAPITools extends PluginToolsFactory {
 
   public async cat_indices(indexName = '') {
     try {
-      const catResponse = await this.opensearchClient!.cat.indices({
+      const catResponse = await this.opensearchClient.cat.indices({
         index: indexName,
       });
       return JSON.stringify(catResponse.body);
@@ -35,7 +35,7 @@ export class OSAPITools extends PluginToolsFactory {
 
   public async index_exists(indexName: string) {
     try {
-      const indexExistsResponse = await this.opensearchClient!.indices.exists({
+      const indexExistsResponse = await this.opensearchClient.indices.exists({
         index: indexName,
       });
 

@@ -11,7 +11,7 @@ import { PluginToolsFactory } from '../tools_factory/tools_factory';
 export class KnowledgeTools extends PluginToolsFactory {
   chain = RetrievalQAChain.fromLLM(
     llmModel.model,
-    llmModel.createVectorStore(this.opensearchClient!).asRetriever(),
+    llmModel.createVectorStore(this.opensearchClient).asRetriever(),
     { returnSourceDocuments: false }
   );
 

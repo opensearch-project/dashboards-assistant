@@ -43,7 +43,7 @@ export class PPLTools extends PluginToolsFactory {
    * @returns non hidden OpenSearch index names as a list.
    */
   private async getIndexNameList() {
-    const response = await this.opensearchClient!.cat.indices({ format: 'json' });
+    const response = await this.opensearchClient.cat.indices({ format: 'json' });
     return response.body
       .map((index) => index.index)
       .filter((index) => index !== undefined && !index.startsWith('.')) as string[];
@@ -69,12 +69,9 @@ export class PPLTools extends PluginToolsFactory {
   }
 
   public async executePPL(query: string) {
-    const response: PPLResponse = await this.observabilityClient!.callAsCurrentUser(
-      'ppl.pplQuery',
-      {
-        body: { query },
-      }
-    );
+    const response: PPLResponse = await this.observabilityClient.callAsCurrentUser('ppl.pplQuery', {
+      body: { query },
+    });
     return response;
   }
 
@@ -101,8 +98,8 @@ export class PPLTools extends PluginToolsFactory {
 
     try {
       const [mappings, sampleDoc] = await Promise.all([
-        this.opensearchClient!.indices.getMapping({ index }),
-        this.opensearchClient!.search({ index, size: 1 }),
+        this.opensearchClient.indices.getMapping({ index }),
+        this.opensearchClient.search({ index, size: 1 }),
       ]);
       const fields = generateFieldContext(mappings, sampleDoc);
 

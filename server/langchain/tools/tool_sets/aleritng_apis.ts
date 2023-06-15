@@ -44,7 +44,7 @@ export class OSAlertingTools extends PluginToolsFactory {
       };
 
       const params = { body: query };
-      const results = await this.observabilityClient!.callAsCurrentUser(
+      const results = await this.observabilityClient.callAsCurrentUser(
         'alerting.getMonitors',
         params
       );
@@ -56,7 +56,7 @@ export class OSAlertingTools extends PluginToolsFactory {
 
   public getAllAlerts = async () => {
     try {
-      const results = await this.observabilityClient!.callAsCurrentUser('alerting.getAlerts');
+      const results = await this.observabilityClient.callAsCurrentUser('alerting.getAlerts');
       return JSON.stringify(results);
     } catch (err) {
       return 'Issue in Alerting - Alerts - getAlerts:' + err;
