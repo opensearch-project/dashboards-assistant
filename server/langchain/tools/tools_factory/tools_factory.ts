@@ -6,10 +6,10 @@
 import { DynamicTool } from 'langchain/tools';
 import { ILegacyScopedClusterClient, OpenSearchClient } from '../../../../../../src/core/server';
 
-export class PluginToolsFactory {
+export abstract class PluginToolsFactory {
   opensearchClient?: OpenSearchClient;
   observabilityClient?: ILegacyScopedClusterClient;
-  toolsList?: DynamicTool[];
+  abstract toolsList: DynamicTool[];
 
   public constructClients(
     opensearchClient: OpenSearchClient,

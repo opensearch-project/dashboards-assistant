@@ -38,9 +38,9 @@ export function registerLangChainRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const { index, question } = request.body;
-        const observabilityClient: ILegacyScopedClusterClient =
-          // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
-          context.observability_plugin.observabilityClient.asScoped(request);
+        const observabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+          request
+        );
 
         const pplTools = new PPLTools();
         pplTools.constructClients(

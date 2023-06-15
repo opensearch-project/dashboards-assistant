@@ -16,7 +16,6 @@ import {
   IChat,
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
-import { convertToOutputs } from '../../langchain/utils/data_model';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
 import {
@@ -24,7 +23,7 @@ import {
   destructToolsClients,
   initTools,
 } from '../../langchain/tools/tools_helper';
-import { AgentFactory } from '../../langchain/agents/agent_factory/agent_factory';
+import { convertToOutputs } from '../../langchain/utils/data_model';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -55,9 +54,9 @@ export function registerChatRoute(router: IRouter) {
       try {
         const client = context.core.savedObjects.client;
         const { chatId, input, messages } = request.body;
-        const opensearchObservabilityClient: ILegacyScopedClusterClient =
-          // @ts-ignore https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
-          context.observability_plugin.observabilityClient.asScoped(request);
+        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+          request
+        );
 
         const pluginTools = initTools();
         const pluginAgentTools = pluginAgentsInit(pluginTools);

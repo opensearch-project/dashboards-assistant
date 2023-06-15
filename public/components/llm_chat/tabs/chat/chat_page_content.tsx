@@ -49,16 +49,18 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           <MessageBubble type={message.type} contentType={message.contentType}>
             <MessageContent message={message} />
           </MessageBubble>,
-          message.suggestedActions?.flatMap((suggestedAction) => [
-            <EuiSpacer size="m" />,
-            <SuggestionBubble
-              inputDisabled={props.inputDisabled}
-              message={message}
-              suggestedAction={suggestedAction}
-            />,
-          ]),
+          message.type === 'output' &&
+            message.suggestedActions?.flatMap((suggestedAction) => [
+              <EuiSpacer size="m" />,
+              <SuggestionBubble
+                inputDisabled={props.inputDisabled}
+                message={message}
+                suggestedAction={suggestedAction}
+              />,
+            ]),
           <EuiSpacer />,
         ])
+        // slice(0, -1) to remove last EuiSpacer
         .slice(0, -1)}
       {chatStateContext.chatState.llmResponding && <LoadingButton />}
       {chatStateContext.chatState.llmError && (

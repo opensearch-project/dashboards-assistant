@@ -38,7 +38,6 @@ export class ObservabilityPlugin
       }
     );
 
-    // @ts-ignore
     core.http.registerRouteHandlerContext('observability_plugin', (context, request) => {
       return {
         logger: this.logger,

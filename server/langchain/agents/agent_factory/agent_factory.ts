@@ -5,25 +5,25 @@
 
 import {
   AgentExecutor,
-  ZeroShotAgent,
-  ChatConversationalCreatePromptArgs,
   ChatConversationalAgent,
+  ChatConversationalCreatePromptArgs,
+  ZeroShotAgent,
 } from 'langchain/agents';
+import { BaseLanguageModel } from 'langchain/base_language';
+import { LLMChain } from 'langchain/chains';
 import { BufferMemory } from 'langchain/memory';
 import {
   ChatPromptTemplate,
-  SystemMessagePromptTemplate,
   HumanMessagePromptTemplate,
+  SystemMessagePromptTemplate,
 } from 'langchain/prompts';
-import { DynamicTool, Tool } from 'langchain/tools';
-import { LLMChain } from 'langchain/chains';
-import { BaseLanguageModel } from 'langchain/base_language';
+import { DynamicTool } from 'langchain/tools';
 import { llmModel } from '../../models/llm_model';
-import { DEFAULT_SYSTEM_MESSAGE, DEFAULT_HUMAN_MESSAGE } from '../prompts/default_chat_prompts';
+import { DEFAULT_HUMAN_MESSAGE, DEFAULT_SYSTEM_MESSAGE } from '../prompts/default_chat_prompts';
 import {
+  ZEROSHOT_HUMAN_PROMPT_TEMPLATE,
   ZEROSHOT_PROMPT_PREFIX,
   ZEROSHOT_PROMPT_SUFFIX,
-  ZEROSHOT_HUMAN_PROMPT_TEMPLATE,
 } from '../prompts/default_zeroshot_prompt';
 
 type AgentTypes = 'zeroshot' | 'chat';
