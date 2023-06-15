@@ -19,12 +19,12 @@ import { DynamicTool, Tool } from 'langchain/tools';
 import { LLMChain } from 'langchain/chains';
 import { BaseLanguageModel } from 'langchain/base_language';
 import { llmModel } from '../../models/llm_model';
-import { DEFAULT_SYSTEM_MESSAGE, DEFAULT_HUMAN_MESSAGE } from '../default_chat_prompts';
+import { DEFAULT_SYSTEM_MESSAGE, DEFAULT_HUMAN_MESSAGE } from '../prompts/default_chat_prompts';
 import {
   ZEROSHOT_PROMPT_PREFIX,
   ZEROSHOT_PROMPT_SUFFIX,
   ZEROSHOT_HUMAN_PROMPT_TEMPLATE,
-} from '../zeroshot_agent_prompt';
+} from '../prompts/default_zeroshot_prompt';
 
 type AgentTypes = 'zeroshot' | 'chat';
 
