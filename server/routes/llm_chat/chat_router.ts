@@ -68,9 +68,7 @@ export function registerChatRoute(router: IRouter) {
           opensearchObservabilityClient,
           pluginTools
         );
-
         const agentResponse = await chatAgent.run(input.content);
-
         destructToolsClients(pluginTools);
 
         const outputs = convertToOutputs(agentResponse);
