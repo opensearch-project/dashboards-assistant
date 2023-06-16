@@ -8,8 +8,8 @@ import {
   ChatAgent,
   ChatConversationalAgent,
   ChatConversationalCreatePromptArgs,
-  ZeroShotAgent,
   ChatCreatePromptArgs,
+  ZeroShotAgent,
 } from 'langchain/agents';
 import { BaseLanguageModel } from 'langchain/base_language';
 import { LLMChain } from 'langchain/chains';
@@ -21,16 +21,17 @@ import {
 } from 'langchain/prompts';
 import { DynamicTool } from 'langchain/tools';
 import { llmModel } from '../../models/llm_model';
+import { ChatConversationalAgentOutputLenientParser } from '../output_parsers/output_parsers';
 import { DEFAULT_HUMAN_MESSAGE, DEFAULT_SYSTEM_MESSAGE } from '../prompts/default_chat_prompts';
+import {
+  ZEROSHOT_CHAT_PREFIX,
+  ZEROSHOT_CHAT_SUFFIX,
+} from '../prompts/default_zeroshot_chat_prompts';
 import {
   ZEROSHOT_HUMAN_PROMPT_TEMPLATE,
   ZEROSHOT_PROMPT_PREFIX,
   ZEROSHOT_PROMPT_SUFFIX,
 } from '../prompts/default_zeroshot_prompt';
-import {
-  ZEROSHOT_CHAT_PREFIX,
-  ZEROSHOT_CHAT_SUFFIX,
-} from '../prompts/default_zeroshot_chat_prompts';
 
 type AgentTypes = 'zeroshot' | 'chat' | 'chat-zeroshot';
 
@@ -117,9 +118,13 @@ export class AgentFactory {
 
       case 'chat':
       default: {
+        const toolNames = this.agentTools.map((tool) => tool.name);
+        const baseParser = new ChatConversationalAgentOutputLenientParser(toolNames);
+        // TODO add retries to parser, ChatConversationalAgentOutputParserWithRetries seems not exported
         const convArgs: ChatConversationalCreatePromptArgs = {
           systemMessage: this.agentArgs.chat_system_message ?? DEFAULT_SYSTEM_MESSAGE,
           humanMessage: this.agentArgs.chat_human_message ?? DEFAULT_HUMAN_MESSAGE,
+          outputParser: baseParser,
         };
         this.executor = AgentExecutor.fromAgentAndTools({
           agent: ChatConversationalAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
