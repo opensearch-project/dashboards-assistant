@@ -9,8 +9,8 @@ import React, { useMemo, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import {
   ApplicationStart,
+  CoreStart,
   HttpStart,
-  OverlayStart,
   SavedObjectsClientContract,
 } from '../../../../../src/core/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
@@ -25,8 +25,8 @@ interface HeaderChatButtonProps {
 }
 
 interface ICoreServicesContext {
+  core: CoreStart;
   http: HttpStart;
-  overlays: OverlayStart;
   savedObjectsClient: SavedObjectsClientContract;
   DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
 }

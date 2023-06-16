@@ -229,8 +229,8 @@ export class ObservabilityPlugin
       mount: toMountPoint(
         <CoreServicesContext.Provider
           value={{
+            core,
             http: core.http,
-            overlays: core.overlays,
             savedObjectsClient: core.savedObjects.client,
             DashboardContainerByValueRenderer:
               startDeps.dashboard.DashboardContainerByValueRenderer,

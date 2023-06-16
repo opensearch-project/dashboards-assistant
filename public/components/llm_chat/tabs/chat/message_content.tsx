@@ -31,8 +31,8 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       return <EuiText style={{ whiteSpace: 'pre-line' }}>{props.message.content}</EuiText>;
 
     case 'markdown':
-      // remove emoji from defaultParsingPlugins https://github.com/opensearch-project/oui/blob/8605d70ce89fa5633a90bdec0931c95d1683c48d/src/components/markdown_editor/plugins/markdown_default_plugins.tsx#LL66C31-L66C31
-      const parsingPlugins = getDefaultOuiMarkdownParsingPlugins() as Array<[any, any]>; // Array<unified.PluginTuple<any[], unified.Settings>
+      // TODO remove after https://github.com/opensearch-project/oui/pull/801
+      const parsingPlugins = getDefaultOuiMarkdownParsingPlugins() as Array<[any, any]>; // Array<unified.PluginTuple<any[], unified.Settings>>
       const emojiPlugin = parsingPlugins.find(([, settings]) => settings.emoticon)?.at(1);
       if (emojiPlugin) emojiPlugin.emoticon = false;
       return (

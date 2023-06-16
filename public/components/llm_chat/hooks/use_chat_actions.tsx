@@ -90,27 +90,27 @@ export const useChatActions = () => {
 
       case 'save_and_view_ppl_query':
         const saveQueryResponse = await savePPLQuery(suggestAction.metadata.query);
-        window.location.replace(`/app/observability-logs#/explorer/${saveQueryResponse.objectId}`);
+        coreServicesContext.core.application.navigateToUrl(
+          `/app/observability-logs#/explorer/${saveQueryResponse.objectId}`
+        );
         break;
 
       case 'view_ppl_visualization':
-        const modal = coreServicesContext.overlays.openModal(
+        const modal = coreServicesContext.core.overlays.openModal(
           toMountPoint(
-            <div className="llm-modal-visualizations">
-              <PPLVisualizationModal
-                query={suggestAction.metadata.query}
-                onConfirm={async () => {
-                  const saveVisualizationResponse = await savePPLVisualization(
-                    suggestAction.metadata.query
-                  );
-                  window.location.replace(
-                    `/app/observability-logs#/explorer/${saveVisualizationResponse.objectId}`
-                  );
-                  modal.close();
-                }}
-                onClose={() => modal.close()}
-              />
-            </div>
+            <PPLVisualizationModal
+              query={suggestAction.metadata.query}
+              onConfirm={async () => {
+                const saveVisualizationResponse = await savePPLVisualization(
+                  suggestAction.metadata.query
+                );
+                modal.close();
+                coreServicesContext.core.application.navigateToUrl(
+                  `/app/observability-logs#/explorer/${saveVisualizationResponse.objectId}`
+                );
+              }}
+              onClose={() => modal.close()}
+            />
           )
         );
         break;

@@ -29,8 +29,10 @@ export const PPLVisualizationModal: React.FC<PPLVisualizationModelProps> = (prop
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiCodeBlock isCopyable>{props.query}</EuiCodeBlock>
-        <PPLVisualization query={props.query} />
+        <div>
+          <EuiCodeBlock isCopyable>{props.query}</EuiCodeBlock>
+          <PPLVisualization query={props.query} />
+        </div>
       </EuiModalBody>
 
       <EuiModalFooter>
