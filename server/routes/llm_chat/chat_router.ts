@@ -59,9 +59,19 @@ export function registerChatRoute(router: IRouter) {
           context.core.opensearch.client.asCurrentUser,
           opensearchObservabilityClient
         );
-        const pluginAgentTools = pluginAgentsInit(pluginTools);
+        // const pluginAgentTools = pluginAgentsInit(pluginTools);
         const memory = memoryInit(messages.slice(1)); // Skips the first default message
-        const chatAgent = chatAgentInit(pluginAgentTools, memory);
+        // const chatAgent = chatAgentInit(pluginAgentTools, memory);
+        const chatAgent = chatAgentInit(
+          [
+            ...pluginTools[0].toolsList,
+            ...pluginTools[1].toolsList,
+            ...pluginTools[2].toolsList,
+            ...pluginTools[3].toolsList,
+          ],
+          memory
+        );
+
         const agentResponse = await chatAgent.run(input.content);
         const outputs = convertToOutputs(agentResponse);
 
