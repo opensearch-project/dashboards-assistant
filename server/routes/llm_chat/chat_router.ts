@@ -20,6 +20,7 @@ import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { convertToOutputs } from '../../langchain/utils/data_model';
+import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -59,7 +60,8 @@ export function registerChatRoute(router: IRouter) {
           opensearchObservabilityClient
         );
         const pluginAgentTools = pluginAgentsInit(pluginTools);
-        const chatAgent = chatAgentInit(pluginAgentTools);
+        const memory = memoryInit(messages.slice(1)); // Skips the first default message
+        const chatAgent = chatAgentInit(pluginAgentTools, memory);
         const agentResponse = await chatAgent.run(input.content);
         const outputs = convertToOutputs(agentResponse);
 

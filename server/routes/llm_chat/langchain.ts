@@ -15,6 +15,7 @@ import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
+import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(
@@ -73,15 +74,17 @@ export function registerLangChainRoutes(router: IRouter) {
         const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
           request
         );
-
+        console.log('########### START CHAIN ####################');
         const pluginTools = initTools(
           context.core.opensearch.client.asCurrentUser,
           opensearchObservabilityClient
         );
         const pluginAgentTools = pluginAgentsInit(pluginTools);
-        const chatAgent = chatAgentInit(pluginAgentTools);
+        const memory = memoryInit([]);
+        const chatAgent = chatAgentInit(pluginAgentTools, memory);
         const agentResponse = await chatAgent.run(question);
-
+        // const agentResponse = await pluginTools[0].generatePPL(question);
+        console.log('########### END CHAIN ####################');
         return response.ok({ body: agentResponse });
       } catch (error) {
         return response.custom({

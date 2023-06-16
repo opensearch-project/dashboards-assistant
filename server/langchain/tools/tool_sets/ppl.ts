@@ -21,9 +21,9 @@ interface PPLResponse {
 export class PPLTools extends PluginToolsFactory {
   toolsList = [
     new DynamicTool({
-      name: 'Generate generic PPL query',
+      name: 'PPL Query generator',
       description:
-        'Use this tool to generate a PPL query. This tool takes natural language question as input.',
+        'Use this too to generate a PPL Query from a question. Takes natural language as input.',
       func: (query: string) => this.generatePPL(query),
     }),
     new DynamicTool({
