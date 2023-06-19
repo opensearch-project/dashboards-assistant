@@ -119,7 +119,7 @@ export class AgentFactory {
       case 'chat':
       default: {
         const toolNames = this.agentTools.map((tool) => tool.name);
-        const baseParser = new ChatConversationalAgentOutputLenientParser({ toolNames });
+        const baseParser = new ChatConversationalAgentOutputLenientParser(toolNames);
         // TODO add retries to parser, ChatConversationalAgentOutputParserWithRetries seems not exported
         const convArgs: ChatConversationalCreatePromptArgs = {
           systemMessage: this.agentArgs.chat_system_message ?? DEFAULT_SYSTEM_MESSAGE,
