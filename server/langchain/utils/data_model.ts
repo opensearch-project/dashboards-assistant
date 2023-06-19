@@ -30,7 +30,7 @@ export const extractContent = (agentResponse: AgentResponse) => {
 
 const extractPPLQueries = (content: string) => {
   return (
-    Array.from(content.matchAll(/(^|[\n\r])\s*(source\s*=\s*.+)/g)).map((match) => match[2]) || []
+    Array.from(content.matchAll(/(^|[\n\r]|:)\s*(source\s*=\s*.+)/g)).map((match) => match[2]) || []
   );
 };
 
