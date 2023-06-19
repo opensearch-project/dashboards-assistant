@@ -13,7 +13,13 @@ Overall, Assistant is a powerful system that can help with a wide range of tasks
 
 export const DEFAULT_HUMAN_MESSAGE = `TOOLS
 ------
-Assistant can ask the user to use tools and iterate through them to look up information that may be helpful in answering the users original question. The tools the human can use are:
+Assistant can ask the user to use tools to look up information that may be helpful in answering the users original question. Assistant must follow the rules below:
+
+1. Assistant must remember the context of the original question when answering with the final response.
+2. Assistant must send the original user question to tools without modification.
+3. Assistant must return original output from tools without modification.
+
+The tools the human can use are:
 
 {tools}
 

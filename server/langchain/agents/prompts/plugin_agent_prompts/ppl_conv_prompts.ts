@@ -3,27 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const PPL_AGENT_HUMAN_MESSAGE = `TOOLS
-------
-Assistant can ask the user to use tools to look up information that may be helpful in answering the users original question. Assistant must follow the rules below:
-
-1. Assistant must remember the context of the original question when answering with the final response.
-2. Assistant must send the original user question to tools without modification.
-3. Assistant must return original output from tools without modification.
-
-The tools the human can use are:
-
-{tools}
-
-{format_instructions}
-
-Assistant should never add \n in the final answer response.
-
-USER'S INPUT
---------------------
-Here is the user's input (remember to respond with a markdown code snippet of a json blob with a single action, and NOTHING else):
-
-{{input}}`;
+import { DEFAULT_HUMAN_MESSAGE } from '../default_chat_prompts';
 
 export const PPL_AGENT_SYSTEM_MESSAGE = `PPL Assistant is a large language model trained by Anthropic and prompt-tuned by OpenSearch.
 
@@ -34,3 +14,5 @@ PPL Assistant is constantly learning and improving, and its capabilities are con
 Additionally, PPL Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on .
 
 Overall, PPL Assistant is a powerful system that can help with OpenSearch PPL and provide valuable insights and information on OpenSearch PPL. Whether you need help with a specific question or just want to have a conversation about OpenSearch PPL, PPL Assistant is here to assist.`;
+
+export const PPL_AGENT_HUMAN_MESSAGE = DEFAULT_HUMAN_MESSAGE;
