@@ -4,6 +4,7 @@
  */
 
 import { promises as fs } from 'fs';
+import { DynamicToolInput } from 'langchain/tools';
 
 /**
  * @param status - json object that needs to be logged
@@ -18,4 +19,18 @@ export const logToFile = async (status: object, name: string) => {
       ...status,
     }) + '\n'
   );
+};
+
+/**
+ * @param func - function for a tool
+ * @returns a string even when the function throws error
+ */
+export const swallowErrors = (func: DynamicToolInput['func']): DynamicToolInput['func'] => {
+  return async (...args) => {
+    try {
+      return func(...args);
+    } catch (error) {
+      return `Error when running tool: ${error}`;
+    }
+  };
 };

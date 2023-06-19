@@ -8,7 +8,7 @@ import { PPL_DATASOURCES_REQUEST } from '../../../../common/constants/metrics';
 import { requestGuessingIndexChain } from '../../chains/guessing_index';
 import { requestPPLGeneratorChain } from '../../chains/ppl_generator';
 import { generateFieldContext } from '../../utils/ppl_generator';
-import { logToFile } from '../../utils/utils';
+import { logToFile, swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
 interface PPLResponse {
@@ -22,21 +22,21 @@ export class PPLTools extends PluginToolsFactory {
   toolsList = [
     new DynamicTool({
       name: 'PPL Query generator',
-      description:
-        'Use this too to generate a PPL Query from a question. Takes natural language as input.',
-      func: (query: string) => this.generatePPL(query),
+      description: 'Use to generate a PPL Query. The input should be the original user question',
+      func: swallowErrors((query: string) => this.generatePPL(query)),
     }),
     new DynamicTool({
       name: 'Generate prometheus PPL query',
       description:
         'Use this tool to generate a PPL query about metrics and prometheus. This tool take natural language question as input.',
-      func: (query: string) => this.generatePPL(query),
+      func: swallowErrors((query: string) => this.generatePrometheusPPL(query)),
     }),
     new DynamicTool({
       name: 'Execute PPL query',
       description: 'Use this tool to run a PPL query. This tool takes the PPL query as input.',
-      func: (query: string) =>
-        this.executePPL(query).then((result) => JSON.stringify(result, null, 2)),
+      func: swallowErrors((query: string) =>
+        this.executePPL(query).then((result) => JSON.stringify(result, null, 2))
+      ),
     }),
   ];
   /**
@@ -110,7 +110,7 @@ export class PPLTools extends PluginToolsFactory {
       return ppl.query;
     } catch (error) {
       logToFile({ question, error }, 'ppl_generator');
-      return `Error when generating PPL query: ${error}`;
+      throw error;
     }
   }
 }

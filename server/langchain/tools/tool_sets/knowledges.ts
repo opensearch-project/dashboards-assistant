@@ -6,6 +6,7 @@
 import { RetrievalQAChain } from 'langchain/chains';
 import { DynamicTool } from 'langchain/tools';
 import { llmModel } from '../../models/llm_model';
+import { swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
 export class KnowledgeTools extends PluginToolsFactory {
@@ -20,13 +21,13 @@ export class KnowledgeTools extends PluginToolsFactory {
       name: 'Get Nginx information',
       description:
         'Use this tool to get Nginx related information, including setting up nginx and troubleshooting access logs. This tool takes the Nginx question as input.',
-      func: (query: string) => this.askVectorStore(query),
+      func: swallowErrors((query: string) => this.askVectorStore(query)),
     }),
     new DynamicTool({
       name: 'Get OpenSearch PPL information',
       description:
         'Use this tool to get PPL related information. This tool takes the PPL related question as input.',
-      func: (query: string) => this.askVectorStore(query),
+      func: swallowErrors((query: string) => this.askVectorStore(query)),
     }),
   ];
 
