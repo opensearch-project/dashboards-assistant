@@ -18,9 +18,9 @@ import {
 } from '../../../common/types/observability_saved_object_attributes';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
+import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { convertToOutputs } from '../../langchain/utils/data_model';
-import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -59,18 +59,17 @@ export function registerChatRoute(router: IRouter) {
           context.core.opensearch.client.asCurrentUser,
           opensearchObservabilityClient
         );
-        // const pluginAgentTools = pluginAgentsInit(pluginTools);
+        const pluginAgentTools = pluginAgentsInit(pluginTools);
         const memory = memoryInit(messages.slice(1)); // Skips the first default message
-        // const chatAgent = chatAgentInit(pluginAgentTools, memory);
-        const chatAgent = chatAgentInit(
-          [
-            ...pluginTools[0].toolsList,
-            ...pluginTools[1].toolsList,
-            ...pluginTools[2].toolsList,
-            ...pluginTools[3].toolsList,
-          ],
+
+        const chatAgentWithPluginAgentTools = chatAgentInit(pluginAgentTools, memory);
+        const chatAgentWithFlattenedTools = chatAgentInit(
+          pluginTools.flatMap((tool) => tool.toolsList),
           memory
         );
+        const chatAgentWithPPLTools = chatAgentInit(pluginTools[0].toolsList, memory);
+
+        const chatAgent = chatAgentWithFlattenedTools;
 
         const agentResponse = await chatAgent.run(input.content);
         const outputs = convertToOutputs(agentResponse);
