@@ -23,7 +23,9 @@ export class PPLTools extends PluginToolsFactory {
     new DynamicTool({
       name: 'PPL Query generator',
       description: 'Use to generate a PPL Query. The input should be the original user question',
-      func: swallowErrors((query: string) => this.generatePPL(query)),
+      func: swallowErrors(
+        async (query: string) => 'The PPL query is: ' + (await this.generatePPL(query))
+      ),
     }),
     new DynamicTool({
       name: 'Generate prometheus PPL query',
@@ -106,7 +108,7 @@ export class PPLTools extends PluginToolsFactory {
       const input = `Fields:\n${fields}\nQuestion: ${question}? index is \`${index}\``;
       const ppl = await requestPPLGeneratorChain(input);
       logToFile({ question, input, ppl }, 'ppl_generator');
-      ppl.query = ppl.query.replace(/^source\s*=\s*`(.+?)`/, 'source=$1'); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509
+      ppl.query = ppl.query.replace(/`/g, ''); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
       return ppl.query;
     } catch (error) {
       logToFile({ question, error }, 'ppl_generator');
