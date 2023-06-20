@@ -24,9 +24,9 @@ export class KnowledgeTools extends PluginToolsFactory {
       func: swallowErrors((query: string) => this.askVectorStore(query)),
     }),
     new DynamicTool({
-      name: 'Get OpenSearch PPL information',
+      name: 'Get generic information',
       description:
-        'Use this tool to get PPL related information. This tool takes the PPL related question as input.',
+        'Use this tool to answer a generic question not related to OpenSearch cluster. This tool takes the question as input.',
       func: swallowErrors((query: string) => this.askVectorStore(query)),
     }),
   ];
