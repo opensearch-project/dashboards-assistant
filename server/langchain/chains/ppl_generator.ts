@@ -170,7 +170,7 @@ Fields:
 - http.flavor: text ("1.1")
 - http.request.method: text ("GET")
 - http.response.bytes: long (4955)
-- http.response.status_code: integer (200)
+- http.response.status_code: keyword ("200")
 - http.url: text ("/")
 - log: text (null)
 - observerTime: date (1686000665919)
@@ -179,7 +179,7 @@ Fields:
 - trace_id: text ("102981ABCD2901")
 
 Question: What are recent logs with errors and contains word 'test'? index is 'events'
-PPL: source=\`events\` | where \`http.response.status_code\` >= 300 AND MATCH(\`body\`, 'test') AND \`observerTime\` < DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+PPL: source=\`events\` | where \`http.response.status_code\` != "200" AND MATCH(\`body\`, 'test') AND \`observerTime\` < DATE_SUB(NOW(), INTERVAL 5 MINUTE)
 
 Question: What are the top traces with largest bytes? index is 'events'
 PPL: source=\`events\` | stats SUM(\`http.response.bytes\`) as \`sum_bytes\` by \`trace_id\` | sort -sum_bytes | head
@@ -188,7 +188,7 @@ Question: Give me log patterns? index is 'events'
 PPL: source=\`events\` | patterns \`body\` | stats take(\`body\`, 1) as \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
 
 Question: Give me log patterns for logs with errors? index is 'events'
-PPL: source=\`events\` | where \`http.response.status_code\` >= 300 | patterns \`body\` | stats take(\`body\`, 1) as \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
+PPL: source=\`events\` | where \`http.response.status_code\` != "200" | patterns \`body\` | stats take(\`body\`, 1) as \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
 
 ----------------
 

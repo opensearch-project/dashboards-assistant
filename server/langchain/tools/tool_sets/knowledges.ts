@@ -17,7 +17,7 @@ export class KnowledgeTools extends PluginToolsFactory {
   );
 
   toolsList = [
-    new DynamicTool({
+    /* new DynamicTool({
       name: 'Get Nginx information',
       description:
         'Use this tool to get Nginx related information, including setting up nginx and troubleshooting access logs. This tool takes the Nginx question as input.',
@@ -28,7 +28,7 @@ export class KnowledgeTools extends PluginToolsFactory {
       description:
         'Use this tool to answer a generic question not related to OpenSearch cluster. This tool takes the question as input.',
       func: swallowErrors((query: string) => this.askVectorStore(query)),
-    }),
+    }), */
   ];
 
   public async askVectorStore(query: string) {
