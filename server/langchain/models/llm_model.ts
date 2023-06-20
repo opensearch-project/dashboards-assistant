@@ -37,6 +37,7 @@ class LLMModel {
         this.#model = new ChatAnthropic({ temperature: 0.0000001 });
         this.#embeddings = new HuggingFaceInferenceEmbeddings({
           model: 'sentence-transformers/paraphrase-albert-small-v2',
+          apiKey: process.env.HUGGINGFACEHUB_API_TOKEN,
         });
         break;
     }
