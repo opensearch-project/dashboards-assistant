@@ -15,9 +15,10 @@ export const DEFAULT_HUMAN_MESSAGE = `TOOLS
 ------
 Assistant can ask the user to use tools to look up information that may be helpful in answering the users original question. Assistant must follow the rules below:
 
-1. Assistant must remember the context of the original question when answering with the final response.
-2. Assistant must send the original user question to tools without modification.
-3. Assistant must return original output from tools without modification.
+#01 Assistant must remember the context of the original question when answering with the final response.
+#02 Assistant must send the original user question to tools without modification.
+#03 Assistant must not change user's question in any way when calling tools.
+#04 Here is a sample PPL query: source=<index> | where <field> = '<value>'. If the output of a tool contains a PPL query, assistant must include the original query in the response.
 
 The tools the human can use are:
 
