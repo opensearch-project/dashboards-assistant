@@ -16,6 +16,7 @@ import {
   PPLSavedVisualizationClient,
 } from '../../../services/saved_objects/saved_object_client/ppl';
 import { ChatContext, ChatStateContext, CoreServicesContext } from '../chat_header_button';
+import { LangchainTracesModal } from '../components/langchain_traces_modal';
 import { PPLVisualizationModal } from '../components/ppl_visualization_modal';
 
 interface SendResponse {
@@ -80,22 +81,24 @@ export const useChatActions = () => {
 
   const executeAction = async (suggestAction: ISuggestedAction, message: IMessage) => {
     switch (suggestAction.actionType) {
-      case 'send_as_input':
+      case 'send_as_input': {
         send({
           type: 'input',
           content: suggestAction.message,
           contentType: 'text',
         });
         break;
+      }
 
-      case 'save_and_view_ppl_query':
+      case 'save_and_view_ppl_query': {
         const saveQueryResponse = await savePPLQuery(suggestAction.metadata.query);
         coreServicesContext.core.application.navigateToUrl(
           `/app/observability-logs#/explorer/${saveQueryResponse.objectId}`
         );
         break;
+      }
 
-      case 'view_ppl_visualization':
+      case 'view_ppl_visualization': {
         const modal = coreServicesContext.core.overlays.openModal(
           toMountPoint(
             <PPLVisualizationModal
@@ -114,6 +117,20 @@ export const useChatActions = () => {
           )
         );
         break;
+      }
+
+      case 'view_details': {
+        const modal = coreServicesContext.core.overlays.openModal(
+          toMountPoint(
+            <LangchainTracesModal
+              sessionId={suggestAction.metadata.sessionId}
+              http={coreServicesContext.http}
+              onClose={() => modal.close()}
+            />
+          )
+        );
+        break;
+      }
 
       default:
         break;
