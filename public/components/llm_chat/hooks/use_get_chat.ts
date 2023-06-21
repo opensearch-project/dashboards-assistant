@@ -58,6 +58,7 @@ export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) =
     let abort = false;
     dispatch({ type: 'request' });
 
+    // TODO move find call to server, because public saved object client does not support sorting
     chatContext.savedObjectsClient
       .find<IChat>({ ...options, type: CHAT_SAVED_OBJECT })
       .then((payload) => {

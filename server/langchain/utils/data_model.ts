@@ -21,7 +21,7 @@ export const convertToOutputs = (agentResponse: AgentResponse, sessionId: string
     },
   ];
   outputs = buildPPLOutputs(content, outputs);
-  outputs = buildTraces(sessionId, outputs);
+  outputs = buildTraces(sessionId, outputs); // keep at last
   return outputs;
 };
 

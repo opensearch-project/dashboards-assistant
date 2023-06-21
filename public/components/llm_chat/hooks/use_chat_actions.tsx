@@ -26,6 +26,7 @@ interface SendResponse {
 
 let abortControllerRef: AbortController;
 
+// TODO refactor into different hooks
 export const useChatActions = () => {
   const chatContext = useContext(ChatContext)!;
   const coreServicesContext = useContext(CoreServicesContext)!;
@@ -160,5 +161,6 @@ const savePPLVisualization = (query: string) => {
     type: 'line',
     sub_type: 'visualization',
   };
+  // @ts-ignore not sure what is required but this works
   return PPLSavedVisualizationClient.getInstance().create(savedVisualization);
 };

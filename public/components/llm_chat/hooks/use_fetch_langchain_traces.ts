@@ -13,6 +13,7 @@ import { genericReducer, GenericReducer } from './fetch_reducer';
 
 export interface LangchainTrace {
   id: string;
+  startTime: number;
   name: string;
   input: string;
   output?: string;
@@ -36,6 +37,7 @@ const convertToTraces = (hits: Array<SearchHit<RunHit>>) => {
     .filter(defined)
     .map((run) => ({
       id: run.uuid,
+      startTime: run.start_time,
       name: run.serialized.name,
       input: run.tool_input,
       output: run.output,
@@ -45,6 +47,7 @@ const convertToTraces = (hits: Array<SearchHit<RunHit>>) => {
     .filter(defined)
     .map((run) => ({
       id: run.uuid,
+      startTime: run.start_time,
       name: run.serialized.name,
       input: run.prompts.join('\n'),
       output: run.response?.generations
@@ -56,6 +59,7 @@ const convertToTraces = (hits: Array<SearchHit<RunHit>>) => {
     .filter(defined)
     .map((run) => ({
       id: run.uuid,
+      startTime: run.start_time,
       name: run.serialized.name,
       input: run.inputs.input,
       output: run.outputs?.text,
