@@ -11,7 +11,7 @@ import { AgentFactory } from '../agents/agent_factory/agent_factory';
 type Awaited<T> = T extends Promise<infer U> ? U : T;
 type AgentResponse = Awaited<ReturnType<InstanceType<typeof AgentFactory>['run']>>;
 
-export const convertToOutputs = (agentResponse: AgentResponse) => {
+export const convertToOutputs = (agentResponse: AgentResponse, sessionId: string) => {
   const content = extractContent(agentResponse);
   let outputs: IMessage[] = [
     {
@@ -21,6 +21,7 @@ export const convertToOutputs = (agentResponse: AgentResponse) => {
     },
   ];
   outputs = buildPPLOutputs(content, outputs);
+  outputs = buildTraces(sessionId, outputs);
   return outputs;
 };
 
@@ -42,6 +43,20 @@ const mergeMessages = (message: IMessage, ...messages: Array<Partial<IMessage>>)
       if (Array.isArray(obj)) return obj.concat(src);
     }
   ) as IMessage;
+};
+
+const buildTraces = (sessionId: string, outputs: IMessage[]): IMessage[] => {
+  const viewDetails: Partial<IMessage> = {
+    suggestedActions: [
+      {
+        message: 'Explain',
+        metadata: { sessionId },
+        actionType: 'view_details',
+      },
+    ],
+  };
+  outputs[outputs.length - 1] = mergeMessages(outputs.at(-1)!, viewDetails);
+  return outputs;
 };
 
 const buildPPLOutputs = (content: string, outputs: IMessage[]): IMessage[] => {

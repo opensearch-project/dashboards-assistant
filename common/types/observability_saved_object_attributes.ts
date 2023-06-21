@@ -53,4 +53,8 @@ export type ISuggestedAction = ISuggestedActionBase &
         actionType: 'save_and_view_ppl_query' | 'view_ppl_visualization';
         metadata: { query: string };
       }
+    | {
+        actionType: 'view_details';
+        metadata: { sessionId: string };
+      }
   );
