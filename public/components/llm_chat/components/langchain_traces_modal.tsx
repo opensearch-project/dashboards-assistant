@@ -26,6 +26,11 @@ interface TraceRunsProps {
   runs: LangchainTrace[];
 }
 
+// workaround to show Claude LLM as OpenSearch LLM
+const formatRunName = (name: string) => {
+  return name.replace('anthropic', 'OpenSearch LLM');
+};
+
 const TraceRuns: React.FC<TraceRunsProps> = (props) => {
   if (!props.runs.length) return null;
 
@@ -37,7 +42,9 @@ const TraceRuns: React.FC<TraceRunsProps> = (props) => {
       {props.runs.map((run) => (
         <div key={run.id}>
           <EuiSpacer size="s" />
-          <EuiText>{`${run.name} (${new Date(run.startTime).toLocaleString()})`}</EuiText>
+          <EuiText>{`${formatRunName(run.name)} (${new Date(
+            run.startTime
+          ).toLocaleString()})`}</EuiText>
           <EuiAccordion id="input-accordion" buttonContent="Input">
             <EuiCodeBlock fontSize="m">{run.input}</EuiCodeBlock>
           </EuiAccordion>
