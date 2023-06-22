@@ -27,9 +27,10 @@ interface TraceRunsProps {
 }
 
 // workaround to show Claude LLM as OpenSearch LLM
-const formatRunName = (name: string) => {
-  return name.replace('anthropic', 'OpenSearch LLM');
-};
+const formatRunName = (run: LangchainTrace) =>
+  `${run.name.replace('anthropic', 'OpenSearch LLM')} (${new Date(
+    run.startTime
+  ).toLocaleString()})`;
 
 const TraceRuns: React.FC<TraceRunsProps> = (props) => {
   if (!props.runs.length) return null;
@@ -39,20 +40,24 @@ const TraceRuns: React.FC<TraceRunsProps> = (props) => {
       <EuiTitle size="s">
         <h3>{props.title}</h3>
       </EuiTitle>
-      {props.runs.map((run) => (
-        <div key={run.id}>
-          <EuiSpacer size="s" />
-          <EuiText>{`${formatRunName(run.name)} (${new Date(
-            run.startTime
-          ).toLocaleString()})`}</EuiText>
-          <EuiAccordion id="input-accordion" buttonContent="Input">
-            <EuiCodeBlock fontSize="m">{run.input}</EuiCodeBlock>
-          </EuiAccordion>
-          <EuiAccordion id="output-accordion" buttonContent="Output">
-            <EuiCodeBlock fontSize="m">{run.output}</EuiCodeBlock>
-          </EuiAccordion>
-        </div>
-      ))}
+      {props.runs
+        .filter((run) => run.input || run.output)
+        .map((run) => (
+          <div key={run.id}>
+            <EuiSpacer size="s" />
+            <EuiText>{formatRunName(run)}</EuiText>
+            {run.input && (
+              <EuiAccordion id="input-accordion" buttonContent="Input">
+                <EuiCodeBlock fontSize="m">{run.input}</EuiCodeBlock>
+              </EuiAccordion>
+            )}
+            {run.output && (
+              <EuiAccordion id="output-accordion" buttonContent="Output">
+                <EuiCodeBlock fontSize="m">{run.output}</EuiCodeBlock>
+              </EuiAccordion>
+            )}
+          </div>
+        ))}
       <EuiSpacer />
     </>
   );
@@ -89,8 +94,8 @@ export const LangchainTracesModal: React.FC<LangchainTracesModalProps> = (props)
   } else {
     content = (
       <>
-        <TraceRuns title="Tools" runs={data.toolRuns} />
         <TraceRuns title="Chains" runs={data.chainRuns} />
+        <TraceRuns title="Tools" runs={data.toolRuns} />
         <TraceRuns title="LLMs" runs={data.llmRuns} />
       </>
     );

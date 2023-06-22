@@ -19,7 +19,7 @@ export interface LangchainTrace {
   output?: string;
 }
 
-export interface LangchainTraces {
+interface RunTraces {
   toolRuns: LangchainTrace[];
   chainRuns: LangchainTrace[];
   llmRuns: LangchainTrace[];
@@ -27,15 +27,17 @@ export interface LangchainTraces {
 
 type RunHit = SearchResponse<ToolRun | ChainRun | LLMRun>;
 
-const parseToolRuns = (traces: LangchainTraces, toolRuns: ToolRun[]) => {
+const parseToolRuns = (traces: RunTraces, toolRuns: ToolRun[]) => {
   traces.toolRuns.push(
-    ...toolRuns.map((run) => ({
-      id: run.uuid,
-      startTime: run.start_time,
-      name: run.serialized.name,
-      input: run.tool_input,
-      output: run.output,
-    }))
+    ...toolRuns
+      .filter((run) => run.uuid)
+      .map((run) => ({
+        id: run.uuid,
+        startTime: run.start_time,
+        name: run.serialized.name,
+        input: run.tool_input,
+        output: run.output,
+      }))
   );
   toolRuns.forEach((run) => {
     if (run.child_tool_runs?.length) parseToolRuns(traces, run.child_tool_runs);
@@ -44,18 +46,30 @@ const parseToolRuns = (traces: LangchainTraces, toolRuns: ToolRun[]) => {
   });
 };
 
-const parseChainRuns = (traces: LangchainTraces, chainRuns: ChainRun[]) => {
+const parseChainRuns = (traces: RunTraces, chainRuns: ChainRun[]) => {
   traces.chainRuns.push(
-    ...chainRuns.map((run) => ({
-      id: run.uuid,
-      startTime: run.start_time,
-      name: run.serialized.name,
-      input:
-        run.inputs.input ||
-        run.inputs.question + '\n' + JSON.stringify(run.inputs.input_documents || '', null, 2),
-      output:
-        run.outputs?.text + '\n' + JSON.stringify(run.outputs?.sourceDocuments || '', null, 2),
-    }))
+    ...chainRuns
+      .filter((run) => run.uuid)
+      .map((run) => {
+        let input = run.inputs.input;
+        if (!input) input = run.inputs.question;
+        if (run.inputs.input_documents)
+          input += '\n\nInput documents:\n' + JSON.stringify(run.inputs.input_documents, null, 2);
+
+        let output = run.outputs?.text;
+        if (output && run.outputs?.sourceDocuments)
+          output +=
+            '\n\nSource documents:\n' + JSON.stringify(run.outputs?.sourceDocuments, null, 2);
+
+        return {
+          id: run.uuid,
+          type: 'chain' as const,
+          startTime: run.start_time,
+          name: run.serialized.name,
+          input,
+          output,
+        };
+      })
   );
   chainRuns.forEach((run) => {
     if (run.child_tool_runs?.length) parseToolRuns(traces, run.child_tool_runs);
@@ -64,17 +78,19 @@ const parseChainRuns = (traces: LangchainTraces, chainRuns: ChainRun[]) => {
   });
 };
 
-const parseLLMRuns = (traces: LangchainTraces, llmRuns: LLMRun[]) => {
+const parseLLMRuns = (traces: RunTraces, llmRuns: LLMRun[]) => {
   traces.llmRuns.push(
-    ...llmRuns.map((run) => ({
-      id: run.uuid,
-      startTime: run.start_time,
-      name: run.serialized.name,
-      input: run.prompts.join('\n'),
-      output: run.response?.generations
-        .flatMap((generation) => generation.map((res) => res.text))
-        .join('\n'),
-    }))
+    ...llmRuns
+      .filter((run) => run.uuid)
+      .map((run) => ({
+        id: run.uuid,
+        startTime: run.start_time,
+        name: run.serialized.name,
+        input: run.prompts.join('\n'),
+        output: run.response?.generations
+          .flatMap((generation) => generation.map((res) => res.text))
+          .join('\n'),
+      }))
   );
 };
 
@@ -85,8 +101,8 @@ const isChainRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchH
 const isLLMRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchHit<LLMRun> =>
   hit._source?.type === 'llm';
 
-const convertToTraces = (hits: RunHit): LangchainTraces => {
-  const traces: LangchainTraces = {
+const convertToTraces = (hits: RunHit): RunTraces => {
+  const traces: RunTraces = {
     toolRuns: [],
     chainRuns: [],
     llmRuns: [],
@@ -106,7 +122,7 @@ const convertToTraces = (hits: RunHit): LangchainTraces => {
 };
 
 export const useFetchLangchainTraces = (http: HttpStart, sessionId: string) => {
-  const reducer: GenericReducer<LangchainTraces> = genericReducer;
+  const reducer: GenericReducer<RunTraces> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
