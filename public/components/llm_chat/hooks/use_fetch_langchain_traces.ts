@@ -19,33 +19,54 @@ export interface LangchainTrace {
   output?: string;
 }
 
-export type LangchainTraces = ReturnType<typeof convertToTraces>;
-
-interface RunHit {
-  child_tool_runs?: ToolRun;
-  child_llm_runs?: LLMRun;
-  child_chain_runs?: ChainRun;
+export interface LangchainTraces {
+  toolRuns: LangchainTrace[];
+  chainRuns: LangchainTrace[];
+  llmRuns: LangchainTrace[];
 }
 
-function defined<T>(value: T | null | undefined): value is T {
-  return value !== null && value !== undefined;
-}
+type RunHit = SearchResponse<ToolRun | ChainRun | LLMRun>;
 
-const convertToTraces = (hits: Array<SearchHit<RunHit>>) => {
-  const toolRuns: LangchainTrace[] = hits
-    .flatMap((hit) => hit._source?.child_tool_runs)
-    .filter(defined)
-    .map((run) => ({
+const parseToolRuns = (traces: LangchainTraces, toolRuns: ToolRun[]) => {
+  traces.toolRuns.push(
+    ...toolRuns.map((run) => ({
       id: run.uuid,
       startTime: run.start_time,
       name: run.serialized.name,
       input: run.tool_input,
       output: run.output,
-    }));
-  const llmRuns: LangchainTrace[] = hits
-    .flatMap((hit) => hit._source?.child_llm_runs)
-    .filter(defined)
-    .map((run) => ({
+    }))
+  );
+  toolRuns.forEach((run) => {
+    if (run.child_tool_runs?.length) parseToolRuns(traces, run.child_tool_runs);
+    if (run.child_chain_runs?.length) parseChainRuns(traces, run.child_chain_runs);
+    if (run.child_llm_runs?.length) parseLLMRuns(traces, run.child_llm_runs);
+  });
+};
+
+const parseChainRuns = (traces: LangchainTraces, chainRuns: ChainRun[]) => {
+  traces.chainRuns.push(
+    ...chainRuns.map((run) => ({
+      id: run.uuid,
+      startTime: run.start_time,
+      name: run.serialized.name,
+      input:
+        run.inputs.input ||
+        run.inputs.question + '\n' + JSON.stringify(run.inputs.input_documents || '', null, 2),
+      output:
+        run.outputs?.text + '\n' + JSON.stringify(run.outputs?.sourceDocuments || '', null, 2),
+    }))
+  );
+  chainRuns.forEach((run) => {
+    if (run.child_tool_runs?.length) parseToolRuns(traces, run.child_tool_runs);
+    if (run.child_chain_runs?.length) parseChainRuns(traces, run.child_chain_runs);
+    if (run.child_llm_runs?.length) parseLLMRuns(traces, run.child_llm_runs);
+  });
+};
+
+const parseLLMRuns = (traces: LangchainTraces, llmRuns: LLMRun[]) => {
+  traces.llmRuns.push(
+    ...llmRuns.map((run) => ({
       id: run.uuid,
       startTime: run.start_time,
       name: run.serialized.name,
@@ -53,22 +74,39 @@ const convertToTraces = (hits: Array<SearchHit<RunHit>>) => {
       output: run.response?.generations
         .flatMap((generation) => generation.map((res) => res.text))
         .join('\n'),
-    }));
-  const chainRuns: LangchainTrace[] = hits
-    .flatMap((hit) => hit._source?.child_chain_runs)
-    .filter(defined)
-    .map((run) => ({
-      id: run.uuid,
-      startTime: run.start_time,
-      name: run.serialized.name,
-      input: run.inputs.input,
-      output: run.outputs?.text,
-    }));
-  return { toolRuns, llmRuns, chainRuns };
+    }))
+  );
+};
+
+const isToolRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchHit<ToolRun> =>
+  hit._source?.type === 'tool';
+const isChainRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchHit<ChainRun> =>
+  hit._source?.type === 'chain';
+const isLLMRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchHit<LLMRun> =>
+  hit._source?.type === 'llm';
+
+const convertToTraces = (hits: RunHit): LangchainTraces => {
+  const traces: LangchainTraces = {
+    toolRuns: [],
+    chainRuns: [],
+    llmRuns: [],
+  };
+
+  hits.hits.hits.forEach((hit) => {
+    if (isToolRun(hit)) parseToolRuns(traces, [hit._source!]);
+    if (isChainRun(hit)) parseChainRuns(traces, [hit._source!]);
+    if (isLLMRun(hit)) parseLLMRuns(traces, [hit._source!]);
+  });
+
+  traces.toolRuns.sort((r1, r2) => r1.startTime - r2.startTime);
+  traces.chainRuns.sort((r1, r2) => r1.startTime - r2.startTime);
+  traces.llmRuns.sort((r1, r2) => r1.startTime - r2.startTime);
+
+  return traces;
 };
 
 export const useFetchLangchainTraces = (http: HttpStart, sessionId: string) => {
-  const reducer: GenericReducer<ReturnType<typeof convertToTraces>> = genericReducer;
+  const reducer: GenericReducer<LangchainTraces> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
@@ -95,11 +133,11 @@ export const useFetchLangchainTraces = (http: HttpStart, sessionId: string) => {
     };
 
     http
-      .post<SearchResponse<RunHit>>(`${DSL_BASE}${DSL_SEARCH}`, {
+      .post<RunHit>(`${DSL_BASE}${DSL_SEARCH}`, {
         body: JSON.stringify({ index: 'langchain', size: 100, ...query }),
         signal: abortController.signal,
       })
-      .then((payload) => dispatch({ type: 'success', payload: convertToTraces(payload.hits.hits) }))
+      .then((payload) => dispatch({ type: 'success', payload: convertToTraces(payload) }))
       .catch((error) => dispatch({ type: 'failure', error }));
 
     return () => abortController.abort();
