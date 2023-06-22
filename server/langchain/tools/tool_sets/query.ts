@@ -22,7 +22,7 @@ export class QueryTools extends PPLTools {
     new DynamicTool({
       name: 'Log error info',
       description:
-        'Use to get information of logs with errors if the question contains an OpenSearch log index. The input should be the name of the index',
+        'Use to get information of logs with errors if the question contains an OpenSearch log index. The input should be the name of the index. The output is a representative log per each log pattern group.',
       func: swallowErrors(async (index: string) => {
         const ppl = await this.generatePPL(
           `Give me log patterns for logs with errors? index is '${index}'`

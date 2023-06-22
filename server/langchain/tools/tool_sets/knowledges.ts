@@ -24,6 +24,12 @@ export class KnowledgeTools extends PluginToolsFactory {
       func: swallowErrors((query: string) => this.askVectorStore(query)),
     }),
     new DynamicTool({
+      name: 'Get ticket information',
+      description:
+        'Use this tool to find tickets in the system with incidents that are relevant to a question about error causes. This tool takes the question as input.',
+      func: swallowErrors((query: string) => this.askVectorStore(query)),
+    }),
+    new DynamicTool({
       name: 'Get generic information',
       description:
         'Use this tool to answer a generic question not related to OpenSearch cluster. This tool takes the question as input.',
