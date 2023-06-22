@@ -15,23 +15,20 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
 import { LangchainTrace, useFetchLangchainTraces } from '../hooks/use_fetch_langchain_traces';
 
 interface TraceRunsProps {
+  title: string;
   runs: LangchainTrace[];
 }
 
 // workaround to show Claude LLM as OpenSearch LLM
-const formatRunDisplay = (run: LangchainTrace) => {
-  return (
-    <span>
-      <strong>{run.type}</strong>: {run.name.replace('anthropic', 'OpenSearch LLM')}(
-      {new Date(run.startTime).toLocaleString()})
-    </span>
-  );
+const formatRunName = (name: string) => {
+  return name.replace('anthropic', 'OpenSearch LLM');
 };
 
 const TraceRuns: React.FC<TraceRunsProps> = (props) => {
@@ -39,10 +36,15 @@ const TraceRuns: React.FC<TraceRunsProps> = (props) => {
 
   return (
     <>
+      <EuiTitle size="s">
+        <h3>{props.title}</h3>
+      </EuiTitle>
       {props.runs.map((run) => (
         <div key={run.id}>
           <EuiSpacer size="s" />
-          <EuiText>{formatRunDisplay(run)}</EuiText>
+          <EuiText>{`${formatRunName(run.name)} (${new Date(
+            run.startTime
+          ).toLocaleString()})`}</EuiText>
           <EuiAccordion id="input-accordion" buttonContent="Input">
             <EuiCodeBlock fontSize="m">{run.input}</EuiCodeBlock>
           </EuiAccordion>
@@ -85,7 +87,13 @@ export const LangchainTracesModal: React.FC<LangchainTracesModalProps> = (props)
   } else if (!data) {
     content = <EuiText>Data not available.</EuiText>;
   } else {
-    content = <TraceRuns runs={data} />;
+    content = (
+      <>
+        <TraceRuns title="Tools" runs={data.toolRuns} />
+        <TraceRuns title="Chains" runs={data.chainRuns} />
+        <TraceRuns title="LLMs" runs={data.llmRuns} />
+      </>
+    );
   }
 
   return (
