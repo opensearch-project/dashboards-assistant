@@ -15,6 +15,7 @@
     "allowUnusedLabels": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "useUnknownInCatchVariables": false,
     "alwaysStrict": false,
     "noImplicitUseStrict": false,
     "types": ["jest", "node"]
