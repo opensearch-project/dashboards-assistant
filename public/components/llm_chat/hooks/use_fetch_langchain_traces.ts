@@ -9,10 +9,11 @@ import { useEffect, useReducer } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
 import { SearchRequest } from '../../../../../../src/plugins/data/common';
 import { DSL_BASE, DSL_SEARCH } from '../../../../common/constants/shared';
-import { genericReducer, GenericReducer } from './fetch_reducer';
+import { GenericReducer, genericReducer } from './fetch_reducer';
 
 export interface LangchainTrace {
   id: string;
+  type: ToolRun['type'] | ChainRun['type'] | LLMRun['type'];
   startTime: number;
   name: string;
   input: string;
@@ -25,7 +26,7 @@ interface RunTraces {
   llmRuns: LangchainTrace[];
 }
 
-type RunHit = SearchResponse<ToolRun | ChainRun | LLMRun>;
+type RunHits = SearchResponse<ToolRun | ChainRun | LLMRun>;
 
 const parseToolRuns = (traces: RunTraces, toolRuns: ToolRun[]) => {
   traces.toolRuns.push(
@@ -33,6 +34,7 @@ const parseToolRuns = (traces: RunTraces, toolRuns: ToolRun[]) => {
       .filter((run) => run.uuid)
       .map((run) => ({
         id: run.uuid,
+        type: 'tool' as const,
         startTime: run.start_time,
         name: run.serialized.name,
         input: run.tool_input,
@@ -84,6 +86,7 @@ const parseLLMRuns = (traces: RunTraces, llmRuns: LLMRun[]) => {
       .filter((run) => run.uuid)
       .map((run) => ({
         id: run.uuid,
+        type: 'llm' as const,
         startTime: run.start_time,
         name: run.serialized.name,
         input: run.prompts.join('\n'),
@@ -101,7 +104,7 @@ const isChainRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchH
 const isLLMRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchHit<LLMRun> =>
   hit._source?.type === 'llm';
 
-const convertToTraces = (hits: RunHit): RunTraces => {
+const convertToTraces = (hits: RunHits) => {
   const traces: RunTraces = {
     toolRuns: [],
     chainRuns: [],
@@ -114,15 +117,13 @@ const convertToTraces = (hits: RunHit): RunTraces => {
     if (isLLMRun(hit)) parseLLMRuns(traces, [hit._source!]);
   });
 
-  traces.toolRuns.sort((r1, r2) => r1.startTime - r2.startTime);
-  traces.chainRuns.sort((r1, r2) => r1.startTime - r2.startTime);
-  traces.llmRuns.sort((r1, r2) => r1.startTime - r2.startTime);
-
-  return traces;
+  return [...traces.toolRuns, ...traces.chainRuns, ...traces.llmRuns].sort(
+    (r1, r2) => r1.startTime - r2.startTime
+  );
 };
 
 export const useFetchLangchainTraces = (http: HttpStart, sessionId: string) => {
-  const reducer: GenericReducer<RunTraces> = genericReducer;
+  const reducer: GenericReducer<LangchainTrace[]> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
@@ -149,7 +150,7 @@ export const useFetchLangchainTraces = (http: HttpStart, sessionId: string) => {
     };
 
     http
-      .post<RunHit>(`${DSL_BASE}${DSL_SEARCH}`, {
+      .post<RunHits>(`${DSL_BASE}${DSL_SEARCH}`, {
         body: JSON.stringify({ index: 'langchain', size: 100, ...query }),
         signal: abortController.signal,
       })

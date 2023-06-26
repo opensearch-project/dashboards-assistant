@@ -3,65 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiAccordion,
-  EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiEmptyPrompt,
-  EuiLoadingContent,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiModalBody, EuiModalFooter, EuiModalHeader } from '@elastic/eui';
 import React from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
-import { LangchainTrace, useFetchLangchainTraces } from '../hooks/use_fetch_langchain_traces';
-
-interface TraceRunsProps {
-  title: string;
-  runs: LangchainTrace[];
-}
-
-// workaround to show Claude LLM as OpenSearch LLM
-const formatRunName = (run: LangchainTrace) =>
-  `${run.name.replace('anthropic', 'OpenSearch LLM')} (${new Date(
-    run.startTime
-  ).toLocaleString()})`;
-
-const TraceRuns: React.FC<TraceRunsProps> = (props) => {
-  if (!props.runs.length) return null;
-
-  return (
-    <>
-      <EuiTitle size="s">
-        <h3>{props.title}</h3>
-      </EuiTitle>
-      {props.runs
-        .filter((run) => run.input || run.output)
-        .map((run) => (
-          <div key={run.id}>
-            <EuiSpacer size="s" />
-            <EuiText>{formatRunName(run)}</EuiText>
-            {run.input && (
-              <EuiAccordion id="input-accordion" buttonContent="Input">
-                <EuiCodeBlock fontSize="m">{run.input}</EuiCodeBlock>
-              </EuiAccordion>
-            )}
-            {run.output && (
-              <EuiAccordion id="output-accordion" buttonContent="Output">
-                <EuiCodeBlock fontSize="m">{run.output}</EuiCodeBlock>
-              </EuiAccordion>
-            )}
-          </div>
-        ))}
-      <EuiSpacer />
-    </>
-  );
-};
+import { useFetchLangchainTraces } from '../hooks/use_fetch_langchain_traces';
+import { LangchainTraces } from './langchain_traces';
 
 interface LangchainTracesModalProps {
   sessionId: string;
@@ -70,44 +16,15 @@ interface LangchainTracesModalProps {
 }
 
 export const LangchainTracesModal: React.FC<LangchainTracesModalProps> = (props) => {
-  const { data, loading, error } = useFetchLangchainTraces(props.http, props.sessionId);
-
-  let content: React.ReactNode;
-  if (loading) {
-    content = (
-      <>
-        <EuiText>Loading...</EuiText>
-        <EuiLoadingContent lines={10} />
-      </>
-    );
-  } else if (error) {
-    content = (
-      <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        title={<h2>Error loading details</h2>}
-        body={error}
-      />
-    );
-  } else if (!data) {
-    content = <EuiText>Data not available.</EuiText>;
-  } else {
-    content = (
-      <>
-        <TraceRuns title="Chains" runs={data.chainRuns} />
-        <TraceRuns title="Tools" runs={data.toolRuns} />
-        <TraceRuns title="LLMs" runs={data.llmRuns} />
-      </>
-    );
-  }
+  const fetchState = useFetchLangchainTraces(props.http, props.sessionId);
 
   return (
     <>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>View details</EuiModalHeaderTitle>
-      </EuiModalHeader>
+      <EuiModalHeader />
 
-      <EuiModalBody>{content}</EuiModalBody>
+      <EuiModalBody>
+        <LangchainTraces fetchState={fetchState} />
+      </EuiModalBody>
 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={props.onClose}>Close</EuiButtonEmpty>
