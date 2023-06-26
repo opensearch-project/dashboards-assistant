@@ -120,19 +120,6 @@ export const useChatActions = () => {
         break;
       }
 
-      case 'view_details': {
-        const modal = coreServicesContext.core.overlays.openModal(
-          toMountPoint(
-            <LangchainTracesModal
-              sessionId={suggestAction.metadata.sessionId}
-              http={coreServicesContext.http}
-              onClose={() => modal.close()}
-            />
-          )
-        );
-        break;
-      }
-
       default:
         break;
     }

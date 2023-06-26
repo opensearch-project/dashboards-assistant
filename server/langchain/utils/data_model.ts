@@ -26,12 +26,12 @@ export const convertToOutputs = (
   let outputs: IMessage[] = [
     {
       type: 'output',
+      sessionId,
       content,
       contentType: 'markdown',
     },
   ];
   outputs = buildPPLOutputs(content, outputs);
-  outputs = buildTraces(sessionId, outputs); // keep at last
   outputs = buildSuggestions(suggestions, outputs);
   return outputs;
 };
@@ -54,20 +54,6 @@ const mergeMessages = (message: IMessage, ...messages: Array<Partial<IMessage>>)
       if (Array.isArray(obj)) return obj.concat(src);
     }
   ) as IMessage;
-};
-
-const buildTraces = (sessionId: string, outputs: IMessage[]): IMessage[] => {
-  const viewDetails: Partial<IMessage> = {
-    suggestedActions: [
-      {
-        message: 'Explain',
-        metadata: { sessionId },
-        actionType: 'view_details',
-      },
-    ],
-  };
-  outputs[outputs.length - 1] = mergeMessages(outputs.at(-1)!, viewDetails);
-  return outputs;
 };
 
 const buildSuggestions = (suggestions: SuggestedQuestions, outputs: IMessage[]) => {

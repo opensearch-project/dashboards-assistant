@@ -36,6 +36,7 @@ interface IInput extends SavedObjectAttributes {
 }
 interface IOutput extends SavedObjectAttributes {
   type: 'output';
+  sessionId?: string;
   contentType: 'markdown' | 'visualization' | 'ppl_visualization';
   content: string;
   suggestedActions?: ISuggestedAction[];
@@ -52,9 +53,5 @@ export type ISuggestedAction = ISuggestedActionBase &
     | {
         actionType: 'save_and_view_ppl_query' | 'view_ppl_visualization';
         metadata: { query: string };
-      }
-    | {
-        actionType: 'view_details';
-        metadata: { sessionId: string };
       }
   );
