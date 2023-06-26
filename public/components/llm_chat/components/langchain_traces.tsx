@@ -21,11 +21,11 @@ const formatRunName = (run: LangchainTrace) =>
   ).toLocaleString()})`;
 
 interface LangchainTracesProps {
-  fetchState: ReturnType<typeof useFetchLangchainTraces>;
+  sessionId: string;
 }
 
 export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
-  const { data: runs, loading, error } = props.fetchState;
+  const { data: runs, loading, error } = useFetchLangchainTraces(props.sessionId);
 
   if (loading) {
     return (

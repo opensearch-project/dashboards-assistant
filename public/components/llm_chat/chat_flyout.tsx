@@ -13,6 +13,7 @@ import { ChatHistoryPage } from './tabs/history/chat_history_page';
 interface ChatFlyoutProps {
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
+  overrideComponent: React.ReactNode | null;
 }
 
 export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
@@ -42,10 +43,16 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
       hideCloseButton
       onClose={() => chatContext.setFlyoutVisible(false)}
     >
-      <EuiFlyoutHeader className="llm-chat-flyout-header">
-        <ChatTabBar />
-      </EuiFlyoutHeader>
-      {content}
+      {props.overrideComponent !== null ? (
+        props.overrideComponent
+      ) : (
+        <>
+          <EuiFlyoutHeader className="llm-chat-flyout-header">
+            <ChatTabBar />
+          </EuiFlyoutHeader>
+          {content}
+        </>
+      )}
     </EuiFlyout>
   );
 };

@@ -3,13 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiMarkdownFormat, EuiText, getDefaultOuiMarkdownParsingPlugins } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiMarkdownFormat,
+  EuiText,
+  getDefaultOuiMarkdownParsingPlugins,
+  EuiFlyoutBody,
+} from '@elastic/eui';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { DashboardContainerInput } from '../../../../../../../src/plugins/dashboard/public';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { uiSettingsService } from '../../../../../common/utils';
-import { CoreServicesContext } from '../../chat_header_button';
+import { ChatContext, CoreServicesContext } from '../../chat_header_button';
+import { LangchainTraces } from '../../components/langchain_traces';
 import { PPLVisualization } from '../../components/ppl_visualization';
 
 interface MessageContentProps {
@@ -18,6 +27,7 @@ interface MessageContentProps {
 
 export const MessageContent: React.FC<MessageContentProps> = React.memo((props) => {
   const coreServicesContext = useContext(CoreServicesContext)!;
+  const chatContext = useContext(ChatContext)!;
   const [visInput, setVisInput] = useState<DashboardContainerInput>();
 
   useEffect(() => {
@@ -26,20 +36,24 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
     }
   }, [props.message]);
 
+  let content: React.ReactNode;
+
   switch (props.message.contentType) {
     case 'text':
-      return <EuiText style={{ whiteSpace: 'pre-line' }}>{props.message.content}</EuiText>;
+      content = <EuiText style={{ whiteSpace: 'pre-line' }}>{props.message.content}</EuiText>;
+      break;
 
     case 'markdown':
       // TODO remove after https://github.com/opensearch-project/oui/pull/801
       const parsingPlugins = getDefaultOuiMarkdownParsingPlugins() as Array<[any, any]>; // Array<unified.PluginTuple<any[], unified.Settings>>
       const emojiPlugin = parsingPlugins.find(([, settings]) => settings.emoticon)?.at(1);
       if (emojiPlugin) emojiPlugin.emoticon = false;
-      return (
+      content = (
         <EuiMarkdownFormat parsingPluginList={parsingPlugins}>
           {props.message.content}
         </EuiMarkdownFormat>
       );
+      break;
 
     case 'visualization':
       const dateFormat = uiSettingsService.get('dateFormat');
@@ -47,7 +61,7 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       let to = moment(visInput?.timeRange?.to).format(dateFormat);
       from = from === 'Invalid date' ? visInput?.timeRange.from : from;
       to = to === 'Invalid date' ? visInput?.timeRange.to : to;
-      return (
+      content = (
         <>
           <EuiText size="s">{`${from} - ${to}`}</EuiText>
           <div className="llm-chat-visualizations">
@@ -58,15 +72,40 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
           </div>
         </>
       );
+      break;
 
     case 'ppl_visualization':
-      return (
+      content = (
         <div className="llm-chat-visualizations">
           <PPLVisualization query={props.message.content} />
         </div>
       );
+      break;
 
     default:
       return null;
   }
+
+  return (
+    <>
+      {content}
+      {typeof props.message.sessionId === 'string' && (
+        <>
+          <EuiHorizontalRule />
+          <EuiLink
+            onClick={() => {
+              console.info('❗props.message.sessionId:', props.message.sessionId);
+              chatContext.setFlyoutComponent(
+                <EuiFlyoutBody>
+                  <LangchainTraces sessionId={props.message.sessionId as string} />
+                </EuiFlyoutBody>
+              );
+            }}
+          >
+            How was this generated? <EuiIcon type="iInCircle" />
+          </EuiLink>
+        </>
+      )}
+    </>
+  );
 });

@@ -5,11 +5,12 @@
 
 import { SearchHit, SearchResponse } from '@opensearch-project/opensearch/api/types';
 import { ChainRun, LLMRun, ToolRun } from 'langchain/dist/callbacks/handlers/tracer_langchain_v1';
-import { useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
 import { SearchRequest } from '../../../../../../src/plugins/data/common';
 import { DSL_BASE, DSL_SEARCH } from '../../../../common/constants/shared';
 import { GenericReducer, genericReducer } from './fetch_reducer';
+import { CoreServicesContext } from '../chat_header_button';
 
 export interface LangchainTrace {
   id: string;
@@ -122,7 +123,8 @@ const convertToTraces = (hits: RunHits) => {
   );
 };
 
-export const useFetchLangchainTraces = (http: HttpStart, sessionId: string) => {
+export const useFetchLangchainTraces = (sessionId: string) => {
+  const coreServicesContext = useContext(CoreServicesContext)!;
   const reducer: GenericReducer<LangchainTrace[]> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
@@ -149,7 +151,7 @@ export const useFetchLangchainTraces = (http: HttpStart, sessionId: string) => {
       ],
     };
 
-    http
+    coreServicesContext.http
       .post<RunHits>(`${DSL_BASE}${DSL_SEARCH}`, {
         body: JSON.stringify({ index: 'langchain', size: 100, ...query }),
         signal: abortController.signal,

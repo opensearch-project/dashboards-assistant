@@ -38,6 +38,7 @@ interface IChatContext {
   setChatId: React.Dispatch<React.SetStateAction<string | undefined>>;
   flyoutVisible: boolean;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
   selectedTabId: TabId;
   setSelectedTabId: React.Dispatch<React.SetStateAction<TabId>>;
 }
@@ -67,6 +68,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [input, setInput] = useState('');
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
+  const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
   const [chatState, setChatState] = useState<ChatState>({
     messages: [
@@ -96,6 +98,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       setChatId,
       flyoutVisible,
       setFlyoutVisible,
+      setFlyoutComponent,
       selectedTabId,
       setSelectedTabId,
     }),
@@ -122,7 +125,9 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       </EuiHeaderSectionItemButton>
       <ChatContext.Provider value={chatContextValue}>
         <ChatStateContext.Provider value={chatStateContextValue}>
-          {flyoutVisible ? <ChatFlyout input={input} setInput={setInput} /> : null}
+          {flyoutVisible ? (
+            <ChatFlyout overrideComponent={flyoutComponent} input={input} setInput={setInput} />
+          ) : null}
         </ChatStateContext.Provider>
       </ChatContext.Provider>
     </>
