@@ -34,3 +34,23 @@ export const swallowErrors = (func: DynamicToolInput['func']): DynamicToolInput[
     }
   };
 };
+
+export const jsonToCsv = (json) => {
+  const rows = [];
+
+  // Add header row with keys as column names
+  const header = Object.keys(json[0]);
+  rows.push(['row_number', ...header]);
+
+  // Add data rows
+  json.forEach((obj, index) => {
+    const values = Object.values(obj);
+    const row = [index + 1, ...values];
+    rows.push(row);
+  });
+
+  // Convert rows to CSV string
+  const csv = rows.map((row) => row.join(',')).join('\n');
+
+  return csv;
+};

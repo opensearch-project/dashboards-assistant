@@ -5,6 +5,7 @@
 
 import { DynamicTool } from 'langchain/tools';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
+import { jsonToCsv } from '../../utils/utils';
 
 export class OSAPITools extends PluginToolsFactory {
   toolsList = [
@@ -26,8 +27,9 @@ export class OSAPITools extends PluginToolsFactory {
     try {
       const catResponse = await this.opensearchClient.cat.indices({
         index: indexName,
+        format: 'json',
       });
-      return JSON.stringify(catResponse.body);
+      return jsonToCsv(catResponse.body);
     } catch (error) {
       return 'error in runnig cat indices' + error;
     }
