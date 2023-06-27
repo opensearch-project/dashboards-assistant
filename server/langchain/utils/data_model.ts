@@ -10,8 +10,15 @@ import { AgentFactory } from '../agents/agent_factory/agent_factory';
 // TODO remove when typescript is upgraded to >= 4.5
 type Awaited<T> = T extends Promise<infer U> ? U : T;
 type AgentResponse = Awaited<ReturnType<InstanceType<typeof AgentFactory>['run']>>;
+interface SuggestedQuestions {
+  [x: string]: string;
+}
 
-export const convertToOutputs = (agentResponse: AgentResponse, sessionId: string) => {
+export const convertToOutputs = (
+  agentResponse: AgentResponse,
+  sessionId: string,
+  suggestions: SuggestedQuestions
+) => {
   const content = extractContent(agentResponse);
   let outputs: IMessage[] = [
     {
@@ -22,6 +29,7 @@ export const convertToOutputs = (agentResponse: AgentResponse, sessionId: string
   ];
   outputs = buildPPLOutputs(content, outputs);
   outputs = buildTraces(sessionId, outputs); // keep at last
+  outputs = buildSuggestions(suggestions, outputs);
   return outputs;
 };
 
@@ -56,6 +64,23 @@ const buildTraces = (sessionId: string, outputs: IMessage[]): IMessage[] => {
     ],
   };
   outputs[outputs.length - 1] = mergeMessages(outputs.at(-1)!, viewDetails);
+  return outputs;
+};
+
+const buildSuggestions = (suggestions: SuggestedQuestions, outputs: IMessage[]) => {
+  const suggestionsOutput: Partial<IMessage> = {
+    suggestedActions: [
+      {
+        message: suggestions.question1,
+        actionType: 'send_as_input',
+      },
+      {
+        message: suggestions.question2,
+        actionType: 'send_as_input',
+      },
+    ],
+  };
+  outputs[outputs.length - 1] = mergeMessages(outputs.at(-1)!, suggestionsOutput);
   return outputs;
 };
 

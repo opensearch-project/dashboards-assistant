@@ -18,11 +18,10 @@ import {
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
-import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
 import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { convertToOutputs } from '../../langchain/utils/data_model';
-import { getTraceBySessionId } from '../../langchain/utils/session_trace';
+import { requestSuggestionsChain } from '../../langchain/chains/suggestions_generator';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -64,22 +63,25 @@ export function registerChatRoute(router: IRouter) {
           context.core.opensearch.client.asCurrentUser,
           opensearchObservabilityClient
         );
-        const pluginAgentTools = pluginAgentsInit(pluginTools);
+
         const memory = memoryInit(messages.slice(1)); // Skips the first default message
 
-        const chatAgentWithPluginAgentTools = chatAgentInit(pluginAgentTools, memory);
         const chatAgentWithFlattenedTools = chatAgentInit(
           pluginTools.flatMap((tool) => tool.toolsList),
           memory
         );
-        const chatAgentWithPPLTools = chatAgentInit(pluginTools[0].toolsList, memory);
 
         const chatAgent = chatAgentWithFlattenedTools;
 
         const agentResponse = await chatAgent.run(input.content);
         process.env.LANGCHAIN_SESSION = undefined;
 
-        const outputs = convertToOutputs(agentResponse, sessionId);
+        const suggestions = await requestSuggestionsChain(
+          pluginTools.flatMap((tool) => tool.toolsList),
+          memory
+        );
+
+        const outputs = convertToOutputs(agentResponse, sessionId, suggestions);
 
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
