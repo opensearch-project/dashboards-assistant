@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useContext, useEffect, useRef } from 'react';
 import { ChatStateContext } from '../../chat_header_button';
 import { LoadingButton } from '../../components/loading_button';
@@ -45,6 +45,18 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatStateContext.chatState.messages
         .flatMap((message) => [
+          message.type === 'output' && message.toolsUsed?.length && (
+            <>
+              {message.toolsUsed.map((tool) => (
+                <>
+                  <EuiText color="subdued">
+                    <EuiIcon size="l" type="check" color="success" /> {tool}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                </>
+              ))}
+            </>
+          ),
           // TODO add id to message and add key properties
           <MessageBubble type={message.type} contentType={message.contentType}>
             <MessageContent message={message} />

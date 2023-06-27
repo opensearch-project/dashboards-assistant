@@ -8,6 +8,7 @@ import {
   IMessage,
   ISuggestedAction,
 } from '../../../common/types/observability_saved_object_attributes';
+import { LangchainTrace } from '../../../public/components/common/helpers/llm_chat/traces';
 import { AgentFactory } from '../agents/agent_factory/agent_factory';
 
 // TODO remove when typescript is upgraded to >= 4.5
@@ -18,7 +19,8 @@ type SuggestedQuestions = Record<string, string>;
 export const convertToOutputs = (
   agentResponse: AgentResponse,
   sessionId: string,
-  suggestions: SuggestedQuestions
+  suggestions: SuggestedQuestions,
+  traces: LangchainTrace[]
 ) => {
   const content = extractContent(agentResponse);
   let outputs: IMessage[] = [
@@ -29,6 +31,7 @@ export const convertToOutputs = (
       contentType: 'markdown',
     },
   ];
+  outputs = buildToolsUsed(traces, outputs);
   outputs = buildPPLOutputs(content, outputs);
   outputs = buildSuggestions(suggestions, outputs);
   return outputs;
@@ -75,6 +78,12 @@ const buildSuggestions = (suggestions: SuggestedQuestions, outputs: IMessage[]) 
     });
   }
   outputs[outputs.length - 1] = mergeMessages(outputs.at(-1)!, { suggestedActions });
+  return outputs;
+};
+
+const buildToolsUsed = (traces: LangchainTrace[], outputs: IMessage[]) => {
+  const tools = traces.filter((trace) => trace.type === 'tool').map((tool) => tool.name);
+  outputs[0].toolsUsed = tools;
   return outputs;
 };
 

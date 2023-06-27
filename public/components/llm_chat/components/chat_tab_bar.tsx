@@ -4,12 +4,11 @@
  */
 
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
@@ -21,8 +20,6 @@ export type TabId = 'chat' | 'compose' | 'insights' | 'history';
 
 const tabs = [
   { id: 'chat', name: 'Chat' },
-  { id: 'compose', name: 'Compose' },
-  { id: 'insights', name: 'Insights' },
   { id: 'history', name: 'History' },
 ] as const;
 
@@ -40,48 +37,23 @@ export const ChatTabBar: React.FC = React.memo(() => {
     </EuiTab>
   ));
 
-  const items = [
-    <EuiContextMenuItem
-      key="new_chat"
-      onClick={() => {
-        setIsOpen(false);
-        openChat(undefined);
-      }}
-    >
-      New chat
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="fullscreen"
-      onClick={() => {
-        setIsOpen(false);
-        chatContext.toggleFlyoutFullScreen();
-      }}
-    >
-      Toggle fullscreen
-    </EuiContextMenuItem>,
-  ];
-
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiTabs className="llm-chat-tabs">{tabsComponent}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={
-            <EuiButtonIcon
-              aria-label="menu"
-              size="m"
-              iconType="boxesVertical"
-              onClick={() => setIsOpen(!isOpen)}
-            />
-          }
-          isOpen={isOpen}
-          closePopover={() => setIsOpen(false)}
-          panelPaddingSize="none"
-        >
-          <EuiContextMenuPanel items={items} />
-        </EuiPopover>
+        <EuiButtonEmpty size="s" onClick={() => openChat(undefined)}>
+          New chat
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          aria-label="fullScreen"
+          size="s"
+          iconType={chatContext.isFlyoutFullScreen ? 'fullScreenExit' : 'fullScreen'}
+          onClick={chatContext.toggleFlyoutFullScreen}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false} />
     </EuiFlexGroup>

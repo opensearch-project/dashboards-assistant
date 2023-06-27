@@ -12,13 +12,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
-import { LangchainTrace, useFetchLangchainTraces } from '../hooks/use_fetch_langchain_traces';
+import { LangchainTrace } from '../../common/helpers/llm_chat/traces';
+import { useFetchLangchainTraces } from '../hooks/use_fetch_langchain_traces';
 
 // workaround to show Claude LLM as OpenSearch LLM
-const formatRunName = (run: LangchainTrace) =>
-  `${run.name.replace('anthropic', 'OpenSearch LLM')} (${new Date(
-    run.startTime
-  ).toLocaleString()})`;
+const formatRunName = (run: LangchainTrace) => {
+  const name = `${run.name.replace('anthropic', 'OpenSearch LLM')}`;
+  if (run.type === 'tool') return <strong>{name}</strong>;
+  return name;
+};
 
 interface LangchainTracesProps {
   sessionId: string;

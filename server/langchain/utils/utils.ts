@@ -4,6 +4,7 @@
  */
 
 import { promises as fs } from 'fs';
+import { ChainRun, LLMRun, ToolRun } from 'langchain/dist/callbacks/handlers/tracer_langchain_v1';
 import { DynamicToolInput } from 'langchain/tools';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import { SearchRequest } from '../../../../../src/plugins/data/common';
@@ -72,8 +73,9 @@ export const fetchLangchainTraces = (client: OpenSearchClient, sessionId: string
       },
     ],
   };
-  client.search({
+  return client.search<ToolRun | ChainRun | LLMRun>({
     index: 'langchain',
     body: query,
+    size: 10,
   });
 };

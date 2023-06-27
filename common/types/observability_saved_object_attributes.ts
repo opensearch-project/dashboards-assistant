@@ -37,6 +37,7 @@ interface IInput extends SavedObjectAttributes {
 interface IOutput extends SavedObjectAttributes {
   type: 'output';
   sessionId?: string;
+  toolsUsed?: string[];
   contentType: 'markdown' | 'visualization' | 'ppl_visualization';
   content: string;
   suggestedActions?: ISuggestedAction[];

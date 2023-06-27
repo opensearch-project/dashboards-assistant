@@ -17,11 +17,13 @@ import {
   IChat,
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
+import { convertToTraces } from '../../../public/components/common/helpers/llm_chat/traces';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
+import { requestSuggestionsChain } from '../../langchain/chains/suggestions_generator';
 import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { convertToOutputs } from '../../langchain/utils/data_model';
-import { requestSuggestionsChain } from '../../langchain/chains/suggestions_generator';
+import { fetchLangchainTraces } from '../../langchain/utils/utils';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -77,7 +79,11 @@ export function registerChatRoute(router: IRouter) {
           memory
         );
 
-        const outputs = convertToOutputs(agentResponse, sessionId, suggestions);
+        const traces = await fetchLangchainTraces(
+          context.core.opensearch.client.asCurrentUser,
+          sessionId
+        ).then((resp) => convertToTraces(resp.body));
+        const outputs = convertToOutputs(agentResponse, sessionId, suggestions, traces);
 
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {

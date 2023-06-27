@@ -82,8 +82,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
         contentType: 'markdown',
         type: 'output',
         suggestedActions: [
-          { message: 'Answer questions about my system', actionType: 'send_as_input' },
-          { message: 'Show me all services', actionType: 'send_as_input' },
+          { message: 'What are the indices in my cluster?', actionType: 'send_as_input' },
         ],
       },
     ],
@@ -96,7 +95,6 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
     return () => subscription.unsubscribe();
   });
 
-  const isFlyoutFullScreen = useMemo(() => !!Object.keys(flyoutProps).length, [flyoutProps]);
   const toggleFlyoutFullScreen = useCallback(() => {
     setFlyoutProps((fprops) => {
       if (Object.keys(fprops).length) return {};
@@ -112,12 +110,12 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       flyoutVisible,
       setFlyoutVisible,
       setFlyoutComponent,
-      isFlyoutFullScreen,
+      isFlyoutFullScreen: !!Object.keys(flyoutProps).length,
       toggleFlyoutFullScreen,
       selectedTabId,
       setSelectedTabId,
     }),
-    [appId, chatId, flyoutVisible, selectedTabId]
+    [appId, chatId, flyoutVisible, selectedTabId, flyoutProps]
   );
 
   const chatStateContextValue: IChatStateContext = useMemo(
