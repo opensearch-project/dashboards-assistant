@@ -4,6 +4,7 @@
  */
 
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { useContext } from 'react';
 import { ChatContext } from './chat_header_button';
 import { ChatTabBar } from './components/chat_tab_bar';
@@ -36,7 +37,9 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
 
   return (
     <EuiFlyout
-      className="llm-chat-flyout"
+      className={classNames('llm-chat-flyout', {
+        'llm-chat-fullscreen': chatContext.isFlyoutFullScreen,
+      })}
       type="push"
       paddingSize="none"
       size="460px"

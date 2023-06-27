@@ -4,7 +4,6 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import classNames from 'classnames';
 import { produce } from 'immer';
 import React, { useContext, useEffect, useState } from 'react';
 import { ChatContext, ChatStateContext } from '../../chat_header_button';
@@ -36,14 +35,11 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   }, [chat]);
 
   const inputDisabled = messagesLoading || chatStateContext.chatState.llmResponding;
-  const fullScreenClassNames = classNames({
-    'llm-chat-fullscreen': chatContext.isFlyoutFullScreen,
-  });
 
   return (
     <>
       <EuiFlyoutBody>
-        <EuiPage className={fullScreenClassNames}>
+        <EuiPage>
           <EuiPageBody component="div">
             <ChatPageContent
               showGreetings={showGreetings}
@@ -55,7 +51,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter className={fullScreenClassNames}>
+      <EuiFlyoutFooter>
         <EuiSpacer />
         <ChatInputControls disabled={inputDisabled} input={props.input} setInput={props.setInput} />
         <EuiSpacer />

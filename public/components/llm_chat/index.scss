@@ -125,6 +125,8 @@
 }
 
 .llm-chat-fullscreen {
-  width: 80%;
-  margin: auto;
+  .euiFlyoutBody__overflowContent, .euiFlyoutFooter {
+    width: 80%;
+    margin: auto;
+  }
 }
