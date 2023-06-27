@@ -78,7 +78,7 @@
   &.llm-chat-bubble-panel {
     word-break: break-word;
     border-radius: 8px;
-    max-width: 291px;
+    max-width: 80%;
   }
   &.llm-chat-greeting-card-panel {
     width: 357px;
@@ -103,10 +103,12 @@
 .llm-chat-bubble-panel.llm-chat-bubble-panel-input {
   background: #57c3ff;
   border-color: white;
+  margin-left: auto;
 }
 .llm-chat-bubble-panel.llm-chat-bubble-panel-output {
   background: #e6f0f8;
   border-color: white;
+  margin-right: auto;
 }
 
 .llm-chat-greeting-header {
@@ -120,4 +122,9 @@
   margin-left: -12px;
   margin-right: -16px;
   min-height: 450px;
+}
+
+.llm-chat-fullscreen {
+  width: 80%;
+  margin: auto;
 }

@@ -18,9 +18,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
   if (props.type === 'input') {
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiPanel
-            grow={false}
             paddingSize="l"
             color="plain"
             hasBorder
@@ -45,9 +44,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
       <EuiFlexItem grow={false}>
         <EuiAvatar name="llm" size="l" iconType={llmAvatar} iconSize="xxl" color="#e9edf3" />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiPanel
-          grow={false}
           paddingSize="l"
           color="plain"
           hasBorder

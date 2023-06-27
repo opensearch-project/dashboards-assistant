@@ -26,7 +26,6 @@ const tabs = [
 export const ChatTabBar: React.FC = React.memo(() => {
   const chatContext = useContext(ChatContext)!;
   const { openChat } = useChatActions();
-  const [isOpen, setIsOpen] = useState(false);
   const tabsComponent = tabs.map((tab) => (
     <EuiTab
       onClick={() => chatContext.setSelectedTabId(tab.id)}
