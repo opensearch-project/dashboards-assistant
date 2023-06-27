@@ -10,7 +10,6 @@ import {
   EuiMarkdownFormat,
   EuiText,
   getDefaultOuiMarkdownParsingPlugins,
-  EuiFlyoutBody,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
@@ -18,8 +17,8 @@ import { DashboardContainerInput } from '../../../../../../../src/plugins/dashbo
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { uiSettingsService } from '../../../../../common/utils';
 import { ChatContext, CoreServicesContext } from '../../chat_header_button';
-import { LangchainTraces } from '../../components/langchain_traces';
 import { PPLVisualization } from '../../components/ppl_visualization';
+import { LangchainTracesFlyoutBody } from './langchain_traces_flyout_body';
 
 interface MessageContentProps {
   message: IMessage;
@@ -91,14 +90,14 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       {content}
       {typeof props.message.sessionId === 'string' && (
         <>
-          <EuiHorizontalRule />
+          <EuiHorizontalRule margin="s" />
           <EuiLink
             onClick={() => {
-              console.info('❗props.message.sessionId:', props.message.sessionId);
               chatContext.setFlyoutComponent(
-                <EuiFlyoutBody>
-                  <LangchainTraces sessionId={props.message.sessionId as string} />
-                </EuiFlyoutBody>
+                <LangchainTracesFlyoutBody
+                  closeFlyout={() => chatContext.setFlyoutComponent(null)}
+                  sessionId={props.message.sessionId as string}
+                />
               );
             }}
           >

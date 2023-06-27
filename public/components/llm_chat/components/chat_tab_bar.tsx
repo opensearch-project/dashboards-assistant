@@ -50,6 +50,15 @@ export const ChatTabBar: React.FC = React.memo(() => {
     >
       New chat
     </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="fullscreen"
+      onClick={() => {
+        setIsOpen(false);
+        chatContext.toggleFlyoutFullScreen();
+      }}
+    >
+      Toggle fullscreen
+    </EuiContextMenuItem>,
   ];
 
   return (

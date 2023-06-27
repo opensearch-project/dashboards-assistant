@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { forEach, mergeWith } from 'lodash';
+import { mergeWith } from 'lodash';
 import {
   IMessage,
   ISuggestedAction,
@@ -13,9 +13,7 @@ import { AgentFactory } from '../agents/agent_factory/agent_factory';
 // TODO remove when typescript is upgraded to >= 4.5
 type Awaited<T> = T extends Promise<infer U> ? U : T;
 type AgentResponse = Awaited<ReturnType<InstanceType<typeof AgentFactory>['run']>>;
-interface SuggestedQuestions {
-  [x: string]: string;
-}
+type SuggestedQuestions = Record<string, string>;
 
 export const convertToOutputs = (
   agentResponse: AgentResponse,
@@ -46,6 +44,10 @@ const extractPPLQueries = (content: string) => {
   );
 };
 
+/**
+ * Merges a list of partial messages into a given IMessage object.
+ * @returns merged
+ */
 const mergeMessages = (message: IMessage, ...messages: Array<Partial<IMessage>>) => {
   return mergeWith(
     message,
@@ -59,23 +61,20 @@ const mergeMessages = (message: IMessage, ...messages: Array<Partial<IMessage>>)
 const buildSuggestions = (suggestions: SuggestedQuestions, outputs: IMessage[]) => {
   const suggestedActions: ISuggestedAction[] = [];
 
-  if (suggestions.question1 !== '') {
+  if (suggestions.question1) {
     suggestedActions.push({
       message: suggestions.question1,
       actionType: 'send_as_input',
     });
   }
 
-  if (suggestions.question2 !== '') {
+  if (suggestions.question2) {
     suggestedActions.push({
       message: suggestions.question2,
       actionType: 'send_as_input',
     });
   }
-  const suggestionsOutput: Partial<IMessage> = {
-    suggestedActions: [...suggestedActions],
-  };
-  outputs[outputs.length - 1] = mergeMessages(outputs.at(-1)!, suggestionsOutput);
+  outputs[outputs.length - 1] = mergeMessages(outputs.at(-1)!, { suggestedActions });
   return outputs;
 };
 

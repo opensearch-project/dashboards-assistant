@@ -14,6 +14,7 @@ interface ChatFlyoutProps {
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   overrideComponent: React.ReactNode | null;
+  flyoutProps: Partial<React.ComponentProps<typeof EuiFlyout>>;
 }
 
 export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
@@ -42,6 +43,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
       ownFocus={false}
       hideCloseButton
       onClose={() => chatContext.setFlyoutVisible(false)}
+      {...props.flyoutProps}
     >
       {props.overrideComponent !== null ? (
         props.overrideComponent

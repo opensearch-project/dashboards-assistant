@@ -50,7 +50,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
+      <EuiFlyoutFooter className="llm-chat-flyout-footer">
         <EuiSpacer />
         <ChatInputControls disabled={inputDisabled} input={props.input} setInput={props.setInput} />
         <EuiSpacer />

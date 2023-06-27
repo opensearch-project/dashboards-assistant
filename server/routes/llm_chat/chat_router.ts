@@ -63,15 +63,11 @@ export function registerChatRoute(router: IRouter) {
           context.core.opensearch.client.asCurrentUser,
           opensearchObservabilityClient
         );
-
         const memory = memoryInit(messages.slice(1)); // Skips the first default message
-
-        const chatAgentWithFlattenedTools = chatAgentInit(
+        const chatAgent = chatAgentInit(
           pluginTools.flatMap((tool) => tool.toolsList),
           memory
         );
-
-        const chatAgent = chatAgentWithFlattenedTools;
 
         const agentResponse = await chatAgent.run(input.content);
         process.env.LANGCHAIN_SESSION = undefined;

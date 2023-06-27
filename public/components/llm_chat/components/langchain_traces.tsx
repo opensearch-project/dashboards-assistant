@@ -52,9 +52,6 @@ export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
   return (
     <>
       <EuiText size="s">
-        <h1>Request</h1>
-      </EuiText>
-      <EuiText size="s">
         <h1>Response</h1>
       </EuiText>
       {runs

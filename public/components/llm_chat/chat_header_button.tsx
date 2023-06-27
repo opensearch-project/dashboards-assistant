@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { EuiFlyout, EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import {
   ApplicationStart,
@@ -39,6 +39,8 @@ interface IChatContext {
   flyoutVisible: boolean;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
+  isFlyoutFullScreen: boolean;
+  toggleFlyoutFullScreen: () => void;
   selectedTabId: TabId;
   setSelectedTabId: React.Dispatch<React.SetStateAction<TabId>>;
 }
@@ -69,6 +71,9 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
+  const [flyoutProps, setFlyoutProps] = useState<Partial<React.ComponentProps<typeof EuiFlyout>>>(
+    {}
+  );
   const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
   const [chatState, setChatState] = useState<ChatState>({
     messages: [
@@ -91,6 +96,14 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
     return () => subscription.unsubscribe();
   });
 
+  const isFlyoutFullScreen = useMemo(() => !!Object.keys(flyoutProps).length, [flyoutProps]);
+  const toggleFlyoutFullScreen = useCallback(() => {
+    setFlyoutProps((fprops) => {
+      if (Object.keys(fprops).length) return {};
+      return { size: '100%' };
+    });
+  }, []);
+
   const chatContextValue: IChatContext = useMemo(
     () => ({
       appId,
@@ -99,6 +112,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       flyoutVisible,
       setFlyoutVisible,
       setFlyoutComponent,
+      isFlyoutFullScreen,
+      toggleFlyoutFullScreen,
       selectedTabId,
       setSelectedTabId,
     }),
@@ -126,7 +141,12 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       <ChatContext.Provider value={chatContextValue}>
         <ChatStateContext.Provider value={chatStateContextValue}>
           {flyoutVisible ? (
-            <ChatFlyout overrideComponent={flyoutComponent} input={input} setInput={setInput} />
+            <ChatFlyout
+              overrideComponent={flyoutComponent}
+              flyoutProps={flyoutProps}
+              input={input}
+              setInput={setInput}
+            />
           ) : null}
         </ChatStateContext.Provider>
       </ChatContext.Provider>

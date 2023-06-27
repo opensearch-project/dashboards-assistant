@@ -5,6 +5,8 @@
 
 import { promises as fs } from 'fs';
 import { DynamicToolInput } from 'langchain/tools';
+import { OpenSearchClient } from '../../../../../src/core/server';
+import { SearchRequest } from '../../../../../src/plugins/data/common';
 
 /**
  * @param status - json object that needs to be logged
@@ -35,7 +37,7 @@ export const swallowErrors = (func: DynamicToolInput['func']): DynamicToolInput[
   };
 };
 
-export const jsonToCsv = (json) => {
+export const jsonToCsv = (json: object[]) => {
   const rows = [];
 
   // Add header row with keys as column names
@@ -53,4 +55,25 @@ export const jsonToCsv = (json) => {
   const csv = rows.map((row) => row.join(',')).join('\n');
 
   return csv;
+};
+
+export const fetchLangchainTraces = (client: OpenSearchClient, sessionId: string) => {
+  const query: SearchRequest['body'] = {
+    query: {
+      term: {
+        session_id: sessionId,
+      },
+    },
+    sort: [
+      {
+        start_time: {
+          order: 'asc',
+        },
+      },
+    ],
+  };
+  client.search({
+    index: 'langchain',
+    body: query,
+  });
 };
