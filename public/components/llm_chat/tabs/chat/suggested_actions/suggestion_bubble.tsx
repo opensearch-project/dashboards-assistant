@@ -27,10 +27,10 @@ export const SuggestionBubble: React.FC<SuggestionBubbleProps> = (props) => {
           className="llm-chat-suggestion-bubble-panel"
           onClick={() => executeAction(props.suggestedAction, props.message)}
           grow={false}
-          paddingSize="s"
+          paddingSize="none"
           disabled={props.inputDisabled}
         >
-          <EuiText size="s" color={props.inputDisabled ? 'subdued' : 'default'}>
+          <EuiText size="xs" color={props.inputDisabled ? 'subdued' : 'default'}>
             {'\u{1f4ad} ' + props.suggestedAction.message}
           </EuiText>
         </EuiPanel>
