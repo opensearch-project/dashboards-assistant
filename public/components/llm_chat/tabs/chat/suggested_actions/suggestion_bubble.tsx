@@ -28,12 +28,10 @@ export const SuggestionBubble: React.FC<SuggestionBubbleProps> = (props) => {
           onClick={() => executeAction(props.suggestedAction, props.message)}
           grow={false}
           paddingSize="s"
-          color="plain"
           disabled={props.inputDisabled}
-          hasBorder
         >
-          <EuiText color={props.inputDisabled ? 'subdued' : 'default'}>
-            {props.suggestedAction.message}
+          <EuiText size="s" color={props.inputDisabled ? 'subdued' : 'default'}>
+            {'\u{1f4ad} ' + props.suggestedAction.message}
           </EuiText>
         </EuiPanel>
       </EuiFlexItem>
