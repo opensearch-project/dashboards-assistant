@@ -82,7 +82,9 @@ export function registerChatRoute(router: IRouter) {
         const traces = await fetchLangchainTraces(
           context.core.opensearch.client.asCurrentUser,
           sessionId
-        ).then((resp) => convertToTraces(resp.body));
+        )
+          .then((resp) => convertToTraces(resp.body))
+          .catch((e) => console.error(e));
         const outputs = convertToOutputs(agentResponse, sessionId, suggestions, traces);
 
         if (!chatId) {

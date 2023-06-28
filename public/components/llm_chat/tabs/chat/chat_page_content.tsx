@@ -45,7 +45,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatStateContext.chatState.messages
         .flatMap((message) => [
-          message.type === 'output' && message.toolsUsed?.length && (
+          message.type === 'output' && !!message.toolsUsed?.length && (
             <>
               {message.toolsUsed.map((tool) => (
                 <>

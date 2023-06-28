@@ -16,6 +16,7 @@ interface ChatFlyoutProps {
   setInput: React.Dispatch<React.SetStateAction<string>>;
   overrideComponent: React.ReactNode | null;
   flyoutProps: Partial<React.ComponentProps<typeof EuiFlyout>>;
+  isFlyoutFullScreen: boolean;
 }
 
 export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
@@ -38,7 +39,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
   return (
     <EuiFlyout
       className={classNames('llm-chat-flyout', {
-        'llm-chat-fullscreen': chatContext.isFlyoutFullScreen,
+        'llm-chat-fullscreen': props.isFlyoutFullScreen,
       })}
       type="push"
       paddingSize="none"

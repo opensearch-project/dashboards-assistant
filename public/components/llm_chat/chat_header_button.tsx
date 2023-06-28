@@ -39,7 +39,6 @@ interface IChatContext {
   flyoutVisible: boolean;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
-  isFlyoutFullScreen: boolean;
   toggleFlyoutFullScreen: () => void;
   selectedTabId: TabId;
   setSelectedTabId: React.Dispatch<React.SetStateAction<TabId>>;
@@ -110,12 +109,11 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       flyoutVisible,
       setFlyoutVisible,
       setFlyoutComponent,
-      isFlyoutFullScreen: !!Object.keys(flyoutProps).length,
       toggleFlyoutFullScreen,
       selectedTabId,
       setSelectedTabId,
     }),
-    [appId, chatId, flyoutVisible, selectedTabId, flyoutProps]
+    [appId, chatId, flyoutVisible, selectedTabId]
   );
 
   const chatStateContextValue: IChatStateContext = useMemo(
@@ -144,6 +142,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
               flyoutProps={flyoutProps}
               input={input}
               setInput={setInput}
+              isFlyoutFullScreen={!!Object.keys(flyoutProps).length}
             />
           ) : null}
         </ChatStateContext.Provider>

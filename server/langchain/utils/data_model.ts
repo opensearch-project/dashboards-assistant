@@ -20,7 +20,7 @@ export const convertToOutputs = (
   agentResponse: AgentResponse,
   sessionId: string,
   suggestions: SuggestedQuestions,
-  traces: LangchainTrace[]
+  traces: LangchainTrace[] | void
 ) => {
   const content = extractContent(agentResponse);
   let outputs: IMessage[] = [
@@ -81,7 +81,8 @@ const buildSuggestions = (suggestions: SuggestedQuestions, outputs: IMessage[]) 
   return outputs;
 };
 
-const buildToolsUsed = (traces: LangchainTrace[], outputs: IMessage[]) => {
+const buildToolsUsed = (traces: LangchainTrace[] | void, outputs: IMessage[]) => {
+  if (!traces) return outputs;
   const tools = traces.filter((trace) => trace.type === 'tool').map((tool) => tool.name);
   outputs[0].toolsUsed = tools;
   return outputs;
