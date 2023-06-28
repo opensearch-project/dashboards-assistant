@@ -17,7 +17,7 @@ import {
   IChat,
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
-import { convertToTraces } from '../../../public/components/common/helpers/llm_chat/traces';
+import { convertToTraces } from '../../../common/utils/llm_chat/traces';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { requestSuggestionsChain } from '../../langchain/chains/suggestions_generator';
 import { memoryInit } from '../../langchain/memory/chat_agent_memory';

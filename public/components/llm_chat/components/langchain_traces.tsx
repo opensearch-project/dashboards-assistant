@@ -12,7 +12,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
-import { LangchainTrace } from '../../common/helpers/llm_chat/traces';
+import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { useFetchLangchainTraces } from '../hooks/use_fetch_langchain_traces';
 
 // workaround to show Claude LLM as OpenSearch LLM

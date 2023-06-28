@@ -8,7 +8,7 @@ import {
   IMessage,
   ISuggestedAction,
 } from '../../../common/types/observability_saved_object_attributes';
-import { LangchainTrace } from '../../../public/components/common/helpers/llm_chat/traces';
+import { LangchainTrace } from '../../../common/utils/llm_chat/traces';
 import { AgentFactory } from '../agents/agent_factory/agent_factory';
 
 // TODO remove when typescript is upgraded to >= 4.5

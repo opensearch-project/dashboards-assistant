@@ -9,7 +9,7 @@ import { useContext, useEffect, useReducer } from 'react';
 import { SearchResponse } from '../../../../../../src/core/server';
 import { SearchRequest } from '../../../../../../src/plugins/data/common';
 import { DSL_BASE, DSL_SEARCH } from '../../../../common/constants/shared';
-import { convertToTraces, LangchainTrace } from '../../common/helpers/llm_chat/traces';
+import { convertToTraces, LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { CoreServicesContext } from '../chat_header_button';
 import { GenericReducer, genericReducer } from './fetch_reducer';
 
