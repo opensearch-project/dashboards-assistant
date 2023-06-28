@@ -16,7 +16,6 @@ import {
   PPLSavedVisualizationClient,
 } from '../../../services/saved_objects/saved_object_client/ppl';
 import { ChatContext, ChatStateContext, CoreServicesContext } from '../chat_header_button';
-import { LangchainTracesModal } from '../components/langchain_traces_modal';
 import { PPLVisualizationModal } from '../components/ppl_visualization_modal';
 
 interface SendResponse {

@@ -4,6 +4,9 @@
  */
 
 import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
@@ -88,21 +91,32 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
   return (
     <>
       {content}
-      {typeof props.message.sessionId === 'string' && (
+      {props.message.type === 'output' && (
         <>
           <EuiHorizontalRule margin="s" />
-          <EuiLink
-            onClick={() => {
-              chatContext.setFlyoutComponent(
-                <LangchainTracesFlyoutBody
-                  closeFlyout={() => chatContext.setFlyoutComponent(null)}
-                  sessionId={props.message.sessionId as string}
-                />
-              );
-            }}
-          >
-            How was this generated? <EuiIcon type="iInCircle" />
-          </EuiLink>
+          <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {typeof props.message.sessionId === 'string' && (
+                <EuiLink
+                  onClick={() => {
+                    chatContext.setFlyoutComponent(
+                      <LangchainTracesFlyoutBody
+                        closeFlyout={() => chatContext.setFlyoutComponent(null)}
+                        sessionId={props.message.sessionId as string}
+                      />
+                    );
+                  }}
+                >
+                  <EuiText size="s">
+                    How was this generated? <EuiIcon type="iInCircle" />
+                  </EuiText>
+                </EuiLink>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon display="base" iconType="faceHappy" iconSize="s" onClick={() => {}} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
     </>

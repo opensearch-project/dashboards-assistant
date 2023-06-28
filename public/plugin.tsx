@@ -243,6 +243,7 @@ export class ObservabilityPlugin
     // core.chrome.navControls.getRight$().forEach((x) => console.log(x));
 
     const pplService: PPLService = new PPLService(core.http);
+    coreRefs.core = core;
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;

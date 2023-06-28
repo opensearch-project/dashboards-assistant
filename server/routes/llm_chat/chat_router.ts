@@ -119,4 +119,40 @@ export function registerChatRoute(router: IRouter) {
       }
     }
   );
+
+  router.post(
+    {
+      path: CHAT_API.FEEDBACK,
+      validate: {
+        body: schema.object({
+          type: schema.string(),
+          input: schema.string(),
+          output: schema.string(),
+          correct: schema.boolean(),
+          expectedOutput: schema.string(),
+          comment: schema.string(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      try {
+        await context.core.opensearch.client.asCurrentUser.index({
+          index: '.llm-feedback',
+          body: { ...request.body, date: new Date().toISOString() },
+        });
+
+        return response.ok();
+      } catch (error) {
+        console.error(error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
 }
