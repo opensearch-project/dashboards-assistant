@@ -34,6 +34,7 @@ interface FeedbackMetaData {
   chatId?: string;
   sessionId?: string;
   error?: boolean;
+  selectedIndex?: string;
 }
 
 interface FeedbackModelProps {

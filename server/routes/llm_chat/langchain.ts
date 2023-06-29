@@ -106,6 +106,7 @@ export function registerLangChainRoutes(router: IRouter) {
             chatId: schema.maybe(schema.string()),
             sessionId: schema.maybe(schema.string()),
             error: schema.maybe(schema.boolean()),
+            selectedIndex: schema.maybe(schema.string()),
           }),
           input: schema.string(),
           output: schema.string(),
