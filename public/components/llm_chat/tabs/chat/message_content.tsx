@@ -157,8 +157,10 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
         <>
           <EuiHorizontalRule margin="s" />
           <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-            {footers.map((footer) => (
-              <EuiFlexItem grow={false}>{footer}</EuiFlexItem>
+            {footers.map((footer, i) => (
+              <EuiFlexItem key={i} grow={false}>
+                {footer}
+              </EuiFlexItem>
             ))}
           </EuiFlexGroup>
         </>

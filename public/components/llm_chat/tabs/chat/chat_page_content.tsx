@@ -52,26 +52,24 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatStateContext.chatState.messages
         .flatMap((message, i, array) => [
-          message.type === 'output' && !!message.toolsUsed?.length && (
-            <>
-              {message.toolsUsed.map((tool) => (
-                <>
-                  <EuiText color="subdued">
-                    <EuiIcon size="l" type="check" color="success" /> {tool}
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                </>
-              ))}
-            </>
-          ),
-          // TODO add id to message and add key properties
-          <MessageBubble type={message.type} contentType={message.contentType}>
+          message.type === 'output' &&
+            !!message.toolsUsed?.length &&
+            message.toolsUsed.flatMap((tool) => [
+              <EuiText color="subdued">
+                <EuiIcon size="l" type="check" color="success" /> {tool}
+              </EuiText>,
+              <EuiSpacer size="s" />,
+            ]),
+          // Currently new messages will only be appended at the end (no reorders), using index as key is ok.
+          // If fetching a limited size of latest messages is supported in the future, then key should be message id.
+          <MessageBubble key={i} type={message.type} contentType={message.contentType}>
             <MessageContent message={message} previousInput={findPreviousInput(array, i)} />
           </MessageBubble>,
           message.type === 'output' &&
-            message.suggestedActions?.flatMap((suggestedAction) => [
-              <EuiSpacer size="m" />,
+            message.suggestedActions?.flatMap((suggestedAction, j) => [
+              <EuiSpacer key={`spacer-${j}`} size="m" />,
               <SuggestionBubble
+                key={`${j}`}
                 inputDisabled={props.inputDisabled}
                 message={message}
                 suggestedAction={suggestedAction}
