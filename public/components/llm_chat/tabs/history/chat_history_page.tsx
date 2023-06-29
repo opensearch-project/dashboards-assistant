@@ -19,7 +19,11 @@ import { IChat } from '../../../../../common/types/observability_saved_object_at
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useBulkGetChat } from '../../hooks/use_get_chat';
 
-export const ChatHistoryPage: React.FC = () => {
+interface ChatHistoryPageProps {
+  style?: React.CSSProperties;
+}
+
+export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   const { openChat } = useChatActions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -56,7 +60,8 @@ export const ChatHistoryPage: React.FC = () => {
   ];
 
   return (
-    <EuiFlyoutBody>
+    // @ts-ignore react version
+    <EuiFlyoutBody style={props.style}>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiBasicTable

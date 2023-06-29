@@ -6,7 +6,7 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useContext, useEffect, useState } from 'react';
-import { ChatContext, ChatStateContext } from '../../chat_header_button';
+import { ChatStateContext } from '../../chat_header_button';
 import { useGetChat } from '../../hooks/use_get_chat';
 import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
@@ -14,10 +14,10 @@ import { ChatPageContent } from './chat_page_content';
 interface ChatPageProps {
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
+  style?: React.CSSProperties;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
-  const chatContext = useContext(ChatContext)!;
   const chatStateContext = useContext(ChatStateContext)!;
   const [showGreetings, setShowGreetings] = useState(true);
   const { data: chat, loading: messagesLoading, error: messagesLoadingError } = useGetChat();
@@ -38,7 +38,8 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
 
   return (
     <>
-      <EuiFlyoutBody>
+      {/* @ts-ignore react version */}
+      <EuiFlyoutBody style={props.style}>
         <EuiPage>
           <EuiPageBody component="div">
             <ChatPageContent
@@ -51,7 +52,8 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
+      {/* @ts-ignore react version */}
+      <EuiFlyoutFooter style={props.style}>
         <EuiSpacer />
         <ChatInputControls disabled={inputDisabled} input={props.input} setInput={props.setInput} />
         <EuiSpacer />

@@ -22,14 +22,18 @@ interface ChatFlyoutProps {
 export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
   const chatContext = useContext(ChatContext)!;
 
+  const contentStyle: React.CSSProperties | undefined = props.overrideComponent
+    ? { display: 'none' }
+    : undefined;
+
   let content = null;
   switch (chatContext.selectedTabId) {
     case 'chat':
-      content = <ChatPage input={props.input} setInput={props.setInput} />;
+      content = <ChatPage input={props.input} setInput={props.setInput} style={contentStyle} />;
       break;
 
     case 'history':
-      content = <ChatHistoryPage />;
+      content = <ChatHistoryPage style={contentStyle} />;
       break;
 
     default:
@@ -49,16 +53,14 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
       onClose={() => chatContext.setFlyoutVisible(false)}
       {...props.flyoutProps}
     >
-      {props.overrideComponent !== null ? (
-        props.overrideComponent
-      ) : (
-        <>
-          <EuiFlyoutHeader className="llm-chat-flyout-header">
-            <ChatTabBar />
-          </EuiFlyoutHeader>
-          {content}
-        </>
-      )}
+      <>
+        {props.overrideComponent}
+        {/* @ts-ignore react version */}
+        <EuiFlyoutHeader className="llm-chat-flyout-header" style={contentStyle}>
+          <ChatTabBar />
+        </EuiFlyoutHeader>
+        {content}
+      </>
     </EuiFlyout>
   );
 };
