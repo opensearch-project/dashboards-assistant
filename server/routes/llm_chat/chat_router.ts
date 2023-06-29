@@ -8,7 +8,6 @@ import { schema } from '@osd/config-schema';
 import { v4 as uuid } from 'uuid';
 import {
   HttpResponsePayload,
-  ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
   IRouter,
 } from '../../../../../src/core/server';
@@ -16,6 +15,7 @@ import { CHAT_API } from '../../../common/constants/llm';
 import {
   CHAT_SAVED_OBJECT,
   IChat,
+  IMessage,
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/observability_saved_object_attributes';
 import { convertToTraces } from '../../../common/utils/llm_chat/traces';
@@ -52,14 +52,14 @@ export function registerChatRoute(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      try {
-        const client = context.core.savedObjects.client;
-        const { chatId, input, messages } = request.body;
-        const sessionId = uuid();
-        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-          request
-        );
+      const client = context.core.savedObjects.client;
+      const { chatId, input, messages } = request.body;
+      const sessionId = uuid();
+      const opensearchObservabilityClient = context.observability_plugin.observabilityClient.asScoped(
+        request
+      );
 
+      try {
         // FIXME this sets a unique langchain session id for each message but does not support concurrency
         process.env.LANGCHAIN_SESSION = sessionId;
         const pluginTools = initTools(
@@ -96,63 +96,30 @@ export function registerChatRoute(router: IRouter) {
             messages: [...messages, input, ...outputs],
           });
           return response.ok({
-            body: {
-              chatId: createResponse.id,
-              messages: createResponse.attributes.messages,
-            },
+            body: { chatId: createResponse.id, messages: createResponse.attributes.messages },
           });
         }
         const updateResponse = await client.update<Partial<IChat>>(CHAT_SAVED_OBJECT, chatId, {
           messages: [...messages, input, ...outputs],
         });
-        return response.ok({
-          body: {
-            chatId,
-            messages: updateResponse.attributes.messages,
-          },
-        });
+        return response.ok({ body: { chatId, messages: updateResponse.attributes.messages } });
       } catch (error) {
         console.error(error);
-        return response.custom({
-          statusCode: error.statusCode || 500,
-          body: error.message,
-        });
-      }
-    }
-  );
-
-  router.post(
-    {
-      path: CHAT_API.FEEDBACK,
-      validate: {
-        body: schema.object({
-          type: schema.string(),
-          input: schema.string(),
-          output: schema.string(),
-          correct: schema.boolean(),
-          expectedOutput: schema.string(),
-          comment: schema.string(),
-        }),
-      },
-    },
-    async (
-      context,
-      request,
-      response
-    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      try {
-        await context.core.opensearch.client.asCurrentUser.index({
-          index: '.llm-feedback',
-          body: { ...request.body, timestamp: new Date().toISOString() },
-        });
-
-        return response.ok();
-      } catch (error) {
-        console.error(error);
-        return response.custom({
-          statusCode: error.statusCode || 500,
-          body: error.message,
-        });
+        if (chatId) {
+          const errorOutput: IMessage = {
+            type: 'output',
+            sessionId,
+            contentType: 'error',
+            content: error.message,
+          };
+          const updateResponse = await client.update<Partial<IChat>>(CHAT_SAVED_OBJECT, chatId, {
+            messages: [...messages, input, errorOutput],
+          });
+          return response.ok({
+            body: { chatId, messages: updateResponse.attributes.messages },
+          });
+        }
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
   );

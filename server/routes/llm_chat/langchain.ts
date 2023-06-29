@@ -5,6 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import {
+  HttpResponsePayload,
   ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
   IRouter,
@@ -13,9 +14,9 @@ import {
 import { LANGCHAIN_API } from '../../../common/constants/llm';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
+import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
-import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(
@@ -32,7 +33,7 @@ export function registerLangChainRoutes(router: IRouter) {
       context,
       request,
       response
-    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       try {
         const { index, question } = request.body;
         const observabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
@@ -68,7 +69,7 @@ export function registerLangChainRoutes(router: IRouter) {
       context,
       request,
       response
-    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       try {
         const { question } = request.body;
         const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
@@ -87,6 +88,47 @@ export function registerLangChainRoutes(router: IRouter) {
         console.log('########### END CHAIN ####################');
         return response.ok({ body: agentResponse });
       } catch (error) {
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: LANGCHAIN_API.FEEDBACK,
+      validate: {
+        body: schema.object({
+          metadata: schema.object({
+            type: schema.string(),
+            chatId: schema.maybe(schema.string()),
+            sessionId: schema.maybe(schema.string()),
+            error: schema.maybe(schema.boolean()),
+          }),
+          input: schema.string(),
+          output: schema.string(),
+          correct: schema.boolean(),
+          expectedOutput: schema.string(),
+          comment: schema.string(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      try {
+        await context.core.opensearch.client.asCurrentUser.index({
+          index: '.llm-feedback',
+          body: { ...request.body, timestamp: new Date().toISOString() },
+        });
+
+        return response.ok();
+      } catch (error) {
+        console.error(error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,

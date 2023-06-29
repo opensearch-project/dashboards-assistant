@@ -48,6 +48,14 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       content = <EuiText style={{ whiteSpace: 'pre-line' }}>{props.message.content}</EuiText>;
       break;
 
+    case 'error':
+      content = (
+        <EuiText color="danger" style={{ whiteSpace: 'pre-line' }}>
+          {props.message.content}
+        </EuiText>
+      );
+      break;
+
     case 'markdown':
       // TODO remove after https://github.com/opensearch-project/oui/pull/801
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,51 +100,65 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       return null;
   }
 
+  const footers: React.ReactNode[] = [];
+  if (props.message.type === 'output') {
+    const sessionId = props.message.sessionId;
+    if (sessionId !== undefined) {
+      footers.push(
+        <EuiLink
+          onClick={() => {
+            chatContext.setFlyoutComponent(
+              <LangchainTracesFlyoutBody
+                closeFlyout={() => chatContext.setFlyoutComponent(null)}
+                sessionId={sessionId}
+              />
+            );
+          }}
+        >
+          <EuiText size="s">
+            How was this generated? <EuiIcon type="iInCircle" />
+          </EuiText>
+        </EuiLink>
+      );
+    }
+
+    footers.push(
+      <EuiButtonIcon
+        aria-label="feedback-icon"
+        display="base"
+        iconType="faceHappy"
+        iconSize="s"
+        onClick={() => {
+          const modal = coreServicesContext.core.overlays.openModal(
+            toMountPoint(
+              <FeedbackModal
+                input={props.previousInput?.content}
+                output={props.message.content}
+                metadata={{
+                  type: 'chat',
+                  chatId: chatContext.chatId,
+                  sessionId,
+                  error: props.message.contentType === 'error',
+                }}
+                onClose={() => modal.close()}
+              />
+            )
+          );
+        }}
+      />
+    );
+  }
+
   return (
     <>
       {content}
-      {props.message.type === 'output' && (
+      {!!footers.length && (
         <>
           <EuiHorizontalRule margin="s" />
-          <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {typeof props.message.sessionId === 'string' && (
-                <EuiLink
-                  onClick={() => {
-                    chatContext.setFlyoutComponent(
-                      <LangchainTracesFlyoutBody
-                        closeFlyout={() => chatContext.setFlyoutComponent(null)}
-                        sessionId={props.message.sessionId as string}
-                      />
-                    );
-                  }}
-                >
-                  <EuiText size="s">
-                    How was this generated? <EuiIcon type="iInCircle" />
-                  </EuiText>
-                </EuiLink>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label="feedback-icon"
-                display="base"
-                iconType="faceHappy"
-                iconSize="s"
-                onClick={() => {
-                  const modal = coreServicesContext.core.overlays.openModal(
-                    toMountPoint(
-                      <FeedbackModal
-                        type="chat"
-                        input={props.previousInput?.content}
-                        output={props.message.content}
-                        onClose={() => modal.close()}
-                      />
-                    )
-                  );
-                }}
-              />
-            </EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            {footers.map((footer) => (
+              <EuiFlexItem grow={false}>{footer}</EuiFlexItem>
+            ))}
           </EuiFlexGroup>
         </>
       )}

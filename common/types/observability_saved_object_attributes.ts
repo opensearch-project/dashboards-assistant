@@ -36,9 +36,9 @@ interface IInput extends SavedObjectAttributes {
 }
 interface IOutput extends SavedObjectAttributes {
   type: 'output';
-  sessionId?: string;
+  sessionId?: string; // used for tracing agent calls
   toolsUsed?: string[];
-  contentType: 'markdown' | 'visualization' | 'ppl_visualization';
+  contentType: 'error' | 'markdown' | 'visualization' | 'ppl_visualization';
   content: string;
   suggestedActions?: ISuggestedAction[];
 }
