@@ -11,7 +11,7 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
-import { LANGCHAIN_API } from '../../../common/constants/llm';
+import { LANGCHAIN_API, LLM_INDEX } from '../../../common/constants/llm';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
 import { memoryInit } from '../../langchain/memory/chat_agent_memory';
@@ -122,7 +122,7 @@ export function registerLangChainRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       try {
         await context.core.opensearch.client.asCurrentUser.index({
-          index: '.llm-feedback',
+          index: LLM_INDEX.FEEDBACK,
           body: { ...request.body, timestamp: new Date().toISOString() },
         });
 

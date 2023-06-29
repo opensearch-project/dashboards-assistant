@@ -8,6 +8,7 @@ import { ChainRun, LLMRun, ToolRun } from 'langchain/dist/callbacks/handlers/tra
 import { DynamicToolInput } from 'langchain/tools';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import { SearchRequest } from '../../../../../src/plugins/data/common';
+import { LLM_INDEX } from '../../../common/constants/llm';
 
 /**
  * @param status - json object that needs to be logged
@@ -74,7 +75,7 @@ export const fetchLangchainTraces = (client: OpenSearchClient, sessionId: string
     ],
   };
   return client.search<ToolRun | ChainRun | LLMRun>({
-    index: 'langchain',
+    index: LLM_INDEX.TRACES,
     body: query,
     size: 10,
   });

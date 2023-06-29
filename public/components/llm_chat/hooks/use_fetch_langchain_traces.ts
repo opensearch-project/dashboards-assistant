@@ -8,6 +8,7 @@ import { ChainRun, LLMRun, ToolRun } from 'langchain/dist/callbacks/handlers/tra
 import { useContext, useEffect, useReducer } from 'react';
 import { SearchResponse } from '../../../../../../src/core/server';
 import { SearchRequest } from '../../../../../../src/plugins/data/common';
+import { LLM_INDEX } from '../../../../common/constants/llm';
 import { DSL_BASE, DSL_SEARCH } from '../../../../common/constants/shared';
 import { convertToTraces, LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { CoreServicesContext } from '../chat_header_button';
@@ -43,7 +44,7 @@ export const useFetchLangchainTraces = (sessionId: string) => {
 
     coreServicesContext.http
       .post<SearchResponse<ToolRun | ChainRun | LLMRun>>(`${DSL_BASE}${DSL_SEARCH}`, {
-        body: JSON.stringify({ index: 'langchain', size: 100, ...query }),
+        body: JSON.stringify({ index: LLM_INDEX.TRACES, size: 100, ...query }),
         signal: abortController.signal,
       })
       .then((payload) => dispatch({ type: 'success', payload: convertToTraces(payload) }))
