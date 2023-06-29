@@ -52,30 +52,18 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatStateContext.chatState.messages
         .flatMap((message, i, array) => [
-          message.type === 'output' &&
-            !!message.toolsUsed?.length &&
-            message.toolsUsed.flatMap((tool) => [
-              <EuiText color="subdued">
-                <EuiIcon size="l" type="check" color="success" /> {tool}
-              </EuiText>,
-              <EuiSpacer size="s" />,
-            ]),
+          <ToolsUsed key={`tool-${i}`} message={message} />,
           // Currently new messages will only be appended at the end (no reorders), using index as key is ok.
           // If fetching a limited size of latest messages is supported in the future, then key should be message id.
-          <MessageBubble key={i} type={message.type} contentType={message.contentType}>
+          <MessageBubble key={`message-${i}`} type={message.type} contentType={message.contentType}>
             <MessageContent message={message} previousInput={findPreviousInput(array, i)} />
           </MessageBubble>,
-          message.type === 'output' &&
-            message.suggestedActions?.flatMap((suggestedAction, j) => [
-              <EuiSpacer key={`spacer-${j}`} size="m" />,
-              <SuggestionBubble
-                key={`${j}`}
-                inputDisabled={props.inputDisabled}
-                message={message}
-                suggestedAction={suggestedAction}
-              />,
-            ]),
-          <EuiSpacer />,
+          <Suggestions
+            key={`suggestion-${i}`}
+            message={message}
+            inputDisabled={props.inputDisabled}
+          />,
+          <EuiSpacer key={`message-spacer-${i}`} />,
         ])
         // slice(0, -1) to remove last EuiSpacer
         .slice(0, -1)}
@@ -92,3 +80,46 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     </>
   );
 });
+
+interface ToolsUsedProps {
+  message: IMessage;
+}
+
+const ToolsUsed: React.FC<ToolsUsedProps> = (props) => {
+  if (props.message.type !== 'output' || !props.message.toolsUsed?.length) return null;
+  return (
+    <>
+      {props.message.toolsUsed.map((tool, i) => (
+        <React.Fragment key={i}>
+          <EuiText color="subdued">
+            <EuiIcon size="l" type="check" color="success" /> {tool}
+          </EuiText>
+          <EuiSpacer size="s" />
+        </React.Fragment>
+      ))}
+    </>
+  );
+};
+
+interface SuggestionsProps {
+  message: IMessage;
+  inputDisabled: boolean;
+}
+
+const Suggestions: React.FC<SuggestionsProps> = (props) => {
+  if (props.message.type !== 'output' || !props.message.suggestedActions) return null;
+  return (
+    <>
+      {props.message.suggestedActions.map((suggestedAction, i) => (
+        <React.Fragment key={i}>
+          <EuiSpacer size="m" />
+          <SuggestionBubble
+            inputDisabled={props.inputDisabled}
+            message={props.message}
+            suggestedAction={suggestedAction}
+          />
+        </React.Fragment>
+      ))}
+    </>
+  );
+};
