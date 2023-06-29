@@ -31,12 +31,35 @@ export interface FeedbackFormData {
 }
 
 interface FeedbackModelProps {
+  type: FeedbackFormData['type'];
+  input?: string;
+  output?: string;
+  onClose: () => void;
+}
+
+export const FeedbackModal: React.FC<FeedbackModelProps> = (props) => {
+  const [feedbackForm, setFeedbackForm] = useState<FeedbackFormData>({
+    type: props.type,
+    input: props.input ?? '',
+    output: props.output ?? '',
+    correct: true,
+    expectedOutput: '',
+    comment: '',
+  });
+  return (
+    <EuiModal onClose={props.onClose}>
+      <FeedbackModalContent data={feedbackForm} setData={setFeedbackForm} onClose={props.onClose} />
+    </EuiModal>
+  );
+};
+
+interface FeedbackModalContentProps {
   data: FeedbackFormData;
   setData: React.Dispatch<React.SetStateAction<FeedbackFormData>>;
   onClose: () => void;
 }
 
-export const FeedbackModal: React.FC<FeedbackModelProps> = (props) => {
+export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props) => {
   const { loading, submitFeedback } = useSubmitFeedback(props.data, coreRefs.http!);
   const [formErrors, setFormErrors] = useState<
     Partial<{ [x in keyof FeedbackFormData]: string[] }>
@@ -65,7 +88,7 @@ export const FeedbackModal: React.FC<FeedbackModelProps> = (props) => {
     try {
       await submitFeedback();
       props.setData({
-        type: 'event_analytics',
+        ...props.data,
         input: '',
         output: '',
         correct: true,
@@ -80,7 +103,7 @@ export const FeedbackModal: React.FC<FeedbackModelProps> = (props) => {
   };
 
   return (
-    <EuiModal onClose={props.onClose}>
+    <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>LLM Feedback</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -167,7 +190,7 @@ export const FeedbackModal: React.FC<FeedbackModelProps> = (props) => {
           Send
         </EuiButton>
       </EuiModalFooter>
-    </EuiModal>
+    </>
   );
 };
 

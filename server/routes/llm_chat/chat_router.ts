@@ -7,6 +7,7 @@ import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema } from '@osd/config-schema';
 import { v4 as uuid } from 'uuid';
 import {
+  HttpResponsePayload,
   ILegacyScopedClusterClient,
   IOpenSearchDashboardsResponse,
   IRouter,
@@ -50,7 +51,7 @@ export function registerChatRoute(router: IRouter) {
       context,
       request,
       response
-    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       try {
         const client = context.core.savedObjects.client;
         const { chatId, input, messages } = request.body;
@@ -138,11 +139,11 @@ export function registerChatRoute(router: IRouter) {
       context,
       request,
       response
-    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       try {
         await context.core.opensearch.client.asCurrentUser.index({
           index: '.llm-feedback',
-          body: { ...request.body, date: new Date().toISOString() },
+          body: { ...request.body, timestamp: new Date().toISOString() },
         });
 
         return response.ok();

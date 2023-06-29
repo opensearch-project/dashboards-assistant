@@ -5,6 +5,7 @@
 
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useContext, useEffect, useRef } from 'react';
+import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { ChatStateContext } from '../../chat_header_button';
 import { LoadingButton } from '../../components/loading_button';
 import { ChatPageGreetings } from './chat_page_greetings';
@@ -19,6 +20,12 @@ interface ChatPageContentProps {
   messagesLoadingError?: Error;
   inputDisabled: boolean;
 }
+
+const findPreviousInput = (messages: IMessage[], index: number) => {
+  for (let i = index; i >= 0; i--) {
+    if (messages[i].type === 'input') return messages[i];
+  }
+};
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
   const chatStateContext = useContext(ChatStateContext)!;
@@ -44,7 +51,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     <>
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatStateContext.chatState.messages
-        .flatMap((message) => [
+        .flatMap((message, i, array) => [
           message.type === 'output' && !!message.toolsUsed?.length && (
             <>
               {message.toolsUsed.map((tool) => (
@@ -59,7 +66,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           ),
           // TODO add id to message and add key properties
           <MessageBubble type={message.type} contentType={message.contentType}>
-            <MessageContent message={message} />
+            <MessageContent message={message} previousInput={findPreviousInput(array, i)} />
           </MessageBubble>,
           message.type === 'output' &&
             message.suggestedActions?.flatMap((suggestedAction) => [

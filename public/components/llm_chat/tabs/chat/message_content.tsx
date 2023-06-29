@@ -17,14 +17,17 @@ import {
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { DashboardContainerInput } from '../../../../../../../src/plugins/dashboard/public';
+import { toMountPoint } from '../../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { uiSettingsService } from '../../../../../common/utils';
 import { ChatContext, CoreServicesContext } from '../../chat_header_button';
+import { FeedbackModal } from '../../components/feedback_modal';
 import { PPLVisualization } from '../../components/ppl_visualization';
 import { LangchainTracesFlyoutBody } from './langchain_traces_flyout_body';
 
 interface MessageContentProps {
   message: IMessage;
+  previousInput?: IMessage;
 }
 
 export const MessageContent: React.FC<MessageContentProps> = React.memo((props) => {
@@ -47,6 +50,7 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
 
     case 'markdown':
       // TODO remove after https://github.com/opensearch-project/oui/pull/801
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const parsingPlugins = getDefaultOuiMarkdownParsingPlugins() as Array<[any, any]>; // Array<unified.PluginTuple<any[], unified.Settings>>
       const emojiPlugin = parsingPlugins.find(([, settings]) => settings.emoticon)?.at(1);
       if (emojiPlugin) emojiPlugin.emoticon = false;
@@ -114,7 +118,24 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon display="base" iconType="faceHappy" iconSize="s" onClick={() => {}} />
+              <EuiButtonIcon
+                aria-label="feedback-icon"
+                display="base"
+                iconType="faceHappy"
+                iconSize="s"
+                onClick={() => {
+                  const modal = coreServicesContext.core.overlays.openModal(
+                    toMountPoint(
+                      <FeedbackModal
+                        type="chat"
+                        input={props.previousInput?.content}
+                        output={props.message.content}
+                        onClose={() => modal.close()}
+                      />
+                    )
+                  );
+                }}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
