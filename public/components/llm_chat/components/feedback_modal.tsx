@@ -24,7 +24,7 @@ import { coreRefs } from '../../../framework/core_refs';
 export interface FeedbackFormData {
   input: string;
   output: string;
-  correct: boolean;
+  correct: boolean | undefined;
   expectedOutput: string;
   comment: string;
 }
@@ -47,7 +47,7 @@ export const FeedbackModal: React.FC<FeedbackModelProps> = (props) => {
   const [formData, setFormData] = useState<FeedbackFormData>({
     input: props.input ?? '',
     output: props.output ?? '',
-    correct: true,
+    correct: undefined,
     expectedOutput: '',
     comment: '',
   });
@@ -93,9 +93,10 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
     const errors = {
       input: validator.input(props.formData.input),
       output: validator.output(props.formData.output),
+      correct: validator.correct(props.formData.correct),
       expectedOutput: validator.expectedOutput(
         props.formData.expectedOutput,
-        !props.formData.correct
+        props.formData.correct === false
       ),
     };
     if (Object.values(errors).some((e) => !!e.length)) {
@@ -106,10 +107,9 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
     try {
       await submitFeedback();
       props.setFormData({
-        ...props.formData,
         input: '',
         output: '',
-        correct: true,
+        correct: undefined,
         expectedOutput: '',
         comment: '',
       });
@@ -157,20 +157,31 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
               isInvalid={hasError('output')}
             />
           </EuiFormRow>
-          <EuiFormRow label="Does the output match your expectations?">
+          <EuiFormRow
+            label="Does the output match your expectations?"
+            isInvalid={hasError('correct')}
+            error={formErrors.correct}
+          >
             <EuiRadioGroup
               options={[
                 { id: 'yes', label: 'Yes' },
                 { id: 'no', label: 'No' },
               ]}
-              idSelected={props.formData.correct ? 'yes' : 'no'}
+              idSelected={
+                props.formData.correct === undefined
+                  ? undefined
+                  : props.formData.correct === true
+                  ? 'yes'
+                  : 'no'
+              }
               onChange={(id) => {
                 props.setFormData({ ...props.formData, correct: id === 'yes' });
                 setFormErrors({ ...formErrors, expectedOutput: [] });
               }}
+              onBlur={() => setFormErrors({ ...formErrors, correct: [] })}
             />
           </EuiFormRow>
-          {props.formData.correct || (
+          {props.formData.correct === false && (
             <EuiFormRow
               label="Expected output"
               isInvalid={hasError('expectedOutput')}
@@ -188,7 +199,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
                     ...formErrors,
                     expectedOutput: validator.expectedOutput(
                       e.target.value,
-                      !props.formData.correct
+                      props.formData.correct === false
                     ),
                   });
                 }}
@@ -234,6 +245,8 @@ const useSubmitFeedback = (data: FeedbackFormData, metadata: FeedbackMetaData, h
 const validator = {
   input: (text: string) => (text.trim().length === 0 ? ['Input is required'] : []),
   output: (text: string) => (text.trim().length === 0 ? ['Output is required'] : []),
+  correct: (correct: boolean | undefined) =>
+    correct === undefined ? ['Correctness is required'] : [],
   expectedOutput: (text: string, required: boolean) =>
     required && text.trim().length === 0 ? ['expectedOutput is required'] : [],
 };
