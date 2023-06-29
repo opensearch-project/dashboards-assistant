@@ -5,10 +5,12 @@
 
 import { useContext, useEffect, useReducer } from 'react';
 import {
+  HttpFetchQuery,
   SavedObjectsFindOptions,
-  SavedObjectsFindResponsePublic,
   SimpleSavedObject,
 } from '../../../../../../src/core/public';
+import { SavedObjectsFindResponse } from '../../../../../../src/core/server';
+import { CHAT_API } from '../../../../common/constants/llm';
 import {
   CHAT_SAVED_OBJECT,
   IChat,
@@ -49,27 +51,24 @@ export const useGetChat = () => {
 };
 
 export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) => {
-  const chatContext = useContext(CoreServicesContext)!;
-  const reducer: GenericReducer<SavedObjectsFindResponsePublic<IChat>> = genericReducer;
+  const coreServicesContext = useContext(CoreServicesContext)!;
+  const reducer: GenericReducer<SavedObjectsFindResponse<IChat>> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
-    // savedObjectsClient does not support abort signal
-    let abort = false;
+    const abortController = new AbortController();
     dispatch({ type: 'request' });
 
-    // TODO move find call to server, because public saved object client does not support sorting
-    chatContext.savedObjectsClient
-      .find<IChat>({ ...options, type: CHAT_SAVED_OBJECT })
-      .then((payload) => {
-        if (!abort) dispatch({ type: 'success', payload });
+    coreServicesContext.http
+      .get<SavedObjectsFindResponse<IChat>>(CHAT_API.HISTORY, {
+        query: options as HttpFetchQuery,
+        signal: abortController.signal,
       })
-      .catch((error) => {
-        if (!abort) dispatch({ type: 'failure', error });
-      });
+      .then((payload) => dispatch({ type: 'success', payload }))
+      .catch((error) => dispatch({ type: 'failure', error }));
 
     return () => {
-      abort = true;
+      abortController.abort();
     };
   }, [options]);
 

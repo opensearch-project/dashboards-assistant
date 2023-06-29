@@ -123,4 +123,37 @@ export function registerChatRoute(router: IRouter) {
       }
     }
   );
+
+  router.get(
+    {
+      path: CHAT_API.HISTORY,
+      validate: {
+        query: schema.object({
+          page: schema.number(),
+          perPage: schema.number(),
+          sortOrder: schema.string(),
+          sortField: schema.string(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      try {
+        const findResponse = await context.core.savedObjects.client.find<IChat>({
+          ...request.query,
+          type: CHAT_SAVED_OBJECT,
+        });
+
+        return response.ok({ body: findResponse });
+      } catch (error) {
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
+      }
+    }
+  );
 }
