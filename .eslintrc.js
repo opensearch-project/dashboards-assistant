@@ -19,6 +19,7 @@ module.exports = {
     {
       files: ['**/*.{js,ts,tsx}'],
       rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
         'no-console': 0,
         '@osd/eslint/require-license-header': [
           'error',

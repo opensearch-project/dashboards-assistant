@@ -14,9 +14,10 @@ interface State<T> {
 type Action<T> =
   | { type: 'request' }
   | { type: 'success'; payload: State<T>['data'] }
-  | { type: 'failure'; error: Required<State<T>['error']> };
+  | { type: 'failure'; error: NonNullable<State<T>['error']> };
 
 // TODO use instantiation expressions when typescript is upgraded to >= 4.7
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GenericReducer<T = any> = Reducer<State<T>, Action<T>>;
 export const genericReducer: GenericReducer = (state, action) => {
   switch (action.type) {
