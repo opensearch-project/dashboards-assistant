@@ -12,6 +12,7 @@ import {
   EuiLink,
   EuiMarkdownFormat,
   EuiText,
+  EuiToolTip,
   getDefaultOuiMarkdownParsingPlugins,
 } from '@elastic/eui';
 import moment from 'moment';
@@ -123,29 +124,29 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
     }
 
     footers.push(
-      <EuiButtonIcon
-        aria-label="feedback-icon"
-        display="base"
-        iconType="faceHappy"
-        iconSize="s"
-        onClick={() => {
-          const modal = coreServicesContext.core.overlays.openModal(
-            toMountPoint(
-              <FeedbackModal
-                input={props.previousInput?.content}
-                output={props.message.content}
-                metadata={{
-                  type: 'chat',
-                  chatId: chatContext.chatId,
-                  sessionId,
-                  error: props.message.contentType === 'error',
-                }}
-                onClose={() => modal.close()}
-              />
-            )
-          );
-        }}
-      />
+      <EuiToolTip content="Feedback">
+        <EuiButtonIcon
+          aria-label="feedback-icon"
+          iconType="faceHappy"
+          onClick={() => {
+            const modal = coreServicesContext.core.overlays.openModal(
+              toMountPoint(
+                <FeedbackModal
+                  input={props.previousInput?.content}
+                  output={props.message.content}
+                  metadata={{
+                    type: 'chat',
+                    chatId: chatContext.chatId,
+                    sessionId,
+                    error: props.message.contentType === 'error',
+                  }}
+                  onClose={() => modal.close()}
+                />
+              )
+            );
+          }}
+        />
+      </EuiToolTip>
     );
   }
 
@@ -155,7 +156,7 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       {!!footers.length && (
         <>
           <EuiHorizontalRule margin="s" />
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
             {footers.map((footer) => (
               <EuiFlexItem grow={false}>{footer}</EuiFlexItem>
             ))}
