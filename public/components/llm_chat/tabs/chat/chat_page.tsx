@@ -14,7 +14,7 @@ import { ChatPageContent } from './chat_page_content';
 interface ChatPageProps {
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
-  style?: React.CSSProperties;
+  className?: string;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
@@ -38,8 +38,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
 
   return (
     <>
-      {/* @ts-ignore react version */}
-      <EuiFlyoutBody style={props.style}>
+      <EuiFlyoutBody className={props.className}>
         <EuiPage>
           <EuiPageBody component="div">
             <ChatPageContent
@@ -52,8 +51,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
-      {/* @ts-ignore react version */}
-      <EuiFlyoutFooter style={props.style}>
+      <EuiFlyoutFooter className={props.className}>
         <EuiSpacer />
         <ChatInputControls disabled={inputDisabled} input={props.input} setInput={props.setInput} />
         <EuiSpacer />

@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -12,7 +11,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { ChatContext } from '../chat_header_button';
 import { useChatActions } from '../hooks/use_chat_actions';
 
@@ -23,7 +22,12 @@ const tabs = [
   { id: 'history', name: 'History' },
 ] as const;
 
-export const ChatTabBar: React.FC = React.memo(() => {
+interface ChatTabBarProps {
+  flyoutFullScreen: boolean;
+  toggleFlyoutFullScreen: () => void;
+}
+
+export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
   const chatContext = useContext(ChatContext)!;
   const { openChat } = useChatActions();
   const tabsComponent = tabs.map((tab) => (
@@ -50,8 +54,8 @@ export const ChatTabBar: React.FC = React.memo(() => {
         <EuiButtonIcon
           aria-label="fullScreen"
           size="s"
-          iconType={chatContext.isFlyoutFullScreen ? 'fullScreenExit' : 'fullScreen'}
-          onClick={chatContext.toggleFlyoutFullScreen}
+          iconType={props.flyoutFullScreen ? 'fullScreenExit' : 'fullScreen'}
+          onClick={props.toggleFlyoutFullScreen}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} />

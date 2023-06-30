@@ -22,7 +22,7 @@ import { useChatActions } from '../../hooks/use_chat_actions';
 import { useBulkGetChat } from '../../hooks/use_get_chat';
 
 interface ChatHistoryPageProps {
-  style?: React.CSSProperties;
+  className?: string;
 }
 
 type ItemType = SavedObjectsFindResult<IChat>;
@@ -72,8 +72,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   ];
 
   return (
-    // @ts-ignore react version
-    <EuiFlyoutBody style={props.style}>
+    <EuiFlyoutBody className={props.className}>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiBasicTable

@@ -4,7 +4,7 @@
  */
 
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
-import classNames from 'classnames';
+import cs from 'classnames';
 import React, { useContext } from 'react';
 import { ChatContext } from './chat_header_button';
 import { ChatTabBar } from './components/chat_tab_bar';
@@ -12,38 +12,41 @@ import { ChatPage } from './tabs/chat/chat_page';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 
 interface ChatFlyoutProps {
+  flyoutVisible: boolean;
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   overrideComponent: React.ReactNode | null;
   flyoutProps: Partial<React.ComponentProps<typeof EuiFlyout>>;
-  isFlyoutFullScreen: boolean;
+  flyoutFullScreen: boolean;
+  toggleFlyoutFullScreen: () => void;
 }
 
 export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
   const chatContext = useContext(ChatContext)!;
 
-  const contentStyle: React.CSSProperties | undefined = props.overrideComponent
-    ? { display: 'none' }
-    : undefined;
+  let chatPageVisible = false;
+  let chatHistoryPageVisible = false;
 
-  let content = null;
-  switch (chatContext.selectedTabId) {
-    case 'chat':
-      content = <ChatPage input={props.input} setInput={props.setInput} style={contentStyle} />;
-      break;
+  if (!props.overrideComponent) {
+    switch (chatContext.selectedTabId) {
+      case 'chat':
+        chatPageVisible = true;
+        break;
 
-    case 'history':
-      content = <ChatHistoryPage style={contentStyle} />;
-      break;
+      case 'history':
+        chatHistoryPageVisible = true;
+        break;
 
-    default:
-      break;
+      default:
+        break;
+    }
   }
 
   return (
     <EuiFlyout
-      className={classNames('llm-chat-flyout', {
-        'llm-chat-fullscreen': props.isFlyoutFullScreen,
+      className={cs('llm-chat-flyout', {
+        'llm-chat-fullscreen': props.flyoutFullScreen,
+        'llm-chat-hidden': !props.flyoutVisible,
       })}
       type="push"
       paddingSize="none"
@@ -55,11 +58,20 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
     >
       <>
         {props.overrideComponent}
-        {/* @ts-ignore react version */}
-        <EuiFlyoutHeader className="llm-chat-flyout-header" style={contentStyle}>
-          <ChatTabBar />
+        <EuiFlyoutHeader
+          className={cs('llm-chat-flyout-header', { 'llm-chat-hidden': props.overrideComponent })}
+        >
+          <ChatTabBar
+            flyoutFullScreen={props.flyoutFullScreen}
+            toggleFlyoutFullScreen={props.toggleFlyoutFullScreen}
+          />
         </EuiFlyoutHeader>
-        {content}
+        <ChatPage
+          input={props.input}
+          setInput={props.setInput}
+          className={cs({ 'llm-chat-hidden': !chatPageVisible })}
+        />
+        <ChatHistoryPage className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })} />
       </>
     </EuiFlyout>
   );
