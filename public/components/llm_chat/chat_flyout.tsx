@@ -13,8 +13,6 @@ import { ChatHistoryPage } from './tabs/history/chat_history_page';
 
 interface ChatFlyoutProps {
   flyoutVisible: boolean;
-  input: string;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
   overrideComponent: React.ReactNode | null;
   flyoutProps: Partial<React.ComponentProps<typeof EuiFlyout>>;
   flyoutFullScreen: boolean;
@@ -66,11 +64,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
             toggleFlyoutFullScreen={props.toggleFlyoutFullScreen}
           />
         </EuiFlyoutHeader>
-        <ChatPage
-          input={props.input}
-          setInput={props.setInput}
-          className={cs({ 'llm-chat-hidden': !chatPageVisible })}
-        />
+        <ChatPage className={cs({ 'llm-chat-hidden': !chatPageVisible })} />
         {chatHistoryPageVisible && <ChatHistoryPage />}
       </>
     </EuiFlyout>

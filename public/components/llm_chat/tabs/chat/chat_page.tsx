@@ -11,8 +11,6 @@ import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
 
 interface ChatPageProps {
-  input: string;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
   className?: string;
 }
 
@@ -43,7 +41,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
       </EuiFlyoutBody>
       <EuiFlyoutFooter className={props.className}>
         <EuiSpacer />
-        <ChatInputControls disabled={messagesLoading || chatState.llmResponding} input={props.input} setInput={props.setInput} />
+        <ChatInputControls disabled={messagesLoading || chatState.llmResponding} />
         <EuiSpacer />
       </EuiFlyoutFooter>
     </>

@@ -48,7 +48,6 @@ let flyoutLoaded = false;
 
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [appId, setAppId] = useState<string>();
-  const [input, setInput] = useState('');
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
@@ -99,8 +98,6 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
               flyoutVisible={flyoutVisible}
               overrideComponent={flyoutComponent}
               flyoutProps={flyoutProps}
-              input={input}
-              setInput={setInput}
               flyoutFullScreen={!!Object.keys(flyoutProps).length}
               toggleFlyoutFullScreen={toggleFlyoutFullScreen}
             />
