@@ -72,7 +72,9 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
       field: 'updated_at',
       name: 'Updated Time',
       sortable: true,
-      render: (updatedAt: string) => <EuiText size="s">{updatedAt}</EuiText>,
+      render: (updatedAt: string) => (
+        <EuiText size="s">{new Date(updatedAt).toLocaleString()}</EuiText>
+      ),
     },
   ];
 
