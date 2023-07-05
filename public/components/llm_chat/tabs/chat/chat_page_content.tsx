@@ -4,7 +4,7 @@
  */
 
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
 import { LoadingButton } from '../../components/loading_button';
 import { useChatState } from '../../hooks/use_chat_state';
@@ -32,7 +32,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const pageEndRef = useRef<HTMLDivElement>(null);
   const loading = props.messagesLoading || chatState.llmResponding;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
   }, [chatState.messages, loading]);
 
