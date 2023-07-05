@@ -4,10 +4,10 @@
  */
 
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
-import { ChatStateContext } from '../../chat_header_button';
 import { LoadingButton } from '../../components/loading_button';
+import { useChatState } from '../../hooks/use_chat_state';
 import { ChatPageGreetings } from './chat_page_greetings';
 import { MessageBubble } from './message_bubble';
 import { MessageContent } from './message_content';
@@ -18,7 +18,6 @@ interface ChatPageContentProps {
   setShowGreetings: React.Dispatch<React.SetStateAction<boolean>>;
   messagesLoading: boolean;
   messagesLoadingError?: Error;
-  inputDisabled: boolean;
 }
 
 const findPreviousInput = (messages: IMessage[], index: number) => {
@@ -28,15 +27,15 @@ const findPreviousInput = (messages: IMessage[], index: number) => {
 };
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
-  const chatStateContext = useContext(ChatStateContext)!;
+  const { chatState } = useChatState();
   const pageEndRef = useRef<HTMLDivElement>(null);
+  const loading = props.messagesLoading || chatState.llmResponding;
+
   useEffect(() => {
     pageEndRef.current?.scrollIntoView();
-  }, [chatStateContext.chatState.messages, chatStateContext.chatState.llmResponding]);
+  }, [chatState.messages, loading]);
 
-  if (props.messagesLoading && !chatStateContext.chatState.messages.length) {
-    return <LoadingButton />;
-  } else if (props.messagesLoadingError) {
+  if (props.messagesLoadingError) {
     return (
       <EuiEmptyPrompt
         iconType="alert"
@@ -50,7 +49,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   return (
     <>
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
-      {chatStateContext.chatState.messages
+      {chatState.messages
         .flatMap((message, i, array) => [
           <ToolsUsed key={`tool-${i}`} message={message} />,
           // Currently new messages will only be appended at the end (no reorders), using index as key is ok.
@@ -58,22 +57,18 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           <MessageBubble key={`message-${i}`} type={message.type} contentType={message.contentType}>
             <MessageContent message={message} previousInput={findPreviousInput(array, i)} />
           </MessageBubble>,
-          <Suggestions
-            key={`suggestion-${i}`}
-            message={message}
-            inputDisabled={props.inputDisabled}
-          />,
-          <EuiSpacer key={`message-spacer-${i}`} />,
+          <Suggestions key={`suggestion-${i}`} message={message} inputDisabled={loading} />,
+          <EuiSpacer key={`spacer-${i}`} />,
         ])
         // slice(0, -1) to remove last EuiSpacer
         .slice(0, -1)}
-      {chatStateContext.chatState.llmResponding && <LoadingButton />}
-      {chatStateContext.chatState.llmError && (
+      {loading && <LoadingButton />}
+      {chatState.llmError && (
         <EuiEmptyPrompt
           iconType="alert"
           iconColor="danger"
           title={<h2>Error from response</h2>}
-          body={chatStateContext.chatState.llmError.message}
+          body={chatState.llmError.message}
         />
       )}
       <div ref={pageEndRef} />

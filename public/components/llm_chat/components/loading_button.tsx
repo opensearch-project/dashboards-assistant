@@ -6,12 +6,16 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-export const LoadingButton: React.FC = () => {
+interface LoadingButtonProps {
+  message?: string;
+}
+
+export const LoadingButton: React.FC<LoadingButtonProps> = (props) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty onClick={() => {}} isLoading>
-          Loading...
+          {props.message || 'Loading...'}
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>

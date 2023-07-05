@@ -4,9 +4,8 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import { produce } from 'immer';
-import React, { useContext, useEffect, useState } from 'react';
-import { ChatStateContext } from '../../chat_header_button';
+import React, { useEffect, useState } from 'react';
+import { useChatState } from '../../hooks/use_chat_state';
 import { useGetChat } from '../../hooks/use_get_chat';
 import { ChatInputControls } from './chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
@@ -18,23 +17,15 @@ interface ChatPageProps {
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
-  const chatStateContext = useContext(ChatStateContext)!;
+  const { chatState, chatStateDispatch } = useChatState();
   const [showGreetings, setShowGreetings] = useState(true);
   const { data: chat, loading: messagesLoading, error: messagesLoadingError } = useGetChat();
 
   useEffect(() => {
-    if (chat && !chatStateContext.chatState.persisted) {
-      chatStateContext.setChatState(
-        produce((draft) => {
-          draft.messages = chat.attributes.messages;
-          draft.persisted = true;
-        })
-      );
+    if (chat) {
+      chatStateDispatch({ type: 'receive', payload: chat.attributes.messages });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat]);
-
-  const inputDisabled = messagesLoading || chatStateContext.chatState.llmResponding;
 
   return (
     <>
@@ -46,14 +37,13 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
               setShowGreetings={setShowGreetings}
               messagesLoading={messagesLoading}
               messagesLoadingError={messagesLoadingError}
-              inputDisabled={inputDisabled}
             />
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
       <EuiFlyoutFooter className={props.className}>
         <EuiSpacer />
-        <ChatInputControls disabled={inputDisabled} input={props.input} setInput={props.setInput} />
+        <ChatInputControls disabled={messagesLoading || chatState.llmResponding} input={props.input} setInput={props.setInput} />
         <EuiSpacer />
       </EuiFlyoutFooter>
     </>

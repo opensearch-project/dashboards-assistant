@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { produce } from 'immer';
 import React, { useContext } from 'react';
 import { toMountPoint } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { CHAT_API } from '../../../../common/constants/llm';
@@ -15,8 +14,9 @@ import {
   PPLSavedQueryClient,
   PPLSavedVisualizationClient,
 } from '../../../services/saved_objects/saved_object_client/ppl';
-import { ChatContext, ChatStateContext, CoreServicesContext } from '../chat_header_button';
+import { ChatContext, CoreServicesContext } from '../chat_header_button';
 import { PPLVisualizationModal } from '../components/ppl_visualization_modal';
+import { useChatState } from './use_chat_state';
 
 interface SendResponse {
   chatId: string;
@@ -29,42 +29,26 @@ let abortControllerRef: AbortController;
 export const useChatActions = () => {
   const chatContext = useContext(ChatContext)!;
   const coreServicesContext = useContext(CoreServicesContext)!;
-  const chatStateContext = useContext(ChatStateContext)!;
+  const { chatState, chatStateDispatch } = useChatState();
 
   const send = async (input: IMessage) => {
     const abortController = new AbortController();
     abortControllerRef = abortController;
-    chatStateContext.setChatState(
-      produce((draft) => {
-        draft.messages.push(input);
-        draft.llmError = undefined;
-        draft.llmResponding = true;
-      })
-    );
+    chatStateDispatch({ type: 'send', payload: input });
     try {
       const response = await coreServicesContext.http.post<SendResponse>(CHAT_API.LLM, {
         body: JSON.stringify({
           chatId: chatContext.chatId,
-          messages: chatStateContext.chatState.messages,
+          messages: chatState.messages,
           input,
         }),
       });
       if (abortController.signal.aborted) return;
       chatContext.setChatId(response.chatId);
-      chatStateContext.setChatState({
-        llmError: undefined,
-        llmResponding: false,
-        messages: response.messages,
-        persisted: true,
-      });
+      chatStateDispatch({ type: 'receive', payload: response.messages });
     } catch (error) {
       if (abortController.signal.aborted) return;
-      chatStateContext.setChatState(
-        produce((draft) => {
-          draft.llmError = error as Error;
-          draft.llmResponding = false;
-        })
-      );
+      chatStateDispatch({ type: 'error', payload: error as Error });
     }
   };
 
@@ -72,11 +56,7 @@ export const useChatActions = () => {
     abortControllerRef?.abort();
     chatContext.setChatId(chatId);
     chatContext.setSelectedTabId('chat');
-    chatStateContext.setChatState({
-      llmResponding: false,
-      messages: [],
-      persisted: false,
-    });
+    if (!chatId) chatStateDispatch({ type: 'reset' });
   };
 
   const executeAction = async (suggestAction: ISuggestedAction, message: IMessage) => {
