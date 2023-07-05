@@ -11,6 +11,7 @@ import { useChatState } from '../../hooks/use_chat_state';
 import { ChatPageGreetings } from './chat_page_greetings';
 import { MessageBubble } from './message_bubble';
 import { MessageContent } from './message_content';
+import { MessageFooter } from './message_footer';
 import { SuggestionBubble } from './suggested_actions/suggestion_bubble';
 
 interface ChatPageContentProps {
@@ -21,7 +22,7 @@ interface ChatPageContentProps {
 }
 
 const findPreviousInput = (messages: IMessage[], index: number) => {
-  for (let i = index; i >= 0; i--) {
+  for (let i = index - 1; i >= 0; i--) {
     if (messages[i].type === 'input') return messages[i];
   }
 };
@@ -55,7 +56,8 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           // Currently new messages will only be appended at the end (no reorders), using index as key is ok.
           // If fetching a limited size of latest messages is supported in the future, then key should be message id.
           <MessageBubble key={`message-${i}`} type={message.type} contentType={message.contentType}>
-            <MessageContent message={message} previousInput={findPreviousInput(array, i)} />
+            <MessageContent message={message} />
+            <MessageFooter message={message} previousInput={findPreviousInput(array, i)} />
           </MessageBubble>,
           <Suggestions key={`suggestion-${i}`} message={message} inputDisabled={loading} />,
           <EuiSpacer key={`spacer-${i}`} />,
