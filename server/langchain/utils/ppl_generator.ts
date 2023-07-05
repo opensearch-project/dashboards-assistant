@@ -6,6 +6,7 @@
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import {
   IndicesGetMappingResponse,
+  MappingProperty,
   SearchResponse,
 } from '@opensearch-project/opensearch/api/types';
 import { get } from 'lodash';
@@ -47,23 +48,26 @@ const extractValue = (source: unknown | undefined, field: string, type: string) 
  * @returns an object of fields and types
  */
 const flattenMappings = <T = unknown>(mappings: ApiResponse<IndicesGetMappingResponse, T>) => {
-  const rootProperties = mappings.body[Object.keys(mappings.body)[0]].mappings.properties;
+  const fields: Record<string, string> = {};
+  Object.values(mappings.body).forEach((body) =>
+    parseProperties(body.mappings.properties, undefined, fields)
+  );
+  return fields;
+};
 
-  const parseProperties = (
-    properties: typeof rootProperties,
-    prefixes: string[] = [],
-    fields: Record<string, string> = {}
-  ) => {
-    for (const key in properties) {
-      if (!properties.hasOwnProperty(key)) continue;
-      const value = properties[key];
-      if (value.properties) {
-        parseProperties(value.properties, [...prefixes, key], fields);
-      } else {
-        fields[[...prefixes, key].join('.')] = value.type!;
-      }
+const parseProperties = (
+  properties: Record<string, MappingProperty> | undefined,
+  prefixes: string[] = [],
+  fields: Record<string, string> = {}
+) => {
+  for (const key in properties) {
+    if (!properties.hasOwnProperty(key)) continue;
+    const value = properties[key];
+    if (value.properties) {
+      parseProperties(value.properties, [...prefixes, key], fields);
+    } else {
+      fields[[...prefixes, key].join('.')] = value.type!;
     }
-    return fields;
-  };
-  return parseProperties(rootProperties);
+  }
+  return fields;
 };
