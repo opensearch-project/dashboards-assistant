@@ -47,7 +47,7 @@ export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
       />
     );
   }
-  if (!runs) {
+  if (!runs?.length) {
     return <EuiText>Data not available.</EuiText>;
   }
 

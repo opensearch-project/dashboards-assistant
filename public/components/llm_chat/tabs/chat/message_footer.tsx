@@ -3,16 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiLink,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
@@ -34,7 +25,11 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
     const sessionId = props.message.sessionId;
     if (sessionId !== undefined) {
       footers.push(
-        <EuiLink
+        <EuiButtonEmpty
+          iconType="iInCircle"
+          iconSide="right"
+          size="xs"
+          flush="left"
           onClick={() => {
             chatContext.setFlyoutComponent(
               <LangchainTracesFlyoutBody
@@ -44,37 +39,37 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
             );
           }}
         >
-          <EuiText size="s">
-            How was this generated? <EuiIcon type="iInCircle" />
-          </EuiText>
-        </EuiLink>
+          How was this generated?
+        </EuiButtonEmpty>
       );
     }
 
     footers.push(
-      <EuiToolTip content="Feedback">
-        <EuiButtonIcon
-          aria-label="feedback-icon"
-          iconType="faceHappy"
-          onClick={() => {
-            const modal = coreServicesContext.core.overlays.openModal(
-              toMountPoint(
-                <FeedbackModal
-                  input={props.previousInput?.content}
-                  output={props.message.content}
-                  metadata={{
-                    type: 'chat',
-                    chatId: chatContext.chatId,
-                    sessionId,
-                    error: props.message.contentType === 'error',
-                  }}
-                  onClose={() => modal.close()}
-                />
-              )
-            );
-          }}
-        />
-      </EuiToolTip>
+      <EuiButtonEmpty
+        iconType="faceHappy"
+        iconSide="right"
+        size="xs"
+        flush="left"
+        onClick={() => {
+          const modal = coreServicesContext.core.overlays.openModal(
+            toMountPoint(
+              <FeedbackModal
+                input={props.previousInput?.content}
+                output={props.message.content}
+                metadata={{
+                  type: 'chat',
+                  chatId: chatContext.chatId,
+                  sessionId,
+                  error: props.message.contentType === 'error',
+                }}
+                onClose={() => modal.close()}
+              />
+            )
+          );
+        }}
+      >
+        Feedback
+      </EuiButtonEmpty>
     );
   }
 
@@ -83,7 +78,12 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
   return (
     <>
       <EuiHorizontalRule margin="s" />
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+      <EuiFlexGroup
+        gutterSize="none"
+        direction="column"
+        justifyContent="spaceBetween"
+        alignItems="flexStart"
+      >
         {footers.map((footer, i) => (
           <EuiFlexItem key={i} grow={false}>
             {footer}
