@@ -90,7 +90,8 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
     return !!formErrors[key]?.length;
   };
 
-  const submit = async () => {
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     const errors = {
       input: validator.input(props.formData.input),
       output: validator.output(props.formData.output),
@@ -133,6 +134,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
           error={Object.values(formErrors).flat()}
           component="form"
           id="feedback-form"
+          onSubmit={onSubmit}
         >
           <EuiFormRow label="Input question" isInvalid={hasError('input')} error={formErrors.input}>
             <EuiTextArea
@@ -221,7 +223,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={props.onClose}>Cancel</EuiButtonEmpty>
-        <EuiButton onClick={submit} fill isLoading={loading}>
+        <EuiButton type="submit" form="feedback-form" fill isLoading={loading}>
           Send
         </EuiButton>
       </EuiModalFooter>

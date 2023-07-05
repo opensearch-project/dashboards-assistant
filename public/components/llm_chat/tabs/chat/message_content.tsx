@@ -28,7 +28,7 @@ import { LangchainTracesFlyoutBody } from './langchain_traces_flyout_body';
 
 interface MessageContentProps {
   message: IMessage;
-  previousInput?: IMessage;
+  previousInput?: IMessage; // if message is output, find the previous input for filling feedback modal
 }
 
 export const MessageContent: React.FC<MessageContentProps> = React.memo((props) => {
