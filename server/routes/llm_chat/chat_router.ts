@@ -55,6 +55,7 @@ export function registerChatRoute(router: IRouter) {
       const client = context.core.savedObjects.client;
       const { chatId, input, messages } = request.body;
       const sessionId = uuid();
+      let outputs: IMessage[];
       const opensearchObservabilityClient = context.observability_plugin.observabilityClient.asScoped(
         request
       );
@@ -71,7 +72,6 @@ export function registerChatRoute(router: IRouter) {
           pluginTools.flatMap((tool) => tool.toolsList),
           memory
         );
-
         const agentResponse = await chatAgent.run(input.content);
         process.env.LANGCHAIN_SESSION = undefined;
 
@@ -86,8 +86,21 @@ export function registerChatRoute(router: IRouter) {
         )
           .then((resp) => convertToTraces(resp.body))
           .catch((e) => console.error(e));
-        const outputs = convertToOutputs(agentResponse, sessionId, suggestions, traces);
 
+        outputs = convertToOutputs(agentResponse, sessionId, suggestions, traces);
+      } catch (error) {
+        console.error(error);
+        outputs = [
+          {
+            type: 'output',
+            sessionId,
+            contentType: 'error',
+            content: error.message,
+          },
+        ];
+      }
+
+      try {
         if (!chatId) {
           const createResponse = await client.create<IChat>(CHAT_SAVED_OBJECT, {
             title: input.content.substring(0, 50),
@@ -105,20 +118,6 @@ export function registerChatRoute(router: IRouter) {
         return response.ok({ body: { chatId, messages: updateResponse.attributes.messages } });
       } catch (error) {
         console.error(error);
-        if (chatId) {
-          const errorOutput: IMessage = {
-            type: 'output',
-            sessionId,
-            contentType: 'error',
-            content: error.message,
-          };
-          const updateResponse = await client.update<Partial<IChat>>(CHAT_SAVED_OBJECT, chatId, {
-            messages: [...messages, input, errorOutput],
-          });
-          return response.ok({
-            body: { chatId, messages: updateResponse.attributes.messages },
-          });
-        }
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
