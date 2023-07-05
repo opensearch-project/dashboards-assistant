@@ -71,7 +71,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
           setInput={props.setInput}
           className={cs({ 'llm-chat-hidden': !chatPageVisible })}
         />
-        <ChatHistoryPage className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })} />
+        {chatHistoryPageVisible && <ChatHistoryPage />}
       </>
     </EuiFlyout>
   );
