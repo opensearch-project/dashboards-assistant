@@ -22,7 +22,7 @@ export type GenericReducer<T = any> = Reducer<State<T>, Action<T>>;
 export const genericReducer: GenericReducer = (state, action) => {
   switch (action.type) {
     case 'request':
-      return { loading: true };
+      return { data: state.data, loading: true };
     case 'success':
       return { loading: false, data: action.payload };
     case 'failure':

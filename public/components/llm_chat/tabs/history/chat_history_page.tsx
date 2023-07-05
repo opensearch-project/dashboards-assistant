@@ -14,7 +14,7 @@ import {
   EuiPageBody,
   EuiText,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/public';
 import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
 import { IChat } from '../../../../../common/types/observability_saved_object_attributes';
@@ -22,6 +22,7 @@ import { useChatActions } from '../../hooks/use_chat_actions';
 import { useBulkGetChat } from '../../hooks/use_get_chat';
 
 interface ChatHistoryPageProps {
+  shouldRefresh: boolean;
   className?: string;
 }
 
@@ -42,7 +43,11 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
     }),
     [pageIndex, pageSize, sortOrder, sortField]
   );
-  const { data: chats, loading, error } = useBulkGetChat(bulkGetOptions);
+  const { data: chats, loading, error, refresh } = useBulkGetChat(bulkGetOptions);
+
+  useEffect(() => {
+    if (props.shouldRefresh) refresh();
+  }, [props.shouldRefresh]);
 
   const onTableChange = (criteria: CriteriaWithPagination<ItemType>) => {
     const { index, size } = criteria.page;
@@ -77,7 +82,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
         <EuiPageBody component="div">
           <EuiBasicTable
             items={chats?.saved_objects || []}
-            rowHeader="firstName"
+            rowHeader="id"
             loading={loading}
             error={error?.message}
             columns={columns}

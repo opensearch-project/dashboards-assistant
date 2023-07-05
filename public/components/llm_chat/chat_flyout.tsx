@@ -11,6 +11,8 @@ import { ChatTabBar } from './components/chat_tab_bar';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 
+let chatHistoryPageLoaded = false;
+
 interface ChatFlyoutProps {
   flyoutVisible: boolean;
   overrideComponent: React.ReactNode | null;
@@ -40,6 +42,8 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
     }
   }
 
+  if (!chatHistoryPageLoaded && chatHistoryPageVisible) chatHistoryPageLoaded = true;
+
   return (
     <EuiFlyout
       className={cs('llm-chat-flyout', {
@@ -65,7 +69,13 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
           />
         </EuiFlyoutHeader>
         <ChatPage className={cs({ 'llm-chat-hidden': !chatPageVisible })} />
-        {chatHistoryPageVisible && <ChatHistoryPage />}
+        {chatHistoryPageLoaded && (
+          <ChatHistoryPage
+            className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
+            // refresh data when user switched to table from another tab
+            shouldRefresh={chatHistoryPageVisible}
+          />
+        )}
       </>
     </EuiFlyout>
   );

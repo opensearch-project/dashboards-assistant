@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import {
   HttpFetchQuery,
   SavedObjectsFindOptions,
@@ -54,6 +54,7 @@ export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) =
   const coreServicesContext = useContext(CoreServicesContext)!;
   const reducer: GenericReducer<SavedObjectsFindResponse<IChat>> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
+  const [refresh, setRefresh] = useState({});
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -70,7 +71,7 @@ export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) =
     return () => {
       abortController.abort();
     };
-  }, [options]);
+  }, [options, refresh]);
 
-  return { ...state };
+  return { ...state, refresh: () => setRefresh({}) };
 };
