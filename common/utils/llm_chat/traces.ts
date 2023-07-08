@@ -6,6 +6,8 @@
 import { SearchHit, SearchResponse } from '@opensearch-project/opensearch/api/types';
 import { ChainRun, LLMRun, ToolRun } from 'langchain/dist/callbacks/handlers/tracer_langchain_v1';
 
+type RequiredKey<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
 export interface LangchainTrace {
   id: string;
   type: ToolRun['type'] | ChainRun['type'] | LLMRun['type'];
@@ -97,18 +99,23 @@ const isChainRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchH
 const isLLMRun = (hit: SearchHit<ToolRun | ChainRun | LLMRun>): hit is SearchHit<LLMRun> =>
   hit._source?.type === 'llm';
 
-export const convertToTraces = (hits: SearchResponse<ToolRun | ChainRun | LLMRun>) => {
+export const convertToTraces = (response: SearchResponse<ToolRun | ChainRun | LLMRun>) => {
   const traces: RunTraces = {
     toolRuns: [],
     chainRuns: [],
     llmRuns: [],
   };
 
-  hits.hits.hits.forEach((hit) => {
-    if (isToolRun(hit)) parseToolRuns(traces, [hit._source!]);
-    if (isChainRun(hit)) parseChainRuns(traces, [hit._source!]);
-    if (isLLMRun(hit)) parseLLMRuns(traces, [hit._source!]);
-  });
+  response.hits.hits
+    .filter(
+      (hit): hit is RequiredKey<typeof response['hits']['hits'][number], '_source'> =>
+        hit._source !== null && hit._source !== undefined
+    )
+    .forEach((hit) => {
+      if (isToolRun(hit)) parseToolRuns(traces, [hit._source]);
+      if (isChainRun(hit)) parseChainRuns(traces, [hit._source]);
+      if (isLLMRun(hit)) parseLLMRuns(traces, [hit._source]);
+    });
 
   return [...traces.toolRuns, ...traces.chainRuns, ...traces.llmRuns].sort(
     (r1, r2) => r1.startTime - r2.startTime
