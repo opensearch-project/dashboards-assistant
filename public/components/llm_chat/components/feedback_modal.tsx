@@ -68,10 +68,21 @@ interface FeedbackModalContentProps {
   formData: FeedbackFormData;
   setFormData: React.Dispatch<React.SetStateAction<FeedbackFormData>>;
   metadata: FeedbackMetaData;
+  displayLabels?: Partial<Record<keyof FeedbackFormData, string>>;
   onClose: () => void;
 }
 
 export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props) => {
+  const labels: NonNullable<Required<typeof props.displayLabels>> = Object.assign(
+    {
+      input: 'Input question',
+      output: 'Output',
+      correct: 'Does the output match your expectations?',
+      expectedOutput: 'Expected output',
+      comment: 'Comment',
+    },
+    props.displayLabels
+  );
   const { loading, submitFeedback } = useSubmitFeedback(
     props.formData,
     props.metadata,
@@ -136,7 +147,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
           id="feedback-form"
           onSubmit={onSubmit}
         >
-          <EuiFormRow label="Input question" isInvalid={hasError('input')} error={formErrors.input}>
+          <EuiFormRow label={labels.input} isInvalid={hasError('input')} error={formErrors.input}>
             <EuiTextArea
               compressed
               placeholder="Your input question"
@@ -148,7 +159,11 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
               isInvalid={hasError('input')}
             />
           </EuiFormRow>
-          <EuiFormRow label="Output" isInvalid={hasError('output')} error={formErrors.output}>
+          <EuiFormRow
+            label={labels.output}
+            isInvalid={hasError('output')}
+            error={formErrors.output}
+          >
             <EuiTextArea
               compressed
               placeholder="The LLM response"
@@ -161,7 +176,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Does the output match your expectations?"
+            label={labels.correct}
             isInvalid={hasError('correct')}
             error={formErrors.correct}
           >
@@ -186,7 +201,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
           </EuiFormRow>
           {props.formData.correct === false && (
             <EuiFormRow
-              label="Expected output"
+              label={labels.expectedOutput}
               isInvalid={hasError('expectedOutput')}
               error={formErrors.expectedOutput}
             >
@@ -210,7 +225,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
               />
             </EuiFormRow>
           )}
-          <EuiFormRow label="Comment">
+          <EuiFormRow label={labels.comment}>
             <EuiTextArea
               compressed
               placeholder="Additional feedback you would like to leave"
