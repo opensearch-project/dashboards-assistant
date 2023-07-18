@@ -76,17 +76,37 @@ export function registerLangChainRoutes(router: IRouter) {
           request
         );
         console.log('########### START CHAIN ####################');
-        const pluginTools = initTools(
-          context.core.opensearch.client.asCurrentUser,
-          opensearchObservabilityClient
-        );
-        const pluginAgentTools = pluginAgentsInit(pluginTools);
-        const memory = memoryInit([]);
-        const chatAgent = chatAgentInit(pluginAgentTools, memory);
-        const agentResponse = await chatAgent.run(question);
+        // const pluginTools = initTools(
+        //   context.core.opensearch.client.asCurrentUser,
+        //   opensearchObservabilityClient
+        // );
+        // const pluginAgentTools = pluginAgentsInit(pluginTools);
+        // const memory = memoryInit([]);
+        // const chatAgent = chatAgentInit(pluginAgentTools, memory);
+        // const agentResponse = await chatAgent.run(question);
         // const agentResponse = await pluginTools[0].generatePPL(question);
+
+        const {
+          body: { hits },
+        } = await context.core.opensearch.client.asCurrentUser.search({
+          index: 'olly-chat-config',
+        });
+
+        const mlCommonsModelId = hits.hits[0]._source.model_id;
+
+        const mlCommonsResponse = await context.core.opensearch.client.asCurrentUser.transport.request(
+          {
+            method: 'POST',
+            path: `/_plugins/_ml/models/${mlCommonsModelId}/_predict`,
+            body: {
+              parameters: {
+                prompt: question,
+              },
+            },
+          }
+        );
         console.log('########### END CHAIN ####################');
-        return response.ok({ body: agentResponse });
+        return response.ok({ body: mlCommonsResponse });
       } catch (error) {
         return response.custom({
           statusCode: error.statusCode || 500,
