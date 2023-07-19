@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { PromptTemplate, LLMChain } from 'langchain';
 import {
   HttpResponsePayload,
   ILegacyScopedClusterClient,
@@ -12,11 +13,18 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { LANGCHAIN_API, LLM_INDEX } from '../../../common/constants/llm';
-import { chatAgentInit } from '../../langchain/agents/agent_helpers';
-import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
-import { memoryInit } from '../../langchain/memory/chat_agent_memory';
-import { initTools } from '../../langchain/tools/tools_helper';
+// import { chatAgentInit } from '../../langchain/agents/agent_helpers';
+// import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
+// import { memoryInit } from '../../langchain/memory/chat_agent_memory';
+// import { initTools } from '../../langchain/tools/tools_helper';
 import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
+import { MLCommonsChatModel } from '../../langchain/models/ml_commons_chat';
+import {
+  ANTHROPIC_DEFAULT_PARAMS,
+  ASSISTANT_CONFIG_DOCUMENT,
+  ASSISTANT_CONFIG_INDEX,
+  ML_COMMONS_BASE_API,
+} from '../../langchain/commons/constants';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(
@@ -76,37 +84,17 @@ export function registerLangChainRoutes(router: IRouter) {
           request
         );
         console.log('########### START CHAIN ####################');
-        // const pluginTools = initTools(
-        //   context.core.opensearch.client.asCurrentUser,
-        //   opensearchObservabilityClient
-        // );
-        // const pluginAgentTools = pluginAgentsInit(pluginTools);
-        // const memory = memoryInit([]);
-        // const chatAgent = chatAgentInit(pluginAgentTools, memory);
-        // const agentResponse = await chatAgent.run(question);
-        // const agentResponse = await pluginTools[0].generatePPL(question);
-
-        const {
-          body: { hits },
-        } = await context.core.opensearch.client.asCurrentUser.search({
-          index: 'olly-chat-config',
-        });
-
-        const mlCommonsModelId = hits.hits[0]._source.model_id;
-
-        const mlCommonsResponse = await context.core.opensearch.client.asCurrentUser.transport.request(
-          {
-            method: 'POST',
-            path: `/_plugins/_ml/models/${mlCommonsModelId}/_predict`,
-            body: {
-              parameters: {
-                prompt: question,
-              },
-            },
-          }
+        // We can construct an LLMChain from a PromptTemplate and an LLM.
+        const model = new MLCommonsChatModel({}, context.core.opensearch.client.asCurrentUser);
+        const prompt = PromptTemplate.fromTemplate(
+          'What is a good name for a company that makes {product}?'
         );
+        const chainA = new LLMChain({ llm: model, prompt });
+
+        // The result is an object with a `text` property.
+        const resA = await chainA.call({ product: 'colorful socks' });
         console.log('########### END CHAIN ####################');
-        return response.ok({ body: mlCommonsResponse });
+        return response.ok({ body: resA });
       } catch (error) {
         return response.custom({
           statusCode: error.statusCode || 500,
