@@ -25,6 +25,7 @@ import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { convertToOutputs } from '../../langchain/utils/data_model';
 import { fetchLangchainTraces } from '../../langchain/utils/utils';
+import { llmModel } from '../../langchain/models/llm_model';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -63,6 +64,8 @@ export function registerChatRoute(router: IRouter) {
       try {
         // FIXME this sets a unique langchain session id for each message but does not support concurrency
         process.env.LANGCHAIN_SESSION = sessionId;
+
+        llmModel.opensearchClient = context.core.opensearch.client.asCurrentUser;
         const pluginTools = initTools(
           context.core.opensearch.client.asCurrentUser,
           opensearchObservabilityClient
@@ -73,12 +76,13 @@ export function registerChatRoute(router: IRouter) {
           memory
         );
         const agentResponse = await chatAgent.run(input.content);
-        process.env.LANGCHAIN_SESSION = undefined;
 
         const suggestions = await requestSuggestionsChain(
           pluginTools.flatMap((tool) => tool.toolsList),
           memory
         );
+
+        process.env.LANGCHAIN_SESSION = undefined;
 
         const traces = await fetchLangchainTraces(
           context.core.opensearch.client.asCurrentUser,

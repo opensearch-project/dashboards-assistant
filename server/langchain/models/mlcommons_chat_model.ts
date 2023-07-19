@@ -9,6 +9,7 @@ import { CallbackManagerForLLMRun } from 'langchain/callbacks';
 import { BaseLanguageModelParams } from 'langchain/base_language';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
+  ANTHROPIC_DEFAULT_PARAMS,
   ASSISTANT_CONFIG_DOCUMENT,
   ASSISTANT_CONFIG_INDEX,
   ML_COMMONS_BASE_API,
@@ -56,21 +57,30 @@ export class MLCommonsChatModel extends BaseChatModel {
     );
   }
 
+  private jsonEncodeString(question: string): string {
+    const jsonString = JSON.stringify({ value: question });
+    return jsonString.slice(10, -2);
+  }
+
   async model_predict(question: string) {
     const getResponse = await this.opensearchClient.get({
       id: ASSISTANT_CONFIG_DOCUMENT,
       index: ASSISTANT_CONFIG_INDEX,
     });
     const mlCommonsModelId = getResponse.body._source.model_id;
+
+    // console.log('final object: ');
     const mlCommonsResponse = await this.opensearchClient.transport.request({
       method: 'POST',
       path: `${ML_COMMONS_BASE_API}/${mlCommonsModelId}/_predict`,
       body: {
         parameters: {
-          prompt: question,
+          ...ANTHROPIC_DEFAULT_PARAMS,
+          prompt: this.jsonEncodeString(question),
         },
       },
     });
+    // TODO: Handle error here
     return mlCommonsResponse.body.inference_results[0].output[0].dataAsMap.completion;
   }
 
@@ -79,7 +89,7 @@ export class MLCommonsChatModel extends BaseChatModel {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
-    return await this.model_predict(this.formatMessagesAsPrompt(messages).replaceAll('\n', '\\n'));
+    return await this.model_predict(this.formatMessagesAsPrompt(messages));
   }
 
   async _generate(
