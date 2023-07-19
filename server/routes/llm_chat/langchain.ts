@@ -13,18 +13,8 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { LANGCHAIN_API, LLM_INDEX } from '../../../common/constants/llm';
-// import { chatAgentInit } from '../../langchain/agents/agent_helpers';
-// import { pluginAgentsInit } from '../../langchain/agents/plugin_agents/plugin_helpers';
-// import { memoryInit } from '../../langchain/memory/chat_agent_memory';
-// import { initTools } from '../../langchain/tools/tools_helper';
 import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
-import { MLCommonsChatModel } from '../../langchain/models/ml_commons_chat';
-import {
-  ANTHROPIC_DEFAULT_PARAMS,
-  ASSISTANT_CONFIG_DOCUMENT,
-  ASSISTANT_CONFIG_INDEX,
-  ML_COMMONS_BASE_API,
-} from '../../langchain/commons/constants';
+import { MLCommonsChatModel } from '../../langchain/models/mlcommons_chat_model';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(
