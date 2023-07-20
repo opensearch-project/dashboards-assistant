@@ -15,11 +15,11 @@ import React from 'react';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { useFetchLangchainTraces } from '../hooks/use_fetch_langchain_traces';
 
-// workaround to show Claude LLM as OpenSearch LLM
+// workaround to show LLM name as OpenSearch LLM
 const formatRunName = (run: LangchainTrace) => {
-  const name = `${run.name.replace('anthropic', 'OpenSearch LLM')}`;
-  if (run.type === 'tool') return <strong>{name}</strong>;
-  return name;
+  if (run.type === 'tool') return <strong>{run.name}</strong>;
+  if (run.type === 'llm') return 'OpenSearch LLM';
+  return run.name;
 };
 
 interface LangchainTracesProps {
@@ -43,7 +43,7 @@ export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
         iconType="alert"
         iconColor="danger"
         title={<h2>Error loading details</h2>}
-        body={error}
+        body={error.toString()}
       />
     );
   }

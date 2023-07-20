@@ -2,11 +2,18 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { AI_PROMPT, HUMAN_PROMPT } from '@anthropic-ai/sdk';
-import { BaseChatModel } from 'langchain/chat_models/base';
-import { BaseChatMessage, ChatResult, AIChatMessage, MessageType } from 'langchain/schema';
-import { CallbackManagerForLLMRun } from 'langchain/callbacks';
 import { BaseLanguageModelParams } from 'langchain/base_language';
+import { CallbackManagerForLLMRun } from 'langchain/callbacks';
+import { BaseChatModel } from 'langchain/chat_models/base';
+import {
+  AIChatMessage,
+  BaseChatMessage,
+  ChatResult,
+  LLMResult,
+  MessageType,
+} from 'langchain/schema';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
   ANTHROPIC_DEFAULT_PARAMS,
@@ -14,6 +21,10 @@ import {
   ASSISTANT_CONFIG_INDEX,
   ML_COMMONS_BASE_API,
 } from '../commons/constants';
+
+interface AssistantConfigDoc {
+  model_id: string;
+}
 
 export class MLCommonsChatModel extends BaseChatModel {
   opensearchClient: OpenSearchClient;
@@ -23,10 +34,7 @@ export class MLCommonsChatModel extends BaseChatModel {
     this.opensearchClient = osClient;
   }
 
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
-  _combineLLMOutput?(
-    ...llmOutputs: Array<Record<string, any> | undefined>
-  ): Record<string, any> | undefined {
+  _combineLLMOutput?(...llmOutputs: Array<LLMResult['llmOutput']>): LLMResult['llmOutput'] {
     return [];
   }
 
@@ -59,17 +67,17 @@ export class MLCommonsChatModel extends BaseChatModel {
 
   private jsonEncodeString(question: string): string {
     const jsonString = JSON.stringify({ value: question });
-    return jsonString.slice(10, -2);
+    return jsonString.slice(10, -2); // remove `{"value":"` and `"}`
   }
 
   async model_predict(question: string) {
-    const getResponse = await this.opensearchClient.get({
+    const getResponse = await this.opensearchClient.get<AssistantConfigDoc>({
       id: ASSISTANT_CONFIG_DOCUMENT,
       index: ASSISTANT_CONFIG_INDEX,
     });
+    if (!getResponse.body._source) throw new Error('Assistant config source not found.');
     const mlCommonsModelId = getResponse.body._source.model_id;
 
-    // console.log('final object: ');
     const mlCommonsResponse = await this.opensearchClient.transport.request({
       method: 'POST',
       path: `${ML_COMMONS_BASE_API}/${mlCommonsModelId}/_predict`,
@@ -80,7 +88,6 @@ export class MLCommonsChatModel extends BaseChatModel {
         },
       },
     });
-    // TODO: Handle error here
     return mlCommonsResponse.body.inference_results[0].output[0].dataAsMap.completion;
   }
 
