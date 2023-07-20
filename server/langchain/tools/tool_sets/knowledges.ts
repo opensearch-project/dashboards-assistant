@@ -5,14 +5,14 @@
 
 import { RetrievalQAChain } from 'langchain/chains';
 import { DynamicTool } from 'langchain/tools';
-import { llmModel } from '../../models/llm_model';
+import { LLMModelFactory } from '../../models/llm_model_factory';
 import { swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
 export class KnowledgeTools extends PluginToolsFactory {
   chain = RetrievalQAChain.fromLLM(
-    llmModel.model,
-    llmModel.createVectorStore(this.opensearchClient).asRetriever(),
+    this.model,
+    LLMModelFactory.createVectorStore(this.embeddings, this.opensearchClient).asRetriever(),
     { returnSourceDocuments: true }
   );
 

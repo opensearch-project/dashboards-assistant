@@ -4,7 +4,8 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { PromptTemplate, LLMChain } from 'langchain';
+import { LLMChain } from 'langchain/chains';
+import { PromptTemplate } from 'langchain/prompts';
 import {
   HttpResponsePayload,
   ILegacyScopedClusterClient,
@@ -13,8 +14,9 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { LANGCHAIN_API, LLM_INDEX } from '../../../common/constants/llm';
-import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
+import { LLMModelFactory } from '../../langchain/models/llm_model_factory';
 import { MLCommonsChatModel } from '../../langchain/models/mlcommons_chat_model';
+import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(
@@ -32,16 +34,16 @@ export function registerLangChainRoutes(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      try {
-        const { index, question } = request.body;
-        const observabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
-          request
-        );
+      const { index, question } = request.body;
+      const observabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+        request
+      );
+      const opensearchClient = context.core.opensearch.client.asCurrentUser;
 
-        const pplTools = new PPLTools(
-          context.core.opensearch.client.asCurrentUser,
-          observabilityClient
-        );
+      try {
+        const model = LLMModelFactory.createModel(opensearchClient);
+        const embeddings = LLMModelFactory.createEmbeddings();
+        const pplTools = new PPLTools(model, embeddings, opensearchClient, observabilityClient);
         const ppl = await pplTools.generatePPL(question, index);
 
         return response.ok({ body: ppl });

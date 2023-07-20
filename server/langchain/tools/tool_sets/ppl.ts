@@ -110,6 +110,7 @@ export class PPLTools extends PluginToolsFactory {
     if (!index) {
       const prometheusMetricList = await this.getPrometheusMetricList();
       const response = await requestGuessingIndexChain(
+        this.model,
         question,
         prometheusMetricList.map(
           (metric) => `index: ${metric.table}, description: ${metric.description}`
@@ -124,7 +125,7 @@ export class PPLTools extends PluginToolsFactory {
     console.info('❗question:', question);
     if (!index) {
       const indexNameList = await this.getIndexNameList();
-      const response = await requestGuessingIndexChain(question, indexNameList);
+      const response = await requestGuessingIndexChain(this.model, question, indexNameList);
       index = response.index;
     }
 
@@ -136,7 +137,7 @@ export class PPLTools extends PluginToolsFactory {
       const fields = generateFieldContext(mappings, sampleDoc);
 
       const input = `Fields:\n${fields}\nQuestion: ${question}? index is \`${index}\``;
-      const ppl = await requestPPLGeneratorChain(input);
+      const ppl = await requestPPLGeneratorChain(this.model, input);
       logToFile({ question, input, ppl }, 'ppl_generator');
       ppl.query = ppl.query.replace(/`/g, ''); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
       console.info('❗ppl:', ppl.query);

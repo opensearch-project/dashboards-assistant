@@ -20,7 +20,6 @@ import {
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
 import { DynamicTool } from 'langchain/tools';
-import { llmModel } from '../../models/llm_model';
 import { ChatConversationalAgentOutputLenientParser } from '../output_parsers/output_parsers';
 import { DEFAULT_HUMAN_MESSAGE, DEFAULT_SYSTEM_MESSAGE } from '../prompts/default_chat_prompts';
 import {
@@ -68,10 +67,11 @@ export class AgentFactory {
     agentType: AgentTypes,
     agentTools: DynamicTool[],
     agentArgs: AgentPrompts,
+    model: BaseLanguageModel,
     customAgentMemory?: BufferMemory
   ) {
     this.executorType = agentType;
-    this.model = llmModel.model;
+    this.model = model;
     this.agentTools = [...agentTools];
     this.agentArgs = agentArgs;
 

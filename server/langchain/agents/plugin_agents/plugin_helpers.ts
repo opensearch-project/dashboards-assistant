@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BaseLanguageModel } from 'langchain/base_language';
 import { DynamicTool } from 'langchain/tools';
 import { PluginToolsFactory } from '../../tools/tools_factory/tools_factory';
 import { extractContent } from '../../utils/data_model';
@@ -12,14 +13,19 @@ import {
   PPL_AGENT_SYSTEM_MESSAGE,
 } from '../prompts/plugin_agent_prompts/ppl_conv_prompts';
 
-export const pluginAgentsInit = (PluginTools: PluginToolsFactory[]) => {
-  const pplAgent = new AgentFactory('chat', PluginTools[0].toolsList, {
-    chat_system_message: PPL_AGENT_SYSTEM_MESSAGE,
-    chat_human_message: PPL_AGENT_HUMAN_MESSAGE,
-  });
-  const alertingAgent = new AgentFactory('chat', PluginTools[1].toolsList, {});
-  const knowledgeAgent = new AgentFactory('chat', PluginTools[2].toolsList, {});
-  const opensearchAgent = new AgentFactory('chat', PluginTools[3].toolsList, {});
+export const pluginAgentsInit = (PluginTools: PluginToolsFactory[], model: BaseLanguageModel) => {
+  const pplAgent = new AgentFactory(
+    'chat',
+    PluginTools[0].toolsList,
+    {
+      chat_system_message: PPL_AGENT_SYSTEM_MESSAGE,
+      chat_human_message: PPL_AGENT_HUMAN_MESSAGE,
+    },
+    model
+  );
+  const alertingAgent = new AgentFactory('chat', PluginTools[1].toolsList, {}, model);
+  const knowledgeAgent = new AgentFactory('chat', PluginTools[2].toolsList, {}, model);
+  const opensearchAgent = new AgentFactory('chat', PluginTools[3].toolsList, {}, model);
 
   const pluginAgentTools = [
     new DynamicTool({
