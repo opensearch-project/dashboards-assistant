@@ -4,6 +4,7 @@
  */
 
 import { BaseLanguageModel } from 'langchain/base_language';
+import { Callbacks } from 'langchain/callbacks';
 import { LLMChain } from 'langchain/chains';
 import { BufferMemory } from 'langchain/memory';
 import { StructuredOutputParser } from 'langchain/output_parsers';
@@ -50,7 +51,7 @@ const prompt = new PromptTemplate({
   partialVariables: { format_instructions: formatInstructions },
 });
 
-const convertChatToStirng = (chatMessages: BaseChatMessage[]) => {
+const convertChatToString = (chatMessages: BaseChatMessage[]) => {
   const chatString = chatMessages
     .map((message) => `${message._getType()}: ${message.text}`)
     .join('\n');
@@ -60,14 +61,18 @@ const convertChatToStirng = (chatMessages: BaseChatMessage[]) => {
 export const requestSuggestionsChain = async (
   model: BaseLanguageModel,
   tools: Tool[],
-  memory: BufferMemory
+  memory: BufferMemory,
+  callbacks?: Callbacks
 ) => {
   const toolsContext = tools.map((tool) => `${tool.name}: ${tool.description}`).join('\n');
 
   const chatHistory = memory.chatHistory;
   // TODO: Reduce the message history (may be to last six chat pairs) sent to the chain in the context.
-  const chatContext = convertChatToStirng(await chatHistory.getMessages());
+  const chatContext = convertChatToString(await chatHistory.getMessages());
   const chain = new LLMChain({ llm: model, prompt });
-  const output = await chain.call({ tools_description: toolsContext, chat_history: chatContext });
+  const output = await chain.call(
+    { tools_description: toolsContext, chat_history: chatContext },
+    callbacks
+  );
   return parser.parse(output.text);
 };

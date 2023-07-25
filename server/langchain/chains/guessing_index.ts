@@ -4,6 +4,7 @@
  */
 
 import { BaseLanguageModel } from 'langchain/base_language';
+import { Callbacks } from 'langchain/callbacks';
 import { LLMChain } from 'langchain/chains';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { PromptTemplate } from 'langchain/prompts';
@@ -32,9 +33,10 @@ const prompt = new PromptTemplate({
 export const requestGuessingIndexChain = async (
   model: BaseLanguageModel,
   question: string,
-  indexNameList: string[]
+  indexNameList: string[],
+  callbacks?: Callbacks
 ) => {
   const chain = new LLMChain({ llm: model, prompt });
-  const output = await chain.call({ question, indexNames: indexNameList.join('\n') });
+  const output = await chain.call({ question, indexNames: indexNameList.join('\n') }, callbacks);
   return parser.parse(output.text);
 };

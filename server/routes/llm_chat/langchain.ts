@@ -6,6 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { LLMChain } from 'langchain/chains';
 import { PromptTemplate } from 'langchain/prompts';
+import { v4 as uuid } from 'uuid';
 import {
   HttpResponsePayload,
   ILegacyScopedClusterClient,
@@ -14,6 +15,7 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { LANGCHAIN_API, LLM_INDEX } from '../../../common/constants/llm';
+import { OpenSearchTracer } from '../../langchain/callbacks/opensearch_tracer';
 import { LLMModelFactory } from '../../langchain/models/llm_model_factory';
 import { MLCommonsChatModel } from '../../langchain/models/mlcommons_chat_model';
 import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
@@ -35,15 +37,25 @@ export function registerLangChainRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const { index, question } = request.body;
+      const sessionId = uuid();
       const observabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
         request
       );
       const opensearchClient = context.core.opensearch.client.asCurrentUser;
+      const savedObjectsClient = context.core.savedObjects.client;
 
       try {
-        const model = LLMModelFactory.createModel(opensearchClient);
+        const callbacks = [new OpenSearchTracer(opensearchClient, sessionId)];
+        const model = LLMModelFactory.createModel({ client: opensearchClient });
         const embeddings = LLMModelFactory.createEmbeddings();
-        const pplTools = new PPLTools(model, embeddings, opensearchClient, observabilityClient);
+        const pplTools = new PPLTools(
+          model,
+          embeddings,
+          opensearchClient,
+          observabilityClient,
+          savedObjectsClient,
+          callbacks
+        );
         const ppl = await pplTools.generatePPL(question, index);
 
         return response.ok({ body: ppl });

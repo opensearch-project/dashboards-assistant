@@ -29,12 +29,14 @@ export class PPLTools extends PluginToolsFactory {
         const results = await this.executePPL(ppl);
         return `The PPL query is: ${ppl}\n\nThe results are:\n${JSON.stringify(results, null, 2)}`;
       }),
+      callbacks: this.callbacks,
     }),
     /* new DynamicTool({
       name: 'Generate prometheus PPL query',
       description:
         'Use this tool to generate a PPL query about metrics and prometheus. This tool take natural language question as input.',
       func: swallowErrors((query: string) => this.generatePrometheusPPL(query)),
+      callbacks: this.callbacks,
     }), */
     new DynamicTool({
       name: 'Execute PPL query',
@@ -45,6 +47,7 @@ export class PPLTools extends PluginToolsFactory {
             `The PPL query is: ${query}\n\nThe results are:\n${JSON.stringify(result, null, 2)}`
         )
       ),
+      callbacks: this.callbacks,
     }),
     new DynamicTool({
       name: 'Log info',
@@ -55,6 +58,7 @@ export class PPLTools extends PluginToolsFactory {
         const results = await this.executePPL(ppl);
         return `The PPL query is: ${ppl}\n\nThe results are:\n${JSON.stringify(results, null, 2)}`;
       }),
+      callbacks: this.callbacks,
     }),
     new DynamicTool({
       name: 'Log error info',
@@ -67,6 +71,7 @@ export class PPLTools extends PluginToolsFactory {
         const results = await this.executePPL(ppl);
         return `The PPL query is: ${ppl}\n\nThe results are:\n${JSON.stringify(results, null, 2)}`;
       }),
+      callbacks: this.callbacks,
     }),
   ];
 
@@ -114,7 +119,8 @@ export class PPLTools extends PluginToolsFactory {
         question,
         prometheusMetricList.map(
           (metric) => `index: ${metric.table}, description: ${metric.description}`
-        )
+        ),
+        this.callbacks
       );
       index = response.index;
     }
@@ -125,7 +131,12 @@ export class PPLTools extends PluginToolsFactory {
     console.info('❗question:', question);
     if (!index) {
       const indexNameList = await this.getIndexNameList();
-      const response = await requestGuessingIndexChain(this.model, question, indexNameList);
+      const response = await requestGuessingIndexChain(
+        this.model,
+        question,
+        indexNameList,
+        this.callbacks
+      );
       index = response.index;
     }
 
@@ -137,7 +148,7 @@ export class PPLTools extends PluginToolsFactory {
       const fields = generateFieldContext(mappings, sampleDoc);
 
       const input = `Fields:\n${fields}\nQuestion: ${question}? index is \`${index}\``;
-      const ppl = await requestPPLGeneratorChain(this.model, input);
+      const ppl = await requestPPLGeneratorChain(this.model, input, this.callbacks);
       logToFile({ question, input, ppl }, 'ppl_generator');
       ppl.query = ppl.query.replace(/`/g, ''); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
       console.info('❗ppl:', ppl.query);

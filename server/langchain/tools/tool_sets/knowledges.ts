@@ -12,7 +12,10 @@ import { PluginToolsFactory } from '../tools_factory/tools_factory';
 export class KnowledgeTools extends PluginToolsFactory {
   chain = RetrievalQAChain.fromLLM(
     this.model,
-    LLMModelFactory.createVectorStore(this.embeddings, this.opensearchClient).asRetriever(),
+    LLMModelFactory.createVectorStore({
+      embeddings: this.embeddings,
+      client: this.opensearchClient,
+    }).asRetriever(),
     { returnSourceDocuments: true }
   );
 
@@ -22,18 +25,21 @@ export class KnowledgeTools extends PluginToolsFactory {
       description:
         'Use this tool to get information related to Project ThunderShift. This tool takes the user question as input.',
       func: swallowErrors((query: string) => this.askVectorStore(query)),
+      callbacks: this.callbacks,
     }),
     new DynamicTool({
       name: 'Get ticket information',
       description:
         'Use this tool to find tickets in the system with incidents that are relevant to a question about error causes. This tool takes the question as input.',
       func: swallowErrors((query: string) => this.askVectorStore(query)),
+      callbacks: this.callbacks,
     }),
     new DynamicTool({
       name: 'Get generic information',
       description:
         'Use this tool to answer a generic question not related to OpenSearch cluster. This tool takes the question as input.',
       func: swallowErrors((query: string) => this.askVectorStore(query)),
+      callbacks: this.callbacks,
     }),
   ];
 

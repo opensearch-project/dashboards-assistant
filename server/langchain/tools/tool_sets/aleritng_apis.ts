@@ -13,11 +13,13 @@ export class OSAlertingTools extends PluginToolsFactory {
       description:
         'use this tool to search alerting mointors by index name in the OpenSearch cluster. This tool takes the index name as input',
       func: (indexName: string) => this.searchAlertMonitorsByIndex(indexName),
+      callbacks: this.callbacks,
     }),
     new DynamicTool({
       name: 'Get All Alerts',
       description: 'use this tool to search all alerts triggered in the OpenSearch cluster.',
       func: () => this.getAllAlerts(),
+      callbacks: this.callbacks,
     }),
   ];
 

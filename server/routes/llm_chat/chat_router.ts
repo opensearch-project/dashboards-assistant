@@ -5,6 +5,7 @@
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema } from '@osd/config-schema';
+import { Run } from 'langchain/callbacks';
 import { v4 as uuid } from 'uuid';
 import {
   HttpResponsePayload,
@@ -20,12 +21,12 @@ import {
 } from '../../../common/types/observability_saved_object_attributes';
 import { convertToTraces } from '../../../common/utils/llm_chat/traces';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
+import { OpenSearchTracer } from '../../langchain/callbacks/opensearch_tracer';
 import { requestSuggestionsChain } from '../../langchain/chains/suggestions_generator';
 import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 import { LLMModelFactory } from '../../langchain/models/llm_model_factory';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { convertToOutputs } from '../../langchain/utils/data_model';
-import { fetchLangchainTraces } from '../../langchain/utils/utils';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -61,23 +62,26 @@ export function registerChatRoute(router: IRouter) {
         request
       );
       const opensearchClient = context.core.opensearch.client.asCurrentUser;
+      const savedObjectsClient = context.core.savedObjects.client;
 
       try {
-        // FIXME this sets a unique langchain session id for each message but does not support concurrency
-        process.env.LANGCHAIN_SESSION = sessionId;
-
-        const model = LLMModelFactory.createModel(opensearchClient);
+        const traces: Run[] = [];
+        const callbacks = [new OpenSearchTracer(opensearchClient, sessionId, traces)];
+        const model = LLMModelFactory.createModel({ client: opensearchClient });
         const embeddings = LLMModelFactory.createEmbeddings();
         const pluginTools = initTools(
           model,
           embeddings,
           opensearchClient,
-          opensearchObservabilityClient
+          opensearchObservabilityClient,
+          savedObjectsClient,
+          callbacks
         );
         const memory = memoryInit(messages.slice(1)); // Skips the first default message
         const chatAgent = chatAgentInit(
-          pluginTools.flatMap((tool) => tool.toolsList),
           model,
+          pluginTools.flatMap((tool) => tool.toolsList),
+          callbacks,
           memory
         );
         const agentResponse = await chatAgent.run(input.content);
@@ -85,19 +89,11 @@ export function registerChatRoute(router: IRouter) {
         const suggestions = await requestSuggestionsChain(
           model,
           pluginTools.flatMap((tool) => tool.toolsList),
-          memory
+          memory,
+          callbacks
         );
 
-        process.env.LANGCHAIN_SESSION = undefined;
-
-        const traces = await fetchLangchainTraces(
-          context.core.opensearch.client.asCurrentUser,
-          sessionId
-        )
-          .then((resp) => convertToTraces(resp.body))
-          .catch(() => context.observability_plugin.logger.warn('Failed to get langchain traces'));
-
-        outputs = convertToOutputs(agentResponse, sessionId, suggestions, traces);
+        outputs = convertToOutputs(agentResponse, sessionId, suggestions, convertToTraces(traces));
       } catch (error) {
         context.observability_plugin.logger.error(error);
         outputs = [

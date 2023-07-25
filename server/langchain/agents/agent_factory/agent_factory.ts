@@ -12,6 +12,7 @@ import {
   ZeroShotAgent,
 } from 'langchain/agents';
 import { BaseLanguageModel } from 'langchain/base_language';
+import { Callbacks } from 'langchain/callbacks';
 import { LLMChain } from 'langchain/chains';
 import { BufferMemory } from 'langchain/memory';
 import {
@@ -68,6 +69,7 @@ export class AgentFactory {
     agentTools: DynamicTool[],
     agentArgs: AgentPrompts,
     model: BaseLanguageModel,
+    callbacks: Callbacks,
     customAgentMemory?: BufferMemory
   ) {
     this.executorType = agentType;
@@ -98,6 +100,7 @@ export class AgentFactory {
         this.executor = AgentExecutor.fromAgentAndTools({
           agent,
           tools: this.agentTools,
+          callbacks,
           verbose: true,
         });
         break;
@@ -111,6 +114,7 @@ export class AgentFactory {
         this.executor = AgentExecutor.fromAgentAndTools({
           agent: ChatAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
           tools: this.agentTools,
+          callbacks,
           verbose: true,
         });
         break;
@@ -130,6 +134,7 @@ export class AgentFactory {
           agent: ChatConversationalAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
           tools: this.agentTools,
           memory: customAgentMemory ?? this.memory,
+          callbacks,
           verbose: true,
         });
         break;

@@ -4,11 +4,7 @@
  */
 
 import { promises as fs } from 'fs';
-import { ChainRun, LLMRun, ToolRun } from 'langchain/dist/callbacks/handlers/tracer_langchain_v1';
 import { DynamicToolInput } from 'langchain/tools';
-import { OpenSearchClient } from '../../../../../src/core/server';
-import { SearchRequest } from '../../../../../src/plugins/data/common';
-import { LLM_INDEX } from '../../../common/constants/llm';
 
 /**
  * @param status - json object that needs to be logged
@@ -57,26 +53,4 @@ export const jsonToCsv = (json: object[]) => {
   const csv = rows.map((row) => row.join(',')).join('\n');
 
   return csv;
-};
-
-export const fetchLangchainTraces = (client: OpenSearchClient, sessionId: string) => {
-  const query: SearchRequest['body'] = {
-    query: {
-      term: {
-        session_id: sessionId,
-      },
-    },
-    sort: [
-      {
-        start_time: {
-          order: 'asc',
-        },
-      },
-    ],
-  };
-  return client.search<ToolRun | ChainRun | LLMRun>({
-    index: LLM_INDEX.TRACES,
-    body: query,
-    size: 10,
-  });
 };

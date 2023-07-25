@@ -4,6 +4,7 @@
  */
 
 import { BaseLanguageModel } from 'langchain/base_language';
+import { Callbacks } from 'langchain/callbacks';
 import { BufferMemory } from 'langchain/memory';
 import { DynamicTool } from 'langchain/tools';
 import { AgentFactory } from './agent_factory/agent_factory';
@@ -13,8 +14,9 @@ import {
 } from './prompts/parent_agent_prompts';
 
 export const chatAgentInit = (
-  pluginAgentTools: DynamicTool[],
   model: BaseLanguageModel,
+  pluginAgentTools: DynamicTool[],
+  callbacks: Callbacks,
   memory?: BufferMemory
 ) => {
   const chatAgent = new AgentFactory(
@@ -25,6 +27,7 @@ export const chatAgentInit = (
       chat_human_message: PARENT_AGENT_HUMAN_MESSAGE,
     },
     model,
+    callbacks,
     memory
   );
   return chatAgent;

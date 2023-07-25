@@ -4,6 +4,7 @@
  */
 
 import { BaseLanguageModel } from 'langchain/base_language';
+import { Callbacks } from 'langchain/callbacks';
 import { LLMChain } from 'langchain/chains';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { PromptTemplate } from 'langchain/prompts';
@@ -229,8 +230,12 @@ const prompt = new PromptTemplate({
   partialVariables: { format_instructions: formatInstructions },
 });
 
-export const requestPPLGeneratorChain = async (model: BaseLanguageModel, question: string) => {
+export const requestPPLGeneratorChain = async (
+  model: BaseLanguageModel,
+  question: string,
+  callbacks?: Callbacks
+) => {
   const chain = new LLMChain({ llm: model, prompt });
-  const output = await chain.call({ question });
+  const output = await chain.call({ question }, callbacks);
   return parser.parse(output.text);
 };

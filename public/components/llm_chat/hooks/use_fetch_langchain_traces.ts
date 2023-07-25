@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChainRun, LLMRun, ToolRun } from 'langchain/dist/callbacks/handlers/tracer_langchain_v1';
-
+import { Run } from 'langchain/callbacks';
 import { useContext, useEffect, useReducer } from 'react';
 import { SearchResponse } from '../../../../../../src/core/server';
 import { SearchRequest } from '../../../../../../src/plugins/data/common';
@@ -43,11 +42,16 @@ export const useFetchLangchainTraces = (sessionId: string) => {
     };
 
     coreServicesContext.http
-      .post<SearchResponse<ToolRun | ChainRun | LLMRun>>(`${DSL_BASE}${DSL_SEARCH}`, {
+      .post<SearchResponse<Run>>(`${DSL_BASE}${DSL_SEARCH}`, {
         body: JSON.stringify({ index: LLM_INDEX.TRACES, size: 100, ...query }),
         signal: abortController.signal,
       })
-      .then((payload) => dispatch({ type: 'success', payload: convertToTraces(payload) }))
+      .then((payload) =>
+        dispatch({
+          type: 'success',
+          payload: convertToTraces(payload.hits.hits.map((hit) => hit._source)),
+        })
+      )
       .catch((error) => dispatch({ type: 'failure', error }));
 
     return () => abortController.abort();
