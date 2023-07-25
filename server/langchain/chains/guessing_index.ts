@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BaseLanguageModel } from 'langchain/base_language';
 import { LLMChain } from 'langchain/chains';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { PromptTemplate } from 'langchain/prompts';
-import { llmModel } from '../models/llm_model';
 
 const template = `
 From the given list of index names, pick the one that is the most relevant to the question.
@@ -29,8 +29,12 @@ const prompt = new PromptTemplate({
   partialVariables: { format_instructions: formatInstructions },
 });
 
-export const requestGuessingIndexChain = async (question: string, indexNameList: string[]) => {
-  const chain = new LLMChain({ llm: llmModel.model, prompt });
+export const requestGuessingIndexChain = async (
+  model: BaseLanguageModel,
+  question: string,
+  indexNameList: string[]
+) => {
+  const chain = new LLMChain({ llm: model, prompt });
   const output = await chain.call({ question, indexNames: indexNameList.join('\n') });
   return parser.parse(output.text);
 };

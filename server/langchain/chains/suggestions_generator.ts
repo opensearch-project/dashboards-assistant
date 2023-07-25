@@ -3,20 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BaseLanguageModel } from 'langchain/base_language';
 import { LLMChain } from 'langchain/chains';
+import { BufferMemory } from 'langchain/memory';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { PromptTemplate } from 'langchain/prompts';
-import { BufferMemory } from 'langchain/memory';
 import { BaseChatMessage } from 'langchain/schema';
 import { Tool } from 'langchain/tools';
-import { llmModel } from '../models/llm_model';
 
 const template = `
 You will be given a chat history between OpenSearch Assistant and a Human.
 Use the context provided to generate follow up questions the Human would ask to the Assistant.
 
 The Assistant can answer general questions about logs, traces and metrics.
-The Assistant is an expert in 
+The Assistant is an expert in
 
 Assistant can access a set of tools listed below to answer questions given by the Human:
 {tools_description}
@@ -57,13 +57,17 @@ const convertChatToStirng = (chatMessages: BaseChatMessage[]) => {
   return chatString;
 };
 
-export const requestSuggestionsChain = async (tools: Tool[], memory: BufferMemory) => {
+export const requestSuggestionsChain = async (
+  model: BaseLanguageModel,
+  tools: Tool[],
+  memory: BufferMemory
+) => {
   const toolsContext = tools.map((tool) => `${tool.name}: ${tool.description}`).join('\n');
 
   const chatHistory = memory.chatHistory;
   // TODO: Reduce the message history (may be to last six chat pairs) sent to the chain in the context.
   const chatContext = convertChatToStirng(await chatHistory.getMessages());
-  const chain = new LLMChain({ llm: llmModel.model, prompt });
+  const chain = new LLMChain({ llm: model, prompt });
   const output = await chain.call({ tools_description: toolsContext, chat_history: chatContext });
   return parser.parse(output.text);
 };

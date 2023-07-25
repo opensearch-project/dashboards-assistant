@@ -22,6 +22,7 @@ import { convertToTraces } from '../../../common/utils/llm_chat/traces';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { requestSuggestionsChain } from '../../langchain/chains/suggestions_generator';
 import { memoryInit } from '../../langchain/memory/chat_agent_memory';
+import { LLMModelFactory } from '../../langchain/models/llm_model_factory';
 import { initTools } from '../../langchain/tools/tools_helper';
 import { convertToOutputs } from '../../langchain/utils/data_model';
 import { fetchLangchainTraces } from '../../langchain/utils/utils';
@@ -59,37 +60,46 @@ export function registerChatRoute(router: IRouter) {
       const opensearchObservabilityClient = context.observability_plugin.observabilityClient.asScoped(
         request
       );
+      const opensearchClient = context.core.opensearch.client.asCurrentUser;
 
       try {
         // FIXME this sets a unique langchain session id for each message but does not support concurrency
         process.env.LANGCHAIN_SESSION = sessionId;
+
+        const model = LLMModelFactory.createModel(opensearchClient);
+        const embeddings = LLMModelFactory.createEmbeddings();
         const pluginTools = initTools(
-          context.core.opensearch.client.asCurrentUser,
+          model,
+          embeddings,
+          opensearchClient,
           opensearchObservabilityClient
         );
         const memory = memoryInit(messages.slice(1)); // Skips the first default message
         const chatAgent = chatAgentInit(
           pluginTools.flatMap((tool) => tool.toolsList),
+          model,
           memory
         );
         const agentResponse = await chatAgent.run(input.content);
-        process.env.LANGCHAIN_SESSION = undefined;
 
         const suggestions = await requestSuggestionsChain(
+          model,
           pluginTools.flatMap((tool) => tool.toolsList),
           memory
         );
+
+        process.env.LANGCHAIN_SESSION = undefined;
 
         const traces = await fetchLangchainTraces(
           context.core.opensearch.client.asCurrentUser,
           sessionId
         )
           .then((resp) => convertToTraces(resp.body))
-          .catch((e) => console.error(e));
+          .catch(() => context.observability_plugin.logger.warn('Failed to get langchain traces'));
 
         outputs = convertToOutputs(agentResponse, sessionId, suggestions, traces);
       } catch (error) {
-        console.error(error);
+        context.observability_plugin.logger.error(error);
         outputs = [
           {
             type: 'output',
@@ -117,7 +127,7 @@ export function registerChatRoute(router: IRouter) {
         });
         return response.ok({ body: { chatId, messages: updateResponse.attributes.messages } });
       } catch (error) {
-        console.error(error);
+        context.observability_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
@@ -148,10 +158,8 @@ export function registerChatRoute(router: IRouter) {
 
         return response.ok({ body: findResponse });
       } catch (error) {
-        return response.custom({
-          statusCode: error.statusCode || 500,
-          body: error.message,
-        });
+        context.observability_plugin.logger.error(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
   );

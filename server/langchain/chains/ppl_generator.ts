@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BaseLanguageModel } from 'langchain/base_language';
 import { LLMChain } from 'langchain/chains';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { PromptTemplate } from 'langchain/prompts';
-import { llmModel } from '../models/llm_model';
 
 const template = `
 You will be given a question about some metrics from a user.
@@ -229,8 +229,8 @@ const prompt = new PromptTemplate({
   partialVariables: { format_instructions: formatInstructions },
 });
 
-export const requestPPLGeneratorChain = async (question: string) => {
-  const chain = new LLMChain({ llm: llmModel.model, prompt });
+export const requestPPLGeneratorChain = async (model: BaseLanguageModel, question: string) => {
+  const chain = new LLMChain({ llm: model, prompt });
   const output = await chain.call({ question });
   return parser.parse(output.text);
 };

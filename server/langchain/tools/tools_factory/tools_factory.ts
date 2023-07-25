@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BaseLanguageModel } from 'langchain/base_language';
+import { Embeddings } from 'langchain/dist/embeddings/base';
 import { DynamicTool } from 'langchain/tools';
 import { ILegacyScopedClusterClient, OpenSearchClient } from '../../../../../../src/core/server';
 
 export abstract class PluginToolsFactory {
-  opensearchClient: OpenSearchClient;
-  observabilityClient: ILegacyScopedClusterClient;
-  abstract toolsList: DynamicTool[];
+  public abstract toolsList: DynamicTool[];
 
-  constructor(opensearchClient: OpenSearchClient, observabilityClient: ILegacyScopedClusterClient) {
-    this.opensearchClient = opensearchClient;
-    this.observabilityClient = observabilityClient;
-  }
+  constructor(
+    protected model: BaseLanguageModel,
+    protected embeddings: Embeddings,
+    protected opensearchClient: OpenSearchClient,
+    protected observabilityClient: ILegacyScopedClusterClient
+  ) {}
 }
