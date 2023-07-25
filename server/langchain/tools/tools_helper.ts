@@ -8,6 +8,7 @@ import { OSAlertingTools } from './tool_sets/aleritng_apis';
 import { KnowledgeTools } from './tool_sets/knowledges';
 import { OSAPITools } from './tool_sets/os_apis';
 import { PPLTools } from './tool_sets/ppl';
+import { SavedObjectsTools } from './tool_sets/saved_objects';
 
 export const initTools = (
   // proper way to get parameters possibly needs typescript 4.2 https://github.com/microsoft/TypeScript/issues/35576
@@ -17,5 +18,6 @@ export const initTools = (
   const alertingTools = new OSAlertingTools(...args);
   const knowledgeTools = new KnowledgeTools(...args);
   const opensearchTools = new OSAPITools(...args);
-  return [pplTools, alertingTools, knowledgeTools, opensearchTools];
+  const savedObjectsTools = new SavedObjectsTools(...args);
+  return [pplTools, alertingTools, knowledgeTools, opensearchTools, savedObjectsTools];
 };
