@@ -4,6 +4,7 @@
  */
 
 import { Run } from 'langchain/callbacks';
+import _ from 'lodash';
 
 export interface LangchainTrace {
   id: string;
@@ -15,7 +16,10 @@ export interface LangchainTrace {
 }
 
 const getValue = (obj: Record<string, string>, possibleKeys: string[]) => {
-  for (const key of possibleKeys) if (obj[key]) return obj[key];
+  for (const key of possibleKeys) {
+    const value = _.get(obj, key);
+    if (value) return value;
+  }
   return '';
 };
 
@@ -26,8 +30,8 @@ const parseRuns = (traces: LangchainTrace[], runs: Run[]) => {
       type: run.run_type,
       startTime: run.start_time,
       name: run.name,
-      input: getValue(run.inputs, ['input', 'question']),
-      output: run.outputs && getValue(run.outputs, ['output', 'text']),
+      input: getValue(run.inputs, ['input', 'question', 'messages.0.0.data.content']),
+      output: run.outputs && getValue(run.outputs, ['output', 'text', 'generations.0.0.text']),
     }))
   );
   runs.forEach((run) => {
