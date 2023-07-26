@@ -128,7 +128,6 @@ export class PPLTools extends PluginToolsFactory {
   }
 
   public async generatePPL(question: string, index?: string) {
-    console.info('❗question:', question);
     if (!index) {
       const indexNameList = await this.getIndexNameList();
       const response = await requestGuessingIndexChain(
@@ -140,22 +139,17 @@ export class PPLTools extends PluginToolsFactory {
       index = response.index;
     }
 
-    try {
-      const [mappings, sampleDoc] = await Promise.all([
-        this.opensearchClient.indices.getMapping({ index }),
-        this.opensearchClient.search({ index, size: 1 }),
-      ]);
-      const fields = generateFieldContext(mappings, sampleDoc);
+    const [mappings, sampleDoc] = await Promise.all([
+      this.opensearchClient.indices.getMapping({ index }),
+      this.opensearchClient.search({ index, size: 1 }),
+    ]);
+    const fields = generateFieldContext(mappings, sampleDoc);
 
-      const input = `Fields:\n${fields}\nQuestion: ${question}? index is \`${index}\``;
-      const ppl = await requestPPLGeneratorChain(this.model, input, this.callbacks);
-      logToFile({ question, input, ppl }, 'ppl_generator');
-      ppl.query = ppl.query.replace(/`/g, ''); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
-      console.info('❗ppl:', ppl.query);
-      return ppl.query;
-    } catch (error) {
-      logToFile({ question, error }, 'ppl_generator');
-      throw error;
-    }
+    const input = `Fields:\n${fields}\nQuestion: ${question}? index is \`${index}\``;
+    const ppl = await requestPPLGeneratorChain(this.model, input, this.callbacks);
+    logToFile({ question, input, ppl }, 'ppl_generator');
+    ppl.query = ppl.query.replace(/`/g, ''); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
+    ppl.query = ppl.query.replace(/\bSPAN\(/g, 'span('); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/759
+    return ppl.query;
   }
 }
