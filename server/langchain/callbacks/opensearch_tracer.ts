@@ -18,18 +18,24 @@ export class OpenSearchTracer extends BaseTracer {
     this.traces?.push(_run);
     try {
       await this.createIndex();
-      this.indexRun(_run);
+      await this.indexRun(_run);
     } catch (error) {
-      console.error(error); // do not crash server if request failed
+      console.error('failed to persist langchain trace', error); // do not crash server if request failed
     }
   }
 
   private async indexRun(run: Run) {
-    this.client.index({
-      index: LLM_INDEX.TRACES,
-      body: { session_id: this.sessionId, ...run, child_runs: undefined },
-    });
-    if (run.child_runs) run.child_runs.forEach((childRun) => this.indexRun(childRun));
+    const body = this.flattenRunToDocs(run).flatMap((doc) => [
+      { index: { _index: LLM_INDEX.TRACES } },
+      doc,
+    ]);
+    return this.client.bulk({ refresh: true, body });
+  }
+
+  private flattenRunToDocs(run: Run, docs: Array<Partial<Run & { session_id: string }>> = []) {
+    docs.push({ session_id: this.sessionId, ...run, child_runs: undefined });
+    if (run.child_runs) run.child_runs.forEach((childRun) => this.flattenRunToDocs(childRun, docs));
+    return docs;
   }
 
   private async createIndex() {
