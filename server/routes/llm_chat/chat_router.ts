@@ -26,7 +26,7 @@ import { requestSuggestionsChain } from '../../langchain/chains/suggestions_gene
 import { memoryInit } from '../../langchain/memory/chat_agent_memory';
 import { LLMModelFactory } from '../../langchain/models/llm_model_factory';
 import { initTools } from '../../langchain/tools/tools_helper';
-import { convertToOutputs } from '../../langchain/utils/data_model';
+import { buildOutputs } from '../../langchain/utils/output_builders/build_outputs';
 
 export function registerChatRoute(router: IRouter) {
   // TODO split into three functions: request LLM, create chat, update chat
@@ -93,7 +93,7 @@ export function registerChatRoute(router: IRouter) {
           callbacks
         );
 
-        outputs = convertToOutputs(agentResponse, sessionId, suggestions, convertToTraces(traces));
+        outputs = buildOutputs(agentResponse, sessionId, suggestions, convertToTraces(traces));
       } catch (error) {
         context.observability_plugin.logger.error(error);
         outputs = [
