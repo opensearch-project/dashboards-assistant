@@ -72,9 +72,18 @@ export const useChatActions = () => {
 
       case 'save_and_view_ppl_query': {
         const saveQueryResponse = await savePPLQuery(suggestAction.metadata.query);
-        coreServicesContext.core.application.navigateToUrl(
-          `/app/observability-logs#/explorer/${saveQueryResponse.objectId}`
-        );
+        window.open(`./observability-logs#/explorer/${saveQueryResponse.objectId}`, '_blank');
+        break;
+      }
+
+      case 'view_in_dashboards': {
+        const type = message.contentType;
+        const id = message.content;
+        switch (type) {
+          case 'visualization':
+            window.open(`./visualize#/edit/${id}`, '_blank');
+            break;
+        }
         break;
       }
 
@@ -84,13 +93,9 @@ export const useChatActions = () => {
             <PPLVisualizationModal
               query={suggestAction.metadata.query}
               onConfirm={async () => {
-                const saveVisualizationResponse = await savePPLVisualization(
-                  suggestAction.metadata.query
-                );
+                const response = await savePPLVisualization(suggestAction.metadata.query);
                 modal.close();
-                coreServicesContext.core.application.navigateToUrl(
-                  `/app/observability-logs#/explorer/${saveVisualizationResponse.objectId}`
-                );
+                window.open(`./observability-logs#/explorer/${response.objectId}`, '_blank');
               }}
               onClose={() => modal.close()}
             />

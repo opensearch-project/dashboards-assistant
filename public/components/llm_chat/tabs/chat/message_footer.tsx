@@ -44,33 +44,35 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
       );
     }
 
-    footers.push(
-      <EuiButtonEmpty
-        iconType="faceHappy"
-        iconSide="right"
-        size="xs"
-        flush="left"
-        onClick={() => {
-          const modal = coreServicesContext.core.overlays.openModal(
-            toMountPoint(
-              <FeedbackModal
-                input={props.previousInput?.content}
-                output={props.message.content}
-                metadata={{
-                  type: 'chat',
-                  chatId: chatContext.chatId,
-                  sessionId,
-                  error: props.message.contentType === 'error',
-                }}
-                onClose={() => modal.close()}
-              />
-            )
-          );
-        }}
-      >
-        Feedback
-      </EuiButtonEmpty>
-    );
+    if (props.message.contentType === 'markdown') {
+      footers.push(
+        <EuiButtonEmpty
+          iconType="faceHappy"
+          iconSide="right"
+          size="xs"
+          flush="left"
+          onClick={() => {
+            const modal = coreServicesContext.core.overlays.openModal(
+              toMountPoint(
+                <FeedbackModal
+                  input={props.previousInput?.content}
+                  output={props.message.content}
+                  metadata={{
+                    type: 'chat',
+                    chatId: chatContext.chatId,
+                    sessionId,
+                    error: props.message.contentType === 'error',
+                  }}
+                  onClose={() => modal.close()}
+                />
+              )
+            );
+          }}
+        >
+          Feedback
+        </EuiButtonEmpty>
+      );
+    }
   }
 
   if (!footers.length) return null;

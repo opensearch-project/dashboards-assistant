@@ -26,7 +26,7 @@ export const buildCoreVisualizations = (traces: LangchainTrace[], outputs: IMess
     contentType: 'visualization',
     suggestedActions: [
       {
-        message: 'View in Dashboards',
+        message: 'View in Visualize',
         actionType: 'view_in_dashboards',
       },
     ],

@@ -4,28 +4,16 @@
  */
 
 import { EuiMarkdownFormat, EuiText, getDefaultOuiMarkdownParsingPlugins } from '@elastic/eui';
-import moment from 'moment';
-import React, { useContext, useEffect, useState } from 'react';
-import { DashboardContainerInput } from '../../../../../../../src/plugins/dashboard/public';
+import React from 'react';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
-import { uiSettingsService } from '../../../../../common/utils';
-import { CoreServicesContext } from '../../chat_header_button';
 import { PPLVisualization } from '../../components/ppl_visualization';
+import { CoreVisualization } from '../../components/core_visualization';
 
 interface MessageContentProps {
   message: IMessage;
 }
 
 export const MessageContent: React.FC<MessageContentProps> = React.memo((props) => {
-  const coreServicesContext = useContext(CoreServicesContext)!;
-  const [visInput, setVisInput] = useState<DashboardContainerInput>();
-
-  useEffect(() => {
-    if (props.message.contentType === 'visualization') {
-      setVisInput(JSON.parse(props.message.content));
-    }
-  }, [props.message]);
-
   switch (props.message.contentType) {
     case 'text':
       return <EuiText style={{ whiteSpace: 'pre-line' }}>{props.message.content}</EuiText>;
@@ -50,21 +38,10 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       );
 
     case 'visualization':
-      const dateFormat = uiSettingsService.get('dateFormat');
-      let from = moment(visInput?.timeRange?.from).format(dateFormat);
-      let to = moment(visInput?.timeRange?.to).format(dateFormat);
-      from = from === 'Invalid date' ? visInput?.timeRange.from : from;
-      to = to === 'Invalid date' ? visInput?.timeRange.to : to;
       return (
-        <>
-          <EuiText size="s">{`${from} - ${to}`}</EuiText>
-          <div className="llm-chat-visualizations">
-            <coreServicesContext.DashboardContainerByValueRenderer
-              input={JSON.parse(props.message.content)}
-              onInputUpdated={setVisInput}
-            />
-          </div>
-        </>
+        <div className="llm-chat-visualizations">
+          <CoreVisualization message={props.message} />
+        </div>
       );
 
     case 'ppl_visualization':
