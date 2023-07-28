@@ -91,6 +91,7 @@ export const useChatActions = () => {
         const modal = coreServicesContext.core.overlays.openModal(
           toMountPoint(
             <PPLVisualizationModal
+              title={suggestAction.metadata.question}
               query={suggestAction.metadata.query}
               onConfirm={async () => {
                 const response = await savePPLVisualization(suggestAction.metadata.query);

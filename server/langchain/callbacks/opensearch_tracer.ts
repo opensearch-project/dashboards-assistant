@@ -10,12 +10,12 @@ import { LLM_INDEX } from '../../../common/constants/llm';
 export class OpenSearchTracer extends BaseTracer {
   name = 'opensearch_tracer' as const;
 
-  constructor(private client: OpenSearchClient, private sessionId: string, private traces?: Run[]) {
+  constructor(private client: OpenSearchClient, private sessionId: string, private runs?: Run[]) {
     super();
   }
 
   protected async persistRun(_run: Run) {
-    this.traces?.push(_run);
+    this.runs?.push(_run);
     try {
       await this.createIndex();
       await this.indexRun(_run);

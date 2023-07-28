@@ -15,6 +15,7 @@ type Awaited<T> = T extends Promise<infer U> ? U : T;
 type AgentResponse = Awaited<ReturnType<InstanceType<typeof AgentFactory>['run']>>;
 
 export const buildOutputs = (
+  question: string,
   agentResponse: AgentResponse,
   sessionId: string,
   suggestions: SuggestedQuestions,
@@ -30,7 +31,7 @@ export const buildOutputs = (
     },
   ];
   outputs = buildToolsUsed(traces, outputs);
-  outputs = buildPPLOutputs(traces, outputs);
+  outputs = buildPPLOutputs(traces, outputs, question);
   outputs = buildCoreVisualizations(traces, outputs);
   outputs = buildSuggestions(suggestions, outputs);
   return outputs;

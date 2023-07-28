@@ -53,6 +53,6 @@ export type ISuggestedAction = ISuggestedActionBase &
     | { actionType: 'send_as_input' | 'copy' | 'view_in_dashboards' }
     | {
         actionType: 'save_and_view_ppl_query' | 'view_ppl_visualization';
-        metadata: { query: string };
+        metadata: { query: string; question: string };
       }
   );

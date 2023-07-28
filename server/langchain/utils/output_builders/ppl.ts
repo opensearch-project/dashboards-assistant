@@ -23,7 +23,11 @@ const convertToSavePPLActions = (queries: string[]): Partial<IMessage> => {
   };
 };
 
-export const buildPPLOutputs = (traces: LangchainTrace[], outputs: IMessage[]): IMessage[] => {
+export const buildPPLOutputs = (
+  traces: LangchainTrace[],
+  outputs: IMessage[],
+  question: string
+): IMessage[] => {
   const ppls = traces
     .filter(filterToolOutput('Query OpenSearch'))
     .flatMap((trace) => extractPPLQueries(trace.output));
@@ -43,7 +47,7 @@ export const buildPPLOutputs = (traces: LangchainTrace[], outputs: IMessage[]): 
       {
         message: 'View details',
         actionType: 'view_ppl_visualization',
-        metadata: { query },
+        metadata: { query, question },
       },
     ],
   }));

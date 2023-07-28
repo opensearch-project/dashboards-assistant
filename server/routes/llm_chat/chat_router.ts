@@ -39,7 +39,7 @@ export function registerChatRoute(router: IRouter) {
           // TODO finish schema, messages should be retrieved from index
           messages: schema.arrayOf(schema.any()),
           input: schema.object({
-            type: schema.string(),
+            type: schema.literal('input'),
             context: schema.object({
               appId: schema.maybe(schema.string()),
             }),
@@ -65,8 +65,8 @@ export function registerChatRoute(router: IRouter) {
       const savedObjectsClient = context.core.savedObjects.client;
 
       try {
-        const traces: Run[] = [];
-        const callbacks = [new OpenSearchTracer(opensearchClient, sessionId, traces)];
+        const runs: Run[] = [];
+        const callbacks = [new OpenSearchTracer(opensearchClient, sessionId, runs)];
         const model = LLMModelFactory.createModel({ client: opensearchClient });
         const embeddings = LLMModelFactory.createEmbeddings();
         const pluginTools = initTools(
@@ -93,7 +93,13 @@ export function registerChatRoute(router: IRouter) {
           callbacks
         );
 
-        outputs = buildOutputs(agentResponse, sessionId, suggestions, convertToTraces(traces));
+        outputs = buildOutputs(
+          input.content,
+          agentResponse,
+          sessionId,
+          suggestions,
+          convertToTraces(runs)
+        );
       } catch (error) {
         context.observability_plugin.logger.error(error);
         outputs = [
