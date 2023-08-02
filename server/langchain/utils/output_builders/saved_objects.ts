@@ -5,6 +5,7 @@
 
 import { IMessage } from '../../../../common/types/observability_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
+import { SavedObjectsTools } from '../../tools/tool_sets/saved_objects';
 import { filterToolOutput } from './utils';
 
 // TODO use a more robust CSV parsing library
@@ -17,7 +18,7 @@ const extractNthColumn = (csv: string, column: number) => {
 
 export const buildCoreVisualizations = (traces: LangchainTrace[], outputs: IMessage[]) => {
   const visualizationIds = traces
-    .filter(filterToolOutput('Find Visualizations'))
+    .filter(filterToolOutput(SavedObjectsTools.TOOL_NAMES.FIND_VISUALIZATIONS))
     .flatMap((trace) => extractNthColumn(trace.output, 1)); // second column is id field
 
   const visOutputs: IMessage[] = visualizationIds.map((id) => ({

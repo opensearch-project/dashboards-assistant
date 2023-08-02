@@ -19,9 +19,17 @@ interface PPLResponse {
 }
 
 export class PPLTools extends PluginToolsFactory {
+  static TOOL_NAMES = {
+    QUERY_OPENSEARCH: 'Query OpenSearch',
+    QUERY_PROMETHEUS: 'Generate prometheus PPL query',
+    EXECUTE: 'Execute PPL query',
+    LOG_INFO: 'Log info',
+    LOG_ERROR_INFO: 'Log error info',
+  } as const;
+
   toolsList = [
     new DynamicTool({
-      name: 'Query OpenSearch',
+      name: PPLTools.TOOL_NAMES.QUERY_OPENSEARCH,
       description:
         'Use to generate and run a PPL Query to get results for a generic user question. The input must be the original question as user phrased it without modifications',
       func: swallowErrors(async (query: string) => {
@@ -32,14 +40,14 @@ export class PPLTools extends PluginToolsFactory {
       callbacks: this.callbacks,
     }),
     /* new DynamicTool({
-      name: 'Generate prometheus PPL query',
+      name: PPLTools.NAMES.QUERY_PROMETHEUS,
       description:
         'Use this tool to generate a PPL query about metrics and prometheus. This tool take natural language question as input.',
       func: swallowErrors((query: string) => this.generatePrometheusPPL(query)),
       callbacks: this.callbacks,
     }), */
     new DynamicTool({
-      name: 'Execute PPL query',
+      name: PPLTools.TOOL_NAMES.EXECUTE,
       description: 'Use this tool to run a PPL query. This tool takes the PPL query as input.',
       func: swallowErrors((query: string) =>
         this.executePPL(query).then(
@@ -50,7 +58,7 @@ export class PPLTools extends PluginToolsFactory {
       callbacks: this.callbacks,
     }),
     new DynamicTool({
-      name: 'Log info',
+      name: PPLTools.TOOL_NAMES.LOG_INFO,
       description:
         'Use to get information of logs if the question contains an OpenSearch log index. The input should be the name of the index',
       func: swallowErrors(async (index: string) => {
@@ -61,7 +69,7 @@ export class PPLTools extends PluginToolsFactory {
       callbacks: this.callbacks,
     }),
     new DynamicTool({
-      name: 'Log error info',
+      name: PPLTools.TOOL_NAMES.LOG_ERROR_INFO,
       description:
         'Use to get information of logs with errors if the question contains an OpenSearch log index. The input should be the name of the index. The output is a representative log per each log pattern group.',
       func: swallowErrors(async (index: string) => {
@@ -79,7 +87,7 @@ export class PPLTools extends PluginToolsFactory {
    * @returns non hidden OpenSearch index names as a list.
    */
   private async getIndexNameList() {
-    const response = await this.opensearchClient.cat.indices({ format: 'json' });
+    const response = await this.opensearchClient.cat.indices({ format: 'json', h: 'index' });
     return response.body
       .map((index) => index.index)
       .filter((index) => index !== undefined && !index.startsWith('.')) as string[];

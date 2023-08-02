@@ -5,11 +5,12 @@
 
 import { IMessage } from '../../../../common/types/observability_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
+import { PPLTools } from '../../tools/tool_sets/ppl';
 import { filterToolOutput, mergeMessages } from './utils';
 
 const extractPPLQueries = (content: string) => {
-  return (
-    Array.from(content.matchAll(/(^|[\n\r]|:)\s*(source\s*=\s*.+)/g)).map((match) => match[2]) || []
+  return Array.from(content.matchAll(/(^|[\n\r]|:)\s*(source\s*=\s*.+)/gi)).map(
+    (match) => match[2]
   );
 };
 
@@ -29,11 +30,11 @@ export const buildPPLOutputs = (
   question: string
 ): IMessage[] => {
   const ppls = traces
-    .filter(filterToolOutput('Query OpenSearch'))
+    .filter(filterToolOutput(PPLTools.TOOL_NAMES.QUERY_OPENSEARCH))
     .flatMap((trace) => extractPPLQueries(trace.output));
   if (!ppls.length) return outputs;
 
-  const statsPPLs = ppls.filter((ppl) => /\|\s*stats\s+/.test(ppl));
+  const statsPPLs = ppls.filter((ppl) => /\|\s*stats\s+/i.test(ppl));
   if (!statsPPLs.length) {
     outputs[0] = mergeMessages(outputs[0], convertToSavePPLActions(ppls));
     return outputs;

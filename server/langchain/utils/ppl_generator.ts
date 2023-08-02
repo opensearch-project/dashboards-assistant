@@ -23,7 +23,7 @@ export const generateFieldContext = <T = unknown, U = unknown>(
   hits: ApiResponse<SearchResponse<U>, U>
 ) => {
   const flattenedFields = flattenMappings(mappings);
-  const source = hits.body.hits.hits[0]._source;
+  const source = hits.body.hits.hits[0]?._source;
 
   return Object.entries(flattenedFields)
     .filter(([, type]) => type !== 'alias') // PPL doesn't support 'alias' type
@@ -58,16 +58,14 @@ const flattenMappings = <T = unknown>(mappings: ApiResponse<IndicesGetMappingRes
 const parseProperties = (
   properties: Record<string, MappingProperty> | undefined,
   prefixes: string[] = [],
-  fields: Record<string, string> = {}
+  fields: Record<string, string>
 ) => {
-  for (const key in properties) {
-    if (!properties.hasOwnProperty(key)) continue;
-    const value = properties[key];
+  Object.entries(properties || {}).forEach(([key, value]) => {
     if (value.properties) {
       parseProperties(value.properties, [...prefixes, key], fields);
     } else {
       fields[[...prefixes, key].join('.')] = value.type!;
     }
-  }
+  });
   return fields;
 };

@@ -9,9 +9,13 @@ import { jsonToCsv, swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
 export class SavedObjectsTools extends PluginToolsFactory {
+  static TOOL_NAMES = {
+    FIND_VISUALIZATIONS: 'Find Visualizations',
+  } as const;
+
   toolsList = [
     new DynamicTool({
-      name: 'Find Visualizations',
+      name: SavedObjectsTools.TOOL_NAMES.FIND_VISUALIZATIONS,
       description:
         'use this tool to find user created visualizations. This tool takes the visualization name as input and returns the first 3 matching visualizations',
       func: swallowErrors((name: string) => this.findVisualizationsByName(name)), // use arrow function to pass through `this`

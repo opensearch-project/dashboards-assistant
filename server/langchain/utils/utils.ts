@@ -12,7 +12,7 @@ import { DynamicToolInput } from 'langchain/tools';
 export const swallowErrors = (func: DynamicToolInput['func']): DynamicToolInput['func'] => {
   return async (...args) => {
     try {
-      return func(...args);
+      return await func(...args);
     } catch (error) {
       return `Error when running tool: ${error}`;
     }
@@ -20,6 +20,7 @@ export const swallowErrors = (func: DynamicToolInput['func']): DynamicToolInput[
 };
 
 export const jsonToCsv = (json: object[]) => {
+  if (json.length === 0) return 'row_number\n';
   const rows = [];
 
   // Add header row with keys as column names
