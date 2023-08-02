@@ -8,7 +8,7 @@ import { PPL_DATASOURCES_REQUEST } from '../../../../common/constants/metrics';
 import { requestGuessingIndexChain } from '../../chains/guessing_index';
 import { requestPPLGeneratorChain } from '../../chains/ppl_generator';
 import { generateFieldContext } from '../../utils/ppl_generator';
-import { logToFile, swallowErrors } from '../../utils/utils';
+import { swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
 
 interface PPLResponse {
@@ -147,7 +147,6 @@ export class PPLTools extends PluginToolsFactory {
 
     const input = `Fields:\n${fields}\nQuestion: ${question}? index is \`${index}\``;
     const ppl = await requestPPLGeneratorChain(this.model, input, this.callbacks);
-    logToFile({ question, input, ppl }, 'ppl_generator');
     ppl.query = ppl.query.replace(/`/g, ''); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
     ppl.query = ppl.query.replace(/\bSPAN\(/g, 'span('); // workaround for https://github.com/opensearch-project/dashboards-observability/issues/759
     return ppl.query;
