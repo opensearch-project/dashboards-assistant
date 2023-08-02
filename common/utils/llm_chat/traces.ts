@@ -23,7 +23,7 @@ const getValue = (obj: Record<string, string>, possibleKeys: string[]) => {
   return '';
 };
 
-const parseRuns = (traces: LangchainTrace[], runs: Run[]) => {
+export const convertToTraces = (runs: Run[], traces: LangchainTrace[] = []) => {
   traces.push(
     ...runs.map((run) => ({
       id: run.id,
@@ -35,12 +35,7 @@ const parseRuns = (traces: LangchainTrace[], runs: Run[]) => {
     }))
   );
   runs.forEach((run) => {
-    if (run.child_runs) parseRuns(traces, run.child_runs);
+    if (run.child_runs) convertToTraces(run.child_runs, traces);
   });
-};
-
-export const convertToTraces = (runs: Run[]) => {
-  const traces: LangchainTrace[] = [];
-  parseRuns(traces, runs);
   return traces;
 };

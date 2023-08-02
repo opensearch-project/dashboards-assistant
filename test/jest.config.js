@@ -13,18 +13,20 @@ module.exports = {
   testMatch: ['**/*.test.js', '**/*.test.jsx', '**/*.test.ts', '**/*.test.tsx'],
   clearMocks: true,
   modulePathIgnorePatterns: ['<rootDir>/offline-module-cache/'],
-  testPathIgnorePatterns: ['<rootDir>/build/', '<rootDir>/node_modules/'],
+  testPathIgnorePatterns: ['<rootDir>/build/', '<rootDir>/node_modules/', '/__utils__/'],
   snapshotSerializers: ['enzyme-to-json/serializer'],
   coveragePathIgnorePatterns: [
     '<rootDir>/build/',
     '<rootDir>/node_modules/',
     '<rootDir>/test/',
     '<rootDir>/public/requests/',
+    '/__utils__/',
   ],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { diagnostics: false }],
+    'node_modules/langchain/.+\\.js$': ['ts-jest', { diagnostics: false }],
   },
-  transformIgnorePatterns: ['<rootDir>/node_modules'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!langchain)'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/test/__mocks__/styleMock.js',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__mocks__/fileMock.js',

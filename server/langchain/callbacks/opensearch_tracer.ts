@@ -4,6 +4,7 @@
  */
 
 import { BaseTracer, Run } from 'langchain/callbacks';
+import { omit } from 'lodash';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import { LLM_INDEX } from '../../../common/constants/llm';
 
@@ -33,7 +34,7 @@ export class OpenSearchTracer extends BaseTracer {
   }
 
   private flattenRunToDocs(run: Run, docs: Array<Partial<Run & { session_id: string }>> = []) {
-    docs.push({ session_id: this.sessionId, ...run, child_runs: undefined });
+    docs.push({ session_id: this.sessionId, ...omit(run, 'child_runs') });
     if (run.child_runs) run.child_runs.forEach((childRun) => this.flattenRunToDocs(childRun, docs));
     return docs;
   }
