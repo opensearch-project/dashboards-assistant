@@ -140,10 +140,11 @@ export function registerChatRoute(router: IRouter) {
       path: CHAT_API.HISTORY,
       validate: {
         query: schema.object({
-          page: schema.number(),
-          perPage: schema.number(),
-          sortOrder: schema.string(),
-          sortField: schema.string(),
+          perPage: schema.number({ min: 0, defaultValue: 20 }),
+          page: schema.number({ min: 0, defaultValue: 1 }),
+          sortOrder: schema.maybe(schema.string()),
+          sortField: schema.maybe(schema.string()),
+          fields: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },

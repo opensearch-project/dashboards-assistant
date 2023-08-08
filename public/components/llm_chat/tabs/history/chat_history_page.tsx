@@ -31,7 +31,7 @@ type ItemType = SavedObjectsFindResult<IChat>;
 export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   const { openChat } = useChatActions();
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [sortOrder, setSortOrder] = useState<Direction>('desc');
   const [sortField, setSortField] = useState<keyof ItemType>('updated_at');
   const bulkGetOptions: Partial<SavedObjectsFindOptions> = useMemo(
@@ -40,6 +40,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
       perPage: pageSize,
       sortOrder,
       sortField,
+      fields: ['createdTimeMs', 'title'],
     }),
     [pageIndex, pageSize, sortOrder, sortField]
   );
@@ -91,6 +92,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
             pagination={{
               pageIndex,
               pageSize,
+              pageSizeOptions: [10, 20, 50],
               totalItemCount: chats?.total || 0,
             }}
             onChange={onTableChange}
