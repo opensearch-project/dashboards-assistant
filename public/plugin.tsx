@@ -227,24 +227,22 @@ export class ObservabilityPlugin
       .get<{ data: { roles: string[] } }>('/api/v1/configuration/account')
       .then((res) => res.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role)))
       .then((chatEnabled) => {
-        if (chatEnabled) {
-          core.chrome.navControls.registerRight({
-            order: 10000,
-            mount: toMountPoint(
-              <CoreServicesContext.Provider
-                value={{
-                  core,
-                  http: core.http,
-                  savedObjectsClient: core.savedObjects.client,
-                  DashboardContainerByValueRenderer:
-                    startDeps.dashboard.DashboardContainerByValueRenderer,
-                }}
-              >
-                <HeaderChatButton application={core.application} />
-              </CoreServicesContext.Provider>
-            ),
-          });
-        }
+        core.chrome.navControls.registerRight({
+          order: 10000,
+          mount: toMountPoint(
+            <CoreServicesContext.Provider
+              value={{
+                core,
+                http: core.http,
+                savedObjectsClient: core.savedObjects.client,
+                DashboardContainerByValueRenderer:
+                  startDeps.dashboard.DashboardContainerByValueRenderer,
+              }}
+            >
+              <HeaderChatButton application={core.application} chatEnabled={chatEnabled} />
+            </CoreServicesContext.Provider>
+          ),
+        });
       });
 
     const pplService: PPLService = new PPLService(core.http);

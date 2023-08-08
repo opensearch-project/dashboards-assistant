@@ -17,11 +17,13 @@ import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import chatIcon from '../../assets/chat.svg';
 import { ChatFlyout } from './chat_flyout';
 import { TabId } from './components/chat_tab_bar';
+import { InviteMessage } from './components/invite_message';
 import { ChatStateProvider } from './hooks/use_chat_state';
 import './index.scss';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
+  chatEnabled: boolean;
 }
 
 interface ICoreServicesContext {
@@ -50,7 +52,10 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [appId, setAppId] = useState<string>();
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
+  const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(() => {
+    if (props.chatEnabled) return null;
+    return <InviteMessage />;
+  });
   const [flyoutProps, setFlyoutProps] = useState<Partial<React.ComponentProps<typeof EuiFlyout>>>(
     {}
   );
