@@ -39,7 +39,7 @@ export const useChatActions = () => {
       const response = await coreServicesContext.http.post<SendResponse>(CHAT_API.LLM, {
         body: JSON.stringify({
           chatId: chatContext.chatId,
-          messages: chatState.messages,
+          ...(!chatContext.chatId && { messages: chatState.messages }), // include all previous messages for new chats
           input,
         }),
       });

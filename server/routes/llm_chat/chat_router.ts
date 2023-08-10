@@ -29,15 +29,13 @@ import { initTools } from '../../langchain/tools/tools_helper';
 import { buildOutputs } from '../../langchain/utils/output_builders/build_outputs';
 
 export function registerChatRoute(router: IRouter) {
-  // TODO split into three functions: request LLM, create chat, update chat
   router.post(
     {
       path: CHAT_API.LLM,
       validate: {
         body: schema.object({
           chatId: schema.maybe(schema.string()),
-          // TODO finish schema, messages should be retrieved from index
-          messages: schema.arrayOf(schema.any()),
+          messages: schema.maybe(schema.arrayOf(schema.any())),
           input: schema.object({
             type: schema.literal('input'),
             context: schema.object({
@@ -55,7 +53,7 @@ export function registerChatRoute(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const client = context.core.savedObjects.client;
-      const { chatId, input, messages } = request.body;
+      const { chatId, input, messages = [] } = request.body;
       const sessionId = uuid();
       let outputs: IMessage[];
       const opensearchObservabilityClient = context.observability_plugin.observabilityClient.asScoped(
@@ -63,6 +61,17 @@ export function registerChatRoute(router: IRouter) {
       );
       const opensearchClient = context.core.opensearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
+
+      // get history from the chat object for existing chats
+      if (chatId && messages.length === 0) {
+        try {
+          const chatObject = await savedObjectsClient.get<IChat>(CHAT_SAVED_OBJECT, chatId);
+          messages.push(...chatObject.attributes.messages);
+        } catch (error) {
+          context.observability_plugin.logger.warn(`failed to get history for ${chatId}: ` + error);
+          return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+        }
+      }
 
       try {
         const runs: Run[] = [];
