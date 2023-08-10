@@ -4,8 +4,10 @@
  */
 
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useContext, useLayoutEffect, useRef } from 'react';
 import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
+import { ChatContext } from '../../chat_header_button';
+import { InviteMessage } from '../../components/invite_message';
 import { LoadingButton } from '../../components/loading_button';
 import { useChatState } from '../../hooks/use_chat_state';
 import { ChatPageGreetings } from './chat_page_greetings';
@@ -28,6 +30,7 @@ const findPreviousInput = (messages: IMessage[], index: number) => {
 };
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
+  const chatContext = useContext(ChatContext)!;
   const { chatState } = useChatState();
   const pageEndRef = useRef<HTMLDivElement>(null);
   const loading = props.messagesLoading || chatState.llmResponding;
@@ -35,6 +38,17 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
   }, [chatState.messages, loading]);
+
+  if (!chatContext.chatEnabled) {
+    return (
+      <>
+        <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />
+        <MessageBubble type="output" contentType="markdown">
+          <InviteMessage />
+        </MessageBubble>
+      </>
+    );
+  }
 
   if (props.messagesLoadingError) {
     return (

@@ -9,27 +9,25 @@ import React from 'react';
 export const InviteMessage: React.FC = () => {
   // using https://mailtolinkgenerator.com/
   const mailtoLink =
-    'mailto:opensearch-assistant@amazon.com?subject=Invite%20to%20OpenSearch%20Assistant%20Playground';
+    'mailto:opensearch-assistant@amazon.com?subject=Requesting%20invite%20to%20OpenSearch%20Assistant%20Playground';
 
   return (
     <EuiEmptyPrompt
       iconType="search"
       title={<h2>You do not have access to the Assistant</h2>}
+      titleSize="s"
       body={
-        <>
-          <p>
-            Please send an email to{' '}
-            <EuiLink href={mailtoLink} external>
-              opensearch-assistant@amazon.com
-            </EuiLink>{' '}
-            to request access.
-          </p>
-          <p>Permissions will be added nightly.</p>
-        </>
+        <p>
+          Please send an email to{' '}
+          <EuiLink href={mailtoLink} external>
+            opensearch-assistant@amazon.com
+          </EuiLink>{' '}
+          to request access.
+        </p>
       }
       actions={
         <EuiButton color="primary" fill href={mailtoLink}>
-          Send invite email
+          Request invite
         </EuiButton>
       }
     />

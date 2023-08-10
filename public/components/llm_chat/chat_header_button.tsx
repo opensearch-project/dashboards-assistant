@@ -43,6 +43,7 @@ interface IChatContext {
   flyoutVisible: boolean;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
+  chatEnabled: boolean;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 
@@ -52,10 +53,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [appId, setAppId] = useState<string>();
   const [chatId, setChatId] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(() => {
-    if (props.chatEnabled) return null;
-    return <InviteMessage />;
-  });
+  const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [flyoutProps, setFlyoutProps] = useState<Partial<React.ComponentProps<typeof EuiFlyout>>>(
     {}
   );
@@ -82,8 +80,9 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       flyoutVisible,
       setFlyoutVisible,
       setFlyoutComponent,
+      chatEnabled: props.chatEnabled,
     }),
-    [appId, chatId, flyoutVisible, selectedTabId]
+    [appId, chatId, flyoutVisible, selectedTabId, props.chatEnabled]
   );
 
   return (
