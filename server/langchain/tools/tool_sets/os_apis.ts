@@ -17,7 +17,7 @@ export class OSAPITools extends PluginToolsFactory {
       callbacks: this.callbacks,
     }),
     new DynamicTool({
-      name: 'OpenSearch Index check',
+      name: 'Check OpenSearch index existence',
       description:
         'use this tool to check if a data stream, index, or alias exists in the OpenSearch cluster. This tool takes the index name as input',
       func: (indexName: string) => this.index_exists(indexName),

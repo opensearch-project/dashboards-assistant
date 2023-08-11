@@ -91,6 +91,14 @@ export class MLCommonsChatModel extends BaseChatModel {
     return mlCommonsResponse.body.inference_results[0].output[0].dataAsMap.completion;
   }
 
+  // for local testing only
+  async local_model_predict(question: string) {
+    return await fetch('http://localhost:8443', {
+      method: 'POST',
+      body: this.jsonEncodeString(question),
+    }).then((r) => r.text());
+  }
+
   async _call(
     messages: BaseChatMessage[],
     options: this['ParsedCallOptions'],

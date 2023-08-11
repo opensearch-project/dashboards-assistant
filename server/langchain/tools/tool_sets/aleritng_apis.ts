@@ -11,7 +11,7 @@ export class OSAlertingTools extends PluginToolsFactory {
     new DynamicTool({
       name: 'Search Alerting Monitors By Index',
       description:
-        'use this tool to search alerting mointors by index name in the OpenSearch cluster. This tool takes the index name as input',
+        'use this tool to search alerting monitors by index name in the OpenSearch cluster. This tool takes the index name as input',
       func: (indexName: string) => this.searchAlertMonitorsByIndex(indexName),
       callbacks: this.callbacks,
     }),

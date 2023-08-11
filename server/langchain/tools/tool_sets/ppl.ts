@@ -21,17 +21,15 @@ interface PPLResponse {
 export class PPLTools extends PluginToolsFactory {
   static TOOL_NAMES = {
     QUERY_OPENSEARCH: 'Query OpenSearch',
-    QUERY_PROMETHEUS: 'Generate prometheus PPL query',
-    EXECUTE: 'Execute PPL query',
-    LOG_INFO: 'Log info',
-    LOG_ERROR_INFO: 'Log error info',
+    LOG_INFO: 'Get log info',
+    LOG_ERROR_INFO: 'Get log error info',
   } as const;
 
   toolsList = [
     new DynamicTool({
       name: PPLTools.TOOL_NAMES.QUERY_OPENSEARCH,
       description:
-        'Use to generate and run a PPL Query to get results for a generic user question. The input must be the original question as user phrased it without modifications',
+        'Use to generate and run a PPL Query to get results for a generic user question related to data stored in their OpenSearch cluster. The input must be the original question as user phrased it without modifications',
       func: swallowErrors(async (query: string) => {
         const ppl = await this.generatePPL(query);
         const results = await this.executePPL(ppl);
@@ -40,23 +38,12 @@ export class PPLTools extends PluginToolsFactory {
       callbacks: this.callbacks,
     }),
     /* new DynamicTool({
-      name: PPLTools.NAMES.QUERY_PROMETHEUS,
+      name: 'Generate prometheus PPL query',
       description:
         'Use this tool to generate a PPL query about metrics and prometheus. This tool take natural language question as input.',
       func: swallowErrors((query: string) => this.generatePrometheusPPL(query)),
       callbacks: this.callbacks,
     }), */
-    new DynamicTool({
-      name: PPLTools.TOOL_NAMES.EXECUTE,
-      description: 'Use this tool to run a PPL query. This tool takes the PPL query as input.',
-      func: swallowErrors((query: string) =>
-        this.executePPL(query).then(
-          (result) =>
-            `The PPL query is: ${query}\n\nThe results are:\n${JSON.stringify(result, null, 2)}`
-        )
-      ),
-      callbacks: this.callbacks,
-    }),
     new DynamicTool({
       name: PPLTools.TOOL_NAMES.LOG_INFO,
       description:

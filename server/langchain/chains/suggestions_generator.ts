@@ -17,7 +17,6 @@ You will be given a chat history between OpenSearch Assistant and a Human.
 Use the context provided to generate follow up questions the Human would ask to the Assistant.
 
 The Assistant can answer general questions about logs, traces and metrics.
-The Assistant is an expert in
 
 Assistant can access a set of tools listed below to answer questions given by the Human:
 {tools_description}

@@ -21,13 +21,6 @@ export class KnowledgeTools extends PluginToolsFactory {
 
   toolsList = [
     new DynamicTool({
-      name: 'Get Project ThunderShift information',
-      description:
-        'Use this tool to get information related to Project ThunderShift. This tool takes the user question as input.',
-      func: swallowErrors((query: string) => this.askVectorStore(query)),
-      callbacks: this.callbacks,
-    }),
-    new DynamicTool({
       name: 'Get ticket information',
       description:
         'Use this tool to find tickets in the system with incidents that are relevant to a question about error causes. This tool takes the question as input.',
@@ -38,7 +31,8 @@ export class KnowledgeTools extends PluginToolsFactory {
       name: 'Get generic information',
       description:
         'Use this tool to answer a generic question not related to OpenSearch cluster. This tool takes the question as input.',
-      func: swallowErrors((query: string) => this.askVectorStore(query)),
+      func: async (query: string) =>
+        'I do not have any information in my expertise about the question, please ask OpenSearch related questions.',
       callbacks: this.callbacks,
     }),
   ];
