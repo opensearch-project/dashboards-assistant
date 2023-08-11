@@ -30,7 +30,7 @@ export interface FeedbackFormData {
 }
 
 interface FeedbackMetaData {
-  type: 'event_analytics' | 'chat';
+  type: 'event_analytics' | 'chat' | 'ppl_submit';
   chatId?: string;
   sessionId?: string;
   error?: boolean;
@@ -136,7 +136,9 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>LLM Feedback</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {props.metadata.type === 'ppl_submit' ? 'Submit PPL Query' : 'LLM Feedback'}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -150,7 +152,9 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
           <EuiFormRow label={labels.input} isInvalid={hasError('input')} error={formErrors.input}>
             <EuiTextArea
               compressed
-              placeholder="Your input question"
+              placeholder={
+                props.metadata.type === 'ppl_submit' ? 'PPL Query' : 'Your input question'
+              }
               value={props.formData.input}
               onChange={(e) => props.setFormData({ ...props.formData, input: e.target.value })}
               onBlur={(e) => {
@@ -166,7 +170,11 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
           >
             <EuiTextArea
               compressed
-              placeholder="The LLM response"
+              placeholder={
+                props.metadata.type === 'ppl_submit'
+                  ? 'Natural Language Question'
+                  : 'The LLM response'
+              }
               value={props.formData.output}
               onChange={(e) => props.setFormData({ ...props.formData, output: e.target.value })}
               onBlur={(e) => {
@@ -175,30 +183,32 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
               isInvalid={hasError('output')}
             />
           </EuiFormRow>
-          <EuiFormRow
-            label={labels.correct}
-            isInvalid={hasError('correct')}
-            error={formErrors.correct}
-          >
-            <EuiRadioGroup
-              options={[
-                { id: 'yes', label: 'Yes' },
-                { id: 'no', label: 'No' },
-              ]}
-              idSelected={
-                props.formData.correct === undefined
-                  ? undefined
-                  : props.formData.correct === true
-                  ? 'yes'
-                  : 'no'
-              }
-              onChange={(id) => {
-                props.setFormData({ ...props.formData, correct: id === 'yes' });
-                setFormErrors({ ...formErrors, expectedOutput: [] });
-              }}
-              onBlur={() => setFormErrors({ ...formErrors, correct: [] })}
-            />
-          </EuiFormRow>
+          {props.metadata.type !== 'ppl_submit' && (
+            <EuiFormRow
+              label={labels.correct}
+              isInvalid={hasError('correct')}
+              error={formErrors.correct}
+            >
+              <EuiRadioGroup
+                options={[
+                  { id: 'yes', label: 'Yes' },
+                  { id: 'no', label: 'No' },
+                ]}
+                idSelected={
+                  props.formData.correct === undefined
+                    ? undefined
+                    : props.formData.correct === true
+                    ? 'yes'
+                    : 'no'
+                }
+                onChange={(id) => {
+                  props.setFormData({ ...props.formData, correct: id === 'yes' });
+                  setFormErrors({ ...formErrors, expectedOutput: [] });
+                }}
+                onBlur={() => setFormErrors({ ...formErrors, correct: [] })}
+              />
+            </EuiFormRow>
+          )}
           {props.formData.correct === false && (
             <EuiFormRow
               label={labels.expectedOutput}
