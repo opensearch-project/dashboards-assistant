@@ -26,6 +26,7 @@ class CoreRefs {
   public savedObjectsClient?: SavedObjectsClientContract;
   public pplService?: PPLService;
   public toasts?: IToasts;
+  public llm_enabled?: boolean;
   private constructor() {
     // ...
   }

@@ -223,10 +223,12 @@ export class ObservabilityPlugin
   }
 
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
+    coreRefs.core = core;
     core.http
       .get<{ data: { roles: string[] } }>('/api/v1/configuration/account')
       .then((res) => res.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role)))
       .then((chatEnabled) => {
+        coreRefs.llm_enabled = chatEnabled;
         core.chrome.navControls.registerRight({
           order: 10000,
           mount: toMountPoint(
@@ -246,7 +248,6 @@ export class ObservabilityPlugin
       });
 
     const pplService: PPLService = new PPLService(core.http);
-    coreRefs.core = core;
     coreRefs.http = core.http;
     coreRefs.savedObjectsClient = core.savedObjects.client;
     coreRefs.pplService = pplService;
