@@ -161,6 +161,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
                 setFormErrors({ ...formErrors, input: validator.input(e.target.value) });
               }}
               isInvalid={hasError('input')}
+              disabled={props.metadata.type === 'ppl_submit'}
             />
           </EuiFormRow>
           <EuiFormRow
