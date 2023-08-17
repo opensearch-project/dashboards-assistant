@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
 import { LANGCHAIN_API } from '../../../../common/constants/llm';
 import { coreRefs } from '../../../framework/core_refs';
+import { getPPLService } from '../../../../common/utils';
 
 export interface FeedbackFormData {
   input: string;
@@ -104,7 +105,11 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const errors = {
-      input: validator.input(props.formData.input),
+      input:
+        validator.input(props.formData.input) +
+        (props.metadata.type === 'ppl_submit'
+          ? await validator.validateQuery(props.formData.input)
+          : ''),
       output: validator.output(props.formData.output),
       correct: validator.correct(props.formData.correct),
       expectedOutput: validator.expectedOutput(
@@ -161,7 +166,6 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
                 setFormErrors({ ...formErrors, input: validator.input(e.target.value) });
               }}
               isInvalid={hasError('input')}
-              disabled={props.metadata.type === 'ppl_submit'}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -271,6 +275,21 @@ const useSubmitFeedback = (data: FeedbackFormData, metadata: FeedbackMetaData, h
   };
 };
 
+const validatePPLQuery = async (logsQuery: string) => {
+  let responseMessage = '';
+  const pplService = getPPLService();
+  await pplService
+    .fetch({ query: logsQuery, format: 'jdbc' })
+    .then((res) => {
+      if (res === undefined) responseMessage = ' Invalid PPL Query, please re-check the ppl syntax';
+    })
+    .catch((error: Error) => {
+      responseMessage = ' Invalid PPL Query, please re-check the ppl syntax';
+    });
+
+  return responseMessage;
+};
+
 const validator = {
   input: (text: string) => (text.trim().length === 0 ? ['Input is required'] : []),
   output: (text: string) => (text.trim().length === 0 ? ['Output is required'] : []),
@@ -278,4 +297,5 @@ const validator = {
     correct === undefined ? ['Correctness is required'] : [],
   expectedOutput: (text: string, required: boolean) =>
     required && text.trim().length === 0 ? ['expectedOutput is required'] : [],
+  validateQuery: async (logsQuery: string) => await validatePPLQuery(logsQuery),
 };
