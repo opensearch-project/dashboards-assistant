@@ -22,6 +22,12 @@ import { LANGCHAIN_API } from '../../../../common/constants/llm';
 import { coreRefs } from '../../../framework/core_refs';
 import { getPPLService } from '../../../../common/utils';
 
+export interface labelData {
+  formHeader: string;
+  inputPlaceholder: string;
+  outputPlaceholder: string;
+}
+
 export interface FeedbackFormData {
   input: string;
   output: string;
@@ -69,14 +75,17 @@ interface FeedbackModalContentProps {
   formData: FeedbackFormData;
   setFormData: React.Dispatch<React.SetStateAction<FeedbackFormData>>;
   metadata: FeedbackMetaData;
-  displayLabels?: Partial<Record<keyof FeedbackFormData, string>>;
+  displayLabels?: Partial<Record<keyof FeedbackFormData, string>> & Partial<labelData>;
   onClose: () => void;
 }
 
 export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props) => {
   const labels: NonNullable<Required<typeof props.displayLabels>> = Object.assign(
     {
+      formHeader: 'LLM Feedback',
+      inputPlaceholder: 'Your input question',
       input: 'Input question',
+      outputPlaceholder: 'The LLM response',
       output: 'Output',
       correct: 'Does the output match your expectations?',
       expectedOutput: 'Expected output',
@@ -105,11 +114,9 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const errors = {
-      input:
-        validator.input(props.formData.input) +
-        (props.metadata.type === 'ppl_submit'
-          ? await validator.validateQuery(props.formData.input)
-          : ''),
+      input: validator
+        .input(props.formData.input)
+        .concat(await validator.validateQuery(props.formData.input, props.metadata.type)),
       output: validator.output(props.formData.output),
       correct: validator.correct(props.formData.correct),
       expectedOutput: validator.expectedOutput(
@@ -141,9 +148,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {props.metadata.type === 'ppl_submit' ? 'Submit PPL Query' : 'LLM Feedback'}
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{labels.formHeader}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -157,9 +162,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
           <EuiFormRow label={labels.input} isInvalid={hasError('input')} error={formErrors.input}>
             <EuiTextArea
               compressed
-              placeholder={
-                props.metadata.type === 'ppl_submit' ? 'PPL Query' : 'Your input question'
-              }
+              placeholder={labels.inputPlaceholder}
               value={props.formData.input}
               onChange={(e) => props.setFormData({ ...props.formData, input: e.target.value })}
               onBlur={(e) => {
@@ -175,11 +178,7 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
           >
             <EuiTextArea
               compressed
-              placeholder={
-                props.metadata.type === 'ppl_submit'
-                  ? 'Natural Language Question'
-                  : 'The LLM response'
-              }
+              placeholder={labels.outputPlaceholder}
               value={props.formData.output}
               onChange={(e) => props.setFormData({ ...props.formData, output: e.target.value })}
               onBlur={(e) => {
@@ -275,18 +274,21 @@ const useSubmitFeedback = (data: FeedbackFormData, metadata: FeedbackMetaData, h
   };
 };
 
-const validatePPLQuery = async (logsQuery: string) => {
-  let responseMessage = '';
-  const pplService = getPPLService();
-  await pplService
-    .fetch({ query: logsQuery, format: 'jdbc' })
-    .then((res) => {
-      if (res === undefined) responseMessage = ' Invalid PPL Query, please re-check the ppl syntax';
-    })
-    .catch((error: Error) => {
-      responseMessage = ' Invalid PPL Query, please re-check the ppl syntax';
-    });
+const validatePPLQuery = async (logsQuery: string, feedBackType: FeedbackMetaData['type']) => {
+  let responseMessage: [] | string[] = [];
+  const errorMessage = [' Invalid PPL Query, please re-check the ppl syntax'];
 
+  if (feedBackType === 'ppl_submit') {
+    const pplService = getPPLService();
+    await pplService
+      .fetch({ query: logsQuery, format: 'jdbc' })
+      .then((res) => {
+        if (res === undefined) responseMessage = errorMessage;
+      })
+      .catch((error: Error) => {
+        responseMessage = errorMessage;
+      });
+  }
   return responseMessage;
 };
 
@@ -297,5 +299,6 @@ const validator = {
     correct === undefined ? ['Correctness is required'] : [],
   expectedOutput: (text: string, required: boolean) =>
     required && text.trim().length === 0 ? ['expectedOutput is required'] : [],
-  validateQuery: async (logsQuery: string) => await validatePPLQuery(logsQuery),
+  validateQuery: async (logsQuery: string, feedBackType: FeedbackMetaData['type']) =>
+    await validatePPLQuery(logsQuery, feedBackType),
 };
