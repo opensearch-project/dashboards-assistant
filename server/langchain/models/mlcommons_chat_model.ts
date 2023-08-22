@@ -7,13 +7,7 @@ import { AI_PROMPT, HUMAN_PROMPT } from '@anthropic-ai/sdk';
 import { BaseLanguageModelParams } from 'langchain/base_language';
 import { CallbackManagerForLLMRun } from 'langchain/callbacks';
 import { BaseChatModel } from 'langchain/chat_models/base';
-import {
-  AIChatMessage,
-  BaseChatMessage,
-  ChatResult,
-  LLMResult,
-  MessageType,
-} from 'langchain/schema';
+import { AIMessage, BaseMessage, ChatResult, LLMResult, MessageType } from 'langchain/schema';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
   ANTHROPIC_DEFAULT_PARAMS,
@@ -54,7 +48,7 @@ export class MLCommonsChatModel extends BaseChatModel {
     }
   }
 
-  private formatMessagesAsPrompt(messages: BaseChatMessage[]): string {
+  private formatMessagesAsPrompt(messages: BaseMessage[]): string {
     return (
       messages
         .map((message) => {
@@ -100,7 +94,7 @@ export class MLCommonsChatModel extends BaseChatModel {
   }
 
   async _call(
-    messages: BaseChatMessage[],
+    messages: BaseMessage[],
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
@@ -108,12 +102,12 @@ export class MLCommonsChatModel extends BaseChatModel {
   }
 
   async _generate(
-    messages: BaseChatMessage[],
+    messages: BaseMessage[],
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<ChatResult> {
     const text = await this._call(messages, options, runManager);
-    const message = new AIChatMessage(text);
+    const message = new AIMessage(text);
     return {
       generations: [
         {

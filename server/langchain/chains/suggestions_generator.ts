@@ -9,7 +9,7 @@ import { LLMChain } from 'langchain/chains';
 import { BufferMemory } from 'langchain/memory';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { PromptTemplate } from 'langchain/prompts';
-import { BaseChatMessage } from 'langchain/schema';
+import { BaseMessage } from 'langchain/schema';
 import { Tool } from 'langchain/tools';
 
 const template = `
@@ -50,7 +50,7 @@ const prompt = new PromptTemplate({
   partialVariables: { format_instructions: formatInstructions },
 });
 
-const convertChatToString = (chatMessages: BaseChatMessage[]) => {
+const convertChatToString = (chatMessages: BaseMessage[]) => {
   const chatString = chatMessages
     .map((message) => `${message._getType()}: ${message.text}`)
     .join('\n');

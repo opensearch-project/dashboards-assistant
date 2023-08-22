@@ -27,7 +27,7 @@ interface LangchainTracesProps {
 }
 
 export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
-  const { data: runs, loading, error } = useFetchLangchainTraces(props.sessionId);
+  const { data: traces, loading, error } = useFetchLangchainTraces(props.sessionId);
 
   if (loading) {
     return (
@@ -47,7 +47,7 @@ export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
       />
     );
   }
-  if (!runs?.length) {
+  if (!traces?.length) {
     return <EuiText>Data not available.</EuiText>;
   }
 
@@ -56,7 +56,7 @@ export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
       <EuiText size="s">
         <h1>Response</h1>
       </EuiText>
-      {runs
+      {traces
         .filter((run) => run.input || run.output)
         .map((run) => (
           <div key={run.id}>

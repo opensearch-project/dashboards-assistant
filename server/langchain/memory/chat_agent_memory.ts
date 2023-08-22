@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AIChatMessage, BaseChatMessage, HumanChatMessage } from 'langchain/schema';
+import { AIMessage, BaseMessage, HumanMessage } from 'langchain/schema';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { IMessage } from '../../../common/types/observability_saved_object_attributes';
 
 const loadPastMessages = (messages: IMessage[]) => {
-  const pastMessages: BaseChatMessage[] = [];
+  const pastMessages: BaseMessage[] = [];
   messages.forEach((message) =>
     message.type === 'input'
-      ? pastMessages.push(new HumanChatMessage(message.content))
-      : pastMessages.push(new AIChatMessage(message.content))
+      ? pastMessages.push(new HumanMessage(message.content))
+      : pastMessages.push(new AIMessage(message.content))
   );
   return pastMessages;
 };
