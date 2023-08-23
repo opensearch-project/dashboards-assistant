@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TraceAnalyticsMode } from '../../../utils/utils';
+import { SearchRequest } from '@opensearch-project/opensearch/api/types';
 import { OpenSearchClient } from '../../../../../../../src/core/server';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
+import { TraceAnalyticsMode } from '../../../utils/utils';
 
 export async function getMode(opensearchClient: OpenSearchClient) {
   const indexExistsResponse = await opensearchClient.indices.exists({
@@ -105,7 +106,7 @@ export const getDashboardQuery = () => {
 };
 
 export const getTracesQuery = (mode: TraceAnalyticsMode) => {
-  const jaegerQuery = {
+  const jaegerQuery: SearchRequest['body'] = {
     size: 0,
     query: {
       bool: {
@@ -167,7 +168,7 @@ export const getTracesQuery = (mode: TraceAnalyticsMode) => {
       },
     },
   };
-  const dataPrepperQuery = {
+  const dataPrepperQuery: SearchRequest['body'] = {
     size: 0,
     query: {
       bool: {

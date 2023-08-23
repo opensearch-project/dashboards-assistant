@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AggregationsMultiBucketAggregate } from '@opensearch-project/opensearch/api/types';
 import { DynamicTool } from 'langchain/tools';
-import { PluginToolsFactory } from '../tools_factory/tools_factory';
-
-import { flatten, jsonToCsv, swallowErrors } from '../../utils/utils';
-import { getDashboardQuery, getMode, getTracesQuery } from './trace_tools/queries';
 import {
   DATA_PREPPER_INDEX_NAME,
   JAEGER_INDEX_NAME,
 } from '../../../../common/constants/trace_analytics';
+import { AggregationBucket, flatten, jsonToCsv, swallowErrors } from '../../utils/utils';
+import { PluginToolsFactory } from '../tools_factory/tools_factory';
+import { getDashboardQuery, getMode, getTracesQuery } from './trace_tools/queries';
 
 export class TracesTools extends PluginToolsFactory {
   static TOOL_NAMES = {
@@ -38,15 +38,15 @@ export class TracesTools extends PluginToolsFactory {
   ];
 
   public async getTraceGroups() {
-    const mode = await getMode(this.opensearchClient);
     const query = getDashboardQuery();
-    console.log(DATA_PREPPER_INDEX_NAME);
     const traceGroupsResponse = await this.opensearchClient.search({
       index: DATA_PREPPER_INDEX_NAME,
       body: query,
     });
-    const traceGroups = traceGroupsResponse.body.aggregations.trace_group_name.buckets;
-    return jsonToCsv(flatten(traceGroups));
+    if (!traceGroupsResponse.body.aggregations) return '';
+    const traceGroupBuckets = (traceGroupsResponse.body.aggregations
+      .trace_group_name as AggregationsMultiBucketAggregate<AggregationBucket>).buckets;
+    return jsonToCsv(flatten(traceGroupBuckets));
   }
 
   public async getTraces() {
@@ -56,7 +56,9 @@ export class TracesTools extends PluginToolsFactory {
       index: mode === 'data_prepper' ? DATA_PREPPER_INDEX_NAME : JAEGER_INDEX_NAME,
       body: query,
     });
-    const traces = tracesResponse.body.aggregations.traces.buckets;
-    return jsonToCsv(flatten(traces));
+    if (!tracesResponse.body.aggregations) return '';
+    const traceBuckets = (tracesResponse.body.aggregations
+      .trace_group_name as AggregationsMultiBucketAggregate<AggregationBucket>).buckets;
+    return jsonToCsv(flatten(traceBuckets));
   }
 }
