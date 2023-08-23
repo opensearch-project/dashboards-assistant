@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { jsonToCsv, swallowErrors } from '../utils';
+import { flatten, jsonToCsv, swallowErrors } from '../utils';
 
 describe('swallow errors', () => {
   it('should swallow errors for sync functions', async () => {
@@ -40,5 +40,30 @@ describe('utils', () => {
   it('handles empty json', () => {
     const csv = jsonToCsv([]);
     expect(csv).toEqual('row_number\n');
+  });
+
+  it('flattens nested objects', () => {
+    const flattened = flatten([
+      {
+        key1: { key2: 'value1' },
+        key3: {
+          key4: 'value2',
+          key5: { key6: 'value3', key7: [{ key8: 'value4' }, { key9: 'value5' }] },
+        },
+      },
+      { key10: { key11: 'value6' } },
+    ]);
+    expect(flattened).toEqual([
+      {
+        'key1.key2': 'value1',
+        'key3.key4': 'value2',
+        'key3.key5.key6': 'value3',
+        'key3.key5.key7.0.key8': 'value4',
+        'key3.key5.key7.1.key9': 'value5',
+      },
+      {
+        'key10.key11': 'value6',
+      },
+    ]);
   });
 });
