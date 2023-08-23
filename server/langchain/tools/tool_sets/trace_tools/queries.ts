@@ -2,13 +2,20 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import { SearchRequest } from '@opensearch-project/opensearch/api/types';
-import { OpenSearchClient } from '../../../../../../../src/core/server';
-import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
+import _ from 'lodash';
 import { TraceAnalyticsMode } from '../../../utils/utils';
+import { OpenSearchClient } from '../../../../../../../src/core/server';
+import {
+  DATA_PREPPER_SERVICE_INDEX_NAME,
+  JAEGER_SERVICE_INDEX_NAME,
+  SERVICE_MAP_MAX_EDGES,
+  SERVICE_MAP_MAX_NODES,
+  TRACES_MAX_NUM,
+} from '../../../../../common/constants/trace_analytics';
+import { ServiceObject } from '../../../../../public/components/trace_analytics/components/common/plots/service_map';
 
 export async function getMode(opensearchClient: OpenSearchClient) {
+  const indexName = 'otel-v1-apm-span-*';
   const indexExistsResponse = await opensearchClient.indices.exists({
     index: 'otel-v1-apm-span-*',
   });
@@ -222,3 +229,395 @@ export const getTracesQuery = (mode: TraceAnalyticsMode) => {
   };
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
+
+export const getServices = async (
+  mode: TraceAnalyticsMode,
+  observabilityClient: ILegacyScopedClusterClient
+) => {
+  const map: ServiceObject = {};
+  let id = 1;
+  const serviceNodesResponse = await observabilityClient.callAsCurrentUser('search', {
+    index: mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
+    body: JSON.stringify(getServiceNodesQuery(mode)),
+  });
+
+  serviceNodesResponse.aggregations.service_name.buckets.map(
+    (bucket: object) =>
+      (map[bucket.key as string] = {
+        serviceName: bucket.key,
+        id: id++,
+        traceGroups: bucket.trace_group.buckets.map((traceGroup: object) => ({
+          traceGroup: traceGroup.key,
+          targetResource: traceGroup.target_resource.buckets.map((res: object) => res.key),
+        })),
+        targetServices: [],
+        destServices: [],
+      })
+  );
+
+  const targets = {};
+  const serviceEdgesTargetResponse = await observabilityClient.callAsCurrentUser('search', {
+    index: mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
+    body: JSON.stringify(getServiceEdgesQuery('target', mode)),
+  });
+
+  serviceEdgesTargetResponse.aggregations.service_name.buckets.map((bucket: object) => {
+    bucket.resource.buckets.map((resource: object) => {
+      resource.domain.buckets.map((domain: object) => {
+        targets[resource.key + ':' + domain.key] = bucket.key;
+      });
+    });
+  });
+
+  const serviceEdgesDestResponse = await observabilityClient.callAsCurrentUser('search', {
+    index: mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
+    body: JSON.stringify(getServiceEdgesQuery('destination', mode)),
+  });
+
+  serviceEdgesDestResponse.aggregations.service_name.buckets.map((bucket: object) => {
+    bucket.resource.buckets.map((resource: object) => {
+      resource.domain.buckets.map((domain: object) => {
+        const targetService = targets[resource.key + ':' + domain.key];
+        if (targetService) {
+          if (map[bucket.key].targetServices.indexOf(targetService) === -1)
+            map[bucket.key].targetServices.push(targetService);
+          if (map[targetService].destServices.indexOf(bucket.key) === -1)
+            map[targetService].destServices.push(bucket.key);
+        }
+      });
+    });
+  });
+
+  const serviceMetricsResponse = await observabilityClient.callAsCurrentUser('search', {
+    body: getServiceMetricsQuery(Object.keys(map), map, mode),
+  });
+
+  serviceMetricsResponse.aggregations.service_name.buckets.map((bucket: object) => {
+    map[bucket.key].latency = bucket.average_latency.value;
+    map[bucket.key].error_rate = _.round(bucket.error_rate.value, 2) || 0;
+    map[bucket.key].throughput = bucket.doc_count;
+  });
+
+  return serviceMetricsResponse.aggregations.service_name.buckets;
+};
+
+export const getServiceNodesQuery = (mode: TraceAnalyticsMode) => {
+  return {
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    },
+    aggs: {
+      service_name: {
+        terms: {
+          field: 'serviceName',
+          size: SERVICE_MAP_MAX_NODES,
+        },
+        aggs: {
+          trace_group: {
+            terms: {
+              field: 'traceGroupName',
+              size: SERVICE_MAP_MAX_EDGES,
+            },
+            aggs: {
+              target_resource: {
+                terms: {
+                  field: 'target.resource',
+                  size: SERVICE_MAP_MAX_EDGES,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
+export const getServiceEdgesQuery = (
+  source: 'destination' | 'target',
+  mode: TraceAnalyticsMode
+) => {
+  return {
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    },
+    aggs: {
+      service_name: {
+        terms: {
+          field: 'serviceName',
+          size: SERVICE_MAP_MAX_EDGES,
+        },
+        aggs: {
+          resource: {
+            terms: {
+              field: `${source}.resource`,
+              size: SERVICE_MAP_MAX_EDGES,
+            },
+            aggs: {
+              domain: {
+                terms: {
+                  field: `${source}.domain`,
+                  size: SERVICE_MAP_MAX_EDGES,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
+export const getServiceMetricsQuery = (
+  serviceNames: string[],
+  map: ServiceObject,
+  mode: TraceAnalyticsMode
+) => {
+  // const traceGroupFilter = new Set(
+  //   DSL?.query?.bool.must
+  //     .filter((must: any) => must.term?.['traceGroup'])
+  //     .map((must: any) => must.term.traceGroup) || []
+  // );
+
+  const targetResource = [].concat(
+    ...Object.keys(map).map((service) => getServiceMapTargetResources(map, service))
+  );
+  const jaegerQuery = {
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        should: [],
+        must_not: [],
+        filter: [
+          {
+            terms: {
+              'process.serviceName': serviceNames,
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          must_not: {
+                            term: {
+                              references: {
+                                value: [],
+                              },
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    must: {
+                      term: {
+                        references: {
+                          value: [],
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+              adjust_pure_negative: true,
+              boost: 1,
+            },
+          },
+        ],
+      },
+    },
+    aggregations: {
+      service_name: {
+        terms: {
+          field: 'process.serviceName',
+          size: SERVICE_MAP_MAX_NODES,
+          min_doc_count: 1,
+          shard_min_doc_count: 0,
+          show_term_doc_count_error: false,
+          order: [
+            {
+              _count: 'desc',
+            },
+            {
+              _key: 'asc',
+            },
+          ],
+        },
+        aggregations: {
+          average_latency_nanos: {
+            avg: {
+              field: 'duration',
+            },
+          },
+          average_latency: {
+            bucket_script: {
+              buckets_path: {
+                count: '_count',
+                latency: 'average_latency_nanos.value',
+              },
+              script: 'Math.round(params.latency / 10) / 100.0',
+            },
+          },
+          error_count: {
+            filter: {
+              term: {
+                'tag.error': true,
+              },
+            },
+          },
+          error_rate: {
+            bucket_script: {
+              buckets_path: {
+                total: '_count',
+                errors: 'error_count._count',
+              },
+              script: 'params.errors / params.total * 100',
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const dataPrepperQuery = {
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        should: [],
+        must_not: [],
+        filter: [
+          {
+            terms: {
+              serviceName: serviceNames,
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          must_not: {
+                            term: {
+                              parentSpanId: {
+                                value: '',
+                              },
+                            },
+                          },
+                        },
+                      },
+                      {
+                        terms: {
+                          name: targetResource,
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    must: {
+                      term: {
+                        parentSpanId: {
+                          value: '',
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+              adjust_pure_negative: true,
+              boost: 1,
+            },
+          },
+        ],
+      },
+    },
+    aggregations: {
+      service_name: {
+        terms: {
+          field: 'serviceName',
+          size: SERVICE_MAP_MAX_NODES,
+          min_doc_count: 1,
+          shard_min_doc_count: 0,
+          show_term_doc_count_error: false,
+          order: [
+            {
+              _count: 'desc',
+            },
+            {
+              _key: 'asc',
+            },
+          ],
+        },
+        aggregations: {
+          average_latency_nanos: {
+            avg: {
+              field: 'durationInNanos',
+            },
+          },
+          average_latency: {
+            bucket_script: {
+              buckets_path: {
+                count: '_count',
+                latency: 'average_latency_nanos.value',
+              },
+              script: 'Math.round(params.latency / 10000) / 100.0',
+            },
+          },
+          error_count: {
+            filter: {
+              term: {
+                'status.code': '2',
+              },
+            },
+          },
+          error_rate: {
+            bucket_script: {
+              buckets_path: {
+                total: '_count',
+                errors: 'error_count._count',
+              },
+              script: 'params.errors / params.total * 100',
+            },
+          },
+        },
+      },
+    },
+  };
+  // if (DSL.custom?.timeFilter.length > 0) {
+  //   jaegerQuery.query.bool.must.push(...DSL.custom.timeFilter);
+  //   dataPrepperQuery.query.bool.must.push(...DSL.custom.timeFilter);
+  // }
+  return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
+};
+
+export function getServiceMapTargetResources(map: ServiceObject, serviceName: string) {
+  return ([] as string[]).concat.apply(
+    [],
+    [...map[serviceName].traceGroups.map((traceGroup) => [...traceGroup.targetResource])]
+  );
+}

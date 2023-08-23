@@ -35,6 +35,11 @@ export class TracesTools extends PluginToolsFactory {
       func: swallowErrors(async () => this.getTraces()),
       callbacks: this.callbacks,
     }),
+    new DynamicTool({
+      name: TracesTools.TOOL_NAMES.SERVICES,
+      description: 'Use this to get information about each service in trace analytics.',
+      func: swallowErrors(async () => this.getServices()),
+    }),
   ];
 
   public async getTraceGroups() {
@@ -60,5 +65,11 @@ export class TracesTools extends PluginToolsFactory {
     const traceBuckets = (tracesResponse.body.aggregations
       .trace_group_name as AggregationsMultiBucketAggregate<AggregationBucket>).buckets;
     return jsonToCsv(flatten(traceBuckets));
+  }
+
+  public async getServices() {
+    const mode = await getMode(this.opensearchClient);
+    const services = await getServices(mode, this.observabilityClient);
+    return jsonToCsv(flatten(services));
   }
 }
