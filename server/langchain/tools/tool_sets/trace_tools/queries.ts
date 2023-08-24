@@ -229,15 +229,12 @@ export const getTracesQuery = (mode: TraceAnalyticsMode) => {
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
 
-export const getServices = async (
-  mode: TraceAnalyticsMode,
-  observabilityClient: ILegacyScopedClusterClient
-) => {
+export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: OpenSearchClient) => {
   const map: ServiceObject = {};
   let id = 1;
-  const serviceNodesResponse = await observabilityClient.callAsCurrentUser('search', {
+  const serviceNodesResponse = await openSearchClient.search({
     index: mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
-    body: JSON.stringify(getServiceNodesQuery(mode)),
+    body: getServiceNodesQuery(mode),
   });
 
   serviceNodesResponse.aggregations.service_name.buckets.map(
@@ -255,9 +252,9 @@ export const getServices = async (
   );
 
   const targets = {};
-  const serviceEdgesTargetResponse = await observabilityClient.callAsCurrentUser('search', {
+  const serviceEdgesTargetResponse = await openSearchClient.search({
     index: mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
-    body: JSON.stringify(getServiceEdgesQuery('target', mode)),
+    body: getServiceEdgesQuery('target', mode),
   });
 
   serviceEdgesTargetResponse.aggregations.service_name.buckets.map((bucket: object) => {
@@ -268,9 +265,9 @@ export const getServices = async (
     });
   });
 
-  const serviceEdgesDestResponse = await observabilityClient.callAsCurrentUser('search', {
+  const serviceEdgesDestResponse = await openSearchClient.search({
     index: mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME,
-    body: JSON.stringify(getServiceEdgesQuery('destination', mode)),
+    body: getServiceEdgesQuery('destination', mode),
   });
 
   serviceEdgesDestResponse.aggregations.service_name.buckets.map((bucket: object) => {
@@ -287,7 +284,7 @@ export const getServices = async (
     });
   });
 
-  const serviceMetricsResponse = await observabilityClient.callAsCurrentUser('search', {
+  const serviceMetricsResponse = await openSearchClient.search({
     body: getServiceMetricsQuery(Object.keys(map), map, mode),
   });
 
@@ -384,12 +381,6 @@ export const getServiceMetricsQuery = (
   map: ServiceObject,
   mode: TraceAnalyticsMode
 ) => {
-  // const traceGroupFilter = new Set(
-  //   DSL?.query?.bool.must
-  //     .filter((must: any) => must.term?.['traceGroup'])
-  //     .map((must: any) => must.term.traceGroup) || []
-  // );
-
   const targetResource = [].concat(
     ...Object.keys(map).map((service) => getServiceMapTargetResources(map, service))
   );
@@ -607,10 +598,6 @@ export const getServiceMetricsQuery = (
       },
     },
   };
-  // if (DSL.custom?.timeFilter.length > 0) {
-  //   jaegerQuery.query.bool.must.push(...DSL.custom.timeFilter);
-  //   dataPrepperQuery.query.bool.must.push(...DSL.custom.timeFilter);
-  // }
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
 
