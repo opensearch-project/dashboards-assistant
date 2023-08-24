@@ -11,7 +11,7 @@ import {
 } from '../../../../common/constants/trace_analytics';
 import { AggregationBucket, flatten, jsonToCsv, swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
-import { getDashboardQuery, getMode, getTracesQuery } from './trace_tools/queries';
+import { getDashboardQuery, getMode, getTracesQuery, getServices } from './trace_tools/queries';
 
 export class TracesTools extends PluginToolsFactory {
   static TOOL_NAMES = {
@@ -72,7 +72,7 @@ export class TracesTools extends PluginToolsFactory {
 
   public async getServices() {
     const mode = await getMode(this.opensearchClient);
-    const services = await getServices(mode, this.observabilityClient);
+    const services = await getServices(mode, this.opensearchClient);
     return jsonToCsv(flatten(services));
   }
 }
