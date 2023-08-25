@@ -230,6 +230,7 @@ export const getTracesQuery = (mode: TraceAnalyticsMode) => {
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
 
+// @ts-ignore
 export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: OpenSearchClient) => {
   const map: ServiceObject = {};
   let id = 1;
