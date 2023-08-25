@@ -231,7 +231,6 @@ export const getTracesQuery = (mode: TraceAnalyticsMode) => {
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
 
-// @ts-ignore
 export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: OpenSearchClient) => {
   const map: ServiceObject = {};
   let id = 1;
@@ -240,13 +239,19 @@ export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: Op
     body: getServiceNodesQuery(mode),
   });
 
+  // @ts-ignore
   serviceNodesResponse.body.aggregations.service_name.buckets.map(
     (bucket: object) =>
+      // @ts-ignore
       (map[bucket.key as string] = {
+        // @ts-ignore
         serviceName: bucket.key,
         id: id++,
+        // @ts-ignore
         traceGroups: bucket.trace_group.buckets.map((traceGroup: object) => ({
+          // @ts-ignore
           traceGroup: traceGroup.key,
+          // @ts-ignore
           targetResource: traceGroup.target_resource.buckets.map((res: object) => res.key),
         })),
         targetServices: [],
@@ -260,9 +265,13 @@ export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: Op
     body: getServiceEdgesQuery('target', mode),
   });
 
+  // @ts-ignore
   serviceEdgesTargetResponse.body.aggregations.service_name.buckets.map((bucket: object) => {
+    // @ts-ignore
     bucket.resource.buckets.map((resource: object) => {
+      // @ts-ignore
       resource.domain.buckets.map((domain: object) => {
+        // @ts-ignore
         targets[resource.key + ':' + domain.key] = bucket.key;
       });
     });
@@ -273,14 +282,22 @@ export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: Op
     body: getServiceEdgesQuery('destination', mode),
   });
 
+  // @ts-ignore
   serviceEdgesDestResponse.body.aggregations.service_name.buckets.map((bucket: object) => {
+    // @ts-ignore
     bucket.resource.buckets.map((resource: object) => {
+      // @ts-ignore
       resource.domain.buckets.map((domain: object) => {
+        // @ts-ignore
         const targetService = targets[resource.key + ':' + domain.key];
         if (targetService) {
+          // @ts-ignore
           if (map[bucket.key].targetServices.indexOf(targetService) === -1)
+            // @ts-ignore
             map[bucket.key].targetServices.push(targetService);
+          // @ts-ignore
           if (map[targetService].destServices.indexOf(bucket.key) === -1)
+            // @ts-ignore
             map[targetService].destServices.push(bucket.key);
         }
       });
@@ -288,14 +305,20 @@ export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: Op
   });
 
   const serviceMetricsResponse = await openSearchClient.search({
+    // @ts-ignore
     body: getServiceMetricsQuery(Object.keys(map), map, mode),
   });
 
+  // @ts-ignore
   serviceMetricsResponse.body.aggregations.service_name.buckets.map((bucket: object) => {
+    // @ts-ignore
     map[bucket.key].latency = bucket.average_latency.value;
+    // @ts-ignore
     map[bucket.key].error_rate = _.round(bucket.error_rate.value, 2) || 0;
+    // @ts-ignore
     map[bucket.key].throughput = bucket.doc_count;
   });
+  // @ts-ignore
   return serviceMetricsResponse.body.aggregations.service_name.buckets;
 };
 
@@ -378,13 +401,13 @@ export const getServiceEdgesQuery = (
   };
 };
 
-// @ts-ignore
 export const getServiceMetricsQuery = (
   serviceNames: string[],
   map: ServiceObject,
   mode: TraceAnalyticsMode
 ) => {
   const targetResource = [].concat(
+    // @ts-ignore
     ...Object.keys(map).map((service) => getServiceMapTargetResources(map, service))
   );
   const jaegerQuery = {
