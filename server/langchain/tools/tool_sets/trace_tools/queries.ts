@@ -7,6 +7,7 @@ import { SearchRequest } from '@opensearch-project/opensearch/api/types';
 import { TraceAnalyticsMode } from '../../../utils/utils';
 import { OpenSearchClient } from '../../../../../../../src/core/server';
 import {
+  DATA_PREPPER_INDEX_NAME,
   DATA_PREPPER_SERVICE_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
   SERVICE_MAP_MAX_EDGES,
@@ -17,7 +18,7 @@ import { ServiceObject } from '../../../../../public/components/trace_analytics/
 
 export async function getMode(opensearchClient: OpenSearchClient) {
   const indexExistsResponse = await opensearchClient.indices.exists({
-    index: 'otel-v1-apm-span-*',
+    index: DATA_PREPPER_INDEX_NAME,
   });
   return indexExistsResponse ? 'data_prepper' : 'jaeger';
 }

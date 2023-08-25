@@ -47,9 +47,8 @@ export class TracesTools extends PluginToolsFactory {
   public async getTraceGroups() {
     const mode = await getMode(this.opensearchClient);
     const query = getDashboardQuery();
-    console.log(DATA_PREPPER_INDEX_NAME);
     const traceGroupsResponse = await this.opensearchClient.search({
-      index: DATA_PREPPER_INDEX_NAME,
+      index: mode === 'data_prepper' ? DATA_PREPPER_INDEX_NAME : JAEGER_INDEX_NAME,
       body: query,
     });
     if (!traceGroupsResponse.body.aggregations) return '';
