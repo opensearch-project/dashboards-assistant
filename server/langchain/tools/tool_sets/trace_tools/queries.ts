@@ -237,7 +237,7 @@ export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: Op
     body: getServiceNodesQuery(mode),
   });
 
-  serviceNodesResponse.aggregations.service_name.buckets.map(
+  serviceNodesResponse.body.aggregations.service_name.buckets.map(
     (bucket: object) =>
       (map[bucket.key as string] = {
         serviceName: bucket.key,
@@ -257,7 +257,7 @@ export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: Op
     body: getServiceEdgesQuery('target', mode),
   });
 
-  serviceEdgesTargetResponse.aggregations.service_name.buckets.map((bucket: object) => {
+  serviceEdgesTargetResponse.body.aggregations.service_name.buckets.map((bucket: object) => {
     bucket.resource.buckets.map((resource: object) => {
       resource.domain.buckets.map((domain: object) => {
         targets[resource.key + ':' + domain.key] = bucket.key;
@@ -270,7 +270,7 @@ export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: Op
     body: getServiceEdgesQuery('destination', mode),
   });
 
-  serviceEdgesDestResponse.aggregations.service_name.buckets.map((bucket: object) => {
+  serviceEdgesDestResponse.body.aggregations.service_name.buckets.map((bucket: object) => {
     bucket.resource.buckets.map((resource: object) => {
       resource.domain.buckets.map((domain: object) => {
         const targetService = targets[resource.key + ':' + domain.key];
@@ -288,13 +288,12 @@ export const getServices = async (mode: TraceAnalyticsMode, openSearchClient: Op
     body: getServiceMetricsQuery(Object.keys(map), map, mode),
   });
 
-  serviceMetricsResponse.aggregations.service_name.buckets.map((bucket: object) => {
+  serviceMetricsResponse.body.aggregations.service_name.buckets.map((bucket: object) => {
     map[bucket.key].latency = bucket.average_latency.value;
     map[bucket.key].error_rate = _.round(bucket.error_rate.value, 2) || 0;
     map[bucket.key].throughput = bucket.doc_count;
   });
-
-  return serviceMetricsResponse.aggregations.service_name.buckets;
+  return serviceMetricsResponse.body.aggregations.service_name.buckets;
 };
 
 export const getServiceNodesQuery = (mode: TraceAnalyticsMode) => {
