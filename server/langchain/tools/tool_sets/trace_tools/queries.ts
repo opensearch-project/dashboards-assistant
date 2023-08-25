@@ -378,6 +378,7 @@ export const getServiceEdgesQuery = (
   };
 };
 
+// @ts-ignore
 export const getServiceMetricsQuery = (
   serviceNames: string[],
   map: ServiceObject,
