@@ -11,7 +11,7 @@ import {
 } from '../../../../common/constants/trace_analytics';
 import { AggregationBucket, flatten, jsonToCsv, swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
-import { getDashboardQuery, getMode, getTracesQuery } from './trace_tools/queries';
+import { getDashboardQuery, getMode, getTracesQuery, getServices } from './trace_tools/queries';
 
 export class TracesTools extends PluginToolsFactory {
   static TOOL_NAMES = {
@@ -35,12 +35,20 @@ export class TracesTools extends PluginToolsFactory {
       func: swallowErrors(async () => this.getTraces()),
       callbacks: this.callbacks,
     }),
+    new DynamicTool({
+      name: TracesTools.TOOL_NAMES.SERVICES,
+      description:
+        'Use this to get information about each service in trace analytics. The tool response includes the key, doc_count, error_count.doc_count, average_latency_nanos.value, average_latency.value, and error_rate.value. The key is the name of the service. The doc_count is the number of spans in the service. The error_count.doc_count is the number of traces with errors in the service. The average_latency.value is the average latency in milliseconds. The error_rate.value is the percentage of traces that had an error.',
+      func: swallowErrors(async () => this.getServices()),
+      callbacks: this.callbacks,
+    }),
   ];
 
   public async getTraceGroups() {
+    const mode = await getMode(this.opensearchClient);
     const query = getDashboardQuery();
     const traceGroupsResponse = await this.opensearchClient.search({
-      index: DATA_PREPPER_INDEX_NAME,
+      index: mode === 'data_prepper' ? DATA_PREPPER_INDEX_NAME : JAEGER_INDEX_NAME,
       body: query,
     });
     if (!traceGroupsResponse.body.aggregations) return '';
@@ -60,5 +68,11 @@ export class TracesTools extends PluginToolsFactory {
     const traceBuckets = (tracesResponse.body.aggregations
       .trace_group_name as AggregationsMultiBucketAggregate<AggregationBucket>).buckets;
     return jsonToCsv(flatten(traceBuckets));
+  }
+
+  public async getServices() {
+    const mode = await getMode(this.opensearchClient);
+    const services = await getServices(mode, this.opensearchClient);
+    return jsonToCsv(flatten(services));
   }
 }
