@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import _ from 'lodash';
+import { SearchRequest } from '@opensearch-project/opensearch/api/types';
 import { TraceAnalyticsMode } from '../../../utils/utils';
 import { OpenSearchClient } from '../../../../../../../src/core/server';
 import {
