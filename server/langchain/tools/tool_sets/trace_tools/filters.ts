@@ -5,6 +5,7 @@
 
 import { BaseLanguageModel } from 'langchain/base_language';
 import { requestTimesFiltersChain } from '../../../../../server/langchain/chains/filter_generator';
+
 import { SearchRequest } from '../../../../../../../src/plugins/data/common';
 
 export async function addFilters(
