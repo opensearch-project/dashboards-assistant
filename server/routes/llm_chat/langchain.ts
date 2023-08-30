@@ -38,7 +38,7 @@ export function registerLangChainRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const { index, question } = request.body;
       const sessionId = uuid();
-      const observabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+      const observabilityClient: ILegacyScopedClusterClient = context.assistant_plugin.observabilityClient.asScoped(
         request
       );
       const opensearchClient = context.core.opensearch.client.asCurrentUser;
@@ -84,7 +84,7 @@ export function registerLangChainRoutes(router: IRouter) {
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       try {
         const { question } = request.body;
-        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.observability_plugin.observabilityClient.asScoped(
+        const opensearchObservabilityClient: ILegacyScopedClusterClient = context.assistant_plugin.observabilityClient.asScoped(
           request
         );
         console.log('########### START CHAIN ####################');

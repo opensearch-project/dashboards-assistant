@@ -5,7 +5,7 @@
 
 import { EuiMarkdownFormat, EuiText, getDefaultOuiMarkdownParsingPlugins } from '@elastic/eui';
 import React from 'react';
-import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../../common/types/chat_saved_object_attributes';
 import { PPLVisualization } from '../../components/ppl_visualization';
 import { CoreVisualization } from '../../components/core_visualization';
 

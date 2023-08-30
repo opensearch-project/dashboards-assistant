@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiText, ShortDate, htmlIdGenerator, prettyDuration } from '@elastic/eui';
+import { EuiText, htmlIdGenerator, prettyDuration, ShortDate } from '@elastic/eui';
 import React, { useContext, useState } from 'react';
 import { DashboardContainerInput } from '../../../../../../src/plugins/dashboard/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { IMessage } from '../../../../common/types/observability_saved_object_attributes';
-import { uiSettingsService } from '../../../../common/utils';
+import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { CoreServicesContext } from '../chat_header_button';
 
 interface CoreVisualizationProps {
@@ -20,7 +19,7 @@ export const CoreVisualization: React.FC<CoreVisualizationProps> = (props) => {
   const [visInput, setVisInput] = useState<DashboardContainerInput>(() =>
     createDashboardVizObject(props.message.content)
   );
-  const dateFormat = uiSettingsService.get('dateFormat');
+  const dateFormat = coreServicesContext.core.uiSettings.get<string>('dateFormat');
 
   return (
     <>

@@ -17,7 +17,6 @@ import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import chatIcon from '../../assets/chat.svg';
 import { ChatFlyout } from './chat_flyout';
 import { TabId } from './components/chat_tab_bar';
-import { InviteMessage } from './components/invite_message';
 import { ChatStateProvider } from './hooks/use_chat_state';
 import './index.scss';
 

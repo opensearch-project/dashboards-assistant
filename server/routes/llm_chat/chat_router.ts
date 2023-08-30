@@ -18,7 +18,7 @@ import {
   IChat,
   IMessage,
   SAVED_OBJECT_VERSION,
-} from '../../../common/types/observability_saved_object_attributes';
+} from '../../../common/types/chat_saved_object_attributes';
 import { convertToTraces } from '../../../common/utils/llm_chat/traces';
 import { chatAgentInit } from '../../langchain/agents/agent_helpers';
 import { OpenSearchTracer } from '../../langchain/callbacks/opensearch_tracer';
@@ -56,7 +56,7 @@ export function registerChatRoute(router: IRouter) {
       const { chatId, input, messages = [] } = request.body;
       const sessionId = uuid();
       let outputs: IMessage[];
-      const opensearchObservabilityClient = context.observability_plugin.observabilityClient.asScoped(
+      const opensearchObservabilityClient = context.assistant_plugin.observabilityClient.asScoped(
         request
       );
       const opensearchClient = context.core.opensearch.client.asCurrentUser;
@@ -68,7 +68,7 @@ export function registerChatRoute(router: IRouter) {
           const chatObject = await savedObjectsClient.get<IChat>(CHAT_SAVED_OBJECT, chatId);
           messages.push(...chatObject.attributes.messages);
         } catch (error) {
-          context.observability_plugin.logger.warn(`failed to get history for ${chatId}: ` + error);
+          context.assistant_plugin.logger.warn(`failed to get history for ${chatId}: ` + error);
           return response.custom({ statusCode: error.statusCode || 500, body: error.message });
         }
       }
@@ -110,7 +110,7 @@ export function registerChatRoute(router: IRouter) {
           convertToTraces(runs)
         );
       } catch (error) {
-        context.observability_plugin.logger.error(error);
+        context.assistant_plugin.logger.error(error);
         outputs = [
           {
             type: 'output',
@@ -138,7 +138,7 @@ export function registerChatRoute(router: IRouter) {
         });
         return response.ok({ body: { chatId, messages: updateResponse.attributes.messages } });
       } catch (error) {
-        context.observability_plugin.logger.error(error);
+        context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
@@ -170,7 +170,7 @@ export function registerChatRoute(router: IRouter) {
 
         return response.ok({ body: findResponse });
       } catch (error) {
-        context.observability_plugin.logger.error(error);
+        context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }

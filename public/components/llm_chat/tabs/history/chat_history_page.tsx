@@ -17,7 +17,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/public';
 import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
-import { IChat } from '../../../../../common/types/observability_saved_object_attributes';
+import { IChat } from '../../../../../common/types/chat_saved_object_attributes';
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useBulkGetChat } from '../../hooks/use_get_chat';
 

@@ -20,9 +20,8 @@ import React, { useState } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
 import { LANGCHAIN_API } from '../../../../common/constants/llm';
 import { coreRefs } from '../../../framework/core_refs';
-import { getPPLService } from '../../../../common/utils';
 
-export interface labelData {
+export interface LabelData {
   formHeader: string;
   inputPlaceholder: string;
   outputPlaceholder: string;
@@ -75,7 +74,7 @@ interface FeedbackModalContentProps {
   formData: FeedbackFormData;
   setFormData: React.Dispatch<React.SetStateAction<FeedbackFormData>>;
   metadata: FeedbackMetaData;
-  displayLabels?: Partial<Record<keyof FeedbackFormData, string>> & Partial<labelData>;
+  displayLabels?: Partial<Record<keyof FeedbackFormData, string>> & Partial<LabelData>;
   onClose: () => void;
 }
 
@@ -275,21 +274,23 @@ const useSubmitFeedback = (data: FeedbackFormData, metadata: FeedbackMetaData, h
 };
 
 const validatePPLQuery = async (logsQuery: string, feedBackType: FeedbackMetaData['type']) => {
-  let responseMessage: [] | string[] = [];
-  const errorMessage = [' Invalid PPL Query, please re-check the ppl syntax'];
+  return [];
+  // TODO remove
+  // let responseMessage: [] | string[] = [];
+  // const errorMessage = [' Invalid PPL Query, please re-check the ppl syntax'];
 
-  if (feedBackType === 'ppl_submit') {
-    const pplService = getPPLService();
-    await pplService
-      .fetch({ query: logsQuery, format: 'jdbc' })
-      .then((res) => {
-        if (res === undefined) responseMessage = errorMessage;
-      })
-      .catch((error: Error) => {
-        responseMessage = errorMessage;
-      });
-  }
-  return responseMessage;
+  // if (feedBackType === 'ppl_submit') {
+  //   const pplService = getPPLService();
+  //   await pplService
+  //     .fetch({ query: logsQuery, format: 'jdbc' })
+  //     .then((res) => {
+  //       if (res === undefined) responseMessage = errorMessage;
+  //     })
+  //     .catch((error: Error) => {
+  //       responseMessage = errorMessage;
+  //     });
+  // }
+  // return responseMessage;
 };
 
 const validator = {

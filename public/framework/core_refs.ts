@@ -16,7 +16,6 @@
 
 import { CoreStart, HttpStart, IToasts } from '../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../src/core/public';
-import PPLService from '../services/requests/ppl';
 
 class CoreRefs {
   private static _instance: CoreRefs;
@@ -24,7 +23,6 @@ class CoreRefs {
   public core?: CoreStart;
   public http?: HttpStart;
   public savedObjectsClient?: SavedObjectsClientContract;
-  public pplService?: PPLService;
   public toasts?: IToasts;
   public llm_enabled?: boolean;
   private constructor() {

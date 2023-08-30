@@ -5,7 +5,7 @@
 
 import { produce } from 'immer';
 import React, { useContext, useMemo, useReducer } from 'react';
-import { IMessage } from '../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 
 interface ChatState {
   messages: IMessage[];
@@ -66,9 +66,10 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
 
 export const ChatStateProvider: React.FC = (props) => {
   const [chatState, chatStateDispatch] = useReducer(chatStateReducer, initialState);
-  const contextValue: IChatStateContext = useMemo(() => ({ chatState, chatStateDispatch }), [
-    chatState,
-  ]);
+  const contextValue: IChatStateContext = useMemo(
+    () => ({ chatState, chatStateDispatch }),
+    [chatState]
+  );
 
   return (
     <ChatStateContext.Provider value={contextValue}>{props.children}</ChatStateContext.Provider>

@@ -4,12 +4,14 @@
  */
 
 import { DynamicTool } from 'langchain/tools';
-import { PPL_DATASOURCES_REQUEST } from '../../../../common/constants/metrics';
 import { requestGuessingIndexChain } from '../../chains/guessing_index';
 import { requestPPLGeneratorChain } from '../../chains/ppl_generator';
 import { generateFieldContext } from '../../utils/ppl_generator';
 import { swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
+
+const PPL_DATASOURCES_REQUEST =
+  'show datasources | where CONNECTOR_TYPE="PROMETHEUS" | fields DATASOURCE_NAME';
 
 interface PPLResponse {
   schema: Array<{ name: string; type: string }>;

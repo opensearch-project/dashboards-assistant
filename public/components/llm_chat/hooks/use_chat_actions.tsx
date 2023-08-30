@@ -9,11 +9,11 @@ import { CHAT_API } from '../../../../common/constants/llm';
 import {
   IMessage,
   ISuggestedAction,
-} from '../../../../common/types/observability_saved_object_attributes';
-import {
-  PPLSavedQueryClient,
-  PPLSavedVisualizationClient,
-} from '../../../services/saved_objects/saved_object_client/ppl';
+} from '../../../../common/types/chat_saved_object_attributes';
+// import {
+//   PPLSavedQueryClient,
+//   PPLSavedVisualizationClient,
+// } from '../../../services/saved_objects/saved_object_client/ppl';
 import { ChatContext, CoreServicesContext } from '../chat_header_button';
 import { PPLVisualizationModal } from '../components/ppl_visualization_modal';
 import { useChatState } from './use_chat_state';
@@ -71,8 +71,8 @@ export const useChatActions = () => {
       }
 
       case 'save_and_view_ppl_query': {
-        const saveQueryResponse = await savePPLQuery(suggestAction.metadata.query);
-        window.open(`./observability-logs#/explorer/${saveQueryResponse.objectId}`, '_blank');
+        // const saveQueryResponse = await savePPLQuery(suggestAction.metadata.query);
+        // window.open(`./observability-logs#/explorer/${saveQueryResponse.objectId}`, '_blank');
         break;
       }
 
@@ -94,9 +94,9 @@ export const useChatActions = () => {
               title={suggestAction.metadata.question}
               query={suggestAction.metadata.query}
               onConfirm={async () => {
-                const response = await savePPLVisualization(suggestAction.metadata.query);
-                modal.close();
-                window.open(`./observability-logs#/explorer/${response.objectId}`, '_blank');
+                // const response = await savePPLVisualization(suggestAction.metadata.query);
+                // modal.close();
+                // window.open(`./observability-logs#/explorer/${response.objectId}`, '_blank');
               }}
               onClose={() => modal.close()}
             />
@@ -111,28 +111,4 @@ export const useChatActions = () => {
   };
 
   return { send, openChat, executeAction };
-};
-
-const savePPLQuery = (query: string) => {
-  return PPLSavedQueryClient.getInstance().create({
-    query,
-    name: query.slice(0, 50),
-    dateRange: ['now-5y', 'now'],
-    fields: [],
-    timestamp: '',
-  });
-};
-
-const savePPLVisualization = (query: string) => {
-  const savedVisualization = {
-    query,
-    name: query.slice(0, 50),
-    dateRange: ['now-14d', 'now'],
-    fields: [],
-    timestamp: '',
-    type: 'line',
-    sub_type: 'visualization',
-  };
-  // @ts-ignore not sure what is required but this works
-  return PPLSavedVisualizationClient.getInstance().create(savedVisualization);
 };

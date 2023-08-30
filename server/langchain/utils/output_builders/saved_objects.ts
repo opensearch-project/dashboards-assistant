@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IMessage } from '../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { SavedObjectsTools } from '../../tools/tool_sets/saved_objects';
 import { filterToolOutput } from './utils';

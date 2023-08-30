@@ -7,7 +7,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/
 import autosize from 'autosize';
 import React, { useContext, useRef } from 'react';
 import { useEffectOnce } from 'react-use';
-import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../../common/types/chat_saved_object_attributes';
 import { ChatContext } from '../../chat_header_button';
 import { useChatActions } from '../../hooks/use_chat_actions';
 

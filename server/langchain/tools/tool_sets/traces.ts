@@ -5,13 +5,10 @@
 
 import { AggregationsMultiBucketAggregate } from '@opensearch-project/opensearch/api/types';
 import { DynamicTool } from 'langchain/tools';
-import {
-  DATA_PREPPER_INDEX_NAME,
-  JAEGER_INDEX_NAME,
-} from '../../../../common/constants/trace_analytics';
 import { AggregationBucket, flatten, jsonToCsv, swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
-import { getDashboardQuery, getMode, getTracesQuery, getServices } from './trace_tools/queries';
+import { DATA_PREPPER_INDEX_NAME, JAEGER_INDEX_NAME } from './trace_tools/constants';
+import { getDashboardQuery, getMode, getServices, getTracesQuery } from './trace_tools/queries';
 
 export class TracesTools extends PluginToolsFactory {
   static TOOL_NAMES = {
@@ -52,8 +49,10 @@ export class TracesTools extends PluginToolsFactory {
       body: query,
     });
     if (!traceGroupsResponse.body.aggregations) return '';
-    const traceGroupBuckets = (traceGroupsResponse.body.aggregations
-      .trace_group_name as AggregationsMultiBucketAggregate<AggregationBucket>).buckets;
+    const traceGroupBuckets = (
+      traceGroupsResponse.body.aggregations
+        .trace_group_name as AggregationsMultiBucketAggregate<AggregationBucket>
+    ).buckets;
     return jsonToCsv(flatten(traceGroupBuckets));
   }
 
@@ -65,8 +64,10 @@ export class TracesTools extends PluginToolsFactory {
       body: query,
     });
     if (!tracesResponse.body.aggregations) return '';
-    const traceBuckets = (tracesResponse.body.aggregations
-      .trace_group_name as AggregationsMultiBucketAggregate<AggregationBucket>).buckets;
+    const traceBuckets = (
+      tracesResponse.body.aggregations
+        .trace_group_name as AggregationsMultiBucketAggregate<AggregationBucket>
+    ).buckets;
     return jsonToCsv(flatten(traceBuckets));
   }
 

@@ -4,7 +4,7 @@
  */
 
 import { mergeWith } from 'lodash';
-import { IMessage } from '../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 
 type RequiredKey<T, K extends keyof T> = T & Required<Pick<T, K>>;

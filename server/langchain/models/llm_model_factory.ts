@@ -40,10 +40,10 @@ export class LLMModelFactory {
         return new OpenAI({ temperature: 0.0000001, callbacks: options.callbacks });
 
       case 'claude':
+      default:
         return new ChatAnthropic({ temperature: 0.0000001, callbacks: options.callbacks });
 
       case 'ml-commons-claude':
-      default:
         return new MLCommonsChatModel({ callbacks: options.callbacks }, options.client);
     }
   }

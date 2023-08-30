@@ -6,13 +6,13 @@
 import { ILegacyClusterClient, Logger } from '../../../src/core/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityPluginSetup {}
+export interface AssistantPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityPluginStart {}
+export interface AssistantPluginStart {}
 
 declare module '../../../src/core/server' {
   interface RequestHandlerContext {
-    observability_plugin: {
+    assistant_plugin: {
       observabilityClient: ILegacyClusterClient;
       logger: Logger;
     };

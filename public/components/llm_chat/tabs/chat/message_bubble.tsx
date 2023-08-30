@@ -5,7 +5,7 @@
 
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../../common/types/chat_saved_object_attributes';
 import llmAvatar from '../../../../assets/llm_avatar.svg';
 import userAvatar from '../../../../assets/user_avatar.svg';
 

@@ -6,7 +6,7 @@
 import {
   IMessage,
   ISuggestedAction,
-} from '../../../../common/types/observability_saved_object_attributes';
+} from '../../../../common/types/chat_saved_object_attributes';
 import { mergeMessages } from './utils';
 
 export type SuggestedQuestions = Record<string, string>;

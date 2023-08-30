@@ -5,7 +5,7 @@
 
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useContext, useLayoutEffect, useRef } from 'react';
-import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../../common/types/chat_saved_object_attributes';
 import { ChatContext } from '../../chat_header_button';
 import { InviteMessage } from '../../components/invite_message';
 import { LoadingButton } from '../../components/loading_button';

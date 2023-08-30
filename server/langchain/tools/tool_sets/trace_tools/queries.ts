@@ -2,10 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import _ from 'lodash';
 import { SearchRequest } from '@opensearch-project/opensearch/api/types';
-import { TraceAnalyticsMode } from '../../../utils/utils';
+import _ from 'lodash';
 import { OpenSearchClient } from '../../../../../../../src/core/server';
+import { TraceAnalyticsMode } from '../../../utils/utils';
 import {
   DATA_PREPPER_INDEX_NAME,
   DATA_PREPPER_SERVICE_INDEX_NAME,
@@ -13,8 +13,22 @@ import {
   SERVICE_MAP_MAX_EDGES,
   SERVICE_MAP_MAX_NODES,
   TRACES_MAX_NUM,
-} from '../../../../../common/constants/trace_analytics';
-import { ServiceObject } from '../../../../../public/components/trace_analytics/components/common/plots/service_map';
+} from './constants';
+
+interface ServiceObject {
+  [key: string]: {
+    serviceName: string;
+    id: number;
+    traceGroups: Array<{ traceGroup: string; targetResource: string[] }>;
+    targetServices: string[];
+    destServices: string[];
+    latency?: number;
+    error_rate?: number;
+    throughput?: number;
+    throughputPerMinute?: number;
+    relatedServices?: string[]; // services appear in the same traces this service appears
+  };
+}
 
 export async function getMode(opensearchClient: OpenSearchClient) {
   const indexExistsResponse = await opensearchClient.indices.exists({
@@ -57,12 +71,12 @@ export const getDashboardQuery = () => {
                   def seenTraceIdsMap = [:];
                   def totalLatency = 0.0;
                   def traceCount = 0.0;
-  
+
                   for (s in states) {
                     if (s == null) {
                       continue;
                     }
-  
+
                     for (entry in s.entrySet()) {
                       def traceId = entry.getKey();
                       def traceLatency = entry.getValue();
@@ -73,7 +87,7 @@ export const getDashboardQuery = () => {
                       }
                     }
                   }
-  
+
                   def average_latency_nanos = totalLatency / traceCount;
                   return Math.round(average_latency_nanos / 10000) / 100.0;
                 `,

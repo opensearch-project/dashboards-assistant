@@ -6,7 +6,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/opensearch_dashboards_react/public';
-import { IMessage } from '../../../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../../../common/types/chat_saved_object_attributes';
 import { ChatContext, CoreServicesContext } from '../../chat_header_button';
 import { FeedbackModal } from '../../components/feedback_modal';
 import { LangchainTracesFlyoutBody } from './langchain_traces_flyout_body';

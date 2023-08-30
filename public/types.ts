@@ -26,7 +26,7 @@ export interface SetupDependencies {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilitySetup {}
+export interface AssistantSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityStart {}
+export interface AssistantStart {}

@@ -4,15 +4,15 @@
  */
 
 import React from 'react';
-import { SavedVisualization } from '../../../../common/types/explorer';
-import { SavedObjectVisualization } from '../../visualizations/saved_object_visualization';
+// import { SavedVisualization } from '../../../../common/types/explorer';
+// import { SavedObjectVisualization } from '../../visualizations/saved_object_visualization';
 
 interface PPLVisualizationProps {
   query: string;
 }
 
 export const PPLVisualization: React.FC<PPLVisualizationProps> = (props) => {
-  const savedVisualization: SavedVisualization = {
+  const savedVisualization = {
     query: props.query,
     selected_date_range: { start: 'now-14d', end: 'now', text: '' },
     selected_timestamp: { name: 'timestamp', type: 'timestamp' },
@@ -23,12 +23,13 @@ export const PPLVisualization: React.FC<PPLVisualizationProps> = (props) => {
     sub_type: 'visualization',
   };
   return (
-    <SavedObjectVisualization
-      savedVisualization={savedVisualization}
-      timeRange={{
-        from: savedVisualization.selected_date_range.start,
-        to: savedVisualization.selected_date_range.end,
-      }}
-    />
+    <>TODO</>
+    // <SavedObjectVisualization
+    //   savedVisualization={savedVisualization}
+    //   timeRange={{
+    //     from: savedVisualization.selected_date_range.start,
+    //     to: savedVisualization.selected_date_range.end,
+    //   }}
+    // />
   );
 };

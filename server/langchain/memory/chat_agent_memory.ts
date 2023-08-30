@@ -5,7 +5,7 @@
 
 import { AIMessage, BaseMessage, HumanMessage } from 'langchain/schema';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { IMessage } from '../../../common/types/observability_saved_object_attributes';
+import { IMessage } from '../../../common/types/chat_saved_object_attributes';
 
 const loadPastMessages = (messages: IMessage[]) => {
   const pastMessages: BaseMessage[] = [];

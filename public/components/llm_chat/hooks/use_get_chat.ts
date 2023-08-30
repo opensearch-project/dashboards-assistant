@@ -11,10 +11,7 @@ import {
 } from '../../../../../../src/core/public';
 import { SavedObjectsFindResponse } from '../../../../../../src/core/server';
 import { CHAT_API } from '../../../../common/constants/llm';
-import {
-  CHAT_SAVED_OBJECT,
-  IChat,
-} from '../../../../common/types/observability_saved_object_attributes';
+import { CHAT_SAVED_OBJECT, IChat } from '../../../../common/types/chat_saved_object_attributes';
 import { ChatContext, CoreServicesContext } from '../chat_header_button';
 import { genericReducer, GenericReducer } from './fetch_reducer';
 

@@ -4,10 +4,10 @@
  */
 
 import { PluginInitializerContext } from '../../../src/core/server';
-import { ObservabilityPlugin } from './plugin';
+import { AssistantPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ObservabilityPlugin(initializerContext);
+  return new AssistantPlugin(initializerContext);
 }
 
-export { ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
+export { AssistantPluginSetup, AssistantPluginStart } from './types';

@@ -3,15 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './variables.scss';
-import './components/trace_analytics/index.scss';
-import './components/notebooks/index.scss'
+import { AssistantPlugin } from './plugin';
 
-import { PluginInitializer, PluginInitializerContext } from '../../../src/core/public';
-import {
-  ObservabilityPlugin
-} from './plugin';
+export { AssistantPlugin as Plugin };
 
-export { ObservabilityPlugin as Plugin };
-
-export const plugin = (initializerContext: PluginInitializerContext) => new ObservabilityPlugin(initializerContext);
+export const plugin = () => new AssistantPlugin();

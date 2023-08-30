@@ -8,7 +8,7 @@ import React from 'react';
 import {
   IMessage,
   ISuggestedAction,
-} from '../../../../../../common/types/observability_saved_object_attributes';
+} from '../../../../../../common/types/chat_saved_object_attributes';
 import { useChatActions } from '../../../hooks/use_chat_actions';
 
 interface SuggestionBubbleProps {
