@@ -21,7 +21,6 @@
   "dependencies": {
     "@huggingface/inference": "^2.5.0",
     "autosize": "^6.0.1",
-    "dompurify": "^2.4.1",
     "jsdom": "^22.1.0",
     "langchain": "^0.0.132",
     "performance-now": "^2.1.0",
@@ -36,7 +35,8 @@
     "husky": "6.0.0",
     "jest-dom": "^4.0.0",
     "lint-staged": "^13.1.0",
-    "ts-jest": "^29.1.0"
+    "ts-jest": "^29.1.0",
+    "web-streams-polyfill": "^3.2.1"
   },
   "eslintIgnore": [
     "node_modules/*",
