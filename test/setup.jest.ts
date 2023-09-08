@@ -11,6 +11,10 @@ import './fetch-polyfill';
 
 configure({ testIdAttribute: 'data-test-subj' });
 
+// https://github.com/inrupt/solid-client-authn-js/issues/1676#issuecomment-917016646
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 window.URL.createObjectURL = () => '';
 HTMLCanvasElement.prototype.getContext = () => '' as any;
 window.IntersectionObserver = class IntersectionObserver {

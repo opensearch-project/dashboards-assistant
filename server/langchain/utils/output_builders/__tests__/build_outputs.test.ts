@@ -32,7 +32,27 @@ describe('build outputs', () => {
     ]);
   });
 
-  it('builds outputs with response object', () => {
+  it('sanitizes outputs', () => {
+    const outputs = buildOutputs(
+      'test question',
+      'normal text<b onmouseover=alert("XSS testing!")></b>',
+      'test-session',
+      {},
+      []
+    );
+    expect(outputs).toEqual([
+      {
+        content: 'normal text<b></b>',
+        contentType: 'markdown',
+        sessionId: 'test-session',
+        suggestedActions: [],
+        toolsUsed: [],
+        type: 'output',
+      },
+    ]);
+  });
+
+  it('builds outputs with object type response', () => {
     const outputs = buildOutputs(
       'test question',
       { output: 'agent response' },

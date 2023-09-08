@@ -4,6 +4,8 @@
  */
 
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { AgentFactory } from '../../agents/agent_factory/agent_factory';
 import { buildPPLOutputs } from './ppl';
@@ -34,7 +36,7 @@ export const buildOutputs = (
   outputs = buildPPLOutputs(traces, outputs, question);
   outputs = buildCoreVisualizations(traces, outputs);
   outputs = buildSuggestions(suggestions, outputs);
-  return outputs;
+  return sanitize(outputs);
 };
 
 const extractContent = (agentResponse: AgentResponse) => {
@@ -45,4 +47,10 @@ const buildToolsUsed = (traces: LangchainTrace[], outputs: IMessage[]) => {
   const tools = traces.filter((trace) => trace.type === 'tool').map((tool) => tool.name);
   outputs[0].toolsUsed = tools;
   return outputs;
+};
+
+const sanitize = (outputs: IMessage[]) => {
+  const window = new JSDOM('').window;
+  const DOMPurify = createDOMPurify((window as unknown) as Window);
+  return outputs.map((output) => ({ ...output, content: DOMPurify.sanitize(output.content) }));
 };

@@ -24,9 +24,9 @@ module.exports = {
   ],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { diagnostics: false }],
-    'node_modules/langchain/.+\\.js$': ['ts-jest', { diagnostics: false }],
+    'node_modules/(langchain|langsmith)/.+\\.js$': ['ts-jest', { diagnostics: false }],
   },
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!langchain)'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!langchain|langsmith)'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/test/__mocks__/styleMock.js',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__mocks__/fileMock.js',
