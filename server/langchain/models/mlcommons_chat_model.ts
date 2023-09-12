@@ -53,7 +53,7 @@ export class MLCommonsChatModel extends BaseChatModel {
       messages
         .map((message) => {
           const messagePrompt = this.getAnthropicPromptFromMessage(message._getType());
-          return `${messagePrompt} ${message.text}`;
+          return `${messagePrompt} ${message.content}`;
         })
         .join('') + AI_PROMPT
     );
@@ -111,7 +111,7 @@ export class MLCommonsChatModel extends BaseChatModel {
     return {
       generations: [
         {
-          text: message.text,
+          text: message.content,
           message,
         },
       ],

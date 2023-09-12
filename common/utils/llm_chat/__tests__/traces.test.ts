@@ -4,8 +4,8 @@
  */
 
 import { Run } from 'langchain/callbacks';
-import { convertToTraces } from '../traces';
 import { AgentRun } from 'langchain/dist/callbacks/handlers/tracer';
+import { convertToTraces } from '../traces';
 
 describe('Test', () => {
   it('should convert runs to traces', () => {
@@ -58,41 +58,20 @@ describe('Test', () => {
   });
 });
 
-const mockRuns: Array<AgentRun | Run> = [
+type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer U>
+    ? Array<RecursivePartial<U>>
+    : T[P] extends object | undefined
+    ? RecursivePartial<T[P]>
+    : T[P];
+};
+
+// mock runs with only the fields that are being used for converting to traces
+const partialMockRuns: Array<RecursivePartial<AgentRun | Run>> = [
   {
     id: 'bbc4791c-601b-4c7c-ba62-409419e8ef41',
     name: 'AgentExecutor',
     start_time: 1692820695308,
-    serialized: {
-      lc: 1,
-      type: 'not_implemented',
-      id: ['langchain', 'agents', 'executor', 'AgentExecutor'],
-    },
-    events: [
-      { name: 'start', time: 1692820695308 },
-      {
-        name: 'agent_action',
-        time: 1692820697543,
-        kwargs: {
-          action: {
-            tool: 'Get OpenSearch indices',
-            log: ' ```json\n{\n    "action": "Get OpenSearch indices" \n}\n```',
-          },
-        },
-      },
-      {
-        name: 'agent_end',
-        time: 1692820706226,
-        kwargs: {
-          action: {
-            returnValues: { output: 'ai output' },
-            log:
-              ' ```json\n{\n    "action": "Final Answer", \n    "action_input": "ai output" \n}\n```',
-          },
-        },
-      },
-      { name: 'end', time: 1692820706226 },
-    ],
     inputs: {
       input: 'human input',
       chat_history: [
@@ -119,24 +98,15 @@ const mockRuns: Array<AgentRun | Run> = [
         name: 'DynamicTool',
         parent_run_id: 'bbc4791c-601b-4c7c-ba62-409419e8ef41',
         start_time: 1692820697545,
-        serialized: { lc: 1, type: 'not_implemented', id: ['langchain', 'tools', 'DynamicTool'] },
-        events: [
-          { name: 'start', time: 1692820697545 },
-          { name: 'end', time: 1692820697560 },
-        ],
         inputs: {},
         execution_order: 2,
         child_execution_order: 2,
         run_type: 'tool',
         child_runs: [],
-        extra: { metadata: {} },
-        tags: [],
         end_time: 1692820697560,
         outputs: { output: 'tools output' },
       },
     ],
-    extra: { metadata: {} },
-    tags: [],
     actions: [
       {
         tool: 'Get OpenSearch indices',
@@ -151,32 +121,6 @@ const mockRuns: Array<AgentRun | Run> = [
     id: '3d7145a2-1cc1-43cb-9685-bfbe426f03d0',
     name: 'LLMChain',
     start_time: 1692820706240,
-    serialized: {
-      lc: 1,
-      type: 'constructor',
-      id: ['langchain', 'chains', 'llm', 'LLMChain'],
-      kwargs: {
-        llm: {
-          lc: 1,
-          type: 'constructor',
-          id: ['langchain', 'chat_models', 'anthropic', 'ChatAnthropic'],
-          kwargs: {
-            temperature: 1e-7,
-            anthropic_api_key: { lc: 1, type: 'secret', id: ['ANTHROPIC_API_KEY'] },
-          },
-        },
-        prompt: {
-          lc: 1,
-          type: 'constructor',
-          id: ['langchain', 'prompts', 'prompt', 'PromptTemplate'],
-          kwargs: { template: 'prompt', input_variables: ['tools_description', 'chat_history'] },
-        },
-      },
-    },
-    events: [
-      { name: 'start', time: 1692820706240 },
-      { name: 'end', time: 1692820709238 },
-    ],
     inputs: {
       tools_description: 'tools description',
       chat_history: 'human: human input\nai: ai output',
@@ -190,19 +134,6 @@ const mockRuns: Array<AgentRun | Run> = [
         name: 'ChatAnthropic',
         parent_run_id: '3d7145a2-1cc1-43cb-9685-bfbe426f03d0',
         start_time: 1692820706241,
-        serialized: {
-          lc: 1,
-          type: 'constructor',
-          id: ['langchain', 'chat_models', 'anthropic', 'ChatAnthropic'],
-          kwargs: {
-            temperature: 1e-7,
-            anthropic_api_key: { lc: 1, type: 'secret', id: ['ANTHROPIC_API_KEY'] },
-          },
-        },
-        events: [
-          { name: 'start', time: 1692820706241 },
-          { name: 'end', time: 1692820709238 },
-        ],
         inputs: {
           messages: [
             [
@@ -219,20 +150,6 @@ const mockRuns: Array<AgentRun | Run> = [
         child_runs: [],
         child_execution_order: 2,
         run_type: 'llm',
-        extra: {
-          options: {},
-          invocation_params: {
-            model: 'claude-v1',
-            temperature: 1e-7,
-            top_k: -1,
-            top_p: -1,
-            stop_sequences: ['\n\nHuman:'],
-            max_tokens_to_sample: 2048,
-            stream: false,
-          },
-          metadata: {},
-        },
-        tags: [],
         end_time: 1692820709238,
         outputs: {
           generations: [
@@ -251,9 +168,9 @@ const mockRuns: Array<AgentRun | Run> = [
         },
       },
     ],
-    extra: { metadata: {} },
-    tags: [],
     end_time: 1692820709238,
     outputs: { text: 'suggestions' },
   },
 ];
+
+const mockRuns = partialMockRuns as Array<AgentRun | Run>;

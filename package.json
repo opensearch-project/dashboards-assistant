@@ -22,7 +22,7 @@
     "@huggingface/inference": "^2.5.0",
     "autosize": "^6.0.1",
     "jsdom": "^22.1.0",
-    "langchain": "^0.0.132",
+    "langchain": "^0.0.147",
     "performance-now": "^2.1.0",
     "postinstall": "^0.7.4"
   },
