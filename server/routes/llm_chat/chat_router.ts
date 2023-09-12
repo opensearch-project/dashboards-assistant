@@ -86,7 +86,7 @@ export function registerChatRoute(router: IRouter) {
           savedObjectsClient,
           callbacks
         );
-        const memory = memoryInit(messages.slice(1)); // Skips the first default message
+        const memory = memoryInit(messages);
         const chatAgent = chatAgentInit(
           model,
           pluginTools.flatMap((tool) => tool.toolsList),

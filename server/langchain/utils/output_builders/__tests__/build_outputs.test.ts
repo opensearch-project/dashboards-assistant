@@ -5,7 +5,7 @@
 
 import { LangchainTrace } from '../../../../../common/utils/llm_chat/traces';
 import { buildOutputs } from '../build_outputs';
-import { createTrace } from './__utils__/test_helpers';
+import { createTrace } from '../../../__tests__/__utils__/test_helpers';
 
 describe('build outputs', () => {
   it('builds outputs', () => {

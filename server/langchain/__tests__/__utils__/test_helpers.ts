@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IMessage } from '../../../../../../common/types/chat_saved_object_attributes';
-import { LangchainTrace } from '../../../../../../common/utils/llm_chat/traces';
+import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
+import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 
 export const createTrace = (options: Partial<LangchainTrace> = {}): LangchainTrace => ({
   id: 'trace-id',

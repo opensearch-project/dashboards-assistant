@@ -4,7 +4,7 @@
  */
 
 import { buildSuggestions } from '../suggestions';
-import { createMessage } from './__utils__/test_helpers';
+import { createMessage } from '../../../__tests__/__utils__/test_helpers';
 
 describe('build suggestions', () => {
   it('builds suggestion outputs', () => {
