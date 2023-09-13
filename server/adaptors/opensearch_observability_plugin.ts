@@ -8,6 +8,7 @@ const OPENSEARCH_PANELS_API = {
   OBJECT: `${BASE_OBSERVABILITY_URI}/object`,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function OpenSearchObservabilityPlugin(Client: any, config: any, components: any) {
   const clientAction = components.clientAction.factory;
 

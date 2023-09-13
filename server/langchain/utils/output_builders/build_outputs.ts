@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
+import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { AgentFactory } from '../../agents/agent_factory/agent_factory';
 import { buildPPLOutputs } from './ppl';

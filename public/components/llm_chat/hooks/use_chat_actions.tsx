@@ -6,10 +6,7 @@
 import React, { useContext } from 'react';
 import { toMountPoint } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { CHAT_API } from '../../../../common/constants/llm';
-import {
-  IMessage,
-  ISuggestedAction,
-} from '../../../../common/types/chat_saved_object_attributes';
+import { IMessage, ISuggestedAction } from '../../../../common/types/chat_saved_object_attributes';
 // import {
 //   PPLSavedQueryClient,
 //   PPLSavedVisualizationClient,

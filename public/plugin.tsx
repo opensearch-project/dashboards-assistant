@@ -16,8 +16,7 @@ import {
 } from './types';
 
 export class AssistantPlugin
-  implements Plugin<AssistantSetup, AssistantStart, SetupDependencies, AppPluginStartDependencies>
-{
+  implements Plugin<AssistantSetup, AssistantStart, SetupDependencies, AppPluginStartDependencies> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies

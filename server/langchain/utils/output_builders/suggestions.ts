@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  IMessage,
-  ISuggestedAction,
-} from '../../../../common/types/chat_saved_object_attributes';
+import { IMessage, ISuggestedAction } from '../../../../common/types/chat_saved_object_attributes';
 import { mergeMessages } from './utils';
 
 export type SuggestedQuestions = Record<string, string>;

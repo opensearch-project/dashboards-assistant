@@ -12,6 +12,7 @@ import {
   AD_BASE_API,
 } from '../services/utils/alerting_constants';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function OpenSearchAlertingPlugin(Client: any, config: any, components: any) {
   const ca = components.clientAction.factory;
 
