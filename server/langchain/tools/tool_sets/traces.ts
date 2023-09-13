@@ -4,17 +4,16 @@
  */
 
 import { DynamicTool } from 'langchain/tools';
-import { AggregationBucket, flatten, jsonToCsv, swallowErrors } from '../../utils/utils';
-import { DATA_PREPPER_INDEX_NAME, JAEGER_INDEX_NAME } from './trace_tools/constants';
+import { swallowErrors } from '../../utils/utils';
 import { PluginToolsFactory } from '../tools_factory/tools_factory';
+import { addFilters, getField } from './trace_tools/filters';
 import {
   getDashboardQuery,
   getMode,
-  runQuery,
-  getTracesQuery,
   getServices,
+  getTracesQuery,
+  runQuery,
 } from './trace_tools/queries';
-import { addFilters } from './trace_tools/filters';
 
 export class TracesTools extends PluginToolsFactory {
   static TOOL_NAMES = {
@@ -47,24 +46,31 @@ export class TracesTools extends PluginToolsFactory {
     }),
   ];
 
+  // TODO merge LLM requests and make calls parallel if possible
   public async getTraceGroups(userQuery: string) {
+    const keyword = 'trace_group_name';
+    const field = await getField(userQuery, keyword, this.model);
     const mode = await getMode(this.opensearchClient);
     const query = getDashboardQuery(mode);
     await addFilters(query, userQuery, this.model);
-    return await runQuery(this.opensearchClient, query, mode, 'trace_group_name');
+    return await runQuery(this.opensearchClient, query, mode, keyword, field);
   }
 
   public async getTraces(userQuery: string) {
+    const keyword = 'traces';
+    const field = await getField(userQuery, keyword, this.model);
     const mode = await getMode(this.opensearchClient);
     const query = getTracesQuery(mode);
     await addFilters(query, userQuery, this.model);
-    return await runQuery(this.opensearchClient, query, mode, 'traces');
+    return await runQuery(this.opensearchClient, query, mode, keyword, field);
   }
 
   public async getServices(userQuery: string) {
+    const keyword = 'service_name';
+    const field = await getField(userQuery, keyword, this.model);
     const mode = await getMode(this.opensearchClient);
     const query = await getServices(mode, this.opensearchClient);
     await addFilters(query, userQuery, this.model);
-    return await runQuery(this.opensearchClient, query, mode, 'service_name');
+    return await runQuery(this.opensearchClient, query, mode, keyword, field);
   }
 }

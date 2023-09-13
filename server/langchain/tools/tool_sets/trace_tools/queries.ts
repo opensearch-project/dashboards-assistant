@@ -34,6 +34,8 @@ interface ServiceObject {
   };
 }
 
+export type TraceBucketName = 'trace_group_name' | 'traces' | 'service_name';
+
 export async function getMode(opensearchClient: OpenSearchClient) {
   const indexExistsResponse = await opensearchClient.indices.exists({
     index: DATA_PREPPER_INDEX_NAME,
@@ -45,21 +47,28 @@ export async function runQuery(
   opensearchClient: OpenSearchClient,
   query: object,
   mode: TraceAnalyticsMode,
-  keyword: string
+  keyword: TraceBucketName,
+  field?: string
 ) {
   const response = await opensearchClient.search({
     index: mode === 'data_prepper' ? DATA_PREPPER_INDEX_NAME : JAEGER_INDEX_NAME,
     body: query,
   });
   if (!response.body.aggregations) return '';
-  const buckets = (response.body.aggregations[keyword] as AggregationsMultiBucketAggregate<
+  let buckets = (response.body.aggregations[keyword] as AggregationsMultiBucketAggregate<
     AggregationBucket
   >).buckets;
   if (buckets.length === 0) {
     return 'None found';
   }
+  buckets = flatten(buckets);
+  if (field) {
+    buckets = buckets.sort(function (a, b) {
+      return a[field] - b[field];
+    });
+  }
 
-  return jsonToCsv(flatten(buckets));
+  return jsonToCsv(buckets);
 }
 
 export const getDashboardQuery = (mode: TraceAnalyticsMode) => {
