@@ -82,7 +82,8 @@ export class MLCommonsChatModel extends BaseChatModel {
         },
       },
     });
-    return mlCommonsResponse.body.inference_results[0].output[0].dataAsMap.completion;
+    const respData = mlCommonsResponse.body.inference_results[0].output[0].dataAsMap;
+    return respData.completion || respData.message || 'Failed to request model';
   }
 
   // for local testing only

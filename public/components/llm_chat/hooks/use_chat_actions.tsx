@@ -56,12 +56,12 @@ export const useChatActions = () => {
     if (!chatId) chatStateDispatch({ type: 'reset' });
   };
 
-  const executeAction = async (suggestAction: ISuggestedAction, message: IMessage) => {
-    switch (suggestAction.actionType) {
+  const executeAction = async (suggestedAction: ISuggestedAction, message: IMessage) => {
+    switch (suggestedAction.actionType) {
       case 'send_as_input': {
         send({
           type: 'input',
-          content: suggestAction.message,
+          content: suggestedAction.message,
           contentType: 'text',
         });
         break;
@@ -88,8 +88,8 @@ export const useChatActions = () => {
         const modal = coreServicesContext.core.overlays.openModal(
           toMountPoint(
             <PPLVisualizationModal
-              title={suggestAction.metadata.question}
-              query={suggestAction.metadata.query}
+              title={suggestedAction.metadata.question}
+              query={suggestedAction.metadata.query}
               onConfirm={async () => {
                 // const response = await savePPLVisualization(suggestAction.metadata.query);
                 // modal.close();

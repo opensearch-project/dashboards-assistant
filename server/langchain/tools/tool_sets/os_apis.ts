@@ -12,7 +12,7 @@ export class OSAPITools extends PluginToolsFactory {
     new DynamicTool({
       name: 'Get OpenSearch indices',
       description:
-        'use this tool to get high-level information like (health, status, index, uuid, primary count, replica count, docs.count, docs.deleted, store.size, primary.store.size) about indices in a cluster, including backing indices for data streams in the OpenSearch cluster.',
+        'use this tool to get high-level information like (health, status, index, uuid, primary count, replica count, docs.count, docs.deleted, store.size, primary.store.size) about indices in a cluster, including backing indices for data streams in the OpenSearch cluster. This tool optionally takes the index name as input',
       func: (indexName?: string) => this.cat_indices(indexName),
       callbacks: this.callbacks,
     }),

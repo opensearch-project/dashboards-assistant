@@ -4,18 +4,5 @@
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "charts",
-    "dashboard",
-    "data",
-    "embeddable",
-    "inspector",
-    "navigation",
-    "opensearchDashboardsReact",
-    "opensearchDashboardsUtils",
-    "savedObjects",
-    "uiActions",
-    "urlForwarding",
-    "visualizations"
-  ]
+  "requiredPlugins": ["dashboard", "embeddable", "opensearchDashboardsReact"]
 }

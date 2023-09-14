@@ -66,7 +66,6 @@ export const requestSuggestionsChain = async (
   const toolsContext = tools.map((tool) => `${tool.name}: ${tool.description}`).join('\n');
 
   const chatHistory = memory.chatHistory;
-  // TODO: Reduce the message history (may be to last six chat pairs) sent to the chain in the context.
   const chatContext = convertChatToString(await chatHistory.getMessages());
   const chain = new LLMChain({ llm: model, prompt });
   const output = await chain.call(

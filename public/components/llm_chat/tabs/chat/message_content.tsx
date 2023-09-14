@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiMarkdownFormat, EuiText, getDefaultOuiMarkdownParsingPlugins } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import React from 'react';
 import { IMessage } from '../../../../../common/types/chat_saved_object_attributes';
-import { PPLVisualization } from '../../components/ppl_visualization';
 import { CoreVisualization } from '../../components/core_visualization';
+import { PPLVisualization } from '../../components/ppl_visualization';
 
 interface MessageContentProps {
   message: IMessage;
@@ -26,16 +26,7 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       );
 
     case 'markdown':
-      // TODO remove after https://github.com/opensearch-project/oui/pull/801
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const parsingPlugins = getDefaultOuiMarkdownParsingPlugins() as Array<[any, any]>; // Array<unified.PluginTuple<any[], unified.Settings>>
-      const emojiPlugin = parsingPlugins.find(([, settings]) => settings.emoticon)?.at(1);
-      if (emojiPlugin) emojiPlugin.emoticon = false;
-      return (
-        <EuiMarkdownFormat parsingPluginList={parsingPlugins}>
-          {props.message.content}
-        </EuiMarkdownFormat>
-      );
+      return <EuiMarkdownFormat>{props.message.content}</EuiMarkdownFormat>;
 
     case 'visualization':
       return (

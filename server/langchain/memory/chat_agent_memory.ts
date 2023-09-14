@@ -11,9 +11,9 @@ const filterMessages = (messages: IMessage[]): IMessage[] => {
   // remove AI messages until where human asked the first question
   const humanMessageIndex = messages.findIndex((message) => message.type === 'input');
   if (humanMessageIndex === -1) return []; // history is empty if no previous human input
-  messages.splice(0, humanMessageIndex);
   // remove error outputs, unmatched input/output pairs, and only keep the last 10 messages
   return messages
+    .slice(humanMessageIndex)
     .filter((message) => !(message.type === 'output' && message.contentType === 'error'))
     .filter((message, i, arr) => !(message.type === 'input' && arr[i + 1]?.type !== 'output'))
     .slice(-10);
