@@ -3,16 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useContext } from 'react';
-import { toMountPoint } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+import { useContext } from 'react';
 import { CHAT_API } from '../../../../common/constants/llm';
 import { IMessage, ISuggestedAction } from '../../../../common/types/chat_saved_object_attributes';
-// import {
-//   PPLSavedQueryClient,
-//   PPLSavedVisualizationClient,
-// } from '../../../services/saved_objects/saved_object_client/ppl';
 import { ChatContext, CoreServicesContext } from '../chat_header_button';
-import { PPLVisualizationModal } from '../components/ppl_visualization_modal';
 import { useChatState } from './use_chat_state';
 
 interface SendResponse {
@@ -85,20 +79,10 @@ export const useChatActions = () => {
       }
 
       case 'view_ppl_visualization': {
-        const modal = coreServicesContext.core.overlays.openModal(
-          toMountPoint(
-            <PPLVisualizationModal
-              title={suggestedAction.metadata.question}
-              query={suggestedAction.metadata.query}
-              onConfirm={async () => {
-                // const response = await savePPLVisualization(suggestAction.metadata.query);
-                // modal.close();
-                // window.open(`./observability-logs#/explorer/${response.objectId}`, '_blank');
-              }}
-              onClose={() => modal.close()}
-            />
-          )
-        );
+        chatContext.actionExecutors[suggestedAction.actionType]?.({
+          name: suggestedAction.metadata.question,
+          query: suggestedAction.metadata.query,
+        });
         break;
       }
 

@@ -118,19 +118,29 @@ interface SuggestionsProps {
 }
 
 const Suggestions: React.FC<SuggestionsProps> = (props) => {
+  const chatContext = useContext(ChatContext)!;
   if (props.message.type !== 'output' || !props.message.suggestedActions) return null;
   return (
     <>
-      {props.message.suggestedActions.map((suggestedAction, i) => (
-        <React.Fragment key={i}>
-          <EuiSpacer size="m" />
-          <SuggestionBubble
-            inputDisabled={props.inputDisabled}
-            message={props.message}
-            suggestedAction={suggestedAction}
-          />
-        </React.Fragment>
-      ))}
+      {props.message.suggestedActions
+        // remove actions that are not supported by the current chat context
+        .filter(
+          (suggestedAction) =>
+            !(
+              suggestedAction.actionType === 'view_ppl_visualization' &&
+              !chatContext.actionExecutors.view_ppl_visualization
+            )
+        )
+        .map((suggestedAction, i) => (
+          <React.Fragment key={i}>
+            <EuiSpacer size="m" />
+            <SuggestionBubble
+              inputDisabled={props.inputDisabled}
+              message={props.message}
+              suggestedAction={suggestedAction}
+            />
+          </React.Fragment>
+        ))}
     </>
   );
 };

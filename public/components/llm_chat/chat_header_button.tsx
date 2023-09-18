@@ -15,6 +15,7 @@ import {
 } from '../../../../../src/core/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import chatIcon from '../../assets/chat.svg';
+import { ActionExecutor, ContentRenderer } from '../../types';
 import { ChatFlyout } from './chat_flyout';
 import { TabId } from './components/chat_tab_bar';
 import { ChatStateProvider } from './hooks/use_chat_state';
@@ -23,6 +24,8 @@ import './index.scss';
 interface HeaderChatButtonProps {
   application: ApplicationStart;
   chatEnabled: boolean;
+  contentRenderers: Record<string, ContentRenderer>;
+  actionExecutors: Record<string, ActionExecutor>;
 }
 
 interface ICoreServicesContext {
@@ -43,6 +46,8 @@ interface IChatContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
   chatEnabled: boolean;
+  contentRenderers: Record<string, ContentRenderer>;
+  actionExecutors: Record<string, ActionExecutor>;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 
@@ -80,8 +85,18 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       setFlyoutVisible,
       setFlyoutComponent,
       chatEnabled: props.chatEnabled,
+      contentRenderers: props.contentRenderers,
+      actionExecutors: props.actionExecutors,
     }),
-    [appId, chatId, flyoutVisible, selectedTabId, props.chatEnabled]
+    [
+      appId,
+      chatId,
+      flyoutVisible,
+      selectedTabId,
+      props.chatEnabled,
+      props.contentRenderers,
+      props.actionExecutors,
+    ]
   );
 
   return (

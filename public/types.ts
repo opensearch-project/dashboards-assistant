@@ -11,6 +11,10 @@ import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/pub
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
 
+// TODO should pair with server side registered output parser
+export type ContentRenderer = (content: unknown) => React.ReactElement;
+export type ActionExecutor = (params: Record<string, unknown>) => void;
+
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   embeddable: EmbeddableStart;
@@ -25,8 +29,10 @@ export interface SetupDependencies {
   uiActions: UiActionsStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AssistantSetup {}
+export interface AssistantSetup {
+  registerContentRenderer: (contentType: string, render: ContentRenderer) => void;
+  registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantStart {}
