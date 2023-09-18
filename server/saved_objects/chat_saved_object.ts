@@ -13,7 +13,7 @@ export const chatSavedObject: SavedObjectsType = {
   management: {
     defaultSearchField: 'title',
     importableAndExportable: true,
-    icon: 'visQueryPPL',
+    icon: 'chatLeft',
     getTitle(obj) {
       return obj.attributes.title;
     },

@@ -10,13 +10,13 @@ import {
   IOpenSearchDashboardsResponse,
   IRouter,
 } from '../../../../src/core/server';
-import { CHAT_API } from '../../common/constants/llm';
+import { ASSISTANT_API } from '../../common/constants/llm';
 import { CHAT_SAVED_OBJECT, IChat } from '../../common/types/chat_saved_object_attributes';
 import { OllyChatService } from '../services/olly_chat_service';
 import { SavedObjectsStorageService } from '../services/saved_objects_storage_service';
 
 const llmRequestRoute = {
-  path: CHAT_API.LLM,
+  path: ASSISTANT_API.LLM,
   validate: {
     body: schema.object({
       chatId: schema.maybe(schema.string()),
@@ -35,7 +35,7 @@ const llmRequestRoute = {
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
 
 const getChatsRoute = {
-  path: CHAT_API.HISTORY,
+  path: ASSISTANT_API.HISTORY,
   validate: {
     query: schema.object({
       perPage: schema.number({ min: 0, defaultValue: 20 }),

@@ -3,19 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const OBSERVABILITY_BASE = '/api/observability';
+export const API_BASE = '/api/assistant';
 export const DSL_BASE = '/api/dsl';
 export const DSL_SEARCH = '/search';
 
-export const CHAT_API = {
-  LLM: `${OBSERVABILITY_BASE}/chat/llm`,
-  HISTORY: `${OBSERVABILITY_BASE}/chat/history`,
-} as const;
-
-export const LANGCHAIN_API = {
-  PPL_GENERATOR: `${OBSERVABILITY_BASE}/langchain/ppl`,
-  AGENT_TEST: `${OBSERVABILITY_BASE}/langchain/agent`,
-  FEEDBACK: `${OBSERVABILITY_BASE}/chat/feedback`,
+export const ASSISTANT_API = {
+  LLM: `${API_BASE}/send_message`,
+  HISTORY: `${API_BASE}/chats`,
+  PPL_GENERATOR: `${API_BASE}/generate_ppl`,
+  AGENT_TEST: `${API_BASE}/agent_test`,
+  FEEDBACK: `${API_BASE}/feedback`,
 } as const;
 
 export const LLM_INDEX = {

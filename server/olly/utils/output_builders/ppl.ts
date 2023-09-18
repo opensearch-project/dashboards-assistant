@@ -14,16 +14,6 @@ const extractPPLQueries = (content: string) => {
   );
 };
 
-const convertToSavePPLActions = (queries: string[]): Partial<IMessage> => {
-  return {
-    suggestedActions: queries.map((query, i, arr) => ({
-      message: `Save query ${arr.length > 1 ? `(${i}) ` : ''}and view in Event Analytics`,
-      metadata: { query },
-      actionType: 'save_and_view_ppl_query',
-    })),
-  };
-};
-
 export const buildPPLOutputs = (
   traces: LangchainTrace[],
   outputs: IMessage[],
@@ -36,7 +26,6 @@ export const buildPPLOutputs = (
 
   const statsPPLs = ppls.filter((ppl) => /\|\s*stats\s+/i.test(ppl));
   if (!statsPPLs.length) {
-    outputs[0] = mergeMessages(outputs[0], convertToSavePPLActions(ppls));
     return outputs;
   }
 

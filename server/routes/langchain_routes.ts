@@ -13,12 +13,12 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../src/core/server';
-import { LANGCHAIN_API, LLM_INDEX } from '../../common/constants/llm';
+import { ASSISTANT_API, LLM_INDEX } from '../../common/constants/llm';
 import { MLCommonsChatModel } from '../olly/models/mlcommons_chat_model';
 import { OllyChatService } from '../services/olly_chat_service';
 
 const pplGenerationRoute = {
-  path: LANGCHAIN_API.PPL_GENERATOR,
+  path: ASSISTANT_API.PPL_GENERATOR,
   validate: {
     body: schema.object({
       index: schema.string(),
@@ -49,7 +49,7 @@ export function registerLangchainRoutes(router: IRouter) {
 
   router.post(
     {
-      path: LANGCHAIN_API.AGENT_TEST,
+      path: ASSISTANT_API.AGENT_TEST,
       validate: {
         body: schema.object({
           question: schema.string(),
@@ -89,7 +89,7 @@ export function registerLangchainRoutes(router: IRouter) {
 
   router.post(
     {
-      path: LANGCHAIN_API.FEEDBACK,
+      path: ASSISTANT_API.FEEDBACK,
       validate: {
         body: schema.object({
           metadata: schema.object({

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CHAT_API } from '../../common/constants/llm';
+import { ASSISTANT_API } from '../../common/constants/llm';
 import { IMessage, ISuggestedAction } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCoreServicesContext } from '../contexts/core_services_context';
@@ -27,7 +27,7 @@ export const useChatActions = () => {
     abortControllerRef = abortController;
     chatStateDispatch({ type: 'send', payload: input });
     try {
-      const response = await coreServicesContext.http.post<SendResponse>(CHAT_API.LLM, {
+      const response = await coreServicesContext.http.post<SendResponse>(ASSISTANT_API.LLM, {
         body: JSON.stringify({
           chatId: chatContext.chatId,
           ...(!chatContext.chatId && { messages: chatState.messages }), // include all previous messages for new chats
@@ -58,12 +58,6 @@ export const useChatActions = () => {
           content: suggestedAction.message,
           contentType: 'text',
         });
-        break;
-      }
-
-      case 'save_and_view_ppl_query': {
-        // const saveQueryResponse = await savePPLQuery(suggestAction.metadata.query);
-        // window.open(`./observability-logs#/explorer/${saveQueryResponse.objectId}`, '_blank');
         break;
       }
 

@@ -5,7 +5,7 @@
 
 import { SavedObjectAttributes } from '../../../../src/core/types';
 
-export const CHAT_SAVED_OBJECT = 'observability-chat';
+export const CHAT_SAVED_OBJECT = 'assistant-chat';
 export const SAVED_OBJECT_VERSION = 1;
 
 export interface IChat extends SavedObjectAttributes {
@@ -41,7 +41,7 @@ export type ISuggestedAction = ISuggestedActionBase &
   (
     | { actionType: 'send_as_input' | 'copy' | 'view_in_dashboards' }
     | {
-        actionType: 'save_and_view_ppl_query' | 'view_ppl_visualization';
+        actionType: 'view_ppl_visualization';
         metadata: { query: string; question: string };
       }
   );

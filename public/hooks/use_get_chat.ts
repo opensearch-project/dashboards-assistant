@@ -10,7 +10,7 @@ import {
   SimpleSavedObject,
 } from '../../../../src/core/public';
 import { SavedObjectsFindResponse } from '../../../../src/core/server';
-import { CHAT_API } from '../../common/constants/llm';
+import { ASSISTANT_API } from '../../common/constants/llm';
 import { CHAT_SAVED_OBJECT, IChat } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCoreServicesContext } from '../contexts/core_services_context';
@@ -59,7 +59,7 @@ export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) =
     dispatch({ type: 'request' });
 
     coreServicesContext.http
-      .get<SavedObjectsFindResponse<IChat>>(CHAT_API.HISTORY, {
+      .get<SavedObjectsFindResponse<IChat>>(ASSISTANT_API.HISTORY, {
         query: options as HttpFetchQuery,
         signal: abortController.signal,
       })

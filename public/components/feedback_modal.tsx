@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { HttpStart } from '../../../../src/core/public';
-import { LANGCHAIN_API } from '../../common/constants/llm';
+import { ASSISTANT_API } from '../../common/constants/llm';
 import { getCoreStart } from '../plugin';
 
 export interface LabelData {
@@ -264,7 +264,7 @@ const useSubmitFeedback = (data: FeedbackFormData, metadata: FeedbackMetaData, h
     submitFeedback: () => {
       setLoading(true);
       return http
-        .post(LANGCHAIN_API.FEEDBACK, { body: JSON.stringify({ metadata, ...data }) })
+        .post(ASSISTANT_API.FEEDBACK, { body: JSON.stringify({ metadata, ...data }) })
         .finally(() => setLoading(false));
     },
   };

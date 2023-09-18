@@ -42,57 +42,6 @@ describe('build ppl', () => {
     ]);
   });
 
-  it('builds non-stats ppl outputs', () => {
-    const traces: LangchainTrace[] = [
-      createTrace({
-        type: 'tool',
-        name: PPLTools.TOOL_NAMES.QUERY_OPENSEARCH,
-        output: 'The PPL query is: source=opensearch_dashboards_sample_data_flights\n',
-      }),
-    ];
-    const outputs = buildPPLOutputs(traces, [createMessage()], 'input');
-    expect(outputs[0].suggestedActions).toEqual([
-      {
-        actionType: 'save_and_view_ppl_query',
-        message: 'Save query and view in Event Analytics',
-        metadata: { query: 'source=opensearch_dashboards_sample_data_flights' },
-      },
-    ]);
-  });
-
-  it('builds multiple non-stats ppl outputs', () => {
-    const traces: LangchainTrace[] = [
-      createTrace({
-        type: 'tool',
-        name: PPLTools.TOOL_NAMES.QUERY_OPENSEARCH,
-        output: 'The PPL query is: source=opensearch_dashboards_sample_data_flights\n',
-      }),
-      createTrace({
-        type: 'tool',
-        name: PPLTools.TOOL_NAMES.QUERY_OPENSEARCH,
-        output: 'The PPL query is: source=opensearch_dashboards_sample_data_logs\n',
-      }),
-    ];
-    const outputs = buildPPLOutputs(
-      traces,
-      [createMessage({ suggestedActions: [{ actionType: 'copy', message: 'Copy' }] })],
-      'input'
-    );
-    expect(outputs[0].suggestedActions).toEqual([
-      { actionType: 'copy', message: 'Copy' },
-      {
-        actionType: 'save_and_view_ppl_query',
-        message: 'Save query (0) and view in Event Analytics',
-        metadata: { query: 'source=opensearch_dashboards_sample_data_flights' },
-      },
-      {
-        actionType: 'save_and_view_ppl_query',
-        message: 'Save query (1) and view in Event Analytics',
-        metadata: { query: 'source=opensearch_dashboards_sample_data_logs' },
-      },
-    ]);
-  });
-
   it('ignores non-ppl outputs', () => {
     const traces: LangchainTrace[] = [
       createTrace({

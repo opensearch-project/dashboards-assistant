@@ -12,6 +12,7 @@ import { LangchainTrace, convertToTraces } from '../../common/utils/llm_chat/tra
 import { useCoreServicesContext } from '../contexts/core_services_context';
 import { GenericReducer, genericReducer } from './fetch_reducer';
 
+// TODO persist traces with chat objects
 export const useFetchLangchainTraces = (sessionId: string) => {
   const coreServicesContext = useCoreServicesContext();
   const reducer: GenericReducer<LangchainTrace[]> = genericReducer;
