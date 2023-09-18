@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ILegacyClusterClient, IRouter } from '../../../../src/core/server';
-import { registerChatRoute } from './llm_chat/chat_router';
-import { registerLangChainRoutes } from './llm_chat/langchain';
+import { IRouter } from '../../../../src/core/server';
+import { registerChatRoutes } from './chat_routes';
+import { registerLangchainRoutes } from './langchain_routes';
 
-export function setupRoutes({ router, client }: { router: IRouter; client: ILegacyClusterClient }) {
-  registerChatRoute(router);
-  registerLangChainRoutes(router);
+export function setupRoutes(router: IRouter) {
+  registerChatRoutes(router);
+  registerLangchainRoutes(router);
 }

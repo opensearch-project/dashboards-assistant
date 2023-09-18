@@ -43,7 +43,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     });
 
     // Register server side APIs
-    setupRoutes({ router, client: openSearchObservabilityClient });
+    setupRoutes(router);
 
     core.savedObjects.registerType(chatSavedObject);
     core.capabilities.registerProvider(() => ({
