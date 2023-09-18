@@ -10,7 +10,7 @@ import {
   EMAIL_ACCOUNT_BASE_API,
   EMAIL_GROUP_BASE_API,
   AD_BASE_API,
-} from '../services/utils/alerting_constants';
+} from './constants/alerting';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function OpenSearchAlertingPlugin(Client: any, config: any, components: any) {

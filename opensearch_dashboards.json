@@ -4,5 +4,10 @@
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["dashboard", "embeddable", "opensearchDashboardsReact"]
+  "requiredPlugins": [
+    "dashboard",
+    "embeddable",
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils"
+  ]
 }

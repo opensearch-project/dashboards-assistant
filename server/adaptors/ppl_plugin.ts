@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-ignore
 export const PPLPlugin = function (Client, config, components) {
   const ca = components.clientAction.factory;
   Client.prototype.ppl = components.clientAction.namespaceFactory();

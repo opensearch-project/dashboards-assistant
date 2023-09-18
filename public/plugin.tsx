@@ -6,8 +6,7 @@
 import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
-import { CoreServicesContext, HeaderChatButton } from './components/llm_chat/chat_header_button';
-import { coreRefs } from './framework/core_refs';
+import { HeaderChatButton } from './chat_header_button';
 import {
   ActionExecutor,
   AppPluginStartDependencies,
@@ -16,6 +15,10 @@ import {
   ContentRenderer,
   SetupDependencies,
 } from './types';
+import { CoreServicesContext } from './contexts/core_services_context';
+import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
+
+export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 export class AssistantPlugin
   implements Plugin<AssistantSetup, AssistantStart, SetupDependencies, AppPluginStartDependencies> {
@@ -33,7 +36,6 @@ export class AssistantPlugin
           res.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role))
         )
         .then((chatEnabled) => {
-          coreRefs.llm_enabled = chatEnabled;
           coreStart.chrome.navControls.registerRight({
             order: 10000,
             mount: toMountPoint(
@@ -73,10 +75,7 @@ export class AssistantPlugin
   }
 
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): AssistantStart {
-    coreRefs.core = core;
-    coreRefs.http = core.http;
-    coreRefs.savedObjectsClient = core.savedObjects.client;
-    coreRefs.toasts = core.notifications.toasts;
+    setCoreStart(core);
 
     return {};
   }

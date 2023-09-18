@@ -15,10 +15,10 @@ import {
   ResponseError,
 } from '../../../../../src/core/server';
 import { LANGCHAIN_API, LLM_INDEX } from '../../../common/constants/llm';
-import { OpenSearchTracer } from '../../langchain/callbacks/opensearch_tracer';
-import { LLMModelFactory } from '../../langchain/models/llm_model_factory';
-import { MLCommonsChatModel } from '../../langchain/models/mlcommons_chat_model';
-import { PPLTools } from '../../langchain/tools/tool_sets/ppl';
+import { OpenSearchTracer } from '../../olly/callbacks/opensearch_tracer';
+import { LLMModelFactory } from '../../olly/models/llm_model_factory';
+import { MLCommonsChatModel } from '../../olly/models/mlcommons_chat_model';
+import { PPLTools } from '../../olly/tools/tool_sets/ppl';
 
 export function registerLangChainRoutes(router: IRouter) {
   router.post(

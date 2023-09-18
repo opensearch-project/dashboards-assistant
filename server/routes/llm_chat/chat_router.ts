@@ -20,13 +20,13 @@ import {
   SAVED_OBJECT_VERSION,
 } from '../../../common/types/chat_saved_object_attributes';
 import { convertToTraces } from '../../../common/utils/llm_chat/traces';
-import { chatAgentInit } from '../../langchain/agents/agent_helpers';
-import { OpenSearchTracer } from '../../langchain/callbacks/opensearch_tracer';
-import { requestSuggestionsChain } from '../../langchain/chains/suggestions_generator';
-import { memoryInit } from '../../langchain/memory/chat_agent_memory';
-import { LLMModelFactory } from '../../langchain/models/llm_model_factory';
-import { initTools } from '../../langchain/tools/tools_helper';
-import { buildOutputs } from '../../langchain/utils/output_builders/build_outputs';
+import { chatAgentInit } from '../../olly/agents/agent_helpers';
+import { OpenSearchTracer } from '../../olly/callbacks/opensearch_tracer';
+import { requestSuggestionsChain } from '../../olly/chains/suggestions_generator';
+import { memoryInit } from '../../olly/memory/chat_agent_memory';
+import { LLMModelFactory } from '../../olly/models/llm_model_factory';
+import { initTools } from '../../olly/tools/tools_helper';
+import { buildOutputs } from '../../olly/utils/output_builders/build_outputs';
 
 export function registerChatRoute(router: IRouter) {
   router.post(
