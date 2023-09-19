@@ -13,12 +13,12 @@ import { SavedObjectsFindResponse } from '../../../../src/core/server';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { CHAT_SAVED_OBJECT, IChat } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
-import { useCoreServicesContext } from '../contexts/core_services_context';
+import { useCore } from '../contexts/core_context';
 import { GenericReducer, genericReducer } from './fetch_reducer';
 
 export const useGetChat = () => {
   const chatContext = useChatContext();
-  const coreServicesContext = useCoreServicesContext();
+  const core = useCore();
   const reducer: GenericReducer<SimpleSavedObject<IChat>> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
@@ -31,7 +31,7 @@ export const useGetChat = () => {
       return;
     }
 
-    coreServicesContext.savedObjectsClient
+    core.services.savedObjects.client
       .get<IChat>(CHAT_SAVED_OBJECT, chatContext.chatId)
       .then((payload) => {
         if (!abort) dispatch({ type: 'success', payload });
@@ -49,7 +49,7 @@ export const useGetChat = () => {
 };
 
 export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) => {
-  const coreServicesContext = useCoreServicesContext();
+  const core = useCore();
   const reducer: GenericReducer<SavedObjectsFindResponse<IChat>> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
   const [refresh, setRefresh] = useState({});
@@ -58,7 +58,7 @@ export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) =
     const abortController = new AbortController();
     dispatch({ type: 'request' });
 
-    coreServicesContext.http
+    core.services.http
       .get<SavedObjectsFindResponse<IChat>>(ASSISTANT_API.HISTORY, {
         query: options as HttpFetchQuery,
         signal: abortController.signal,

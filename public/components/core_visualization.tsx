@@ -5,28 +5,28 @@
 
 import { EuiText, htmlIdGenerator, prettyDuration, ShortDate } from '@elastic/eui';
 import React, { useState } from 'react';
+import { useCore } from '../contexts/core_context';
 import { DashboardContainerInput } from '../../../../src/plugins/dashboard/public';
 import { ViewMode } from '../../../../src/plugins/embeddable/public';
 import { IMessage } from '../../common/types/chat_saved_object_attributes';
-import { useCoreServicesContext } from '../contexts/core_services_context';
 
 interface CoreVisualizationProps {
   message: IMessage;
 }
 
 export const CoreVisualization: React.FC<CoreVisualizationProps> = (props) => {
-  const coreServicesContext = useCoreServicesContext();
+  const core = useCore();
   const [visInput, setVisInput] = useState<DashboardContainerInput>(() =>
     createDashboardVizObject(props.message.content)
   );
-  const dateFormat = coreServicesContext.core.uiSettings.get<string>('dateFormat');
+  const dateFormat = core.services.uiSettings.get<string>('dateFormat');
 
   return (
     <>
       <EuiText size="s">
         {prettyDuration(visInput.timeRange.from, visInput.timeRange.to, [], dateFormat)}
       </EuiText>
-      <coreServicesContext.DashboardContainerByValueRenderer
+      <core.services.startDeps.dashboard.DashboardContainerByValueRenderer
         input={visInput}
         onInputUpdated={setVisInput}
       />

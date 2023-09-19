@@ -5,8 +5,13 @@
 
 import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
+import {
+  createOpenSearchDashboardsReactContext,
+  toMountPoint,
+} from '../../../src/plugins/opensearch_dashboards_react/public';
+import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { HeaderChatButton } from './chat_header_button';
+import { AssistantServices } from './contexts/core_context';
 import {
   ActionExecutor,
   AppPluginStartDependencies,
@@ -15,8 +20,6 @@ import {
   ContentRenderer,
   SetupDependencies,
 } from './types';
-import { CoreServicesContext } from './contexts/core_services_context';
-import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -30,6 +33,11 @@ export class AssistantPlugin
     const actionExecutors: Record<string, ActionExecutor> = {};
 
     core.getStartServices().then(([coreStart, startDeps]) => {
+      const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
+        ...coreStart,
+        setupDeps,
+        startDeps,
+      });
       coreStart.http
         .get<{ data: { roles: string[] } }>('/api/v1/configuration/account')
         .then((res) =>
@@ -39,22 +47,14 @@ export class AssistantPlugin
           coreStart.chrome.navControls.registerRight({
             order: 10000,
             mount: toMountPoint(
-              <CoreServicesContext.Provider
-                value={{
-                  core: coreStart,
-                  http: coreStart.http,
-                  savedObjectsClient: coreStart.savedObjects.client,
-                  DashboardContainerByValueRenderer:
-                    startDeps.dashboard.DashboardContainerByValueRenderer,
-                }}
-              >
+              <CoreContext.Provider>
                 <HeaderChatButton
                   application={coreStart.application}
                   chatEnabled={chatEnabled}
                   contentRenderers={contentRenderers}
                   actionExecutors={actionExecutors}
                 />
-              </CoreServicesContext.Provider>
+              </CoreContext.Provider>
             ),
           });
         });

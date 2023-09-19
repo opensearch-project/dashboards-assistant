@@ -9,12 +9,12 @@ import { SearchResponse } from '../../../../src/core/server';
 import { SearchRequest } from '../../../../src/plugins/data/common';
 import { DSL_BASE, DSL_SEARCH, LLM_INDEX } from '../../common/constants/llm';
 import { LangchainTrace, convertToTraces } from '../../common/utils/llm_chat/traces';
-import { useCoreServicesContext } from '../contexts/core_services_context';
+import { useCore } from '../contexts/core_context';
 import { GenericReducer, genericReducer } from './fetch_reducer';
 
 // TODO persist traces with chat objects
 export const useFetchLangchainTraces = (sessionId: string) => {
-  const coreServicesContext = useCoreServicesContext();
+  const core = useCore();
   const reducer: GenericReducer<LangchainTrace[]> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
@@ -41,7 +41,7 @@ export const useFetchLangchainTraces = (sessionId: string) => {
       ],
     };
 
-    coreServicesContext.http
+    core.services.http
       .post<SearchResponse<Run>>(`${DSL_BASE}${DSL_SEARCH}`, {
         body: JSON.stringify({ index: LLM_INDEX.TRACES, size: 100, ...query }),
         signal: abortController.signal,

@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useCore } from '../contexts/core_context';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { IMessage, ISuggestedAction } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
-import { useCoreServicesContext } from '../contexts/core_services_context';
 import { useChatState } from './use_chat_state';
 
 interface SendResponse {
@@ -19,7 +19,7 @@ let abortControllerRef: AbortController;
 // TODO refactor into different hooks
 export const useChatActions = () => {
   const chatContext = useChatContext();
-  const coreServicesContext = useCoreServicesContext();
+  const core = useCore();
   const { chatState, chatStateDispatch } = useChatState();
 
   const send = async (input: IMessage) => {
@@ -27,7 +27,7 @@ export const useChatActions = () => {
     abortControllerRef = abortController;
     chatStateDispatch({ type: 'send', payload: input });
     try {
-      const response = await coreServicesContext.http.post<SendResponse>(ASSISTANT_API.LLM, {
+      const response = await core.services.http.post<SendResponse>(ASSISTANT_API.LLM, {
         body: JSON.stringify({
           chatId: chatContext.chatId,
           ...(!chatContext.chatId && { messages: chatState.messages }), // include all previous messages for new chats

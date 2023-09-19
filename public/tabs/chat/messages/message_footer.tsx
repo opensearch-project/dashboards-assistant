@@ -10,7 +10,7 @@ import { IMessage } from '../../../../common/types/chat_saved_object_attributes'
 import { FeedbackModal } from '../../../components/feedback_modal';
 import { LangchainTracesFlyoutBody } from '../../../components/langchain_traces_flyout_body';
 import { useChatContext } from '../../../contexts/chat_context';
-import { useCoreServicesContext } from '../../../contexts/core_services_context';
+import { useCore } from '../../../contexts/core_context';
 
 interface MessageFooterProps {
   message: IMessage;
@@ -19,7 +19,7 @@ interface MessageFooterProps {
 
 export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) => {
   const chatContext = useChatContext();
-  const coreServicesContext = useCoreServicesContext();
+  const core = useCore();
   const footers: React.ReactNode[] = [];
 
   if (props.message.type === 'output') {
@@ -53,7 +53,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
           size="xs"
           flush="left"
           onClick={() => {
-            const modal = coreServicesContext.core.overlays.openModal(
+            const modal = core.overlays.openModal(
               toMountPoint(
                 <FeedbackModal
                   input={props.previousInput?.content}
