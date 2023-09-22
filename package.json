@@ -20,12 +20,14 @@
   "dependencies": {
     "@huggingface/inference": "^2.5.0",
     "autosize": "^6.0.1",
+    "dompurify": "^2.4.1",
     "jsdom": "^22.1.0",
     "langchain": "^0.0.147",
     "postinstall": "^0.7.4"
   },
   "devDependencies": {
     "@types/autosize": "^4.0.1",
+    "@types/dompurify": "^2.3.3",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jsdom": "^21.1.2",
     "@types/react-test-renderer": "^16.9.1",
