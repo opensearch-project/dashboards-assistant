@@ -23,25 +23,15 @@ import { StorageService } from './storage_service';
 
 export class OllyChatService implements ChatService {
   public async requestLLM(
+    messages: IMessage[],
     context: RequestHandlerContext,
-    request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>,
-    storageService: StorageService
+    request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
   ): Promise<IMessage[]> {
-    const { chatId, input, messages = [] } = request.body;
+    const { input } = request.body;
     const sessionId = uuid();
     const observabilityClient = context.assistant_plugin.observabilityClient.asScoped(request);
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
     const savedObjectsClient = context.core.savedObjects.client;
-
-    // get history from the chat object for existing chats
-    if (chatId && messages.length === 0) {
-      try {
-        const savedMessages = await storageService.getMessages(chatId);
-        messages.push(...savedMessages);
-      } catch (error) {
-        throw new Error(`failed to get history for ${chatId}: ` + error);
-      }
-    }
 
     try {
       const runs: Run[] = [];

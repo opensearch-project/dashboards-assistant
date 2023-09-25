@@ -11,9 +11,9 @@ import { StorageService } from './storage_service';
 
 export interface ChatService {
   requestLLM(
+    messages: IMessage[],
     context: RequestHandlerContext,
-    request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>,
-    storageService: StorageService
+    request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
   ): Promise<IMessage[]>;
   generatePPL(
     context: RequestHandlerContext,

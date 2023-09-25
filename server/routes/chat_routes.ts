@@ -4,7 +4,7 @@
  */
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import { TypeOf, schema } from '@osd/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 import {
   HttpResponsePayload,
   IOpenSearchDashboardsResponse,
@@ -60,8 +60,18 @@ export function registerChatRoutes(router: IRouter) {
       const storageService = new SavedObjectsStorageService(context.core.savedObjects.client);
       const chatService = new OllyChatService();
 
+      // get history from the chat object for existing chats
+      if (chatId && messages.length === 0) {
+        try {
+          const savedMessages = await storageService.getMessages(chatId);
+          messages.push(...savedMessages);
+        } catch (error) {
+          throw new Error(`failed to get history for ${chatId}: ` + error);
+        }
+      }
+
       try {
-        const outputs = await chatService.requestLLM(context, request, storageService);
+        const outputs = await chatService.requestLLM(messages, context, request);
         const saveMessagesResponse = await storageService.saveMessages(
           input.content.substring(0, 50),
           chatId,
