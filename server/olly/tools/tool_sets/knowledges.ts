@@ -6,7 +6,7 @@
 import { RetrievalQAChain } from 'langchain/chains';
 import { DynamicTool } from 'langchain/tools';
 import { LLMModelFactory } from '../../models/llm_model_factory';
-import { swallowErrors } from '../../utils/utils';
+import { protectCall } from '../../utils/utils';
 import { PluginToolsBase } from '../tools_base';
 
 export class KnowledgeTools extends PluginToolsBase {
@@ -24,7 +24,7 @@ export class KnowledgeTools extends PluginToolsBase {
       name: 'Get ticket information',
       description:
         'Use this tool to find tickets in the system with incidents that are relevant to a question about error causes. This tool takes the question as input.',
-      func: swallowErrors((query: string) => this.askVectorStore(query)),
+      func: protectCall((query: string) => this.askVectorStore(query)),
       callbacks: this.callbacks,
     }),
     new DynamicTool({

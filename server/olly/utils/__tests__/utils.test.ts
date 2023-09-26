@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { flatten, jsonToCsv, swallowErrors } from '../utils';
+import { MAX_TOOL_OUTPUT_CHAR } from '../constants';
+import { flatten, jsonToCsv, protectCall } from '../utils';
 
-describe('swallow errors', () => {
+describe('protect calls', () => {
   it('should swallow errors for sync functions', async () => {
     const tool = jest.fn().mockImplementation(() => {
       throw new Error('failed to run in test');
     });
-    const toolNoThrow = swallowErrors(tool);
+    const toolNoThrow = protectCall(tool);
     const res = await toolNoThrow('input');
     expect(res).toEqual('Error when running tool: Error: failed to run in test');
     expect(toolNoThrow('input')).resolves.not.toThrowError();
@@ -18,10 +19,18 @@ describe('swallow errors', () => {
 
   it('should swallow errors for async functions', async () => {
     const tool = jest.fn().mockRejectedValue(new Error('failed to run in test'));
-    const toolNoThrow = swallowErrors(tool);
+    const toolNoThrow = protectCall(tool);
     const res = await toolNoThrow('input');
     expect(res).toEqual('Error when running tool: Error: failed to run in test');
     expect(toolNoThrow('input')).resolves.not.toThrowError();
+  });
+
+  it('should truncate text if output is too long', async () => {
+    const tool = jest.fn().mockResolvedValue('failed to run in test'.repeat(1000));
+    const truncated = protectCall(tool);
+    const res = await truncated('input');
+    expect(res).toContain('Output is too long, truncated');
+    expect(res.length).toEqual(MAX_TOOL_OUTPUT_CHAR);
   });
 });
 

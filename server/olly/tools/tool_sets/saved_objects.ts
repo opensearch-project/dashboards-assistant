@@ -5,7 +5,7 @@
 
 import { DynamicTool } from 'langchain/tools';
 import { SavedObjectAttributes } from '../../../../../../src/core/types';
-import { jsonToCsv, swallowErrors } from '../../utils/utils';
+import { jsonToCsv, protectCall } from '../../utils/utils';
 import { PluginToolsBase } from '../tools_base';
 
 export class SavedObjectsTools extends PluginToolsBase {
@@ -18,7 +18,7 @@ export class SavedObjectsTools extends PluginToolsBase {
       name: SavedObjectsTools.TOOL_NAMES.FIND_VISUALIZATIONS,
       description:
         'use this tool to find user created visualizations. This tool takes the visualization name as input and returns the first 3 matching visualizations',
-      func: swallowErrors((name: string) => this.findVisualizationsByName(name)), // use arrow function to pass through `this`
+      func: protectCall((name: string) => this.findVisualizationsByName(name)), // use arrow function to pass through `this`
       callbacks: this.callbacks,
     }),
   ];

@@ -7,7 +7,7 @@ import { DynamicTool } from 'langchain/tools';
 import { requestGuessingIndexChain } from '../../chains/guessing_index';
 import { requestPPLGeneratorChain } from '../../chains/ppl_generator';
 import { generateFieldContext } from '../../utils/ppl_generator';
-import { swallowErrors } from '../../utils/utils';
+import { protectCall } from '../../utils/utils';
 import { PluginToolsBase } from '../tools_base';
 
 const PPL_DATASOURCES_REQUEST =
@@ -32,7 +32,7 @@ export class PPLTools extends PluginToolsBase {
       name: PPLTools.TOOL_NAMES.QUERY_OPENSEARCH,
       description:
         'Use to generate and run a PPL Query to get results for a generic user question related to data stored in their OpenSearch cluster. The input must be the original question as user phrased it without modifications',
-      func: swallowErrors(async (query: string) => {
+      func: protectCall(async (query: string) => {
         const ppl = await this.generatePPL(query);
         const results = await this.executePPL(ppl);
         return `The PPL query is: ${ppl}\n\nThe results are:\n${JSON.stringify(results, null, 2)}`;
@@ -50,7 +50,7 @@ export class PPLTools extends PluginToolsBase {
       name: PPLTools.TOOL_NAMES.LOG_INFO,
       description:
         'Use to get information of logs if the question contains an OpenSearch log index. The input should be the name of the index',
-      func: swallowErrors(async (index: string) => {
+      func: protectCall(async (index: string) => {
         const ppl = await this.generatePPL(`Give me log patterns? index is '${index}'`);
         const results = await this.executePPL(ppl);
         return `The PPL query is: ${ppl}\n\nThe results are:\n${JSON.stringify(results, null, 2)}`;
@@ -61,7 +61,7 @@ export class PPLTools extends PluginToolsBase {
       name: PPLTools.TOOL_NAMES.LOG_ERROR_INFO,
       description:
         'Use to get information of logs with errors if the question contains an OpenSearch log index. The input should be the name of the index. The output is a representative log per each log pattern group.',
-      func: swallowErrors(async (index: string) => {
+      func: protectCall(async (index: string) => {
         const ppl = await this.generatePPL(
           `Give me log patterns for logs with errors? index is '${index}'`
         );

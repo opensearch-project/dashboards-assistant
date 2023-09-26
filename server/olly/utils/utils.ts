@@ -4,18 +4,28 @@
  */
 
 import { DynamicToolInput } from 'langchain/tools';
+import { MAX_TOOL_OUTPUT_CHAR } from './constants';
 
 /**
+ * Use to wrap tool funcs to truncate when output is too long and swallow if
+ * output is an error.
+ *
  * @param func - function for a tool
  * @returns a string even when the function throws error
  */
-export const swallowErrors = (func: DynamicToolInput['func']): DynamicToolInput['func'] => {
+export const protectCall = (func: DynamicToolInput['func']): DynamicToolInput['func'] => {
   return async (...args) => {
+    let response;
     try {
-      return await func(...args);
+      response = await func(...args);
     } catch (error) {
-      return `Error when running tool: ${error}`;
+      response = `Error when running tool: ${error}`;
     }
+    if (response.length > MAX_TOOL_OUTPUT_CHAR) {
+      const tailMessage = '\n\nOutput is too long, truncated...';
+      response = response.slice(0, MAX_TOOL_OUTPUT_CHAR - tailMessage.length) + tailMessage;
+    }
+    return response;
   };
 };
 
