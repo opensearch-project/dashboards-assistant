@@ -6,7 +6,7 @@
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { PPLTools } from '../../tools/tool_sets/ppl';
-import { filterToolOutput, mergeMessages } from './utils';
+import { filterToolOutput } from './utils';
 
 const extractPPLQueries = (content: string) => {
   return Array.from(content.matchAll(/(^|[\n\r]|:)\s*(source\s*=\s*.+)/gi)).map(
@@ -24,7 +24,7 @@ export const buildPPLOutputs = (
     .flatMap((trace) => extractPPLQueries(trace.output));
   if (!ppls.length) return outputs;
 
-  const statsPPLs = ppls.filter((ppl) => /\|\s*stats\s+/i.test(ppl));
+  const statsPPLs = ppls.filter((ppl) => /\|\s*stats\s+[^|]+\sby\s/i.test(ppl));
   if (!statsPPLs.length) {
     return outputs;
   }
