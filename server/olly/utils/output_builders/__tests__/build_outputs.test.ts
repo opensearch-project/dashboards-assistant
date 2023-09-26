@@ -32,7 +32,7 @@ describe('build outputs', () => {
     ]);
   });
 
-  it('sanitizes outputs', () => {
+  it('sanitizes markdown outputs', () => {
     const outputs = buildOutputs(
       'test question',
       'normal text<b onmouseover=alert("XSS testing!")></b>',

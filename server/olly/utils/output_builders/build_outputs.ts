@@ -10,7 +10,7 @@ import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { AgentFactory } from '../../agents/agent_factory/agent_factory';
 import { buildPPLOutputs } from './ppl';
 import { buildCoreVisualizations } from './saved_objects';
-import { SuggestedQuestions, buildSuggestions } from './suggestions';
+import { buildSuggestions, SuggestedQuestions } from './suggestions';
 
 // TODO remove when typescript is upgraded to >= 4.5
 type Awaited<T> = T extends Promise<infer U> ? U : T;
@@ -52,5 +52,8 @@ const buildToolsUsed = (traces: LangchainTrace[], outputs: IMessage[]) => {
 const sanitize = (outputs: IMessage[]) => {
   const window = new JSDOM('').window;
   const DOMPurify = createDOMPurify((window as unknown) as Window);
-  return outputs.map((output) => ({ ...output, content: DOMPurify.sanitize(output.content) }));
+  return outputs.map((output) => ({
+    ...output,
+    ...(output.contentType === 'markdown' && { content: DOMPurify.sanitize(output.content) }),
+  }));
 };
