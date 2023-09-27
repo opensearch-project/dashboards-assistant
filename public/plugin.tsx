@@ -31,33 +31,39 @@ export class AssistantPlugin
   ): AssistantSetup {
     const contentRenderers: Record<string, ContentRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
+    const assistantEnabled = (() => {
+      let enabled: boolean;
+      return async (): Promise<boolean> => {
+        if (enabled === undefined) {
+          enabled = await core.http
+            .get<{ data: { roles: string[] } }>('/api/v1/configuration/account')
+            .then((res) =>
+              res.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role))
+            );
+        }
+        return enabled;
+      };
+    })();
 
-    core.getStartServices().then(([coreStart, startDeps]) => {
+    core.getStartServices().then(async ([coreStart, startDeps]) => {
       const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
         ...coreStart,
         setupDeps,
         startDeps,
       });
-      coreStart.http
-        .get<{ data: { roles: string[] } }>('/api/v1/configuration/account')
-        .then((res) =>
-          res.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role))
-        )
-        .then((chatEnabled) => {
-          coreStart.chrome.navControls.registerRight({
-            order: 10000,
-            mount: toMountPoint(
-              <CoreContext.Provider>
-                <HeaderChatButton
-                  application={coreStart.application}
-                  chatEnabled={chatEnabled}
-                  contentRenderers={contentRenderers}
-                  actionExecutors={actionExecutors}
-                />
-              </CoreContext.Provider>
-            ),
-          });
-        });
+      coreStart.chrome.navControls.registerRight({
+        order: 10000,
+        mount: toMountPoint(
+          <CoreContext.Provider>
+            <HeaderChatButton
+              application={coreStart.application}
+              chatEnabled={await assistantEnabled()}
+              contentRenderers={contentRenderers}
+              actionExecutors={actionExecutors}
+            />
+          </CoreContext.Provider>
+        ),
+      });
     });
 
     return {
@@ -71,6 +77,7 @@ export class AssistantPlugin
           console.warn(`Action executor type ${actionType} is already registered.`);
         actionExecutors[actionType] = execute;
       },
+      assistantEnabled,
     };
   }
 

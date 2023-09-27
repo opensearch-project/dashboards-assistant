@@ -22,6 +22,7 @@ export interface SetupDependencies {
 export interface AssistantSetup {
   registerContentRenderer: (contentType: string, render: ContentRenderer) => void;
   registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
+  assistantEnabled: () => Promise<boolean>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
