@@ -59,12 +59,7 @@ export class MLCommonsChatModel extends BaseChatModel {
     );
   }
 
-  private jsonEncodeString(question: string): string {
-    const jsonString = JSON.stringify({ value: question });
-    return jsonString.slice(10, -2); // remove `{"value":"` and `"}`
-  }
-
-  async model_predict(question: string) {
+  async model_predict(prompt: string) {
     const getResponse = await this.opensearchClient.get<AssistantConfigDoc>({
       id: ASSISTANT_CONFIG_DOCUMENT,
       index: ASSISTANT_CONFIG_INDEX,
@@ -78,20 +73,12 @@ export class MLCommonsChatModel extends BaseChatModel {
       body: {
         parameters: {
           ...ANTHROPIC_DEFAULT_PARAMS,
-          prompt: this.jsonEncodeString(question),
+          prompt,
         },
       },
     });
     const respData = mlCommonsResponse.body.inference_results[0].output[0].dataAsMap;
     return respData.completion || respData.message || 'Failed to request model';
-  }
-
-  // for local testing only
-  async local_model_predict(question: string) {
-    return await fetch('http://localhost:8443', {
-      method: 'POST',
-      body: this.jsonEncodeString(question),
-    }).then((r) => r.text());
   }
 
   async _call(
