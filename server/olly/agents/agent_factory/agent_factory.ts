@@ -4,6 +4,7 @@
  */
 
 import {
+  AgentArgs,
   AgentExecutor,
   ChatAgent,
   ChatConversationalAgent,
@@ -123,12 +124,11 @@ export class AgentFactory {
       case 'chat':
       default: {
         const toolNames = this.agentTools.map((tool) => tool.name);
-        const baseParser = new ChatConversationalAgentOutputLenientParser({ toolNames });
-        // TODO add retries to parser, ChatConversationalAgentOutputParserWithRetries seems not exported
-        const convArgs: ChatConversationalCreatePromptArgs = {
+        const outputParser = new ChatConversationalAgentOutputLenientParser({ toolNames });
+        const convArgs: ChatConversationalCreatePromptArgs & AgentArgs = {
           systemMessage: this.agentArgs.chat_system_message ?? DEFAULT_SYSTEM_MESSAGE,
           humanMessage: this.agentArgs.chat_human_message ?? DEFAULT_HUMAN_MESSAGE,
-          outputParser: baseParser,
+          outputParser,
         };
         this.executor = AgentExecutor.fromAgentAndTools({
           agent: ChatConversationalAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
