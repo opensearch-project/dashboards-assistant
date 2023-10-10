@@ -1190,10 +1190,10 @@ jsonpointer@^5.0.1:
   resolved "https://registry.yarnpkg.com/jsonpointer/-/jsonpointer-5.0.1.tgz#2110e0af0900fd37467b5907ecd13a7884a1b559"
   integrity sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==
 
-langchain@^0.0.147:
-  version "0.0.147"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.0.147.tgz#5ba4cd94be0c5e661f90f2715b8ea57fec08e89c"
-  integrity sha512-4PjOQMKd2VfUPsGuOUA/Dbi5WfvX0aE1Oqex2lwsP9l1d7Xibf3GAYHiWwFG+wTwgrsnHhVyTD3FvpjA/T1TGw==
+langchain@^0.0.164:
+  version "0.0.164"
+  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.0.164.tgz#3322c02b881fd70a16310183343eca832f181f44"
+  integrity sha512-XDyWU/wLtzJtux5adiFgW4ztgqGlA5r0+PaMXO+qRj9ZrUFPiDrvrUysZyr+iHG45/WUyBQj+Bo7g9dIP0XK2w==
   dependencies:
     "@anthropic-ai/sdk" "^0.6.2"
     ansi-styles "^5.0.0"
@@ -1215,7 +1215,7 @@ langchain@^0.0.147:
     p-retry "4"
     uuid "^9.0.0"
     yaml "^2.2.1"
-    zod "^3.21.4"
+    zod "^3.22.3"
     zod-to-json-schema "^3.20.4"
 
 langchainhub@~0.0.6:
@@ -2132,7 +2132,7 @@ zod-to-json-schema@^3.20.4:
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.21.4.tgz#de97c5b6d4a25e9d444618486cb55c0c7fb949fd"
   integrity sha512-fjUZh4nQ1s6HMccgIeE0VP4QG/YRGPmyjO9sAh890aQKPEk3nqbfUXhMFaC+Dr5KvYBm8BCyvfpZf2jY9aGSsw==
 
-zod@^3.21.4:
-  version "3.22.2"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.2.tgz#3add8c682b7077c05ac6f979fea6998b573e157b"
-  integrity sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==
+zod@^3.22.3:
+  version "3.22.4"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
+  integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==
