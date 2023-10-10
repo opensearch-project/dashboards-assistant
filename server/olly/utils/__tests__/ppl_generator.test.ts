@@ -11,9 +11,9 @@ import { generateFieldContext } from '../ppl_generator';
 describe('PPL generator utils', () => {
   it('handles empty mappings', () => {
     const fields = generateFieldContext(
-      ({ body: { employee_nested: { mappings: {} } } } as unknown) as ApiResponse<
-        IndicesGetMappingResponse
-      >,
+      ({
+        body: { employee_nested: { mappings: {} } },
+      } as unknown) as ApiResponse<IndicesGetMappingResponse>,
       ({
         body: {
           took: 0,

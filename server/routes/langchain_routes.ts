@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TypeOf, schema } from '@osd/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 import { LLMChain } from 'langchain/chains';
 import { PromptTemplate } from 'langchain/prompts';
 import {

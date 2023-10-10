@@ -7,7 +7,6 @@ import { OpenSearchDashboardsRequest, RequestHandlerContext } from '../../../../
 import { IMessage } from '../../common/types/chat_saved_object_attributes';
 import { LLMRequestSchema } from '../routes/chat_routes';
 import { PPLGenerationRequestSchema } from '../routes/langchain_routes';
-import { StorageService } from './storage_service';
 
 export interface ChatService {
   requestLLM(

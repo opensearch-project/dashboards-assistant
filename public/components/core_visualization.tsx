@@ -5,10 +5,10 @@
 
 import { EuiText, htmlIdGenerator, prettyDuration, ShortDate } from '@elastic/eui';
 import React, { useState } from 'react';
-import { useCore } from '../contexts/core_context';
 import { DashboardContainerInput } from '../../../../src/plugins/dashboard/public';
 import { ViewMode } from '../../../../src/plugins/embeddable/public';
 import { IMessage } from '../../common/types/chat_saved_object_attributes';
+import { useCore } from '../contexts/core_context';
 
 interface CoreVisualizationProps {
   message: IMessage;

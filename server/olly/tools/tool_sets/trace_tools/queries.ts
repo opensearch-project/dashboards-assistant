@@ -2,13 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import _ from 'lodash';
+
 import {
   AggregationsMultiBucketAggregate,
   SearchRequest,
 } from '@opensearch-project/opensearch/api/types';
-import { AggregationBucket, TraceAnalyticsMode, flatten, jsonToCsv } from '../../../utils/utils';
 import { OpenSearchClient } from '../../../../../../../src/core/server';
+import { AggregationBucket, flatten, jsonToCsv, TraceAnalyticsMode } from '../../../utils/utils';
 import {
   DATA_PREPPER_INDEX_NAME,
   DATA_PREPPER_SERVICE_INDEX_NAME,
@@ -64,6 +64,7 @@ export async function runQuery(
   buckets = flatten(buckets);
   if (field) {
     buckets = buckets.sort(function (a, b) {
+      // @ts-ignore
       return a[field] - b[field];
     });
   }

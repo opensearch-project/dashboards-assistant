@@ -4,17 +4,17 @@
  */
 
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useContext, useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { IMessage } from '../../../common/types/chat_saved_object_attributes';
 import { InviteMessage } from '../../components/invite_message';
 import { LoadingButton } from '../../components/loading_button';
+import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
 import { ChatPageGreetings } from './chat_page_greetings';
 import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { MessageFooter } from './messages/message_footer';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
-import { useChatContext } from '../../contexts/chat_context';
 
 interface ChatPageContentProps {
   showGreetings: boolean;

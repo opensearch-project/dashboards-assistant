@@ -4,12 +4,12 @@
  */
 
 import {
+  AD_BASE_API,
   API_ROUTE_PREFIX,
-  MONITOR_BASE_API,
   DESTINATION_BASE_API,
   EMAIL_ACCOUNT_BASE_API,
   EMAIL_GROUP_BASE_API,
-  AD_BASE_API,
+  MONITOR_BASE_API,
 } from './constants/alerting';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

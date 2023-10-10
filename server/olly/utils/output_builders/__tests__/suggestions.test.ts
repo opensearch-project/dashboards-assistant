@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { buildSuggestions } from '../suggestions';
 import { createMessage } from '../../../__tests__/__utils__/test_helpers';
+import { buildSuggestions } from '../suggestions';
 
 describe('build suggestions', () => {
   it('builds suggestion outputs', () => {

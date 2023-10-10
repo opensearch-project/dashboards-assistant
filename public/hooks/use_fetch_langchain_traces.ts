@@ -8,7 +8,7 @@ import { useEffect, useReducer } from 'react';
 import { SearchResponse } from '../../../../src/core/server';
 import { SearchRequest } from '../../../../src/plugins/data/common';
 import { DSL_BASE, DSL_SEARCH, LLM_INDEX } from '../../common/constants/llm';
-import { LangchainTrace, convertToTraces } from '../../common/utils/llm_chat/traces';
+import { convertToTraces, LangchainTrace } from '../../common/utils/llm_chat/traces';
 import { useCore } from '../contexts/core_context';
 import { GenericReducer, genericReducer } from './fetch_reducer';
 

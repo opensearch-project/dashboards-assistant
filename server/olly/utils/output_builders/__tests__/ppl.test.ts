@@ -5,8 +5,8 @@
 
 import { LangchainTrace } from '../../../../../common/utils/llm_chat/traces';
 import { PPLTools } from '../../../tools/tool_sets/ppl';
-import { buildPPLOutputs } from '../ppl';
 import { createMessage, createTrace } from '../../../__tests__/__utils__/test_helpers';
+import { buildPPLOutputs } from '../ppl';
 
 describe('build ppl', () => {
   it('builds ppl outputs', () => {

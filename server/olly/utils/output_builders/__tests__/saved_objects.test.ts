@@ -5,8 +5,8 @@
 
 import { LangchainTrace } from '../../../../../common/utils/llm_chat/traces';
 import { SavedObjectsTools } from '../../../tools/tool_sets/saved_objects';
-import { buildCoreVisualizations } from '../saved_objects';
 import { createTrace } from '../../../__tests__/__utils__/test_helpers';
+import { buildCoreVisualizations } from '../saved_objects';
 
 describe('build saved objects', () => {
   it('builds visualizations', () => {

@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCore } from '../contexts/core_context';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { IMessage, ISuggestedAction } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
+import { useCore } from '../contexts/core_context';
+import { AssistantActions } from '../types';
 import { useChatState } from './use_chat_state';
 
 interface SendResponse {
@@ -16,8 +17,7 @@ interface SendResponse {
 
 let abortControllerRef: AbortController;
 
-// TODO refactor into different hooks
-export const useChatActions = () => {
+export const useChatActions = (): AssistantActions => {
   const chatContext = useChatContext();
   const core = useCore();
   const { chatState, chatStateDispatch } = useChatState();
@@ -28,6 +28,7 @@ export const useChatActions = () => {
     chatStateDispatch({ type: 'send', payload: input });
     try {
       const response = await core.services.http.post<SendResponse>(ASSISTANT_API.LLM, {
+        // do not send abort signal to http client to allow LLM call run in background
         body: JSON.stringify({
           chatId: chatContext.chatId,
           ...(!chatContext.chatId && { messages: chatState.messages }), // include all previous messages for new chats
@@ -43,11 +44,16 @@ export const useChatActions = () => {
     }
   };
 
-  const openChat = (chatId?: string) => {
+  const loadChat = (chatId?: string) => {
     abortControllerRef?.abort();
     chatContext.setChatId(chatId);
     chatContext.setSelectedTabId('chat');
     if (!chatId) chatStateDispatch({ type: 'reset' });
+  };
+
+  const openChatUI = () => {
+    chatContext.setFlyoutVisible(true);
+    chatContext.setSelectedTabId('chat');
   };
 
   const executeAction = async (suggestedAction: ISuggestedAction, message: IMessage) => {
@@ -85,5 +91,5 @@ export const useChatActions = () => {
     }
   };
 
-  return { send, openChat, executeAction };
+  return { send, loadChat, executeAction, openChatUI };
 };

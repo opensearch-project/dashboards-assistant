@@ -8,8 +8,8 @@ import React, { useEffect, useState } from 'react';
 import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
 import { useGetChat } from '../../hooks/use_get_chat';
-import { ChatInputControls } from './controls/chat_input_controls';
 import { ChatPageContent } from './chat_page_content';
+import { ChatInputControls } from './controls/chat_input_controls';
 
 interface ChatPageProps {
   className?: string;
