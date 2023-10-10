@@ -11,16 +11,18 @@ import { ApplicationStart } from '../../../src/core/public';
 import chatIcon from './assets/chat.svg';
 import { ChatFlyout } from './chat_flyout';
 import { ChatContext, IChatContext } from './contexts/chat_context';
+import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks/use_chat_state';
 import './index.scss';
 import { TabId } from './tabs/chat_tab_bar';
-import { ActionExecutor, ContentRenderer } from './types';
+import { ActionExecutor, AssistantActions, ContentRenderer } from './types';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
   chatEnabled: boolean;
   contentRenderers: Record<string, ContentRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
+  assistantActions: AssistantActions;
 }
 
 let flyoutLoaded = false;
@@ -83,6 +85,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       </EuiHeaderSectionItemButton>
       <ChatContext.Provider value={chatContextValue}>
         <ChatStateProvider>
+          <SetContext assistantActions={props.assistantActions} />
           {flyoutLoaded ? (
             <ChatFlyout
               flyoutVisible={flyoutVisible}

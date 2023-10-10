@@ -29,7 +29,7 @@ interface ChatHistoryPageProps {
 type ItemType = SavedObjectsFindResult<IChat>;
 
 export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
-  const { openChat } = useChatActions();
+  const { loadChat } = useChatActions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [sortOrder, setSortOrder] = useState<Direction>('desc');
@@ -66,7 +66,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
       field: 'id',
       name: 'Chat',
       render: (id: string, item) => (
-        <EuiLink onClick={() => openChat(id)}>{item.attributes.title}</EuiLink>
+        <EuiLink onClick={() => loadChat(id)}>{item.attributes.title}</EuiLink>
       ),
     },
     {

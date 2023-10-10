@@ -29,7 +29,7 @@ interface ChatTabBarProps {
 
 export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
   const chatContext = useChatContext();
-  const { openChat } = useChatActions();
+  const { loadChat } = useChatActions();
   const tabsComponent = tabs.map((tab) => (
     <EuiTab
       onClick={() => chatContext.setSelectedTabId(tab.id)}
@@ -46,7 +46,7 @@ export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
         <EuiTabs className="llm-chat-tabs">{tabsComponent}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="s" onClick={() => openChat(undefined)}>
+        <EuiButtonEmpty size="s" onClick={() => loadChat(undefined)}>
           New chat
         </EuiButtonEmpty>
       </EuiFlexItem>

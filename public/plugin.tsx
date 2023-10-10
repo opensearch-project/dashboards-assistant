@@ -15,6 +15,7 @@ import { AssistantServices } from './contexts/core_context';
 import {
   ActionExecutor,
   AppPluginStartDependencies,
+  AssistantActions,
   AssistantSetup,
   AssistantStart,
   ContentRenderer,
@@ -31,9 +32,10 @@ export class AssistantPlugin
   ): AssistantSetup {
     const contentRenderers: Record<string, ContentRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
+    const assistantActions: AssistantActions = {} as AssistantActions;
     const assistantEnabled = (() => {
       let enabled: boolean;
-      return async (): Promise<boolean> => {
+      return async () => {
         if (enabled === undefined) {
           enabled = await core.http
             .get<{ data: { roles: string[] } }>('/api/v1/configuration/account')
@@ -60,6 +62,7 @@ export class AssistantPlugin
               chatEnabled={await assistantEnabled()}
               contentRenderers={contentRenderers}
               actionExecutors={actionExecutors}
+              assistantActions={assistantActions}
             />
           </CoreContext.Provider>
         ),
@@ -78,6 +81,7 @@ export class AssistantPlugin
         actionExecutors[actionType] = execute;
       },
       assistantEnabled,
+      assistantActions,
     };
   }
 
