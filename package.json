@@ -23,7 +23,8 @@
     "dompurify": "^2.4.1",
     "jsdom": "^22.1.0",
     "langchain": "^0.0.164",
-    "postinstall": "^0.7.4"
+    "postinstall": "^0.7.4",
+    "web-streams-polyfill": "^3.2.1"
   },
   "devDependencies": {
     "@types/autosize": "^4.0.1",
@@ -35,8 +36,7 @@
     "husky": "6.0.0",
     "jest-dom": "^4.0.0",
     "lint-staged": "^13.1.0",
-    "ts-jest": "^29.1.0",
-    "web-streams-polyfill": "^3.2.1"
+    "ts-jest": "^29.1.0"
   },
   "eslintIgnore": [
     "node_modules/*",

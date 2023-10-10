@@ -7,7 +7,7 @@
 import { configure } from '@testing-library/react';
 import { TextDecoder, TextEncoder } from 'util';
 import 'web-streams-polyfill';
-import './fetch-polyfill';
+import '../server/fetch-polyfill';
 
 configure({ testIdAttribute: 'data-test-subj' });
 
