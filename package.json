@@ -14,7 +14,6 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "organize-imports-cli",
       "yarn lint --fix"
     ]
   },
@@ -36,7 +35,6 @@
     "husky": "6.0.0",
     "jest-dom": "^4.0.0",
     "lint-staged": "^13.1.0",
-    "organize-imports-cli": "^0.10.0",
     "ts-jest": "^29.1.0",
     "web-streams-polyfill": "^3.2.1"
   },
