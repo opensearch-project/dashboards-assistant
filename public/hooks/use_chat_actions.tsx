@@ -40,7 +40,7 @@ export const useChatActions = (): AssistantActions => {
       chatStateDispatch({ type: 'receive', payload: response.messages });
     } catch (error) {
       if (abortController.signal.aborted) return;
-      chatStateDispatch({ type: 'error', payload: error as Error });
+      chatStateDispatch({ type: 'error', payload: error });
     }
   };
 

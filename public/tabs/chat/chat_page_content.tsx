@@ -42,7 +42,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   if (!chatContext.chatEnabled) {
     return (
       <>
-        <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />
+        {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
         <MessageBubble type="output" contentType="markdown">
           <InviteMessage />
         </MessageBubble>

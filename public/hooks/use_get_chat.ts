@@ -34,7 +34,10 @@ export const useGetChat = () => {
     core.services.savedObjects.client
       .get<IChat>(CHAT_SAVED_OBJECT, chatContext.chatId)
       .then((payload) => {
-        if (!abort) dispatch({ type: 'success', payload });
+        if (!abort) {
+          if (payload.error) throw payload.error;
+          dispatch({ type: 'success', payload });
+        }
       })
       .catch((error) => {
         if (!abort) dispatch({ type: 'failure', error });

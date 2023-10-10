@@ -66,7 +66,7 @@ export function registerChatRoutes(router: IRouter) {
           const savedMessages = await storageService.getMessages(chatId);
           messages.push(...savedMessages);
         } catch (error) {
-          throw new Error(`failed to get history for ${chatId}: ` + error);
+          return response.custom({ statusCode: error.statusCode || 500, body: error.message });
         }
       }
 

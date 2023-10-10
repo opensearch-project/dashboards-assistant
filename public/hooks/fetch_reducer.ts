@@ -14,7 +14,10 @@ interface State<T> {
 type Action<T> =
   | { type: 'request' }
   | { type: 'success'; payload: State<T>['data'] }
-  | { type: 'failure'; error: NonNullable<State<T>['error']> };
+  | {
+      type: 'failure';
+      error: NonNullable<State<T>['error']> | { body: NonNullable<State<T>['error']> };
+    };
 
 // TODO use instantiation expressions when typescript is upgraded to >= 4.7
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,7 +29,7 @@ export const genericReducer: GenericReducer = (state, action) => {
     case 'success':
       return { loading: false, data: action.payload };
     case 'failure':
-      return { loading: false, error: action.error };
+      return { loading: false, error: 'body' in action.error ? action.error.body : action.error };
     default:
       return state;
   }

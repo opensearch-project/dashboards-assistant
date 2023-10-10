@@ -35,6 +35,7 @@ export const ChatTabBar: React.FC<ChatTabBarProps> = React.memo((props) => {
       onClick={() => chatContext.setSelectedTabId(tab.id)}
       isSelected={tab.id === chatContext.selectedTabId}
       key={tab.id}
+      disabled={!chatContext.chatEnabled}
     >
       {tab.name}
     </EuiTab>
