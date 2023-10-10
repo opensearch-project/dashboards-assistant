@@ -36,7 +36,7 @@ export class OllyChatService implements ChatService {
       const runs: Run[] = [];
       const callbacks = [new OpenSearchTracer(opensearchClient, sessionId, runs)];
       const model = LLMModelFactory.createModel({ client: opensearchClient });
-      const embeddings = LLMModelFactory.createEmbeddings();
+      const embeddings = LLMModelFactory.createEmbeddings({ client: opensearchClient });
       const pluginTools = initTools(
         model,
         embeddings,
@@ -92,7 +92,7 @@ export class OllyChatService implements ChatService {
     const sessionId = uuid();
     const callbacks = [new OpenSearchTracer(opensearchClient, sessionId)];
     const model = LLMModelFactory.createModel({ client: opensearchClient });
-    const embeddings = LLMModelFactory.createEmbeddings();
+    const embeddings = LLMModelFactory.createEmbeddings({ client: opensearchClient });
     const pplTools = new PPLTools(
       model,
       embeddings,

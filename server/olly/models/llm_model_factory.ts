@@ -6,7 +6,7 @@
 import { Client } from '@opensearch-project/opensearch';
 import { Callbacks } from 'langchain/callbacks';
 import { ChatAnthropic } from 'langchain/chat_models/anthropic';
-import { Embeddings } from 'langchain/dist/embeddings/base';
+import { Embeddings } from 'langchain/embeddings/base';
 import { HuggingFaceInferenceEmbeddings } from 'langchain/embeddings/hf';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { OpenAI } from 'langchain/llms/openai';
@@ -14,6 +14,7 @@ import { OpenSearchVectorStore } from 'langchain/vectorstores/opensearch';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import { LLM_INDEX } from '../../../common/constants/llm';
 import { MLCommonsChatModel } from './mlcommons_chat_model';
+import { MLCommonsEmbeddingsModel } from './mlcommons_embedding_model';
 
 type ModelName = 'claude' | 'openai' | 'ml-commons-claude';
 
@@ -24,6 +25,7 @@ interface CreateModelOptions {
 }
 
 interface CreateEmbeddingsOptions {
+  client: OpenSearchClient;
   name?: ModelName;
 }
 
@@ -48,18 +50,20 @@ export class LLMModelFactory {
     }
   }
 
-  static createEmbeddings(options: CreateEmbeddingsOptions = {}) {
+  static createEmbeddings(options: CreateEmbeddingsOptions) {
     switch (options.name) {
       case 'openai':
         return new OpenAIEmbeddings();
 
       case 'claude':
-      case 'ml-commons-claude':
-      default:
         return new HuggingFaceInferenceEmbeddings({
           model: 'sentence-transformers/all-mpnet-base-v2',
           apiKey: process.env.HUGGINGFACEHUB_API_TOKEN,
         });
+
+      case 'ml-commons-claude':
+      default:
+        return new MLCommonsEmbeddingsModel(options.client);
     }
   }
 

@@ -16,10 +16,6 @@ import {
   ML_COMMONS_BASE_API,
 } from './constants';
 
-interface AssistantConfigDoc {
-  model_id: string;
-}
-
 export class MLCommonsChatModel extends BaseChatModel {
   opensearchClient: OpenSearchClient;
 
@@ -69,7 +65,7 @@ export class MLCommonsChatModel extends BaseChatModel {
 
     const mlCommonsResponse = await this.opensearchClient.transport.request({
       method: 'POST',
-      path: `${ML_COMMONS_BASE_API}/${mlCommonsModelId}/_predict`,
+      path: `${ML_COMMONS_BASE_API}/models/${mlCommonsModelId}/_predict`,
       body: {
         parameters: {
           ...ANTHROPIC_DEFAULT_PARAMS,

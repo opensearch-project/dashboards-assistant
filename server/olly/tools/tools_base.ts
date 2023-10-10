@@ -5,7 +5,7 @@
 
 import { BaseLanguageModel } from 'langchain/base_language';
 import { Callbacks } from 'langchain/callbacks';
-import { Embeddings } from 'langchain/dist/embeddings/base';
+import { Embeddings } from 'langchain/embeddings/base';
 import { DynamicTool } from 'langchain/tools';
 import {
   ILegacyScopedClusterClient,
