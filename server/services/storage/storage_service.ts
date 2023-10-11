@@ -3,13 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IMessage } from '../../../common/types/chat_saved_object_attributes';
+import {
+  IMessage,
+  ISession,
+  ISessionFindResponse,
+} from '../../../common/types/chat_saved_object_attributes';
+import { GetSessionsSchema } from '../../routes/chat_routes';
 
 export interface StorageService {
-  getMessages(chatId: string): Promise<IMessage[]>;
+  getSession(sessionID: string): Promise<ISession>;
+  getSessions(query: GetSessionsSchema): Promise<ISessionFindResponse>;
   saveMessages(
     title: string,
-    chatId: string | undefined,
+    sessionID: string | undefined,
     messages: IMessage[]
-  ): Promise<{ chatId: string; messages: IMessage[] }>;
+  ): Promise<{ sessionID: string; messages: IMessage[] }>;
 }

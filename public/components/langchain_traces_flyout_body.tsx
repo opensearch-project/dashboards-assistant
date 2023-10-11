@@ -8,7 +8,7 @@ import React from 'react';
 import { LangchainTraces } from './langchain_traces';
 
 interface LangchainTracesFlyoutBodyProps {
-  sessionId: string;
+  traceID: string;
   closeFlyout: () => void;
 }
 
@@ -24,7 +24,7 @@ export const LangchainTracesFlyoutBody: React.FC<LangchainTracesFlyoutBodyProps>
         Back
       </EuiButtonEmpty>
       <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24 }}>
-        <LangchainTraces sessionId={props.sessionId} />
+        <LangchainTraces traceID={props.traceID} />
       </div>
     </EuiFlyoutBody>
   );

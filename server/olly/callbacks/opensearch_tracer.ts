@@ -11,7 +11,7 @@ import { LLM_INDEX } from '../../../common/constants/llm';
 export class OpenSearchTracer extends BaseTracer {
   name = 'opensearch_tracer' as const;
 
-  constructor(private client: OpenSearchClient, private sessionId: string, private runs?: Run[]) {
+  constructor(private client: OpenSearchClient, private traceID: string, private runs?: Run[]) {
     super();
   }
 
@@ -33,8 +33,8 @@ export class OpenSearchTracer extends BaseTracer {
     return this.client.bulk({ refresh: true, body });
   }
 
-  private flattenRunToDocs(run: Run, docs: Array<Partial<Run & { session_id: string }>> = []) {
-    docs.push({ session_id: this.sessionId, ...omit(run, 'child_runs') });
+  private flattenRunToDocs(run: Run, docs: Array<Partial<Run & { trace_id: string }>> = []) {
+    docs.push({ trace_id: this.traceID, ...omit(run, 'child_runs') });
     if (run.child_runs) run.child_runs.forEach((childRun) => this.flattenRunToDocs(childRun, docs));
     return docs;
   }
@@ -62,7 +62,7 @@ export class OpenSearchTracer extends BaseTracer {
               id: { type: 'keyword' },
               name: { type: 'keyword' },
               parent_run_id: { type: 'keyword' },
-              session_id: { type: 'keyword' },
+              trace_id: { type: 'keyword' },
               start_time: { type: 'date' },
             },
           },

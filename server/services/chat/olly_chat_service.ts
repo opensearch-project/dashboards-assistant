@@ -27,14 +27,14 @@ export class OllyChatService implements ChatService {
     request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
   ): Promise<IMessage[]> {
     const { input } = request.body;
-    const sessionId = uuid();
+    const traceID = uuid();
     const observabilityClient = context.assistant_plugin.observabilityClient.asScoped(request);
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
     const savedObjectsClient = context.core.savedObjects.client;
 
     try {
       const runs: Run[] = [];
-      const callbacks = [new OpenSearchTracer(opensearchClient, sessionId, runs)];
+      const callbacks = [new OpenSearchTracer(opensearchClient, traceID, runs)];
       const model = LLMModelFactory.createModel({ client: opensearchClient });
       const embeddings = LLMModelFactory.createEmbeddings({ client: opensearchClient });
       const pluginTools = initTools(
@@ -64,7 +64,7 @@ export class OllyChatService implements ChatService {
       return buildOutputs(
         input.content,
         agentResponse,
-        sessionId,
+        traceID,
         suggestions,
         convertToTraces(runs)
       );
@@ -73,7 +73,7 @@ export class OllyChatService implements ChatService {
       return [
         {
           type: 'output',
-          sessionId,
+          traceID,
           contentType: 'error',
           content: error.message,
         },
@@ -89,8 +89,8 @@ export class OllyChatService implements ChatService {
     const observabilityClient = context.assistant_plugin.observabilityClient.asScoped(request);
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
     const savedObjectsClient = context.core.savedObjects.client;
-    const sessionId = uuid();
-    const callbacks = [new OpenSearchTracer(opensearchClient, sessionId)];
+    const traceID = uuid();
+    const callbacks = [new OpenSearchTracer(opensearchClient, traceID)];
     const model = LLMModelFactory.createModel({ client: opensearchClient });
     const embeddings = LLMModelFactory.createEmbeddings({ client: opensearchClient });
     const pplTools = new PPLTools(

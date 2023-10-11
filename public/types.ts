@@ -12,8 +12,8 @@ export type ContentRenderer = (content: unknown) => React.ReactElement;
 export type ActionExecutor = (params: Record<string, unknown>) => void;
 export interface AssistantActions {
   send: (input: IMessage) => void;
-  loadChat: (chatId?: string) => void;
-  openChatUI: (chatId?: string) => void;
+  loadChat: (sessionID?: string) => void;
+  openChatUI: (sessionID?: string) => void;
   executeAction: (suggestedAction: ISuggestedAction, message: IMessage) => void;
 }
 

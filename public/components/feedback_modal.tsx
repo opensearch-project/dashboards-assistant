@@ -37,8 +37,8 @@ export interface FeedbackFormData {
 
 interface FeedbackMetaData {
   type: 'event_analytics' | 'chat' | 'ppl_submit';
-  chatId?: string;
-  sessionId?: string;
+  sessionID?: string;
+  traceID?: string;
   error?: boolean;
   selectedIndex?: string;
 }

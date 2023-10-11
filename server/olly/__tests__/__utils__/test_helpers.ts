@@ -30,7 +30,7 @@ export const createMessage = (options: Partial<IMessage> = {}): IMessage => {
     type: 'output',
     content: 'assistant output',
     contentType: 'markdown',
-    sessionId: 'session-id',
+    traceID: 'session-id',
     ...options,
   } as IMessage;
 };

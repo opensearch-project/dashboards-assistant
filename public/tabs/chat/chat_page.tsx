@@ -7,7 +7,7 @@ import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from 
 import React, { useEffect, useState } from 'react';
 import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
-import { useGetChat } from '../../hooks/use_get_chat';
+import { useGetSession } from '../../hooks/use_sessions';
 import { ChatPageContent } from './chat_page_content';
 import { ChatInputControls } from './controls/chat_input_controls';
 
@@ -19,13 +19,13 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
   const [showGreetings, setShowGreetings] = useState(true);
-  const { data: chat, loading: messagesLoading, error: messagesLoadingError } = useGetChat();
+  const { data: session, loading: messagesLoading, error: messagesLoadingError } = useGetSession();
 
   useEffect(() => {
-    if (chat) {
-      chatStateDispatch({ type: 'receive', payload: chat.attributes.messages });
+    if (session) {
+      chatStateDispatch({ type: 'receive', payload: session.messages });
     }
-  }, [chat]);
+  }, [session]);
 
   return (
     <>

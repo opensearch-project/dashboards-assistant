@@ -63,9 +63,9 @@ describe('langchain opensearch tracer', () => {
       expect.objectContaining({
         body: expect.arrayContaining([
           { index: { _index: LLM_INDEX.TRACES } },
-          { level: 0, session_id: 'test-session' },
-          { level: 1, session_id: 'test-session' },
-          { level: 2, session_id: 'test-session' },
+          { level: 0, trace_id: 'test-session' },
+          { level: 1, trace_id: 'test-session' },
+          { level: 2, trace_id: 'test-session' },
         ]),
       })
     );

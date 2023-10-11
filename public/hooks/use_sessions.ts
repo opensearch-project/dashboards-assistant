@@ -4,56 +4,45 @@
  */
 
 import { useEffect, useReducer, useState } from 'react';
-import {
-  HttpFetchQuery,
-  SavedObjectsFindOptions,
-  SimpleSavedObject,
-} from '../../../../src/core/public';
-import { SavedObjectsFindResponse } from '../../../../src/core/server';
+import { HttpFetchQuery, SavedObjectsFindOptions } from '../../../../src/core/public';
 import { ASSISTANT_API } from '../../common/constants/llm';
-import { CHAT_SAVED_OBJECT, IChat } from '../../common/types/chat_saved_object_attributes';
+import { ISession, ISessionFindResponse } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { GenericReducer, genericReducer } from './fetch_reducer';
 
-export const useGetChat = () => {
+export const useGetSession = () => {
   const chatContext = useChatContext();
   const core = useCore();
-  const reducer: GenericReducer<SimpleSavedObject<IChat>> = genericReducer;
+  const reducer: GenericReducer<ISession> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
 
   useEffect(() => {
-    // savedObjectsClient does not support abort signal
-    let abort = false;
+    const abortController = new AbortController();
     dispatch({ type: 'request' });
-    if (!chatContext.chatId) {
+    if (!chatContext.sessionID) {
       dispatch({ type: 'success', payload: undefined });
       return;
     }
 
-    core.services.savedObjects.client
-      .get<IChat>(CHAT_SAVED_OBJECT, chatContext.chatId)
-      .then((payload) => {
-        if (!abort) {
-          if (payload.error) throw payload.error;
-          dispatch({ type: 'success', payload });
-        }
+    core.services.http
+      .get<ISession>(`${ASSISTANT_API.SESSION}/${chatContext.sessionID}`, {
+        signal: abortController.signal,
       })
-      .catch((error) => {
-        if (!abort) dispatch({ type: 'failure', error });
-      });
+      .then((payload) => dispatch({ type: 'success', payload }))
+      .catch((error) => dispatch({ type: 'failure', error }));
 
     return () => {
-      abort = true;
+      abortController.abort();
     };
-  }, [chatContext.chatId]);
+  }, [chatContext.sessionID]);
 
   return { ...state };
 };
 
-export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) => {
+export const useGetSessions = (options: Partial<SavedObjectsFindOptions> = {}) => {
   const core = useCore();
-  const reducer: GenericReducer<SavedObjectsFindResponse<IChat>> = genericReducer;
+  const reducer: GenericReducer<ISessionFindResponse> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
   const [refresh, setRefresh] = useState({});
 
@@ -62,7 +51,7 @@ export const useBulkGetChat = (options: Partial<SavedObjectsFindOptions> = {}) =
     dispatch({ type: 'request' });
 
     core.services.http
-      .get<SavedObjectsFindResponse<IChat>>(ASSISTANT_API.HISTORY, {
+      .get<ISessionFindResponse>(ASSISTANT_API.SESSIONS, {
         query: options as HttpFetchQuery,
         signal: abortController.signal,
       })

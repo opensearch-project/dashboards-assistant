@@ -17,16 +17,16 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { SavedObjectsFindOptions } from '../../../../../src/core/public';
 import { SavedObjectsFindResult } from '../../../../../src/core/server';
-import { IChat } from '../../../common/types/chat_saved_object_attributes';
+import { ISession } from '../../../common/types/chat_saved_object_attributes';
 import { useChatActions } from '../../hooks/use_chat_actions';
-import { useBulkGetChat } from '../../hooks/use_get_chat';
+import { useGetSessions } from '../../hooks/use_sessions';
 
 interface ChatHistoryPageProps {
   shouldRefresh: boolean;
   className?: string;
 }
 
-type ItemType = SavedObjectsFindResult<IChat>;
+type ItemType = SavedObjectsFindResult<ISession>;
 
 export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   const { loadChat } = useChatActions();
@@ -44,7 +44,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
     }),
     [pageIndex, pageSize, sortOrder, sortField]
   );
-  const { data: chats, loading, error, refresh } = useBulkGetChat(bulkGetOptions);
+  const { data: sessions, loading, error, refresh } = useGetSessions(bulkGetOptions);
 
   useEffect(() => {
     if (props.shouldRefresh) refresh();
@@ -84,7 +84,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
       <EuiPage>
         <EuiPageBody component="div">
           <EuiBasicTable
-            items={chats?.saved_objects || []}
+            items={sessions?.saved_objects || []}
             rowHeader="id"
             loading={loading}
             error={error?.message}
@@ -93,7 +93,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
               pageIndex,
               pageSize,
               pageSizeOptions: [10, 20, 50],
-              totalItemCount: chats?.total || 0,
+              totalItemCount: sessions?.total || 0,
             }}
             onChange={onTableChange}
             sorting={{ sort: { field: sortField, direction: sortOrder } }}

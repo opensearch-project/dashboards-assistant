@@ -19,7 +19,7 @@ type AgentResponse = Awaited<ReturnType<InstanceType<typeof AgentFactory>['run']
 export const buildOutputs = (
   question: string,
   agentResponse: AgentResponse,
-  sessionId: string,
+  traceID: string,
   suggestions: SuggestedQuestions,
   traces: LangchainTrace[]
 ) => {
@@ -27,7 +27,7 @@ export const buildOutputs = (
   let outputs: IMessage[] = [
     {
       type: 'output',
-      sessionId,
+      traceID,
       content,
       contentType: 'markdown',
     },

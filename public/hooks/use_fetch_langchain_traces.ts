@@ -13,7 +13,7 @@ import { useCore } from '../contexts/core_context';
 import { GenericReducer, genericReducer } from './fetch_reducer';
 
 // TODO persist traces with chat objects
-export const useFetchLangchainTraces = (sessionId: string) => {
+export const useFetchLangchainTraces = (traceID: string) => {
   const core = useCore();
   const reducer: GenericReducer<LangchainTrace[]> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
@@ -21,7 +21,7 @@ export const useFetchLangchainTraces = (sessionId: string) => {
   useEffect(() => {
     const abortController = new AbortController();
     dispatch({ type: 'request' });
-    if (!sessionId) {
+    if (!traceID) {
       dispatch({ type: 'success', payload: undefined });
       return;
     }
@@ -29,7 +29,7 @@ export const useFetchLangchainTraces = (sessionId: string) => {
     const query: SearchRequest['body'] = {
       query: {
         term: {
-          session_id: sessionId,
+          trace_id: traceID,
         },
       },
       sort: [
@@ -55,7 +55,7 @@ export const useFetchLangchainTraces = (sessionId: string) => {
       .catch((error) => dispatch({ type: 'failure', error }));
 
     return () => abortController.abort();
-  }, [sessionId]);
+  }, [traceID]);
 
   return { ...state };
 };

@@ -94,8 +94,8 @@ export function registerLangchainRoutes(router: IRouter) {
         body: schema.object({
           metadata: schema.object({
             type: schema.string(),
-            chatId: schema.maybe(schema.string()),
-            sessionId: schema.maybe(schema.string()),
+            sessionID: schema.maybe(schema.string()),
+            traceID: schema.maybe(schema.string()),
             error: schema.maybe(schema.boolean()),
             selectedIndex: schema.maybe(schema.string()),
           }),

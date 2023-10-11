@@ -9,17 +9,17 @@ import {
   HttpResponsePayload,
   IOpenSearchDashboardsResponse,
   IRouter,
+  RequestHandlerContext,
 } from '../../../../src/core/server';
 import { ASSISTANT_API } from '../../common/constants/llm';
-import { CHAT_SAVED_OBJECT, IChat } from '../../common/types/chat_saved_object_attributes';
 import { OllyChatService } from '../services/chat/olly_chat_service';
 import { SavedObjectsStorageService } from '../services/storage/saved_objects_storage_service';
 
 const llmRequestRoute = {
-  path: ASSISTANT_API.LLM,
+  path: ASSISTANT_API.SEND_MESSAGE,
   validate: {
     body: schema.object({
-      chatId: schema.maybe(schema.string()),
+      sessionID: schema.maybe(schema.string()),
       messages: schema.maybe(schema.arrayOf(schema.any())),
       input: schema.object({
         type: schema.literal('input'),
@@ -34,8 +34,18 @@ const llmRequestRoute = {
 };
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
 
-const getChatsRoute = {
-  path: ASSISTANT_API.HISTORY,
+const getSessionRoute = {
+  path: `${ASSISTANT_API.SESSION}/{sessionID}`,
+  validate: {
+    params: schema.object({
+      sessionID: schema.string(),
+    }),
+  },
+};
+export type GetSessionSchema = TypeOf<typeof getSessionRoute.validate.params>;
+
+const getSessionsRoute = {
+  path: ASSISTANT_API.SESSIONS,
   validate: {
     query: schema.object({
       perPage: schema.number({ min: 0, defaultValue: 20 }),
@@ -46,9 +56,13 @@ const getChatsRoute = {
     }),
   },
 };
-export type GetChatsSchema = TypeOf<typeof getChatsRoute.validate.query>;
+export type GetSessionsSchema = TypeOf<typeof getSessionsRoute.validate.query>;
 
 export function registerChatRoutes(router: IRouter) {
+  const createStorageService = (context: RequestHandlerContext) =>
+    new SavedObjectsStorageService(context.core.savedObjects.client);
+  const createChatService = () => new OllyChatService();
+
   router.post(
     llmRequestRoute,
     async (
@@ -56,15 +70,15 @@ export function registerChatRoutes(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { chatId, input, messages = [] } = request.body;
-      const storageService = new SavedObjectsStorageService(context.core.savedObjects.client);
-      const chatService = new OllyChatService();
+      const { sessionID, input, messages = [] } = request.body;
+      const storageService = createStorageService(context);
+      const chatService = createChatService();
 
       // get history from the chat object for existing chats
-      if (chatId && messages.length === 0) {
+      if (sessionID && messages.length === 0) {
         try {
-          const savedMessages = await storageService.getMessages(chatId);
-          messages.push(...savedMessages);
+          const session = await storageService.getSession(sessionID);
+          messages.push(...session.messages);
         } catch (error) {
           return response.custom({ statusCode: error.statusCode || 500, body: error.message });
         }
@@ -74,7 +88,7 @@ export function registerChatRoutes(router: IRouter) {
         const outputs = await chatService.requestLLM(messages, context, request);
         const saveMessagesResponse = await storageService.saveMessages(
           input.content.substring(0, 50),
-          chatId,
+          sessionID,
           [...messages, input, ...outputs]
         );
         return response.ok({ body: saveMessagesResponse });
@@ -86,19 +100,36 @@ export function registerChatRoutes(router: IRouter) {
   );
 
   router.get(
-    getChatsRoute,
+    getSessionRoute,
     async (
       context,
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      try {
-        const findResponse = await context.core.savedObjects.client.find<IChat>({
-          ...request.query,
-          type: CHAT_SAVED_OBJECT,
-        });
+      const storageService = createStorageService(context);
 
-        return response.ok({ body: findResponse });
+      try {
+        const getResponse = await storageService.getSession(request.params.sessionID);
+        return response.ok({ body: getResponse });
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
+    }
+  );
+
+  router.get(
+    getSessionsRoute,
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      const storageService = createStorageService(context);
+
+      try {
+        const getResponse = await storageService.getSessions(request.query);
+        return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });

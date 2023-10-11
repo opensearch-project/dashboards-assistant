@@ -23,11 +23,11 @@ const formatRunName = (run: LangchainTrace) => {
 };
 
 interface LangchainTracesProps {
-  sessionId: string;
+  traceID: string;
 }
 
 export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
-  const { data: traces, loading, error } = useFetchLangchainTraces(props.sessionId);
+  const { data: traces, loading, error } = useFetchLangchainTraces(props.traceID);
 
   if (loading) {
     return (
