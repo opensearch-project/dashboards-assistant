@@ -14,16 +14,18 @@ export const InviteMessage: React.FC = () => {
   return (
     <EuiEmptyPrompt
       iconType="search"
-      title={<h2>You do not have access to the Assistant</h2>}
       titleSize="s"
       body={
-        <p>
-          Please send an email to{' '}
-          <EuiLink href={mailtoLink} external>
-            opensearch-assistant@amazon.com
-          </EuiLink>{' '}
-          to request access.
-        </p>
+        <>
+          <p>Please login with the email that has access to the Assistant.</p>
+          <p>
+            To request access, please send an email to{' '}
+            <EuiLink href={mailtoLink} external>
+              opensearch-assistant@amazon.com
+            </EuiLink>
+            .
+          </p>
+        </>
       }
       actions={
         <EuiButton color="primary" fill href={mailtoLink}>
