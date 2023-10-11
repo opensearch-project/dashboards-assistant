@@ -7,8 +7,6 @@ import { mergeWith } from 'lodash';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 
-type RequiredKey<T, K extends keyof T> = T & Required<Pick<T, K>>;
-
 export const filterToolOutput = (toolName: string) => {
   return (trace: LangchainTrace): trace is RequiredKey<typeof trace, 'output'> =>
     trace.type === 'tool' &&

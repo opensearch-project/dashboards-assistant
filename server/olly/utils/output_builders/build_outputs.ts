@@ -7,14 +7,9 @@ import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
-import { AgentFactory } from '../../agents/agent_factory/agent_factory';
 import { buildPPLOutputs } from './ppl';
 import { buildCoreVisualizations } from './saved_objects';
 import { buildSuggestions, SuggestedQuestions } from './suggestions';
-
-// TODO remove when typescript is upgraded to >= 4.5
-type Awaited<T> = T extends Promise<infer U> ? U : T;
-type AgentResponse = Awaited<ReturnType<InstanceType<typeof AgentFactory>['run']>>;
 
 export const buildOutputs = (
   question: string,
@@ -45,6 +40,7 @@ const extractContent = (agentResponse: AgentResponse) => {
 
 const buildToolsUsed = (traces: LangchainTrace[], outputs: IMessage[]) => {
   const tools = traces.filter((trace) => trace.type === 'tool').map((tool) => tool.name);
+  if (outputs[0].type !== 'output') throw new Error('First output message type should be output.');
   outputs[0].toolsUsed = tools;
   return outputs;
 };

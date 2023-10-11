@@ -12,6 +12,7 @@ describe('build suggestions', () => {
       { question1: 'test suggestion 1', question2: 'test suggestion 2' },
       [createMessage()]
     );
+    // @ts-expect-error
     expect(outputs[0].suggestedActions).toEqual([
       { actionType: 'send_as_input', message: 'test suggestion 1' },
       { actionType: 'send_as_input', message: 'test suggestion 2' },
@@ -20,6 +21,7 @@ describe('build suggestions', () => {
 
   it('builds empty suggestion outputs', () => {
     const outputs = buildSuggestions({ ignored: 'test suggestion 1' }, [createMessage()]);
+    // @ts-expect-error
     expect(outputs[0].suggestedActions).toEqual([]);
   });
 });
