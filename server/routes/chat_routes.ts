@@ -12,8 +12,8 @@ import {
 } from '../../../../src/core/server';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { CHAT_SAVED_OBJECT, IChat } from '../../common/types/chat_saved_object_attributes';
-import { OllyChatService } from '../services/olly_chat_service';
-import { SavedObjectsStorageService } from '../services/saved_objects_storage_service';
+import { OllyChatService } from '../services/chat/olly_chat_service';
+import { SavedObjectsStorageService } from '../services/storage/saved_objects_storage_service';
 
 const llmRequestRoute = {
   path: ASSISTANT_API.LLM,

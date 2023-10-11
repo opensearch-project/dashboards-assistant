@@ -15,7 +15,7 @@ import {
 } from '../../../../src/core/server';
 import { ASSISTANT_API, LLM_INDEX } from '../../common/constants/llm';
 import { MLCommonsChatModel } from '../olly/models/mlcommons_chat_model';
-import { OllyChatService } from '../services/olly_chat_service';
+import { OllyChatService } from '../services/chat/olly_chat_service';
 
 const pplGenerationRoute = {
   path: ASSISTANT_API.PPL_GENERATOR,

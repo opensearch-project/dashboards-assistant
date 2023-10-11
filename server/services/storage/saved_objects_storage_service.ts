@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientContract } from '../../../../src/core/server';
+import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import {
   CHAT_SAVED_OBJECT,
   IChat,
   IMessage,
   SAVED_OBJECT_VERSION,
-} from '../../common/types/chat_saved_object_attributes';
+} from '../../../common/types/chat_saved_object_attributes';
 import { StorageService } from './storage_service';
 
 export class SavedObjectsStorageService implements StorageService {
