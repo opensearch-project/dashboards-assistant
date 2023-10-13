@@ -3,22 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsFindResponse } from '../../../../src/core/server';
-import { SavedObjectAttributes } from '../../../../src/core/types';
-
 export const CHAT_SAVED_OBJECT = 'assistant-chat';
 export const SAVED_OBJECT_VERSION = 1;
 
-export interface ISession extends SavedObjectAttributes {
+export interface ISession {
   title: string;
   version: number;
   createdTimeMs: number;
+  updatedTimeMs: number;
   messages: IMessage[];
 }
 
-export type ISessionFindResponse = SavedObjectsFindResponse<ISession>;
+export interface ISessionFindResponse {
+  objects: Array<ISession & { id: string }>;
+  total: number;
+}
 
-interface IInput extends SavedObjectAttributes {
+interface IInput {
   type: 'input';
   contentType: 'text';
   content: string;
@@ -26,7 +27,7 @@ interface IInput extends SavedObjectAttributes {
     appId?: string;
   };
 }
-interface IOutput extends SavedObjectAttributes {
+interface IOutput {
   type: 'output';
   traceID?: string; // used for tracing agent calls
   toolsUsed?: string[];
@@ -36,7 +37,7 @@ interface IOutput extends SavedObjectAttributes {
 }
 export type IMessage = IInput | IOutput;
 
-interface ISuggestedActionBase extends SavedObjectAttributes {
+interface ISuggestedActionBase {
   actionType: string;
   message: string;
 }

@@ -16,8 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { SavedObjectsFindOptions } from '../../../../../src/core/public';
-import { SavedObjectsFindResult } from '../../../../../src/core/server';
-import { ISession } from '../../../common/types/chat_saved_object_attributes';
+import { ISessionFindResponse } from '../../../common/types/chat_saved_object_attributes';
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useGetSessions } from '../../hooks/use_sessions';
 
@@ -26,21 +25,21 @@ interface ChatHistoryPageProps {
   className?: string;
 }
 
-type ItemType = SavedObjectsFindResult<ISession>;
+type ItemType = ISessionFindResponse['objects'][number];
 
 export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   const { loadChat } = useChatActions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [sortOrder, setSortOrder] = useState<Direction>('desc');
-  const [sortField, setSortField] = useState<keyof ItemType>('updated_at');
+  const [sortField, setSortField] = useState<keyof ItemType>('updatedTimeMs');
   const bulkGetOptions: Partial<SavedObjectsFindOptions> = useMemo(
     () => ({
       page: pageIndex + 1,
       perPage: pageSize,
       sortOrder,
       sortField,
-      fields: ['createdTimeMs', 'title'],
+      fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
     }),
     [pageIndex, pageSize, sortOrder, sortField]
   );
@@ -65,16 +64,14 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
     {
       field: 'id',
       name: 'Chat',
-      render: (id: string, item) => (
-        <EuiLink onClick={() => loadChat(id)}>{item.attributes.title}</EuiLink>
-      ),
+      render: (id: string, item) => <EuiLink onClick={() => loadChat(id)}>{item.title}</EuiLink>,
     },
     {
-      field: 'updated_at',
+      field: 'updatedTimeMs',
       name: 'Updated Time',
       sortable: true,
-      render: (updatedAt: string) => (
-        <EuiText size="s">{new Date(updatedAt).toLocaleString()}</EuiText>
+      render: (updatedTimeMs: number) => (
+        <EuiText size="s">{new Date(updatedTimeMs).toLocaleString()}</EuiText>
       ),
     },
   ];
@@ -84,7 +81,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
       <EuiPage>
         <EuiPageBody component="div">
           <EuiBasicTable
-            items={sessions?.saved_objects || []}
+            items={sessions?.objects || []}
             rowHeader="id"
             loading={loading}
             error={error?.message}

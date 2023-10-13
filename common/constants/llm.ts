@@ -19,5 +19,6 @@ export const ASSISTANT_API = {
 export const LLM_INDEX = {
   FEEDBACK: '.llm-feedback',
   TRACES: '.assistant-traces',
+  SESSIONS: '.assistant-sessions',
   VECTOR_STORE: '.llm-vector-store',
 };
