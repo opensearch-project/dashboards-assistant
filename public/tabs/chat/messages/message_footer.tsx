@@ -5,7 +5,6 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
-import { toMountPoint } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { FeedbackModal } from '../../../components/feedback_modal';
 import { LangchainTracesFlyoutBody } from '../../../components/langchain_traces_flyout_body';
@@ -54,19 +53,17 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
           flush="left"
           onClick={() => {
             const modal = core.overlays.openModal(
-              toMountPoint(
-                <FeedbackModal
-                  input={props.previousInput?.content}
-                  output={props.message.content}
-                  metadata={{
-                    type: 'chat',
-                    sessionId: chatContext.sessionId,
-                    traceId,
-                    error: props.message.contentType === 'error',
-                  }}
-                  onClose={() => modal.close()}
-                />
-              )
+              <FeedbackModal
+                input={props.previousInput?.content}
+                output={props.message.content}
+                metadata={{
+                  type: 'chat',
+                  sessionId: chatContext.sessionId,
+                  traceId,
+                  error: props.message.contentType === 'error',
+                }}
+                onClose={() => modal.close()}
+              />
             );
           }}
         >
