@@ -19,7 +19,7 @@ const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
   validate: {
     body: schema.object({
-      sessionID: schema.maybe(schema.string()),
+      sessionId: schema.maybe(schema.string()),
       messages: schema.maybe(schema.arrayOf(schema.any())),
       input: schema.object({
         type: schema.literal('input'),
@@ -35,10 +35,10 @@ const llmRequestRoute = {
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
 
 const getSessionRoute = {
-  path: `${ASSISTANT_API.SESSION}/{sessionID}`,
+  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
   validate: {
     params: schema.object({
-      sessionID: schema.string(),
+      sessionId: schema.string(),
     }),
   },
 };
@@ -70,14 +70,14 @@ export function registerChatRoutes(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { sessionID, input, messages = [] } = request.body;
+      const { sessionId, input, messages = [] } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService();
 
       // get history from the chat object for existing chats
-      if (sessionID && messages.length === 0) {
+      if (sessionId && messages.length === 0) {
         try {
-          const session = await storageService.getSession(sessionID);
+          const session = await storageService.getSession(sessionId);
           messages.push(...session.messages);
         } catch (error) {
           return response.custom({ statusCode: error.statusCode || 500, body: error.message });
@@ -88,7 +88,7 @@ export function registerChatRoutes(router: IRouter) {
         const outputs = await chatService.requestLLM(messages, context, request);
         const saveMessagesResponse = await storageService.saveMessages(
           input.content.substring(0, 50),
-          sessionID,
+          sessionId,
           [...messages, input, ...outputs]
         );
         return response.ok({ body: saveMessagesResponse });
@@ -109,7 +109,7 @@ export function registerChatRoutes(router: IRouter) {
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.getSession(request.params.sessionID);
+        const getResponse = await storageService.getSession(request.params.sessionId);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);

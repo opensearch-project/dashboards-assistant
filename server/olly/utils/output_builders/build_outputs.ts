@@ -14,7 +14,7 @@ import { buildSuggestions, SuggestedQuestions } from './suggestions';
 export const buildOutputs = (
   question: string,
   agentResponse: AgentResponse,
-  traceID: string,
+  traceId: string,
   suggestions: SuggestedQuestions,
   traces: LangchainTrace[]
 ) => {
@@ -22,7 +22,7 @@ export const buildOutputs = (
   let outputs: IMessage[] = [
     {
       type: 'output',
-      traceID,
+      traceId,
       content,
       contentType: 'markdown',
     },

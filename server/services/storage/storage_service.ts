@@ -11,11 +11,11 @@ import {
 import { GetSessionsSchema } from '../../routes/chat_routes';
 
 export interface StorageService {
-  getSession(sessionID: string): Promise<ISession>;
+  getSession(sessionId: string): Promise<ISession>;
   getSessions(query: GetSessionsSchema): Promise<ISessionFindResponse>;
   saveMessages(
     title: string,
-    sessionID: string | undefined,
+    sessionId: string | undefined,
     messages: IMessage[]
-  ): Promise<{ sessionID: string; messages: IMessage[] }>;
+  ): Promise<{ sessionId: string; messages: IMessage[] }>;
 }

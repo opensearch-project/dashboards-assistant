@@ -21,7 +21,7 @@ describe('build outputs', () => {
       {
         content: 'agent response',
         contentType: 'markdown',
-        traceID: 'test-session',
+        traceId: 'test-session',
         suggestedActions: [
           { actionType: 'send_as_input', message: 'test suggestion 1' },
           { actionType: 'send_as_input', message: 'test suggestion 2' },
@@ -44,7 +44,7 @@ describe('build outputs', () => {
       {
         content: 'normal text<b></b>',
         contentType: 'markdown',
-        traceID: 'test-session',
+        traceId: 'test-session',
         suggestedActions: [],
         toolsUsed: [],
         type: 'output',
@@ -64,7 +64,7 @@ describe('build outputs', () => {
       {
         content: 'agent response',
         contentType: 'markdown',
-        traceID: 'test-session',
+        traceId: 'test-session',
         suggestedActions: [],
         toolsUsed: [],
         type: 'output',

@@ -23,8 +23,8 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
   const footers: React.ReactNode[] = [];
 
   if (props.message.type === 'output') {
-    const traceID = props.message.traceID;
-    if (traceID !== undefined) {
+    const traceId = props.message.traceId;
+    if (traceId !== undefined) {
       footers.push(
         <EuiButtonEmpty
           iconType="iInCircle"
@@ -35,7 +35,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
             chatContext.setFlyoutComponent(
               <LangchainTracesFlyoutBody
                 closeFlyout={() => chatContext.setFlyoutComponent(null)}
-                traceID={traceID}
+                traceId={traceId}
               />
             );
           }}
@@ -60,8 +60,8 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
                   output={props.message.content}
                   metadata={{
                     type: 'chat',
-                    sessionID: chatContext.sessionID,
-                    traceID,
+                    sessionId: chatContext.sessionId,
+                    traceId,
                     error: props.message.contentType === 'error',
                   }}
                   onClose={() => modal.close()}

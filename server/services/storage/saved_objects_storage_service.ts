@@ -21,8 +21,8 @@ export class SavedObjectsStorageService implements StorageService {
     return updatedAt ? new Date(updatedAt).getTime() : undefined;
   }
 
-  async getSession(sessionID: string): Promise<ISession> {
-    const session = await this.client.get<ISession>(CHAT_SAVED_OBJECT, sessionID);
+  async getSession(sessionId: string): Promise<ISession> {
+    const session = await this.client.get<ISession>(CHAT_SAVED_OBJECT, sessionId);
     if (session.error) throw session.error;
     return {
       ...session.attributes,
@@ -53,10 +53,10 @@ export class SavedObjectsStorageService implements StorageService {
 
   public async saveMessages(
     title: string,
-    sessionID: string | undefined,
+    sessionId: string | undefined,
     messages: IMessage[]
-  ): Promise<{ sessionID: string; messages: IMessage[] }> {
-    if (!sessionID) {
+  ): Promise<{ sessionId: string; messages: IMessage[] }> {
+    if (!sessionId) {
       const createResponse = await this.client.create<Omit<ISession, 'updatedTimeMs'>>(
         CHAT_SAVED_OBJECT,
         {
@@ -66,13 +66,13 @@ export class SavedObjectsStorageService implements StorageService {
           messages,
         }
       );
-      return { sessionID: createResponse.id, messages: createResponse.attributes.messages };
+      return { sessionId: createResponse.id, messages: createResponse.attributes.messages };
     }
     const updateResponse = await this.client.update<Partial<ISession>>(
       CHAT_SAVED_OBJECT,
-      sessionID,
+      sessionId,
       { messages }
     );
-    return { sessionID, messages: updateResponse.attributes.messages! };
+    return { sessionId, messages: updateResponse.attributes.messages! };
   }
 }

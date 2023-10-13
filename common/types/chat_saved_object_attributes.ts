@@ -29,7 +29,7 @@ interface IInput {
 }
 interface IOutput {
   type: 'output';
-  traceID?: string; // used for tracing agent calls
+  traceId?: string; // used for tracing agent calls
   toolsUsed?: string[];
   contentType: 'error' | 'markdown' | 'visualization' | 'ppl_visualization';
   content: string;

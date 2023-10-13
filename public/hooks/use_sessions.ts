@@ -20,13 +20,13 @@ export const useGetSession = () => {
   useEffect(() => {
     const abortController = new AbortController();
     dispatch({ type: 'request' });
-    if (!chatContext.sessionID) {
+    if (!chatContext.sessionId) {
       dispatch({ type: 'success', payload: undefined });
       return;
     }
 
     core.services.http
-      .get<ISession>(`${ASSISTANT_API.SESSION}/${chatContext.sessionID}`, {
+      .get<ISession>(`${ASSISTANT_API.SESSION}/${chatContext.sessionId}`, {
         signal: abortController.signal,
       })
       .then((payload) => dispatch({ type: 'success', payload }))
@@ -35,7 +35,7 @@ export const useGetSession = () => {
     return () => {
       abortController.abort();
     };
-  }, [chatContext.sessionID]);
+  }, [chatContext.sessionId]);
 
   return { ...state };
 };

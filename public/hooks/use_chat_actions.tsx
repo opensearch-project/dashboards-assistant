@@ -11,7 +11,7 @@ import { AssistantActions } from '../types';
 import { useChatState } from './use_chat_state';
 
 interface SendResponse {
-  sessionID: string;
+  sessionId: string;
   messages: IMessage[];
 }
 
@@ -30,13 +30,13 @@ export const useChatActions = (): AssistantActions => {
       const response = await core.services.http.post<SendResponse>(ASSISTANT_API.SEND_MESSAGE, {
         // do not send abort signal to http client to allow LLM call run in background
         body: JSON.stringify({
-          sessionID: chatContext.sessionID,
-          ...(!chatContext.sessionID && { messages: chatState.messages }), // include all previous messages for new chats
+          sessionId: chatContext.sessionId,
+          ...(!chatContext.sessionId && { messages: chatState.messages }), // include all previous messages for new chats
           input,
         }),
       });
       if (abortController.signal.aborted) return;
-      chatContext.setSessionID(response.sessionID);
+      chatContext.setSessionId(response.sessionId);
       chatStateDispatch({ type: 'receive', payload: response.messages });
     } catch (error) {
       if (abortController.signal.aborted) return;
@@ -44,11 +44,11 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const loadChat = (sessionID?: string) => {
+  const loadChat = (sessionId?: string) => {
     abortControllerRef?.abort();
-    chatContext.setSessionID(sessionID);
+    chatContext.setSessionId(sessionId);
     chatContext.setSelectedTabId('chat');
-    if (!sessionID) chatStateDispatch({ type: 'reset' });
+    if (!sessionId) chatStateDispatch({ type: 'reset' });
   };
 
   const openChatUI = () => {

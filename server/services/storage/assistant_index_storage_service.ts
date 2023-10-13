@@ -15,10 +15,10 @@ import { StorageService } from './storage_service';
 
 export class AssistantIndexStorageService implements StorageService {
   constructor(private readonly client: OpenSearchClient) {}
-  async getSession(sessionID: string): Promise<ISession> {
+  async getSession(sessionId: string): Promise<ISession> {
     const session = await this.client.get<ISession>({
       index: LLM_INDEX.SESSIONS,
-      id: sessionID,
+      id: sessionId,
     });
     if (!session.body._source) throw new Error('Session not found');
     return session.body._source;
@@ -52,12 +52,12 @@ export class AssistantIndexStorageService implements StorageService {
 
   async saveMessages(
     title: string,
-    sessionID: string | undefined,
+    sessionId: string | undefined,
     messages: IMessage[]
-  ): Promise<{ sessionID: string; messages: IMessage[] }> {
+  ): Promise<{ sessionId: string; messages: IMessage[] }> {
     await this.createIndex();
     const timestamp = new Date().getTime();
-    if (!sessionID) {
+    if (!sessionId) {
       const createResponse = await this.client.index<ISession>({
         index: LLM_INDEX.SESSIONS,
         body: {
@@ -68,11 +68,11 @@ export class AssistantIndexStorageService implements StorageService {
           messages,
         },
       });
-      return { sessionID: createResponse.body._id, messages };
+      return { sessionId: createResponse.body._id, messages };
     }
     const updateResponse = await this.client.update<Partial<ISession>>({
       index: LLM_INDEX.SESSIONS,
-      id: sessionID,
+      id: sessionId,
       body: {
         doc: {
           messages,
@@ -80,7 +80,7 @@ export class AssistantIndexStorageService implements StorageService {
         },
       },
     });
-    return { sessionID, messages };
+    return { sessionId, messages };
   }
 
   private async createIndex() {

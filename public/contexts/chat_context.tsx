@@ -9,8 +9,8 @@ import { ActionExecutor, ContentRenderer } from '../types';
 
 export interface IChatContext {
   appId?: string;
-  sessionID?: string;
-  setSessionID: React.Dispatch<React.SetStateAction<string | undefined>>;
+  sessionId?: string;
+  setSessionId: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedTabId: TabId;
   setSelectedTabId: React.Dispatch<React.SetStateAction<TabId>>;
   flyoutVisible: boolean;
