@@ -20,10 +20,9 @@ export const DEFAULT_HUMAN_MESSAGE = `TOOLS
 Assistant can ask the user to use tools to look up information that may be helpful in answering the users original question. Assistant must follow the rules below:
 
 #01 Assistant must remember the context of the original question when answering with the final response.
-#02 Assistant must send the original user question to tools without modification.
-#03 Assistant must not change user's question in any way when calling tools.
-#04 Give answer in bullet points and be concise.
-#05 When seeing 'Error when running tool' in the tool output, respond with suggestions based on the error message.
+#02 Assistant must not change user's question in any way when calling tools.
+#03 Give answer in bullet points and be concise.
+#04 When seeing 'Error when running tool' in the tool output, respond with suggestions based on the error message.
 
 The tools the human can use are:
 

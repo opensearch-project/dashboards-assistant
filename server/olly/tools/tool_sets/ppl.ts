@@ -9,6 +9,7 @@ import { requestPPLGeneratorChain } from '../../chains/ppl_generator';
 import { generateFieldContext } from '../../utils/ppl_generator';
 import { protectCall } from '../../utils/utils';
 import { PluginToolsBase } from '../tools_base';
+import { PreservedInputTool } from '../preserved_input_tool';
 
 const PPL_DATASOURCES_REQUEST =
   'show datasources | where CONNECTOR_TYPE="PROMETHEUS" | fields DATASOURCE_NAME';
@@ -28,10 +29,10 @@ export class PPLTools extends PluginToolsBase {
   } as const;
 
   toolsList = [
-    new DynamicTool({
+    new PreservedInputTool({
       name: PPLTools.TOOL_NAMES.QUERY_OPENSEARCH,
       description:
-        'Use to generate and run a PPL Query to get results for a generic user question related to data stored in their OpenSearch cluster. The input must be the original question as user phrased it without modifications',
+        'Use to generate and run a PPL Query to get results for a generic user question related to data stored in their OpenSearch cluster.',
       func: protectCall(async (query: string) => {
         const ppl = await this.generatePPL(query);
         const results = await this.executePPL(ppl);

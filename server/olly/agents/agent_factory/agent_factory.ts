@@ -22,6 +22,7 @@ import {
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
 import { DynamicTool } from 'langchain/tools';
+import { OpenSearchAgentExecutor } from '../agent_executor/opensearch_agent_executor';
 import { ChatConversationalAgentOutputLenientParser } from '../output_parsers/output_parsers';
 import { DEFAULT_HUMAN_MESSAGE, DEFAULT_SYSTEM_MESSAGE } from '../prompts/default_chat_prompts';
 import {
@@ -130,7 +131,7 @@ export class AgentFactory {
           humanMessage: this.agentArgs.chat_human_message ?? DEFAULT_HUMAN_MESSAGE,
           outputParser,
         };
-        this.executor = AgentExecutor.fromAgentAndTools({
+        this.executor = new OpenSearchAgentExecutor({
           agent: ChatConversationalAgent.fromLLMAndTools(this.model, this.agentTools, convArgs),
           tools: this.agentTools,
           memory: customAgentMemory ?? this.memory,
