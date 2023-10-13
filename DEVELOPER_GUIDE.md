@@ -4,13 +4,13 @@ So you want to contribute code to this project? Excellent! We're glad you're her
 
 ### Setup
 
-1. Download OpenSearch for the version that matches the [OpenSearch Dashboards version specified in opensearch_dashboards.json](./dashboards-observability/opensearch_dashboards.json#L4) from [opensearch.org](https://opensearch.org/downloads.html).
-1. Download the OpenSearch Dashboards source code for the [version specified in opensearch_dashboards.json](./dashboards-observability/opensearch_dashboards.json#L4) you want to set up.
+1. Download OpenSearch for the version that matches the [OpenSearch Dashboards version specified in opensearch_dashboards.json](./opensearch_dashboards.json#L4) from [opensearch.org](https://opensearch.org/downloads.html).
+1. Download the OpenSearch Dashboards source code for the [version specified in opensearch_dashboards.json](./opensearch_dashboards.json#L4) you want to set up.
 1. Change your node version to the version specified in `.node-version` inside the OpenSearch Dashboards root directory.
 1. cd into `OpenSearch-Dashboards` and remove the `plugins` directory.
-1. Check out this package from version control as the `plugins/dashboards-observability` directory.
+1. Check out this package from version control as the `plugins/dashboards-assistant` directory.
 ```bash
-git clone https://github.com/opensearch-project/dashboards-observability plugins
+git clone https://github.com/opensearch-project/dashboards-assistant plugins
 git checkout main
 ```
 6. Run `yarn osd bootstrap` inside `OpenSearch-Dashboards`.
@@ -21,14 +21,14 @@ Ultimately, your directory structure should look like this:
 .
 ├── OpenSearch-Dashboards
 │   └── plugins
-│       └── dashboards-observability
+│       └── dashboards-assistant
 ```
 
 ### Build
 
-To build the plugin's distributable zip simply run `yarn build`.
+To build the plugin's distributable zip simply run `yarn build` in the plugin's directory.
 
-Example output: `./build/observability*.zip`
+Example output: `./build/assistant*.zip`
 
 ### Run
 
