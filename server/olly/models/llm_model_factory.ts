@@ -7,7 +7,6 @@ import { Client } from '@opensearch-project/opensearch';
 import { Callbacks } from 'langchain/callbacks';
 import { ChatAnthropic } from 'langchain/chat_models/anthropic';
 import { Embeddings } from 'langchain/embeddings/base';
-import { HuggingFaceInferenceEmbeddings } from 'langchain/embeddings/hf';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { OpenAI } from 'langchain/llms/openai';
 import { OpenSearchVectorStore } from 'langchain/vectorstores/opensearch';
@@ -56,11 +55,6 @@ export class LLMModelFactory {
         return new OpenAIEmbeddings();
 
       case 'claude':
-        return new HuggingFaceInferenceEmbeddings({
-          model: 'sentence-transformers/all-mpnet-base-v2',
-          apiKey: process.env.HUGGINGFACEHUB_API_TOKEN,
-        });
-
       case 'ml-commons-claude':
       default:
         return new MLCommonsEmbeddingsModel(options.client);

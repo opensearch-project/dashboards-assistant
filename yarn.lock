@@ -43,11 +43,6 @@
   resolved "https://registry.yarnpkg.com/@danieldietrich/copy/-/copy-0.4.2.tgz#c1cabfa499d8b473ba95413c446c1c1efae64d24"
   integrity sha512-ZVNZIrgb2KeomfNahP77rL445ho6aQj0HHqU6hNlQ61o4rhvca+NS+ePj0d82zQDq2UPk1mjVZBTXgP+ErsDgw==
 
-"@huggingface/inference@^2.5.0":
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/@huggingface/inference/-/inference-2.6.1.tgz#d11f4c44d824e92577ec460c6ff60474ef36467d"
-  integrity sha512-qFYchgOCPeEkZJKiSr7Kz62QwukJtgkeQCT7Q0SSKUcvHpTQVNJp6i/JrJMR4dBdzQysJ1SZDC0pLBBnnskTag==
-
 "@jest/schemas@^29.6.3":
   version "29.6.3"
   resolved "https://registry.yarnpkg.com/@jest/schemas/-/schemas-29.6.3.tgz#430b5ce8a4e0044a7e3819663305a7b3091c8e03"
