@@ -5,6 +5,7 @@
 
 import { Run } from 'langchain/callbacks';
 import { v4 as uuid } from 'uuid';
+import { ApiResponse } from '@opensearch-project/opensearch';
 import { OpenSearchDashboardsRequest, RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { convertToTraces } from '../../../common/utils/llm_chat/traces';
@@ -51,16 +52,22 @@ export class OllyChatService implements ChatService {
         callbacks
       );
       const memory = memoryInit(payload.messages);
-      const chatAgent = chatAgentInit(
-        model,
-        pluginTools.flatMap((tool) => tool.toolsList),
-        callbacks,
-        memory
-      );
-      const agentResponse = await chatAgent.run(
-        payload.input.content,
-        payload.sessionId ? OllyChatService.abortControllers.get(payload.sessionId) : undefined
-      );
+
+      const agentFrameworkResponse = (await opensearchClient.transport.request({
+        method: 'POST',
+        path: '/_plugins/_ml/agents/usjqiYsBC_Oyjc6-Rhpq/_execute',
+        body: {
+          parameters: {
+            question: payload.input.content,
+          },
+        },
+      })) as ApiResponse<{
+        inference_results: Array<{ output: Array<{ name: string; result: string }> }>;
+      }>;
+      const agentFrameworkAnswer =
+        agentFrameworkResponse.body.inference_results[0].output[0].result;
+      await memory.chatHistory.addUserMessage(payload.input.content);
+      await memory.chatHistory.addAIChatMessage(agentFrameworkAnswer);
 
       const suggestions = await requestSuggestionsChain(
         model,
@@ -71,7 +78,7 @@ export class OllyChatService implements ChatService {
 
       return buildOutputs(
         payload.input.content,
-        agentResponse,
+        agentFrameworkAnswer,
         traceId,
         suggestions,
         convertToTraces(runs)
