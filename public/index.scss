@@ -49,9 +49,6 @@
   .euiFlyoutFooter {
     background: transparent;
   }
-  .euiPage {
-    background: transparent;
-  }
 }
 
 .llm-chat-flyout-header {
@@ -78,7 +75,7 @@
   &.llm-chat-bubble-panel {
     word-break: break-word;
     border-radius: 8px;
-    max-width: 80%;
+    max-width: 95%;
   }
   &.llm-chat-greeting-card-panel {
     width: 357px;
@@ -102,13 +99,10 @@
 }
 
 .llm-chat-bubble-panel.llm-chat-bubble-panel-input {
-  background: #57c3ff;
-  border-color: white;
+  background: #159d8d;
   margin-left: auto;
 }
 .llm-chat-bubble-panel.llm-chat-bubble-panel-output {
-  background: #e6f0f8;
-  border-color: white;
   margin-right: auto;
 }
 
@@ -126,7 +120,8 @@
 }
 
 .llm-chat-fullscreen {
-  .euiFlyoutBody__overflowContent, .euiFlyoutFooter {
+  .euiFlyoutBody__overflowContent,
+  .euiFlyoutFooter {
     width: 70%;
     margin: auto;
   }

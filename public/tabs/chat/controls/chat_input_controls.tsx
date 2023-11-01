@@ -19,6 +19,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
   const chatContext = useChatContext();
   const { send } = useChatActions();
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
   useEffectOnce(() => {
     if (inputRef.current) {
       autosize(inputRef.current);

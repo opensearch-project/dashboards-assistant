@@ -19,6 +19,7 @@ import './fetch-polyfill';
 import { setupRoutes } from './routes/index';
 import { chatSavedObject } from './saved_objects/chat_saved_object';
 import { AssistantPluginSetup, AssistantPluginStart } from './types';
+import { chatConfigSavedObject } from './saved_objects/chat_config_saved_object';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
@@ -48,6 +49,8 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     setupRoutes(router);
 
     core.savedObjects.registerType(chatSavedObject);
+    core.savedObjects.registerType(chatConfigSavedObject);
+
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,

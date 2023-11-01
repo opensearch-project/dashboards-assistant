@@ -6,7 +6,7 @@
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useLayoutEffect, useRef } from 'react';
 import { IMessage } from '../../../common/types/chat_saved_object_attributes';
-import { InviteMessage } from '../../components/invite_message';
+import { TermsAndConditions } from '../../components/terms_and_conditions';
 import { LoadingButton } from '../../components/loading_button';
 import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
@@ -39,17 +39,6 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     pageEndRef.current?.scrollIntoView();
   }, [chatState.messages, loading]);
 
-  if (!chatContext.chatEnabled) {
-    return (
-      <>
-        {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
-        <MessageBubble type="output" contentType="markdown">
-          <InviteMessage />
-        </MessageBubble>
-      </>
-    );
-  }
-
   if (props.messagesLoadingError) {
     return (
       <EuiEmptyPrompt
@@ -63,6 +52,10 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
 
   return (
     <>
+      <MessageBubble type="output" contentType="markdown">
+        <TermsAndConditions username={chatContext.currentAccount.username} />
+      </MessageBubble>
+      <EuiSpacer />,
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatState.messages
         .flatMap((message, i, array) => [

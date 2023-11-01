@@ -15,7 +15,7 @@ import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks/use_chat_state';
 import './index.scss';
 import { TabId } from './tabs/chat_tab_bar';
-import { ActionExecutor, AssistantActions, ContentRenderer } from './types';
+import { ActionExecutor, AssistantActions, ContentRenderer, UserAccount } from './types';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -23,6 +23,7 @@ interface HeaderChatButtonProps {
   contentRenderers: Record<string, ContentRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   assistantActions: AssistantActions;
+  currentAccount: UserAccount;
 }
 
 let flyoutLoaded = false;
@@ -61,6 +62,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       chatEnabled: props.chatEnabled,
       contentRenderers: props.contentRenderers,
       actionExecutors: props.actionExecutors,
+      currentAccount: props.currentAccount,
     }),
     [
       appId,
@@ -70,6 +72,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       props.chatEnabled,
       props.contentRenderers,
       props.actionExecutors,
+      props.currentAccount,
     ]
   );
 

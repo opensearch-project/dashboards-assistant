@@ -33,15 +33,19 @@ export class AssistantPlugin
     const contentRenderers: Record<string, ContentRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
+    const getAccount = async () => {
+      return await core.http.get<{ data: { roles: string[]; user_name: string } }>(
+        '/api/v1/configuration/account'
+      );
+    };
     const assistantEnabled = (() => {
       let enabled: boolean;
       return async () => {
         if (enabled === undefined) {
-          enabled = await core.http
-            .get<{ data: { roles: string[] } }>('/api/v1/configuration/account')
-            .then((res) =>
-              res.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role))
-            );
+          const account = await getAccount();
+          enabled = account.data.roles.some((role) =>
+            ['all_access', 'assistant_user'].includes(role)
+          );
         }
         return enabled;
       };
@@ -53,16 +57,22 @@ export class AssistantPlugin
         setupDeps,
         startDeps,
       });
+      const account = await getAccount();
+      const username = account.data.user_name;
+
       coreStart.chrome.navControls.registerRight({
         order: 10000,
         mount: toMountPoint(
           <CoreContext.Provider>
             <HeaderChatButton
               application={coreStart.application}
-              chatEnabled={await assistantEnabled()}
+              chatEnabled={account.data.roles.some((role) =>
+                ['all_access', 'assistant_user'].includes(role)
+              )}
               contentRenderers={contentRenderers}
               actionExecutors={actionExecutors}
               assistantActions={assistantActions}
+              currentAccount={{ username }}
             />
           </CoreContext.Provider>
         ),

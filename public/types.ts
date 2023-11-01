@@ -35,3 +35,11 @@ export interface AssistantSetup {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantStart {}
+
+export interface UserAccount {
+  username: string;
+}
+
+export interface ChatConfig {
+  terms_accepted: boolean;
+}
