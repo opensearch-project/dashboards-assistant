@@ -8,7 +8,6 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import { ApplicationStart } from '../../../src/core/public';
-import chatIcon from './assets/chat.svg';
 import { ChatFlyout } from './chat_flyout';
 import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
@@ -84,7 +83,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
         })}
         onClick={() => setFlyoutVisible(!flyoutVisible)}
       >
-        <EuiIcon type={chatIcon} size="l" />
+        <EuiIcon type="chatRight" size="m" />
       </EuiHeaderSectionItemButton>
       <ChatContext.Provider value={chatContextValue}>
         <ChatStateProvider>
