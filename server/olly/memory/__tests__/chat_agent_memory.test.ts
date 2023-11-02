@@ -57,19 +57,21 @@ describe('convert messages to memory', () => {
     ]);
   });
 
-  it('only returns the latest 10 messages', async () => {
-    const memory = memoryInit(
-      Array.from({ length: 20 }, (_, i) =>
-        createMessage({
-          type: i % 2 === 0 ? 'input' : 'output',
-          content: `${i % 2 === 0 ? 'human' : 'ai'} message ${Math.floor(i / 2) + 1}`,
-        })
-      )
+  it('only returns the latest 5 input/output pairs', async () => {
+    const messageArr = Array.from({ length: 20 }, (_, i) =>
+      createMessage({
+        type: i % 2 === 0 ? 'input' : 'output',
+        content: `${i % 2 === 0 ? 'human' : 'ai'} message ${Math.floor(i / 2) + 1}`,
+      })
     );
+    messageArr.splice(10, 0, createMessage({ type: 'output', content: 'ai message 5.5' }));
+    messageArr.splice(13, 0, createMessage({ type: 'output', content: 'ai message 6.5' }));
+    const memory = memoryInit(messageArr);
     const messages = await memory.chatHistory.getMessages();
     expect(messages).toMatchObject([
       { content: 'human message 6' },
       { content: 'ai message 6' },
+      { content: 'ai message 6.5' },
       { content: 'human message 7' },
       { content: 'ai message 7' },
       { content: 'human message 8' },
