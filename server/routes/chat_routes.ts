@@ -86,12 +86,15 @@ export function registerChatRoutes(router: IRouter) {
 
       try {
         const outputs = await chatService.requestLLM(messages, context, request);
-        const saveMessagesResponse = await storageService.saveMessages(
-          input.content.substring(0, 50),
-          sessionId,
-          [...messages, input, ...outputs]
-        );
-        return response.ok({ body: saveMessagesResponse });
+        const title = input.content.substring(0, 50);
+        const saveMessagesResponse = await storageService.saveMessages(title, sessionId, [
+          ...messages,
+          input,
+          ...outputs,
+        ]);
+        return response.ok({
+          body: { ...saveMessagesResponse, title },
+        });
       } catch (error) {
         context.assistant_plugin.logger.warn(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });

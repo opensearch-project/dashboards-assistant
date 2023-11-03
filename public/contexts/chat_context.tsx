@@ -4,8 +4,7 @@
  */
 
 import React, { useContext } from 'react';
-import { TabId } from '../tabs/chat_tab_bar';
-import { ActionExecutor, ContentRenderer, UserAccount } from '../types';
+import { ActionExecutor, ContentRenderer, UserAccount, TabId } from '../types';
 
 export interface IChatContext {
   appId?: string;
@@ -20,6 +19,8 @@ export interface IChatContext {
   contentRenderers: Record<string, ContentRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   currentAccount: UserAccount;
+  title?: string;
+  setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 

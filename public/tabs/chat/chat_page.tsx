@@ -5,6 +5,7 @@
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import cs from 'classnames';
 import { useObservable } from 'react-use';
 import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
@@ -41,7 +42,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
 
   return (
     <>
-      <EuiFlyoutBody className={props.className}>
+      <EuiFlyoutBody className={cs(props.className, 'llm-chat-flyout-body')}>
         <EuiPage style={{ background: 'transparent' }}>
           <EuiPageBody component="div">
             <ChatPageContent

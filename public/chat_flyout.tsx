@@ -8,7 +8,7 @@ import cs from 'classnames';
 import React from 'react';
 import { useChatContext } from './contexts/chat_context';
 import { ChatPage } from './tabs/chat/chat_page';
-import { ChatTabBar } from './tabs/chat_tab_bar';
+import { ChatWindowHeader } from './tabs/chat_window_header';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 
 let chatHistoryPageLoaded = false;
@@ -59,16 +59,17 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
       {...props.flyoutProps}
     >
       <>
-        {props.overrideComponent}
-        <EuiFlyoutHeader
-          className={cs('llm-chat-flyout-header', { 'llm-chat-hidden': props.overrideComponent })}
-        >
-          <ChatTabBar
+        <EuiFlyoutHeader className={cs('llm-chat-flyout-header')}>
+          <ChatWindowHeader
             flyoutFullScreen={props.flyoutFullScreen}
             toggleFlyoutFullScreen={props.toggleFlyoutFullScreen}
           />
         </EuiFlyoutHeader>
+
+        {props.overrideComponent}
+
         <ChatPage className={cs({ 'llm-chat-hidden': !chatPageVisible })} />
+
         {chatHistoryPageLoaded && (
           <ChatHistoryPage
             className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}

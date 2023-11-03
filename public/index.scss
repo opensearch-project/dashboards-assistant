@@ -28,24 +28,9 @@
   }
 }
 
-.llm-chat-flyout-header {
-  background: #e6f0f8;
-}
-
-.llm-chat-tabs {
-  justify-content: left;
-
-  .euiTab-isSelected {
-    font-weight: 700;
-  }
-
-  .euiTab {
-    color: $ouiLinkColor;
-    &:hover,
-    &:focus {
-      text-decoration: none;
-    }
-  }
+.llm-chat-flyout-body {
+  background-color: $euiPageBackgroundColor;
+  margin: 0px 20px;
 }
 
 .euiPanel {

@@ -55,7 +55,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       <MessageBubble type="output" contentType="markdown">
         <TermsAndConditions username={chatContext.currentAccount.username} />
       </MessageBubble>
-      <EuiSpacer />,
+      <EuiSpacer />
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatState.messages
         .flatMap((message, i, array) => [

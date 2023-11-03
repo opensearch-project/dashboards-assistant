@@ -12,6 +12,7 @@ import { useChatState } from './use_chat_state';
 
 interface SendResponse {
   sessionId: string;
+  title: string;
   messages: IMessage[];
 }
 
@@ -37,6 +38,7 @@ export const useChatActions = (): AssistantActions => {
       });
       if (abortController.signal.aborted) return;
       chatContext.setSessionId(response.sessionId);
+      chatContext.setTitle(response.title);
       chatStateDispatch({ type: 'receive', payload: response.messages });
     } catch (error) {
       if (abortController.signal.aborted) return;
@@ -44,10 +46,12 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const loadChat = (sessionId?: string) => {
+  const loadChat = (sessionId?: string, title?: string) => {
     abortControllerRef?.abort();
     chatContext.setSessionId(sessionId);
+    chatContext.setTitle(title);
     chatContext.setSelectedTabId('chat');
+    chatContext.setFlyoutComponent(null);
     if (!sessionId) chatStateDispatch({ type: 'reset' });
   };
 

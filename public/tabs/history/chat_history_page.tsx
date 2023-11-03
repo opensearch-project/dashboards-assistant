@@ -64,7 +64,9 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
     {
       field: 'id',
       name: 'Chat',
-      render: (id: string, item) => <EuiLink onClick={() => loadChat(id)}>{item.title}</EuiLink>,
+      render: (id: string, item) => (
+        <EuiLink onClick={() => loadChat(id, item.title)}>{item.title}</EuiLink>
+      ),
     },
     {
       field: 'updatedTimeMs',

@@ -13,8 +13,7 @@ import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks/use_chat_state';
 import './index.scss';
-import { TabId } from './tabs/chat_tab_bar';
-import { ActionExecutor, AssistantActions, ContentRenderer, UserAccount } from './types';
+import { ActionExecutor, AssistantActions, ContentRenderer, UserAccount, TabId } from './types';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -30,6 +29,7 @@ let flyoutLoaded = false;
 export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [appId, setAppId] = useState<string>();
   const [sessionId, setSessionId] = useState<string>();
+  const [title, setTitle] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [flyoutProps, setFlyoutProps] = useState<Partial<React.ComponentProps<typeof EuiFlyout>>>(
@@ -62,6 +62,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       contentRenderers: props.contentRenderers,
       actionExecutors: props.actionExecutors,
       currentAccount: props.currentAccount,
+      title,
+      setTitle,
     }),
     [
       appId,
@@ -72,6 +74,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       props.contentRenderers,
       props.actionExecutors,
       props.currentAccount,
+      title,
+      setTitle,
     ]
   );
 
