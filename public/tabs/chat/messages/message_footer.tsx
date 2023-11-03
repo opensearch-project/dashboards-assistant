@@ -44,7 +44,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
       );
     }
 
-    if (props.message.contentType === 'markdown') {
+    if (props.message.contentType === 'markdown' || props.message.contentType === 'error') {
       footers.push(
         <EuiButtonEmpty
           iconType="faceHappy"

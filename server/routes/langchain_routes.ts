@@ -93,6 +93,8 @@ export function registerLangchainRoutes(router: IRouter) {
       validate: {
         body: schema.object({
           metadata: schema.object({
+            user: schema.string(),
+            tenant: schema.string(),
             type: schema.string(),
             sessionId: schema.maybe(schema.string()),
             traceId: schema.maybe(schema.string()),

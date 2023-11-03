@@ -258,13 +258,20 @@ export const FeedbackModalContent: React.FC<FeedbackModalContentProps> = (props)
 
 const useSubmitFeedback = (data: FeedbackFormData, metadata: FeedbackMetaData, http: HttpStart) => {
   const [loading, setLoading] = useState(false);
-
   return {
     loading,
-    submitFeedback: () => {
+    submitFeedback: async () => {
       setLoading(true);
+      const auth = await http
+        .get<{ data: { user_name: string; user_requested_tenant: string; roles: string[] } }>(
+          '/api/v1/configuration/account'
+        )
+        .then((res) => ({ user: res.data.user_name, tenant: res.data.user_requested_tenant }));
+
       return http
-        .post(ASSISTANT_API.FEEDBACK, { body: JSON.stringify({ metadata, ...data }) })
+        .post(ASSISTANT_API.FEEDBACK, {
+          body: JSON.stringify({ metadata: { ...metadata, ...auth }, ...data }),
+        })
         .finally(() => setLoading(false));
     },
   };
