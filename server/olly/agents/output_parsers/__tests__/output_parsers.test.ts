@@ -69,6 +69,18 @@ describe('OutputParsers', () => {
     });
   });
 
+  it('parses output with missing end quote', async () => {
+    const parser = new ChatConversationalAgentOutputLenientParser({ toolNames });
+    const output = await parser.parse(
+      ' ```json\n{\\n    \\"action\\": \\"Final Answer\\",\\n    \\"action_input\\": \\"output}\\n```'
+    );
+    expect(output).toMatchObject({
+      returnValues: {
+        output: 'output',
+      },
+    });
+  });
+
   it('throws exception if no JSON found', () => {
     const parser = new ChatConversationalAgentOutputLenientParser({ toolNames });
     expect(parser.parse('Internal Error')).rejects.toThrowError();

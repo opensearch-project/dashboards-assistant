@@ -8,8 +8,8 @@ import { requestGuessingIndexChain } from '../../chains/guessing_index';
 import { requestPPLGeneratorChain } from '../../chains/ppl_generator';
 import { generateFieldContext } from '../../utils/ppl_generator';
 import { protectCall } from '../../utils/utils';
-import { PluginToolsBase } from '../tools_base';
 import { PreservedInputTool } from '../preserved_input_tool';
+import { PluginToolsBase } from '../tools_base';
 
 const PPL_DATASOURCES_REQUEST =
   'show datasources | where CONNECTOR_TYPE="PROMETHEUS" | fields DATASOURCE_NAME';
@@ -80,7 +80,9 @@ export class PPLTools extends PluginToolsBase {
     const response = await this.opensearchClient.cat.indices({ format: 'json', h: 'index' });
     return response.body
       .map((index) => index.index)
-      .filter((index) => index !== undefined && !index.startsWith('.')) as string[];
+      .filter(
+        (index) => index !== undefined && !/^(\.|security-auditlog-)/.test(index)
+      ) as string[];
   }
 
   private async getPrometheusMetricList() {

@@ -54,7 +54,8 @@ export class ChatConversationalAgentOutputLenientParser extends ChatConversation
           .replace(/\\"/g, '"')
           .replace(/\\n/g, '\n')
           .replace(/\n/g, ' '.repeat(15))
-          .replace(/```\s*}\s*```\s*/g, '"}```');
+          .replace(/```\s*}\s*```\s*/, '"}```')
+          .replace(/([^\s"])\s*}\s*```\s*/, '$1"}```');
         const jsonStr = this.getInnerJSONString(jsonOutput);
         const response = JSON.parse(JSON.stringify(JSON.parse(jsonStr)).replace(/( {15})/g, '\\n'));
         return this.createAgentResponse(response, text);
