@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import { HttpFetchQuery, SavedObjectsFindOptions } from '../../../../src/core/public';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { ISession, ISessionFindResponse } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
-import { GenericReducer, genericReducer } from './fetch_reducer';
+import { GenericReducer, genericReducer, genericReducerWithAbortController } from './fetch_reducer';
 
 export const useGetSession = () => {
   const chatContext = useChatContext();
@@ -64,4 +64,49 @@ export const useGetSessions = (options: Partial<SavedObjectsFindOptions> = {}) =
   }, [options, refresh]);
 
   return { ...state, refresh: () => setRefresh({}) };
+};
+
+export const useDeleteSession = () => {
+  const core = useCore();
+  const [state, dispatch] = useReducer(genericReducerWithAbortController, { loading: false });
+
+  const deleteSession = useCallback((sessionId: string) => {
+    const abortController = new AbortController();
+    dispatch({ type: 'request', abortController });
+    return core.services.http
+      .delete(`${ASSISTANT_API.SESSION}/${sessionId}`, {
+        signal: abortController.signal,
+      })
+      .then((payload) => dispatch({ type: 'success', payload }))
+      .catch((error) => dispatch({ type: 'failure', error }));
+  }, []);
+
+  return {
+    ...state,
+    deleteSession,
+  };
+};
+
+export const usePatchSession = () => {
+  const core = useCore();
+  const [state, dispatch] = useReducer(genericReducerWithAbortController, { loading: false });
+
+  const patchSession = useCallback((sessionId: string, title: string) => {
+    const abortController = new AbortController();
+    dispatch({ type: 'request', abortController });
+    return core.services.http
+      .patch(`${ASSISTANT_API.SESSION}/${sessionId}`, {
+        query: {
+          title,
+        },
+        signal: abortController.signal,
+      })
+      .then((payload) => dispatch({ type: 'success', payload }))
+      .catch((error) => dispatch({ type: 'failure', error }));
+  }, []);
+
+  return {
+    ...state,
+    patchSession,
+  };
 };

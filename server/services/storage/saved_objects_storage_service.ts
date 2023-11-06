@@ -38,6 +38,8 @@ export class SavedObjectsStorageService implements StorageService {
       // saved objects by default provides updated_at field
       ...(query.sortField === 'updatedTimeMs' && { sortField: 'updated_at' }),
       type: CHAT_SAVED_OBJECT,
+      searchFields:
+        typeof query.searchFields === 'string' ? [query.searchFields] : query.searchFields,
     });
     return {
       objects: sessions.saved_objects.map((session) => ({
@@ -74,5 +76,15 @@ export class SavedObjectsStorageService implements StorageService {
       { messages }
     );
     return { sessionId, messages: updateResponse.attributes.messages! };
+  }
+
+  deleteSession(sessionId: string) {
+    return this.client.delete(CHAT_SAVED_OBJECT, sessionId);
+  }
+
+  updateSession(sessionId: string, title: string) {
+    return this.client.update(CHAT_SAVED_OBJECT, sessionId, {
+      title,
+    });
   }
 }

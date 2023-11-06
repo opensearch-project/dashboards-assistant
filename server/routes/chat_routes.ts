@@ -53,10 +53,33 @@ const getSessionsRoute = {
       sortOrder: schema.maybe(schema.string()),
       sortField: schema.maybe(schema.string()),
       fields: schema.maybe(schema.arrayOf(schema.string())),
+      search: schema.maybe(schema.string()),
+      searchFields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
     }),
   },
 };
 export type GetSessionsSchema = TypeOf<typeof getSessionsRoute.validate.query>;
+
+const deleteSessionRoute = {
+  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+  validate: {
+    params: schema.object({
+      sessionId: schema.string(),
+    }),
+  },
+};
+
+const updateSessionRoute = {
+  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+  validate: {
+    params: schema.object({
+      sessionId: schema.string(),
+    }),
+    query: schema.object({
+      title: schema.string(),
+    }),
+  },
+};
 
 export function registerChatRoutes(router: IRouter) {
   const createStorageService = (context: RequestHandlerContext) =>
@@ -132,6 +155,47 @@ export function registerChatRoutes(router: IRouter) {
 
       try {
         const getResponse = await storageService.getSessions(request.query);
+        return response.ok({ body: getResponse });
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
+    }
+  );
+
+  router.delete(
+    deleteSessionRoute,
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      const storageService = createStorageService(context);
+
+      try {
+        const getResponse = await storageService.deleteSession(request.params.sessionId);
+        return response.ok({ body: getResponse });
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
+    }
+  );
+
+  router.patch(
+    updateSessionRoute,
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      const storageService = createStorageService(context);
+
+      try {
+        const getResponse = await storageService.updateSession(
+          request.params.sessionId,
+          request.query.title
+        );
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
