@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
 import autosize from 'autosize';
 import React, { useRef } from 'react';
 import { useEffectOnce } from 'react-use';
@@ -13,6 +13,7 @@ import { useChatActions } from '../../../hooks/use_chat_actions';
 
 interface ChatInputControlsProps {
   disabled: boolean;
+  loading: boolean;
 }
 
 export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
@@ -66,14 +67,18 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
+        <EuiButton
           aria-label="send"
+          minWidth={70}
+          fill
+          iconType={props.loading ? undefined : 'returnKey'}
+          iconSide="right"
           size="m"
-          display="fill"
-          iconType="sortRight"
           onClick={onSubmit}
           isDisabled={props.disabled}
-        />
+        >
+          {props.loading ? 'Generating...' : 'Go'}
+        </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false} />
     </EuiFlexGroup>

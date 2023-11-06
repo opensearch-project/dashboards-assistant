@@ -44,6 +44,16 @@ const getSessionRoute = {
 };
 export type GetSessionSchema = TypeOf<typeof getSessionRoute.validate.params>;
 
+const abortAgentExecutionRoute = {
+  path: `${ASSISTANT_API.ABORT_AGENT_EXECUTION}`,
+  validate: {
+    body: schema.object({
+      sessionId: schema.string(),
+    }),
+  },
+};
+export type AbortAgentExecutionSchema = TypeOf<typeof abortAgentExecutionRoute.validate.body>;
+
 const getSessionsRoute = {
   path: ASSISTANT_API.SESSIONS,
   validate: {
@@ -110,11 +120,11 @@ export function registerChatRoutes(router: IRouter) {
       try {
         const outputs = await chatService.requestLLM(messages, context, request);
         const title = input.content.substring(0, 50);
-        const saveMessagesResponse = await storageService.saveMessages(title, sessionId, [
-          ...messages,
-          input,
-          ...outputs,
-        ]);
+        const saveMessagesResponse = await storageService.saveMessages(
+          title,
+          sessionId,
+          [...messages, input, ...outputs].filter((message) => message.content !== 'AbortError')
+        );
         return response.ok({
           body: { ...saveMessagesResponse, title },
         });
@@ -197,6 +207,26 @@ export function registerChatRoutes(router: IRouter) {
           request.query.title
         );
         return response.ok({ body: getResponse });
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
+    }
+  );
+
+  router.post(
+    abortAgentExecutionRoute,
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      const chatService = createChatService();
+
+      try {
+        chatService.abortAgentExecution(request.body.sessionId);
+        context.assistant_plugin.logger.info(`Abort agent execution: ${request.body.sessionId}`);
+        return response.ok();
       } catch (error) {
         context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });

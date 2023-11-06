@@ -95,5 +95,17 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  return { send, loadChat, executeAction, openChatUI };
+  const abortAction = async (sessionId?: string) => {
+    abortControllerRef.abort();
+    chatStateDispatch({ type: 'abort' });
+
+    if (sessionId) {
+      // abort agent execution
+      await core.services.http.post<SendResponse>(`${ASSISTANT_API.ABORT_AGENT_EXECUTION}`, {
+        body: JSON.stringify({ sessionId }),
+      });
+    }
+  };
+
+  return { send, loadChat, executeAction, openChatUI, abortAction };
 };

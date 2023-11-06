@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlyout, EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useEffectOnce } from 'react-use';
@@ -32,10 +32,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [title, setTitle] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
-  const [flyoutProps, setFlyoutProps] = useState<Partial<React.ComponentProps<typeof EuiFlyout>>>(
-    {}
-  );
   const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
+  const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
 
   if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
 
@@ -45,8 +43,12 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   });
 
   const toggleFlyoutFullScreen = useCallback(() => {
-    setFlyoutProps((fprops) => (Object.keys(fprops).length ? {} : { size: '100%' }));
-  }, []);
+    if (chatSize === 'fullscreen') {
+      setChatSize('dock-right');
+    } else if (chatSize === 'dock-right') {
+      setChatSize('fullscreen');
+    }
+  }, [chatSize, setChatSize]);
 
   const chatContextValue: IChatContext = useMemo(
     () => ({
@@ -96,8 +98,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
             <ChatFlyout
               flyoutVisible={flyoutVisible}
               overrideComponent={flyoutComponent}
-              flyoutProps={flyoutProps}
-              flyoutFullScreen={!!Object.keys(flyoutProps).length}
+              flyoutProps={chatSize === 'fullscreen' ? { size: '100%' } : {}}
+              flyoutFullScreen={chatSize === 'fullscreen'}
               toggleFlyoutFullScreen={toggleFlyoutFullScreen}
             />
           ) : null}

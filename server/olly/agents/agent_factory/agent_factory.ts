@@ -143,11 +143,11 @@ export class AgentFactory {
     }
   }
 
-  public run = async (question: string) => {
+  public run = async (question: string, abortController?: AbortController) => {
     const response =
       this.executorType === 'zeroshot'
         ? await this.executor.run(question)
-        : await this.executor.call({ input: question });
+        : await this.executor.call({ input: question, signal: abortController?.signal });
     return response;
   };
 }

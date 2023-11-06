@@ -26,17 +26,23 @@
   .euiFlyoutFooter {
     background: transparent;
   }
+  .euiPage {
+    margin: 8px;
+    border-radius: 8px;
+    background: $euiPageBackgroundColor;
+  }
 }
 
 .llm-chat-flyout-body {
-  background-color: $euiPageBackgroundColor;
-  margin: 0px 20px;
+  // background-color: $euiPageBackgroundColor;
+  // margin: 0px 20px;
 }
 
 .euiPanel {
   &.llm-chat-bubble-panel {
     word-break: break-word;
-    border-radius: 8px;
+    border-radius: 16px;
+    padding: 8px 16px 8px 16px;
     max-width: 95%;
   }
   &.llm-chat-greeting-card-panel {
@@ -55,7 +61,7 @@
   }
   &.llm-chat-suggestion-bubble-panel {
     padding: 4px;
-    border-radius: 6px;
+    border-radius: 4px;
     text-align: left;
   }
 }
@@ -63,9 +69,14 @@
 .llm-chat-bubble-panel.llm-chat-bubble-panel-input {
   background: #159d8d;
   margin-left: auto;
+  color: #fcfeff;
+  max-width: 85%;
 }
 .llm-chat-bubble-panel.llm-chat-bubble-panel-output {
   margin-right: auto;
+}
+.llm-chat-bubble-panel.llm-chat-bubble-panel-output.llm-chat-bubble-panel-loading {
+  min-width: 85%;
 }
 
 .llm-chat-greeting-header {
@@ -76,8 +87,8 @@
 
 .llm-chat-visualizations {
   // remove some padding added by EuiPage
-  margin-left: -12px;
-  margin-right: -16px;
+  // margin-left: -12px;
+  // margin-right: -16px;
   min-height: 450px;
 }
 

@@ -14,6 +14,7 @@ interface ChatState {
 }
 
 type ChatStateAction =
+  | { type: 'abort' }
   | { type: 'reset' }
   | { type: 'send'; payload: IMessage }
   | { type: 'receive'; payload: ChatState['messages'] }
@@ -63,6 +64,9 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
       case 'error':
         draft.llmResponding = false;
         draft.llmError = 'body' in action.payload ? action.payload.body : action.payload;
+        break;
+      case 'abort':
+        draft.llmResponding = false;
         break;
     }
   });

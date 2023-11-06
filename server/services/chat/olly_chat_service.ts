@@ -16,21 +16,27 @@ import { LLMModelFactory } from '../../olly/models/llm_model_factory';
 import { initTools } from '../../olly/tools/tools_helper';
 import { PPLTools } from '../../olly/tools/tool_sets/ppl';
 import { buildOutputs } from '../../olly/utils/output_builders/build_outputs';
-import { LLMRequestSchema } from '../../routes/chat_routes';
+import { AbortAgentExecutionSchema, LLMRequestSchema } from '../../routes/chat_routes';
 import { PPLGenerationRequestSchema } from '../../routes/langchain_routes';
 import { ChatService } from './chat_service';
 
 export class OllyChatService implements ChatService {
+  static abortControllers: Map<string, AbortController> = new Map();
+
   public async requestLLM(
     messages: IMessage[],
     context: RequestHandlerContext,
     request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
   ): Promise<IMessage[]> {
-    const { input } = request.body;
+    const { input, sessionId } = request.body;
     const traceId = uuid();
     const observabilityClient = context.assistant_plugin.observabilityClient.asScoped(request);
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
     const savedObjectsClient = context.core.savedObjects.client;
+
+    if (sessionId) {
+      OllyChatService.abortControllers.set(sessionId, new AbortController());
+    }
 
     try {
       const runs: Run[] = [];
@@ -52,7 +58,10 @@ export class OllyChatService implements ChatService {
         callbacks,
         memory
       );
-      const agentResponse = await chatAgent.run(input.content);
+      const agentResponse = await chatAgent.run(
+        input.content,
+        sessionId ? OllyChatService.abortControllers.get(sessionId) : undefined
+      );
 
       const suggestions = await requestSuggestionsChain(
         model,
@@ -78,6 +87,16 @@ export class OllyChatService implements ChatService {
           content: error.message,
         },
       ];
+    } finally {
+      if (sessionId) {
+        OllyChatService.abortControllers.delete(sessionId);
+      }
+    }
+  }
+
+  abortAgentExecution(sessionId: string) {
+    if (OllyChatService.abortControllers.has(sessionId)) {
+      OllyChatService.abortControllers.get(sessionId)?.abort();
     }
   }
 

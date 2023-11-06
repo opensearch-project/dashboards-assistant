@@ -47,7 +47,7 @@ const createDashboardVizObject = (
       '1': {
         gridData: { x: 0, y: 0, w: 50, h: 25, i: '1' },
         type: 'visualization',
-        explicitInput: { id: '1', savedObjectId: objectId },
+        explicitInput: { id: '1', savedObjectId: objectId, disabledActions: ['togglePanel'] },
       },
     },
     isFullScreenMode: false,

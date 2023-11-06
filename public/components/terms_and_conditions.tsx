@@ -33,7 +33,7 @@ export const TermsAndConditions = (props: Props) => {
       iconColor="primary"
       titleSize="s"
       body={
-        <EuiText>
+        <EuiText color="default">
           <p>Welcome {props.username} to the OpenSearch Assistant</p>
           <p>I can help you analyze data, create visualizations, and get other insights.</p>
           <p>How can I help?</p>
@@ -61,7 +61,7 @@ export const TermsAndConditions = (props: Props) => {
             Terms & Conditions
           </EuiLink>
         </EuiText>,
-      ]}
+      ].filter(Boolean)}
     />
   );
 };
