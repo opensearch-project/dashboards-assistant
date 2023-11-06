@@ -12,7 +12,8 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { EditConversationNameModal } from '../components/edit_conversation_name_modal';
 import { useChatContext } from '../contexts/chat_context';
 import { useChatActions } from '../hooks/use_chat_actions';
 
@@ -25,6 +26,7 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
   const chatContext = useChatContext();
   const { loadChat } = useChatActions();
   const [isPopoverOpen, setPopover] = useState(false);
+  const [isRenameModelOpen, setRenameModelOpen] = useState(false);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -33,6 +35,16 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
   const closePopover = () => {
     setPopover(false);
   };
+
+  const handleEditConversationClose = useCallback(
+    (status: 'updated' | string, newTitle?: string) => {
+      if (status === 'updated') {
+        chatContext.setTitle(newTitle);
+      }
+      setRenameModelOpen(false);
+    },
+    [chatContext]
+  );
 
   const dockBottom = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
@@ -60,15 +72,19 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
       iconSide="right"
       onClick={onButtonClick}
     >
-      <span className="eui-textTruncate">{chatContext.title || 'OpenSearch Assistant'}</span>
+      <span className="eui-textTruncate">
+        {chatContext.sessionId ? chatContext.title : 'OpenSearch Assistant'}
+      </span>
     </EuiButtonEmpty>
   );
 
   const items = [
     <EuiContextMenuItem
+      disabled={!chatContext.sessionId}
       key="rename-conversation"
       onClick={() => {
         closePopover();
+        setRenameModelOpen(true);
       }}
     >
       Rename conversation
@@ -93,53 +109,63 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
   ];
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceAround" alignItems="center">
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="conversationTitle"
-              button={button}
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-            >
-              <EuiContextMenuPanel size="m" items={items} />
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label="history"
-              iconType="clock"
-              size="m"
-              onClick={() => {
-                chatContext.setSelectedTabId('history');
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label="fullScreen"
-          size="s"
-          // TODO replace svg with built-in icon
-          iconType={props.flyoutFullScreen ? dockRight : dockBottom}
-          onClick={props.toggleFlyoutFullScreen}
+    <>
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceAround" alignItems="center">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                id="conversationTitle"
+                button={button}
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+              >
+                <EuiContextMenuPanel size="m" items={items} />
+              </EuiPopover>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label="history"
+                iconType="clock"
+                size="m"
+                onClick={() => {
+                  chatContext.setSessionId(undefined);
+                  chatContext.setSelectedTabId('history');
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label="fullScreen"
+            size="s"
+            // TODO replace svg with built-in icon
+            iconType={props.flyoutFullScreen ? dockRight : dockBottom}
+            onClick={props.toggleFlyoutFullScreen}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label="close"
+            size="s"
+            iconType="cross"
+            onClick={() => {
+              chatContext.setFlyoutVisible(false);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} />
+      </EuiFlexGroup>
+      {isRenameModelOpen && (
+        <EditConversationNameModal
+          sessionId={chatContext.sessionId!}
+          onClose={handleEditConversationClose}
+          defaultTitle={chatContext.title!}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label="close"
-          size="s"
-          iconType="cross"
-          onClick={() => {
-            chatContext.setFlyoutVisible(false);
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} />
-    </EuiFlexGroup>
+      )}
+    </>
   );
 });

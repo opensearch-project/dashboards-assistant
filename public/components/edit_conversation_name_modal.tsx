@@ -9,7 +9,7 @@ import { EuiConfirmModal, EuiFieldText, EuiSpacer, EuiText } from '@elastic/eui'
 import { usePatchSession } from '../hooks/use_sessions';
 
 interface EditConversationNameModalProps {
-  onClose?: (status: 'updated' | 'cancelled' | 'errored') => void;
+  onClose?: (status: 'updated' | 'cancelled' | 'errored', newTitle?: string) => void;
   sessionId: string;
   defaultTitle: string;
 }
@@ -37,7 +37,7 @@ export const EditConversationNameModal = ({
       onClose?.('errored');
       return;
     }
-    onClose?.('updated');
+    onClose?.('updated', title);
   }, [onClose, sessionId, patchSession]);
 
   return (

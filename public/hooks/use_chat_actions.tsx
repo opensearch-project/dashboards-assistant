@@ -38,7 +38,10 @@ export const useChatActions = (): AssistantActions => {
       });
       if (abortController.signal.aborted) return;
       chatContext.setSessionId(response.sessionId);
-      chatContext.setTitle(response.title);
+      // set title for first time
+      if (!chatContext.title) {
+        chatContext.setTitle(response.title);
+      }
       chatStateDispatch({ type: 'receive', payload: response.messages });
     } catch (error) {
       if (abortController.signal.aborted) return;
