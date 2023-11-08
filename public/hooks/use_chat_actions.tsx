@@ -111,11 +111,35 @@ export const useChatActions = (): AssistantActions => {
 
     if (sessionId) {
       // abort agent execution
-      await core.services.http.post<SendResponse>(`${ASSISTANT_API.ABORT_AGENT_EXECUTION}`, {
+      await core.services.http.post(`${ASSISTANT_API.ABORT_AGENT_EXECUTION}`, {
         body: JSON.stringify({ sessionId }),
       });
     }
   };
 
-  return { send, loadChat, executeAction, openChatUI, abortAction };
+  const regenerate = async () => {
+    if (chatContext.sessionId) {
+      const abortController = new AbortController();
+      abortControllerRef = abortController;
+      chatStateDispatch({ type: 'regenerate' });
+
+      try {
+        const response = await core.services.http.patch(`${ASSISTANT_API.REGENERATE}`, {
+          body: JSON.stringify({ sessionId: chatContext.sessionId }),
+        });
+
+        if (abortController.signal.aborted) {
+          return;
+        }
+        chatStateDispatch({ type: 'receive', payload: response.messages });
+      } catch (error) {
+        if (abortController.signal.aborted) {
+          return;
+        }
+        chatStateDispatch({ type: 'error', payload: error });
+      }
+    }
+  };
+
+  return { send, loadChat, executeAction, openChatUI, abortAction, regenerate };
 };

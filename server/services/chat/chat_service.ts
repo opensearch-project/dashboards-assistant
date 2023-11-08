@@ -4,13 +4,13 @@
  */
 
 import { OpenSearchDashboardsRequest, RequestHandlerContext } from '../../../../../src/core/server';
-import { IMessage } from '../../../common/types/chat_saved_object_attributes';
+import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { LLMRequestSchema } from '../../routes/chat_routes';
 import { PPLGenerationRequestSchema } from '../../routes/langchain_routes';
 
 export interface ChatService {
   requestLLM(
-    messages: IMessage[],
+    payload: { messages: IMessage[]; input: IInput; sessionId?: string },
     context: RequestHandlerContext,
     request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
   ): Promise<IMessage[]>;

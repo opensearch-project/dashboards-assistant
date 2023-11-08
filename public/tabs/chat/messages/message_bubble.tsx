@@ -15,12 +15,18 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
+import cx from 'classnames';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { useUiSetting } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 
 type MessageBubbleProps = (
   | { showActionBar: false }
-  | { showActionBar: true; showRegenerate: boolean }
+  | {
+      showActionBar: true;
+      showRegenerate: boolean;
+      shouldActionBarVisibleOnHover: boolean;
+      onRegenerate: () => void;
+    }
 ) &
   (
     | {
@@ -113,7 +119,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
           <EuiAvatar name="llm" size="l" iconType="chatRight" iconSize="m" iconColor="#fff" />
         )}
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem className="llm-chat-bubble-wrapper">
         <EuiPanel
           style={isVisualization ? { minWidth: '100%' } : {}}
           hasShadow={false}
@@ -128,6 +134,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
           <>
             <EuiSpacer size="xs" />
             <EuiFlexGroup
+              className={cx({
+                'llm-chat-action-buttons-hidden': props.shouldActionBarVisibleOnHover,
+              })}
               responsive={false}
               gutterSize="s"
               alignItems="center"
@@ -150,7 +159,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
               )}
               {props.showRegenerate && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon title="regenerate message" color="text" iconType="refresh" />
+                  <EuiButtonIcon
+                    onClick={props.onRegenerate}
+                    title="regenerate message"
+                    color="text"
+                    iconType="refresh"
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>

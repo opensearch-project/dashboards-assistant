@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiIcon, EuiPanel, EuiText, IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, IconType } from '@elastic/eui';
 import React from 'react';
 import { TextColor } from '@elastic/eui/src/components/text/text_color';
 
@@ -30,10 +30,16 @@ export const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
       grow={false}
       paddingSize="none"
     >
-      <EuiText size="xs" color={color}>
-        <EuiIcon type={iconType} style={{ marginRight: 5 }} />
-        {content}
-      </EuiText>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={iconType} style={{ marginRight: 5 }} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="xs" color={color}>
+            {content}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

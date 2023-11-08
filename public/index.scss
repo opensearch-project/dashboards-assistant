@@ -38,6 +38,20 @@
   // margin: 0px 20px;
 }
 
+.llm-chat-bubble-wrapper {
+  .llm-chat-action-buttons-hidden {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &:hover {
+    .llm-chat-action-buttons-hidden {
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
+  }
+}
+
 .euiPanel {
   &.llm-chat-bubble-panel {
     word-break: break-word;

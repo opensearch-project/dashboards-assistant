@@ -82,27 +82,34 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       <EuiSpacer />
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {termsAccepted &&
-        chatState.messages
-          .flatMap((message, i, array) => [
-            <ToolsUsed key={`tool-${i}`} message={message} />,
-            // Currently new messages will only be appended at the end (no reorders), using index as key is ok.
-            // If fetching a limited size of latest messages is supported in the future, then key should be message id.
-            <MessageBubble
-              key={`message-${i}`}
-              type={message.type}
-              contentType={message.contentType}
-              showActionBar={firstInputIndex > 0 && i > firstInputIndex}
-              showRegenerate={lastInputIndex > 0 && i > lastInputIndex}
-              content={message.content}
-            >
-              <MessageContent message={message} />
-              {/* <MessageFooter message={message} previousInput={findPreviousInput(array, i)} />*/}
-            </MessageBubble>,
-            <Suggestions key={`suggestion-${i}`} message={message} inputDisabled={loading} />,
-            <EuiSpacer key={`spacer-${i}`} />,
-          ])
-          // slice(0, -1) to remove last EuiSpacer
-          .slice(0, -1)}
+        chatState.messages.map((message, i) => {
+          // The latest llm output, just after the last user input
+          const isLatestOutput = lastInputIndex > 0 && i > lastInputIndex;
+          // All the llm output in response to user's input, exclude outputs before user's first input
+          const isChatOutput = firstInputIndex > 0 && i > firstInputIndex;
+          // Only show suggestion on llm outputs after last user input
+          const showSuggestions = i > lastInputIndex;
+
+          return (
+            <React.Fragment key={i}>
+              <ToolsUsed message={message} />
+              <MessageBubble
+                type={message.type}
+                contentType={message.contentType}
+                showActionBar={isChatOutput}
+                showRegenerate={isLatestOutput}
+                shouldActionBarVisibleOnHover={!isLatestOutput}
+                onRegenerate={chatActions.regenerate}
+                content={message.content}
+              >
+                <MessageContent message={message} />
+                {/* <MessageFooter message={message} previousInput={findPreviousInput(array, i)} />*/}
+              </MessageBubble>
+              {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}
+              <EuiSpacer />
+            </React.Fragment>
+          );
+        })}
       {loading && (
         <>
           <EuiSpacer />

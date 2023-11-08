@@ -6,7 +6,7 @@
 import { Run } from 'langchain/callbacks';
 import { v4 as uuid } from 'uuid';
 import { OpenSearchDashboardsRequest, RequestHandlerContext } from '../../../../../src/core/server';
-import { IMessage } from '../../../common/types/chat_saved_object_attributes';
+import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { convertToTraces } from '../../../common/utils/llm_chat/traces';
 import { chatAgentInit } from '../../olly/agents/agent_helpers';
 import { OpenSearchTracer } from '../../olly/callbacks/opensearch_tracer';
@@ -24,18 +24,17 @@ export class OllyChatService implements ChatService {
   static abortControllers: Map<string, AbortController> = new Map();
 
   public async requestLLM(
-    messages: IMessage[],
+    payload: { messages: IMessage[]; input: IInput; sessionId?: string },
     context: RequestHandlerContext,
-    request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
+    request: OpenSearchDashboardsRequest
   ): Promise<IMessage[]> {
-    const { input, sessionId } = request.body;
     const traceId = uuid();
     const observabilityClient = context.assistant_plugin.observabilityClient.asScoped(request);
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
     const savedObjectsClient = context.core.savedObjects.client;
 
-    if (sessionId) {
-      OllyChatService.abortControllers.set(sessionId, new AbortController());
+    if (payload.sessionId) {
+      OllyChatService.abortControllers.set(payload.sessionId, new AbortController());
     }
 
     try {
@@ -51,7 +50,7 @@ export class OllyChatService implements ChatService {
         savedObjectsClient,
         callbacks
       );
-      const memory = memoryInit(messages);
+      const memory = memoryInit(payload.messages);
       const chatAgent = chatAgentInit(
         model,
         pluginTools.flatMap((tool) => tool.toolsList),
@@ -59,8 +58,8 @@ export class OllyChatService implements ChatService {
         memory
       );
       const agentResponse = await chatAgent.run(
-        input.content,
-        sessionId ? OllyChatService.abortControllers.get(sessionId) : undefined
+        payload.input.content,
+        payload.sessionId ? OllyChatService.abortControllers.get(payload.sessionId) : undefined
       );
 
       const suggestions = await requestSuggestionsChain(
@@ -71,7 +70,7 @@ export class OllyChatService implements ChatService {
       );
 
       return buildOutputs(
-        input.content,
+        payload.input.content,
         agentResponse,
         traceId,
         suggestions,
@@ -88,8 +87,8 @@ export class OllyChatService implements ChatService {
         },
       ];
     } finally {
-      if (sessionId) {
-        OllyChatService.abortControllers.delete(sessionId);
+      if (payload.sessionId) {
+        OllyChatService.abortControllers.delete(payload.sessionId);
       }
     }
   }

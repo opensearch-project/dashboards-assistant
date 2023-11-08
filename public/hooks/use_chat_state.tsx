@@ -14,6 +14,7 @@ interface ChatState {
 }
 
 type ChatStateAction =
+  | { type: 'regenerate' }
   | { type: 'abort' }
   | { type: 'reset' }
   | { type: 'send'; payload: IMessage }
@@ -67,6 +68,13 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
         break;
       case 'abort':
         draft.llmResponding = false;
+        break;
+      case 'regenerate':
+        const lastInputIndex = draft.messages.findLastIndex((msg) => msg.type === 'input');
+        // Exclude the last outputs
+        draft.messages = draft.messages.slice(0, lastInputIndex + 1);
+        draft.llmResponding = true;
+        draft.llmError = undefined;
         break;
     }
   });
