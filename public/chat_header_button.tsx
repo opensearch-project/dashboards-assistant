@@ -34,6 +34,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
   const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
+  const flyoutFullScreen = chatSize === 'fullscreen';
 
   if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
 
@@ -43,12 +44,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   });
 
   const toggleFlyoutFullScreen = useCallback(() => {
-    if (chatSize === 'fullscreen') {
-      setChatSize('dock-right');
-    } else if (chatSize === 'dock-right') {
-      setChatSize('fullscreen');
-    }
-  }, [chatSize, setChatSize]);
+    setChatSize(flyoutFullScreen ? 'dock-right' : 'fullscreen');
+  }, [flyoutFullScreen, setChatSize]);
 
   const chatContextValue: IChatContext = useMemo(
     () => ({
@@ -58,6 +55,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       selectedTabId,
       setSelectedTabId,
       flyoutVisible,
+      flyoutFullScreen,
       setFlyoutVisible,
       setFlyoutComponent,
       chatEnabled: props.chatEnabled,
@@ -71,6 +69,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       appId,
       sessionId,
       flyoutVisible,
+      flyoutFullScreen,
       selectedTabId,
       props.chatEnabled,
       props.contentRenderers,
@@ -98,8 +97,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
             <ChatFlyout
               flyoutVisible={flyoutVisible}
               overrideComponent={flyoutComponent}
-              flyoutProps={chatSize === 'fullscreen' ? { size: '100%' } : {}}
-              flyoutFullScreen={chatSize === 'fullscreen'}
+              flyoutProps={flyoutFullScreen ? { size: '100%' } : {}}
+              flyoutFullScreen={flyoutFullScreen}
               toggleFlyoutFullScreen={toggleFlyoutFullScreen}
             />
           ) : null}

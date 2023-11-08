@@ -141,11 +141,14 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
               <EuiButtonIcon
                 aria-label="history"
                 iconType="clock"
-                size="m"
+                size="xs"
                 onClick={() => {
-                  chatContext.setSessionId(undefined);
-                  chatContext.setSelectedTabId('history');
+                  // Back to chat tab if history page already visible
+                  chatContext.setSelectedTabId(
+                    chatContext.selectedTabId === 'history' ? 'chat' : 'history'
+                  );
                 }}
+                display={chatContext.selectedTabId === 'history' ? 'fill' : undefined}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

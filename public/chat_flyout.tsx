@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import cs from 'classnames';
 import React from 'react';
 import { useChatContext } from './contexts/chat_context';
@@ -42,6 +42,11 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
     }
   }
 
+  // Always show chat page in fullscreen mode
+  if (!props.overrideComponent && props.flyoutFullScreen) {
+    chatPageVisible = true;
+  }
+
   if (!chatHistoryPageLoaded && chatHistoryPageVisible) chatHistoryPageLoaded = true;
 
   return (
@@ -67,16 +72,23 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
         </EuiFlyoutHeader>
 
         {props.overrideComponent}
-
-        <ChatPage className={cs({ 'llm-chat-hidden': !chatPageVisible })} />
-
-        {chatHistoryPageLoaded && (
-          <ChatHistoryPage
-            className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
-            // refresh data when user switched to table from another tab
-            shouldRefresh={chatHistoryPageVisible}
-          />
-        )}
+        <EuiFlexGroup gutterSize="none" style={{ overflow: 'hidden' }}>
+          <EuiFlexItem grow={props.flyoutFullScreen}>
+            <ChatPage className={cs({ 'llm-chat-hidden': !chatPageVisible })} />
+          </EuiFlexItem>
+          <EuiFlexItem
+            style={props.flyoutFullScreen && chatHistoryPageVisible ? { width: '30%' } : undefined}
+            grow={!props.flyoutFullScreen}
+          >
+            {chatHistoryPageLoaded && (
+              <ChatHistoryPage
+                className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
+                // refresh data when user switched to table from another tab
+                shouldRefresh={chatHistoryPageVisible}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     </EuiFlyout>
   );

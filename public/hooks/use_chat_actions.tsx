@@ -57,7 +57,10 @@ export const useChatActions = (): AssistantActions => {
     abortControllerRef?.abort();
     chatContext.setSessionId(sessionId);
     chatContext.setTitle(title);
-    chatContext.setSelectedTabId('chat');
+    // Chat page will always visible in fullscreen mode, we don't need to change the tab anymore
+    if (!chatContext.flyoutFullScreen) {
+      chatContext.setSelectedTabId('chat');
+    }
     chatContext.setFlyoutComponent(null);
     if (!sessionId) chatStateDispatch({ type: 'reset' });
   };

@@ -15,6 +15,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useDebounce } from 'react-use';
+import cs from 'classnames';
 import { SavedObjectsFindOptions } from '../../../../../src/core/public';
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useGetSessions } from '../../hooks/use_sessions';
@@ -43,6 +44,8 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
       page: pageIndex + 1,
       perPage: pageSize,
       fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
+      sortField: 'updatedTimeMs',
+      sortOrder: 'DESC',
       ...(debouncedSearchName ? { search: debouncedSearchName, searchFields: ['title'] } : {}),
     }),
     [pageIndex, pageSize, debouncedSearchName]
@@ -89,7 +92,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   }, [props.shouldRefresh]);
 
   return (
-    <EuiFlyoutBody className={props.className}>
+    <EuiFlyoutBody className={cs(props.className, 'llm-chat-flyout-body')}>
       <EuiPage>
         <EuiPageBody component="div">
           <EuiTitle size="s">

@@ -13,6 +13,7 @@ export interface IChatContext {
   selectedTabId: TabId;
   setSelectedTabId: React.Dispatch<React.SetStateAction<TabId>>;
   flyoutVisible: boolean;
+  flyoutFullScreen: boolean;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
   chatEnabled: boolean;
