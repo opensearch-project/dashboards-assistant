@@ -124,7 +124,7 @@ export const useChatActions = (): AssistantActions => {
       chatStateDispatch({ type: 'regenerate' });
 
       try {
-        const response = await core.services.http.patch(`${ASSISTANT_API.REGENERATE}`, {
+        const response = await core.services.http.put(`${ASSISTANT_API.REGENERATE}`, {
           body: JSON.stringify({ sessionId: chatContext.sessionId }),
         });
 

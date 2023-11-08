@@ -95,7 +95,7 @@ export const usePatchSession = () => {
     const abortController = new AbortController();
     dispatch({ type: 'request', abortController });
     return core.services.http
-      .patch(`${ASSISTANT_API.SESSION}/${sessionId}`, {
+      .put(`${ASSISTANT_API.SESSION}/${sessionId}`, {
         query: {
           title,
         },
