@@ -16,6 +16,10 @@ interface SendResponse {
   messages: IMessage[];
 }
 
+interface SetParagraphResponse {
+  objectId: string;
+}
+
 let abortControllerRef: AbortController;
 
 export const useChatActions = (): AssistantActions => {

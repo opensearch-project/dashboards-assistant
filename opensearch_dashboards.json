@@ -9,5 +9,8 @@
     "embeddable",
     "opensearchDashboardsReact",
     "opensearchDashboardsUtils"
+  ],
+  "optionalPlugins":[
+    "observabilityDashboards"
   ]
 }

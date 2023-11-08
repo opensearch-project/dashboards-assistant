@@ -16,6 +16,10 @@ import React, { useCallback, useState } from 'react';
 import { EditConversationNameModal } from '../components/edit_conversation_name_modal';
 import { useChatContext } from '../contexts/chat_context';
 import { useChatActions } from '../hooks/use_chat_actions';
+import { NotebookNameModal } from '../components/notebook/notebook_name_modal';
+import { useCore } from '../contexts/core_context';
+import { useChatState } from '../hooks/use_chat_state';
+import { useSaveChat } from '../hooks/use_save_chat';
 
 interface ChatWindowHeaderProps {
   flyoutFullScreen: boolean;
@@ -25,8 +29,11 @@ interface ChatWindowHeaderProps {
 export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((props) => {
   const chatContext = useChatContext();
   const { loadChat } = useChatActions();
+  const core = useCore();
   const [isPopoverOpen, setPopover] = useState(false);
   const [isRenameModelOpen, setRenameModelOpen] = useState(false);
+  const { chatState } = useChatState();
+  const { saveChat } = useSaveChat();
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -101,10 +108,15 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
     <EuiContextMenuItem
       key="save-as-notebook"
       onClick={() => {
+        const modal = core.overlays.openModal(
+          <NotebookNameModal onClose={() => modal.close()} saveChat={saveChat} />
+        );
         closePopover();
       }}
+      // There is only one message in initial discussion, which will not be stored.
+      disabled={chatState.messages.length <= 1}
     >
-      Save as notebook
+      Save to notebook
     </EuiContextMenuItem>,
   ];
 

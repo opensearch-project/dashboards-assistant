@@ -19,7 +19,7 @@ export interface ISessionFindResponse {
   total: number;
 }
 
-interface IInput {
+export interface IInput {
   type: 'input';
   contentType: 'text';
   content: string;
