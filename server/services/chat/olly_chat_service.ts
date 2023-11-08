@@ -53,19 +53,25 @@ export class OllyChatService implements ChatService {
       );
       const memory = memoryInit(payload.messages);
 
+      /**
+       * Wait for an API to fetch root agent id.
+       */
       const agentFrameworkResponse = (await opensearchClient.transport.request({
         method: 'POST',
-        path: '/_plugins/_ml/agents/usjqiYsBC_Oyjc6-Rhpq/_execute',
+        path: '/_plugins/_ml/agents/_UoprosBZFp32K9Rsfqe/_execute',
         body: {
           parameters: {
             question: payload.input.content,
           },
         },
       })) as ApiResponse<{
-        inference_results: Array<{ output: Array<{ name: string; result: string }> }>;
+        inference_results: Array<{
+          output: Array<{ name: string; result?: string; dataAsMap?: { response: string } }>;
+        }>;
       }>;
+      const outputBody = agentFrameworkResponse.body.inference_results?.[0]?.output?.[0];
       const agentFrameworkAnswer =
-        agentFrameworkResponse.body.inference_results[0].output[0].result;
+        agentFrameworkResponse.body.inference_results[0].output[0].result || "";
       await memory.chatHistory.addUserMessage(payload.input.content);
       await memory.chatHistory.addAIChatMessage(agentFrameworkAnswer);
 
