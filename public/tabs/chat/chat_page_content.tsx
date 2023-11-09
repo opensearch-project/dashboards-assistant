@@ -104,7 +104,10 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
 
   return (
     <>
-      <MessageBubble type="output" contentType="markdown" showActionBar={false}>
+      <MessageBubble
+        message={{ type: 'output', contentType: 'markdown', content: '' }}
+        showActionBar={false}
+      >
         <TermsAndConditions username={chatContext.currentAccount.username} />
       </MessageBubble>
       <EuiSpacer />
@@ -122,13 +125,11 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
             <React.Fragment key={i}>
               <ToolsUsed message={message} />
               <MessageBubble
-                type={message.type}
-                contentType={message.contentType}
+                message={message}
                 showActionBar={isChatOutput}
                 showRegenerate={isLatestOutput}
                 shouldActionBarVisibleOnHover={!isLatestOutput}
                 onRegenerate={chatActions.regenerate}
-                content={message.content}
               >
                 <MessageContent message={message} />
                 {/* <MessageFooter message={message} previousInput={findPreviousInput(array, i)} />*/}
@@ -141,7 +142,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       {loading && (
         <>
           <EuiSpacer />
-          <MessageBubble type="loading" showActionBar={false} />
+          <MessageBubble loading showActionBar={false} />
         </>
       )}
       {chatState.llmResponding && chatContext.sessionId && (
