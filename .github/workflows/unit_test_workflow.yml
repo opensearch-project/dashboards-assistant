@@ -5,16 +5,12 @@ name: Build and test
 
 # trigger on every commit push and PR for all branches except pushes for backport branches
 on:
-  push:
-    branches: ['*']
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
   pull_request:
-    branches: ['*']
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
+    branches:
+      - "*"
+  push:
+    branches:
+      - "*"
 env:
   OPENSEARCH_DASHBOARDS_VERSION: '2.x'
   NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
