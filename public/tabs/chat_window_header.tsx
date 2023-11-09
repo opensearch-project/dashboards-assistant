@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { EditConversationNameModal } from '../components/edit_conversation_name_modal';
@@ -20,7 +21,7 @@ import { NotebookNameModal } from '../components/notebook/notebook_name_modal';
 import { useCore } from '../contexts/core_context';
 import { useChatState } from '../hooks/use_chat_state';
 import { useSaveChat } from '../hooks/use_save_chat';
-
+import chatIcon from '../assets/chat.svg';
 interface ChatWindowHeaderProps {
   flyoutFullScreen: boolean;
   toggleFlyoutFullScreen: () => void;
@@ -126,6 +127,9 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
       <EuiFlexGroup gutterSize="s" justifyContent="spaceAround" alignItems="center">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false} style={{ marginLeft: '8px' }}>
+              <EuiIcon type={chatIcon} size="m" />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
                 id="conversationTitle"

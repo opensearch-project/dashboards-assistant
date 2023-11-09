@@ -18,6 +18,7 @@ import React from 'react';
 import cx from 'classnames';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { useUiSetting } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+import chatIcon from '../../../assets/chat.svg';
 
 type MessageBubbleProps = (
   | { showActionBar: false }
@@ -110,13 +111,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
           <EuiAvatar
             name="llm"
             size="l"
-            iconType="chatRight"
-            iconSize="m"
+            iconType={chatIcon}
+            iconSize="l"
             iconColor="#fff"
             color="#0A121A"
           />
         ) : (
-          <EuiAvatar name="llm" size="l" iconType="chatRight" iconSize="m" iconColor="#fff" />
+          <EuiAvatar name="llm" size="l" iconType={chatIcon} iconSize="l" iconColor="#fff" />
         )}
       </EuiFlexItem>
       <EuiFlexItem className="llm-chat-bubble-wrapper">

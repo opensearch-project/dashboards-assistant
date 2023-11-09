@@ -12,6 +12,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
+import chatIcon from '../../assets/chat.svg';
 import { GreetingCard } from '../../components/greeting_card';
 
 interface ChatPageGreetingsProps {
@@ -39,7 +40,7 @@ export const ChatPageGreetings: React.FC<ChatPageGreetingsProps> = (props) => {
       <EuiSpacer size="xxl" />
       <EuiFlexGroup alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="chatRight" size="l" />
+          <EuiIcon type={chatIcon} size="l" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText className="llm-chat-greeting-header" color="subdued">

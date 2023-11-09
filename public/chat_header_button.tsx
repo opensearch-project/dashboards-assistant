@@ -13,6 +13,7 @@ import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks/use_chat_state';
 import './index.scss';
+import chatIcon from './assets/chat.svg';
 import { ActionExecutor, AssistantActions, ContentRenderer, UserAccount, TabId } from './types';
 
 interface HeaderChatButtonProps {
@@ -83,12 +84,10 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   return (
     <>
       <EuiHeaderSectionItemButton
-        className={classNames('llm-chat-header-icon-wrapper', {
-          'llm-chat-header-icon-wrapper-selected': flyoutVisible,
-        })}
+        className={classNames('llm-chat-header-icon-wrapper')}
         onClick={() => setFlyoutVisible(!flyoutVisible)}
       >
-        <EuiIcon type="chatRight" size="m" />
+        <EuiIcon type={chatIcon} size="l" />
       </EuiHeaderSectionItemButton>
       <ChatContext.Provider value={chatContextValue}>
         <ChatStateProvider>
