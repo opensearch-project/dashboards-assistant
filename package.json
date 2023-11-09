@@ -6,7 +6,7 @@
   "scripts": {
     "osd": "node ../../scripts/osd",
     "build": "yarn plugin-helpers build",
-    "test": "../../node_modules/.bin/jest --config ./test/jest.config.js",
+    "test:jest": "../../node_modules/.bin/jest --config ./test/jest.config.js",
     "plugin-helpers": "node ../../scripts/plugin_helpers",
     "prepare": "husky install",
     "lint:es": "node ../../scripts/eslint",
