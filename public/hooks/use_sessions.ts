@@ -16,6 +16,11 @@ export const useGetSession = () => {
   const core = useCore();
   const reducer: GenericReducer<ISession> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
+  const [refreshToggle, setRefreshToggle] = useState(false);
+
+  const refresh = useCallback(() => {
+    setRefreshToggle((flag) => !flag);
+  }, []);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -35,9 +40,10 @@ export const useGetSession = () => {
     return () => {
       abortController.abort();
     };
-  }, [chatContext.sessionId]);
+    // refreshToggle is used to force refresh session to get latest data
+  }, [chatContext.sessionId, refreshToggle]);
 
-  return { ...state };
+  return { ...state, refresh };
 };
 
 export const useGetSessions = (options: Partial<SavedObjectsFindOptions> = {}) => {

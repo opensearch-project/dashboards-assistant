@@ -78,8 +78,8 @@ export const ChatHistoryListItem = ({
               <EuiButtonIcon
                 onClick={handleEditClick}
                 iconType="pencil"
-                color="ghost"
                 aria-label="Edit conversation name"
+                color="text"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

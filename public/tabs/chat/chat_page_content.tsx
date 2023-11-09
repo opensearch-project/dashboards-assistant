@@ -4,10 +4,12 @@
  */
 
 import {
+  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -32,6 +34,7 @@ interface ChatPageContentProps {
   setShowGreetings: React.Dispatch<React.SetStateAction<boolean>>;
   messagesLoading: boolean;
   messagesLoadingError?: Error;
+  onRefresh: () => void;
 }
 
 const findPreviousInput = (messages: IMessage[], index: number) => {
@@ -59,14 +62,40 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     pageEndRef.current?.scrollIntoView();
   }, [chatState.messages, loading]);
 
+  if (props.messagesLoading) {
+    return (
+      <>
+        <EuiSpacer size="xl" />
+        <EuiEmptyPrompt
+          icon={<EuiLoadingSpinner size="xl" />}
+          title={<h1>Loading conversation</h1>}
+          titleSize="l"
+        />
+      </>
+    );
+  }
+
   if (props.messagesLoadingError) {
     return (
-      <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        title={<h2>Error loading chat history</h2>}
-        body={props.messagesLoadingError.message}
-      />
+      <>
+        <EuiSpacer size="xl" />
+        <EuiEmptyPrompt
+          icon={<EuiIcon type="alert" color="danger" size="xl" />}
+          title={<h1>Error loading conversation</h1>}
+          body={props.messagesLoadingError.message}
+          titleSize="l"
+          actions={
+            <EuiButton
+              className="llm-chat-error-refresh-button"
+              fill
+              iconType="refresh"
+              onClick={props.onRefresh}
+            >
+              Refresh
+            </EuiButton>
+          }
+        />
+      </>
     );
   }
 

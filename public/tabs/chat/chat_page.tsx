@@ -30,7 +30,12 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
   const [showGreetings, setShowGreetings] = useState(false);
-  const { data: session, loading: messagesLoading, error: messagesLoadingError } = useGetSession();
+  const {
+    data: session,
+    loading: messagesLoading,
+    error: messagesLoadingError,
+    refresh,
+  } = useGetSession();
   const chatConfig = useObservable(chatConfigService.get$(chatContext.currentAccount.username));
   const termsAccepted = Boolean(chatConfig?.terms_accepted);
 
@@ -50,6 +55,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
               setShowGreetings={setShowGreetings}
               messagesLoading={messagesLoading}
               messagesLoadingError={messagesLoadingError}
+              onRefresh={refresh}
             />
           </EuiPageBody>
         </EuiPage>

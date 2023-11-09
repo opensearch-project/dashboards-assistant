@@ -5,11 +5,14 @@
 
 import {
   EuiFieldSearch,
+  EuiFieldSearchProps,
   EuiFlyoutBody,
   EuiPage,
   EuiPageBody,
   EuiSpacer,
   EuiTablePagination,
+  EuiTablePaginationProps,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,9 +22,98 @@ import cs from 'classnames';
 import { SavedObjectsFindOptions } from '../../../../../src/core/public';
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useGetSessions } from '../../hooks/use_sessions';
-import { ChatHistoryList } from './chat_history_list';
+import { ChatHistoryList, ChatHistoryListProps } from './chat_history_list';
 import { EditConversationNameModal } from '../../components/edit_conversation_name_modal';
 import { DeleteConversationConfirmModal } from './delete_conversation_confirm_modal';
+
+interface HistorySearchListProps
+  extends Pick<
+    EuiTablePaginationProps,
+    'activePage' | 'itemsPerPage' | 'onChangeItemsPerPage' | 'onChangePage' | 'pageCount'
+  > {
+  search?: string;
+  histories: ChatHistoryListProps['chatHistories'];
+  onSearchChange: EuiFieldSearchProps['onChange'];
+  onLoadChat: (sessionId?: string | undefined, title?: string | undefined) => void;
+  onRefresh: () => void;
+}
+
+const HistorySearchList = ({
+  search,
+  histories,
+  pageCount,
+  activePage,
+  itemsPerPage,
+  onRefresh,
+  onLoadChat,
+  onChangePage,
+  onSearchChange,
+  onChangeItemsPerPage,
+}: HistorySearchListProps) => {
+  const [editingConversation, setEditingConversation] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [deletingConversation, setDeletingConversation] = useState<{ id: string } | null>(null);
+
+  const handleEditConversationCancel = useCallback(
+    (status: 'updated' | string) => {
+      if (status === 'updated') {
+        onRefresh();
+      }
+      setEditingConversation(null);
+    },
+    [setEditingConversation, onRefresh]
+  );
+
+  const handleDeleteConversationCancel = useCallback(
+    (status: 'deleted' | string) => {
+      if (status === 'deleted') {
+        onRefresh();
+      }
+      setDeletingConversation(null);
+    },
+    [setDeletingConversation, onRefresh]
+  );
+  return (
+    <>
+      <EuiFieldSearch
+        placeholder="Search by conversation name"
+        value={search}
+        onChange={onSearchChange}
+        fullWidth
+      />
+      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
+      <ChatHistoryList
+        chatHistories={histories}
+        onChatHistoryTitleClick={onLoadChat}
+        onChatHistoryEditClick={setEditingConversation}
+        onChatHistoryDeleteClick={setDeletingConversation}
+      />
+      <EuiTablePagination
+        activePage={activePage}
+        itemsPerPage={itemsPerPage}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onChangePage={onChangePage}
+        pageCount={pageCount}
+      />
+      {editingConversation && (
+        <EditConversationNameModal
+          onClose={handleEditConversationCancel}
+          sessionId={editingConversation.id}
+          defaultTitle={editingConversation.title}
+        />
+      )}
+      {deletingConversation && (
+        <DeleteConversationConfirmModal
+          sessionId={deletingConversation.id}
+          onClose={handleDeleteConversationCancel}
+        />
+      )}
+    </>
+  );
+};
 
 interface ChatHistoryPageProps {
   shouldRefresh: boolean;
@@ -30,11 +122,6 @@ interface ChatHistoryPageProps {
 
 export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   const { loadChat } = useChatActions();
-  const [editingConversation, setEditingConversation] = useState<{
-    id: string;
-    title: string;
-  } | null>(null);
-  const [deletingConversation, setDeletingConversation] = useState<{ id: string } | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchName, setSearchName] = useState<string>();
@@ -50,32 +137,18 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
     }),
     [pageIndex, pageSize, debouncedSearchName]
   );
-  const { data: sessions, refresh } = useGetSessions(bulkGetOptions);
-
+  const { refresh, loading, ...rest } = useGetSessions(bulkGetOptions);
+  const { data: sessions } = rest;
   const chatHistories = useMemo(() => sessions?.objects || [], [sessions]);
-
-  const handleEditConversationCancel = useCallback(
-    (status: 'updated' | string) => {
-      if (status === 'updated') {
-        refresh();
-      }
-      setEditingConversation(null);
-    },
-    [setEditingConversation]
-  );
-
-  const handleDeleteConversationCancel = useCallback(
-    (status: 'deleted' | string) => {
-      if (status === 'deleted') {
-        refresh();
-      }
-      setDeletingConversation(null);
-    },
-    [setDeletingConversation, refresh]
-  );
+  const hasNoConversations = !searchName && 'data' in rest && rest.data?.total === 0 && !loading;
 
   const handleSearchChange = useCallback((e) => {
     setSearchName(e.target.value);
+  }, []);
+
+  const handleItemsPerPageChange = useCallback((itemsPerPage: number) => {
+    setPageIndex(0);
+    setPageSize(itemsPerPage);
   }, []);
 
   useDebounce(
@@ -102,38 +175,25 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiSpacer size="xs" />
-          <EuiFieldSearch
-            placeholder="Search by conversation or date"
-            value={searchName}
-            onChange={handleSearchChange}
-            fullWidth
-          />
-          <EuiSpacer size="s" />
-          <EuiSpacer size="xs" />
-          <ChatHistoryList
-            chatHistories={chatHistories}
-            onChatHistoryTitleClick={loadChat}
-            onChatHistoryEditClick={setEditingConversation}
-            onChatHistoryDeleteClick={setDeletingConversation}
-          />
-          <EuiTablePagination
-            activePage={pageIndex}
-            itemsPerPage={pageSize}
-            onChangeItemsPerPage={setPageSize}
-            onChangePage={setPageIndex}
-            {...(sessions ? { pageCount: Math.ceil(sessions.total / pageSize) } : {})}
-          />
-          {editingConversation && (
-            <EditConversationNameModal
-              onClose={handleEditConversationCancel}
-              sessionId={editingConversation.id}
-              defaultTitle={editingConversation.title}
-            />
-          )}
-          {deletingConversation && (
-            <DeleteConversationConfirmModal
-              sessionId={deletingConversation.id}
-              onClose={handleDeleteConversationCancel}
+          {hasNoConversations ? (
+            <EuiText>
+              <p>
+                No conversation has been recorded. Start a conversation in the assistant to have it
+                saved.
+              </p>
+            </EuiText>
+          ) : (
+            <HistorySearchList
+              search={searchName}
+              onSearchChange={handleSearchChange}
+              onLoadChat={loadChat}
+              onRefresh={refresh}
+              histories={chatHistories}
+              activePage={pageIndex}
+              itemsPerPage={pageSize}
+              onChangeItemsPerPage={handleItemsPerPageChange}
+              onChangePage={setPageIndex}
+              {...(sessions ? { pageCount: Math.ceil(sessions.total / pageSize) } : {})}
             />
           )}
         </EuiPageBody>

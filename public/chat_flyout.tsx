@@ -73,16 +73,16 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
 
         {props.overrideComponent}
         <EuiFlexGroup gutterSize="none" style={{ overflow: 'hidden' }}>
-          <EuiFlexItem grow={props.flyoutFullScreen}>
-            <ChatPage className={cs({ 'llm-chat-hidden': !chatPageVisible })} />
+          <EuiFlexItem className={cs({ 'llm-chat-hidden': !chatPageVisible })}>
+            <ChatPage />
           </EuiFlexItem>
           <EuiFlexItem
             style={props.flyoutFullScreen && chatHistoryPageVisible ? { width: '30%' } : undefined}
             grow={!props.flyoutFullScreen}
+            className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
           >
             {chatHistoryPageLoaded && (
               <ChatHistoryPage
-                className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
                 // refresh data when user switched to table from another tab
                 shouldRefresh={chatHistoryPageVisible}
               />
