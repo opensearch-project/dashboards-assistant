@@ -75,6 +75,7 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
     <EuiButtonEmpty
       style={{ maxWidth: '300px' }}
       size="s"
+      color="text"
       iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}
@@ -142,7 +143,9 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
                 aria-label="history"
                 iconType="clock"
                 size="xs"
+                color="text"
                 onClick={() => {
+                  chatContext.setFlyoutComponent(undefined);
                   // Back to chat tab if history page already visible
                   chatContext.setSelectedTabId(
                     chatContext.selectedTabId === 'history' ? 'chat' : 'history'
@@ -156,7 +159,8 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             aria-label="fullScreen"
-            size="s"
+            color="text"
+            size="xs"
             // TODO replace svg with built-in icon
             iconType={props.flyoutFullScreen ? dockRight : dockBottom}
             onClick={props.toggleFlyoutFullScreen}
@@ -165,7 +169,8 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             aria-label="close"
-            size="s"
+            size="xs"
+            color="text"
             iconType="cross"
             onClick={() => {
               chatContext.setFlyoutVisible(false);

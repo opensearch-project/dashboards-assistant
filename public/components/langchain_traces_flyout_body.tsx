@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonEmpty, EuiFlyoutBody } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlyoutBody,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiPageHeader,
+} from '@elastic/eui';
 import React from 'react';
 import { LangchainTraces } from './langchain_traces';
 
@@ -14,18 +21,24 @@ interface LangchainTracesFlyoutBodyProps {
 
 export const LangchainTracesFlyoutBody: React.FC<LangchainTracesFlyoutBodyProps> = (props) => {
   return (
-    <EuiFlyoutBody>
-      <EuiButtonEmpty
-        style={{ marginTop: 5, marginLeft: 5 }}
-        size="l"
-        onClick={props.closeFlyout}
-        iconType="arrowLeft"
-      >
-        Back
-      </EuiButtonEmpty>
-      <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24 }}>
-        <LangchainTraces traceId={props.traceId} />
-      </div>
+    <EuiFlyoutBody className="llm-chat-flyout">
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageHeader>
+            <EuiButtonEmpty
+              style={{ marginLeft: '-8px' }}
+              size="xs"
+              onClick={props.closeFlyout}
+              iconType="arrowLeft"
+            >
+              Back
+            </EuiButtonEmpty>
+          </EuiPageHeader>
+          <EuiPageContentBody>
+            <LangchainTraces traceId={props.traceId} />
+          </EuiPageContentBody>
+        </EuiPageBody>
+      </EuiPage>
     </EuiFlyoutBody>
   );
 };

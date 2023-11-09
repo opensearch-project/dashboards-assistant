@@ -13,14 +13,13 @@ import {
 } from '@elastic/eui';
 import React, { useLayoutEffect, useRef } from 'react';
 import { useObservable } from 'react-use';
-import { IMessage } from '../../../common/types/chat_saved_object_attributes';
+import { IMessage, ISuggestedAction } from '../../../common/types/chat_saved_object_attributes';
 import { TermsAndConditions } from '../../components/terms_and_conditions';
 import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
 import { ChatPageGreetings } from './chat_page_greetings';
 import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
-import { MessageFooter } from './messages/message_footer';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useCore } from '../../contexts/core_context';
@@ -172,11 +171,22 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
   const chatContext = useChatContext();
   const { executeAction } = useChatActions();
 
-  if (
-    props.message.type !== 'output' ||
-    !props.message.suggestedActions ||
-    props.message.suggestedActions.length === 0
-  ) {
+  if (props.message.type !== 'output') {
+    return null;
+  }
+  const traceId = props.message.traceId;
+
+  const suggestedActions = structuredClone(props.message.suggestedActions) || [];
+  if (traceId) {
+    const viewTraceAction: ISuggestedAction = {
+      actionType: 'view_trace',
+      metadata: { traceId, icon: 'questionInCircle' },
+      message: 'How was this generated?',
+    };
+    suggestedActions.push(viewTraceAction);
+  }
+
+  if (!suggestedActions.length) {
     return null;
   }
 
@@ -185,31 +195,32 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
       <EuiText color="subdued" size="xs" style={{ paddingLeft: 10 }}>
         <small>Available suggestions</small>
       </EuiText>
-      {props.message.suggestedActions
-        // remove actions that are not supported by the current chat context
-        .filter(
-          (suggestedAction) =>
-            !(
-              suggestedAction.actionType === 'view_ppl_visualization' &&
-              !chatContext.actionExecutors.view_ppl_visualization
-            )
-        )
-        .map((suggestedAction, i) => (
-          <div key={i}>
-            <EuiSpacer size="xs" />
-            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
-              <EuiFlexItem>
+      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
+        {suggestedActions
+          // remove actions that are not supported by the current chat context
+          .filter(
+            (suggestedAction) =>
+              !(
+                suggestedAction.actionType === 'view_ppl_visualization' &&
+                !chatContext.actionExecutors.view_ppl_visualization
+              )
+          )
+          .map((suggestedAction, i) => (
+            <div key={i}>
+              <EuiSpacer size="xs" />
+              <EuiFlexItem grow={false}>
                 <SuggestionBubble
                   onClick={() =>
                     !props.inputDisabled && executeAction(suggestedAction, props.message)
                   }
                   color={props.inputDisabled ? 'subdued' : 'default'}
                   content={suggestedAction.message}
+                  iconType={suggestedAction.metadata?.icon}
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        ))}
+            </div>
+          ))}
+      </EuiFlexGroup>
     </div>
   );
 };

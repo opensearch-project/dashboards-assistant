@@ -148,6 +148,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                   <EuiCopy textToCopy={props.content ?? ''}>
                     {(copy) => (
                       <EuiButtonIcon
+                        aria-label="copy"
                         title="copy message"
                         onClick={copy}
                         color="text"
@@ -160,6 +161,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
               {props.showRegenerate && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    aria-label="regenerate"
                     onClick={props.onRegenerate}
                     title="regenerate message"
                     color="text"
@@ -168,10 +170,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon color="text" iconType="thumbsUp" />
+                <EuiButtonIcon aria-label="thumbsUp" color="text" iconType="thumbsUp" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon color="text" iconType="thumbsDown" />
+                <EuiButtonIcon aria-label="thumbsDown" color="text" iconType="thumbsDown" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

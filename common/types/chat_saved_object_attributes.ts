@@ -48,4 +48,8 @@ export type ISuggestedAction = ISuggestedActionBase &
         actionType: 'view_ppl_visualization';
         metadata: { query: string; question: string };
       }
+    | {
+        actionType: 'view_trace';
+        metadata: { traceId: string; icon: string };
+      }
   );
