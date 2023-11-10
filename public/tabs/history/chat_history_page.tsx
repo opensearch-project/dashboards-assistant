@@ -9,6 +9,7 @@ import {
   EuiFlyoutBody,
   EuiPage,
   EuiPageBody,
+  EuiPanel,
   EuiSpacer,
   EuiTablePagination,
   EuiTablePaginationProps,
@@ -32,6 +33,7 @@ interface HistorySearchListProps
     'activePage' | 'itemsPerPage' | 'onChangeItemsPerPage' | 'onChangePage' | 'pageCount'
   > {
   search?: string;
+  loading: boolean;
   histories: ChatHistoryListProps['chatHistories'];
   onSearchChange: EuiFieldSearchProps['onChange'];
   onLoadChat: (sessionId?: string | undefined, title?: string | undefined) => void;
@@ -40,6 +42,7 @@ interface HistorySearchListProps
 
 const HistorySearchList = ({
   search,
+  loading,
   histories,
   pageCount,
   activePage,
@@ -85,31 +88,42 @@ const HistorySearchList = ({
       />
       <EuiSpacer size="s" />
       <EuiSpacer size="xs" />
-      <ChatHistoryList
-        chatHistories={histories}
-        onChatHistoryTitleClick={onLoadChat}
-        onChatHistoryEditClick={setEditingConversation}
-        onChatHistoryDeleteClick={setDeletingConversation}
-      />
-      <EuiTablePagination
-        activePage={activePage}
-        itemsPerPage={itemsPerPage}
-        onChangeItemsPerPage={onChangeItemsPerPage}
-        onChangePage={onChangePage}
-        pageCount={pageCount}
-      />
-      {editingConversation && (
-        <EditConversationNameModal
-          onClose={handleEditConversationCancel}
-          sessionId={editingConversation.id}
-          defaultTitle={editingConversation.title}
-        />
-      )}
-      {deletingConversation && (
-        <DeleteConversationConfirmModal
-          sessionId={deletingConversation.id}
-          onClose={handleDeleteConversationCancel}
-        />
+      {!loading && histories.length === 0 ? (
+        <EuiPanel hasBorder hasShadow paddingSize="s" borderRadius="m">
+          <EuiText size="s">
+            <p>There were no results found.</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </EuiPanel>
+      ) : (
+        <>
+          <ChatHistoryList
+            chatHistories={histories}
+            onChatHistoryTitleClick={onLoadChat}
+            onChatHistoryEditClick={setEditingConversation}
+            onChatHistoryDeleteClick={setDeletingConversation}
+          />
+          <EuiTablePagination
+            activePage={activePage}
+            itemsPerPage={itemsPerPage}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onChangePage={onChangePage}
+            pageCount={pageCount}
+          />
+          {editingConversation && (
+            <EditConversationNameModal
+              onClose={handleEditConversationCancel}
+              sessionId={editingConversation.id}
+              defaultTitle={editingConversation.title}
+            />
+          )}
+          {deletingConversation && (
+            <DeleteConversationConfirmModal
+              sessionId={deletingConversation.id}
+              onClose={handleDeleteConversationCancel}
+            />
+          )}
+        </>
       )}
     </>
   );
@@ -140,7 +154,8 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   const { refresh, loading, ...rest } = useGetSessions(bulkGetOptions);
   const { data: sessions } = rest;
   const chatHistories = useMemo(() => sessions?.objects || [], [sessions]);
-  const hasNoConversations = !searchName && 'data' in rest && rest.data?.total === 0 && !loading;
+  const hasNoConversations =
+    !debouncedSearchName && 'data' in rest && rest.data?.total === 0 && !loading;
 
   const handleSearchChange = useCallback((e) => {
     setSearchName(e.target.value);
@@ -185,6 +200,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
           ) : (
             <HistorySearchList
               search={searchName}
+              loading={loading}
               onSearchChange={handleSearchChange}
               onLoadChat={loadChat}
               onRefresh={refresh}
