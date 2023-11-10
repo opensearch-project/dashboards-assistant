@@ -26,16 +26,21 @@
   .euiFlyoutFooter {
     background: transparent;
   }
-  .euiPage {
-    margin: 8px;
-    border-radius: 8px;
-    background: $euiPageBackgroundColor;
+  // .euiPage {
+  //   margin: 8px;
+  //   border-radius: 8px;
+  //   background: $euiPageBackgroundColor;
+  // }
+  .euiFlyoutBody__overflow {
+    mask-image: none;
+    -webkit-mask-image: none;
   }
 }
 
 .llm-chat-flyout-body {
-  // background-color: $euiPageBackgroundColor;
-  // margin: 0px 20px;
+  background-color: $euiPageBackgroundColor;
+  margin: 8px;
+  border-radius: 8px;
 }
 
 .llm-chat-bubble-wrapper {

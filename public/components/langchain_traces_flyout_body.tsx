@@ -21,7 +21,7 @@ interface LangchainTracesFlyoutBodyProps {
 
 export const LangchainTracesFlyoutBody: React.FC<LangchainTracesFlyoutBodyProps> = (props) => {
   return (
-    <EuiFlyoutBody className="llm-chat-flyout">
+    <EuiFlyoutBody className="llm-chat-flyout llm-chat-flyout-body">
       <EuiPage>
         <EuiPageBody>
           <EuiPageHeader>
