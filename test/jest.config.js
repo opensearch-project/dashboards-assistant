@@ -22,6 +22,7 @@ module.exports = {
     '<rootDir>/public/requests/',
     '/__utils__/',
   ],
+  // https://github.com/jestjs/jest/issues/6229#issuecomment-403539460
   transformIgnorePatterns: ['node_modules/(?!langchain|langsmith)'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/test/__mocks__/styleMock.js',
