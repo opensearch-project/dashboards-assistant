@@ -14,11 +14,12 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import cx from 'classnames';
-import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
+import { IMessage, IOutput } from '../../../../common/types/chat_saved_object_attributes';
 import { useUiSetting } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 import chatIcon from '../../../assets/chat.svg';
+import { useFeedback } from '../../../hooks/use_feed_back';
 
 type MessageBubbleProps = {
   showActionBar: boolean;
@@ -36,6 +37,24 @@ type MessageBubbleProps = {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
   const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const { feedbackResult, sendFeedback } = useFeedback();
+
+  // According to the design of the feedback, only markdown type output is supported.
+  const showFeedback =
+    'message' in props &&
+    props.message.type === 'output' &&
+    props.message.contentType === 'markdown';
+
+  const feedbackOutput = useCallback(
+    (correct: boolean, result: boolean | undefined) => {
+      // No repeated feedback.
+      if (result !== undefined || !('message' in props)) {
+        return;
+      }
+      sendFeedback(props.message as IOutput, correct);
+    },
+    [props, sendFeedback]
+  );
   if ('loading' in props && props.loading) {
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
@@ -167,12 +186,29 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     />
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon aria-label="thumbsUp" color="text" iconType="thumbsUp" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon aria-label="thumbsDown" color="text" iconType="thumbsDown" />
-                </EuiFlexItem>
+                {showFeedback && (
+                  // After feedback, only corresponding thumb icon will be kept and disabled.
+                  <>
+                    {feedbackResult !== false ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          color={feedbackResult === true ? 'primary' : 'text'}
+                          iconType="thumbsUp"
+                          onClick={() => feedbackOutput(true, feedbackResult)}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    {feedbackResult !== true ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          color={feedbackResult === false ? 'primary' : 'text'}
+                          iconType="thumbsDown"
+                          onClick={() => feedbackOutput(false, feedbackResult)}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                  </>
+                )}
               </EuiFlexGroup>
             </>
           )}

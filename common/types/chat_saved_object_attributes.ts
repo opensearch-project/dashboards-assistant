@@ -27,7 +27,7 @@ export interface IInput {
     appId?: string;
   };
 }
-interface IOutput {
+export interface IOutput {
   type: 'output';
   traceId?: string; // used for tracing agent calls
   toolsUsed?: string[];
