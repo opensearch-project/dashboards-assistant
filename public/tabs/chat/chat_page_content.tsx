@@ -110,6 +110,19 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       >
         <TermsAndConditions username={chatContext.currentAccount.username} />
       </MessageBubble>
+      {firstInputIndex < 0 && (
+        <Suggestions
+          message={{
+            content: '',
+            contentType: 'markdown',
+            type: 'output',
+            suggestedActions: [
+              { message: 'What are the indices in my cluster?', actionType: 'send_as_input' },
+            ],
+          }}
+          inputDisabled={loading}
+        />
+      )}
       <EuiSpacer />
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {termsAccepted &&

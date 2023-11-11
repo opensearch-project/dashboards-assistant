@@ -22,6 +22,17 @@
   }
 }
 
+.llm-chat-avatar {
+  background-image: url('./assets/chat_avatar_bg.svg');
+  background-size: cover;
+  background-position: center;
+
+  .euiLoadingSpinner {
+    border-color: rgba(0, 0, 0, 0.2) rgba(255, 255, 255, 0.8) rgba(255, 255, 255, 0.8)
+      rgba(255, 255, 255, 0.8);
+  }
+}
+
 .llm-chat-flyout {
   .euiFlyoutFooter {
     background: transparent;
@@ -35,6 +46,10 @@
     mask-image: none;
     -webkit-mask-image: none;
   }
+}
+
+.euiFlyoutHeader.llm-chat-flyout-header {
+  padding-top: 4px;
 }
 
 .llm-chat-flyout-body {

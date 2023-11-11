@@ -81,9 +81,9 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
       iconSide="right"
       onClick={onButtonClick}
     >
-      <span className="eui-textTruncate">
+      <h3 className="eui-textTruncate">
         {chatContext.sessionId ? chatContext.title : 'OpenSearch Assistant'}
-      </span>
+      </h3>
     </EuiButtonEmpty>
   );
 

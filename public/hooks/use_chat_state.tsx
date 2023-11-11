@@ -31,16 +31,7 @@ interface IChatStateContext {
 const ChatStateContext = React.createContext<IChatStateContext | null>(null);
 
 const initialState: ChatState = {
-  messages: [
-    {
-      content: `Hello, I'm the Observability assistant.\n\nHow may I help you?`,
-      contentType: 'markdown',
-      type: 'output',
-      suggestedActions: [
-        { message: 'What are the indices in my cluster?', actionType: 'send_as_input' },
-      ],
-    },
-  ],
+  messages: [],
   llmResponding: false,
 };
 

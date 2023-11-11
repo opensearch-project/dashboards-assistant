@@ -14,11 +14,10 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
 import cx from 'classnames';
 import { IMessage, IOutput } from '../../../../common/types/chat_saved_object_attributes';
-import { useUiSetting } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
-import chatIcon from '../../../assets/chat.svg';
 import { useFeedback } from '../../../hooks/use_feed_back';
 
 type MessageBubbleProps = {
@@ -36,7 +35,6 @@ type MessageBubbleProps = {
 );
 
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
-  const darkMode = useUiSetting<boolean>('theme:darkMode');
   const { feedbackResult, sendFeedback } = useFeedback();
 
   // According to the design of the feedback, only markdown type output is supported.
@@ -55,28 +53,26 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     },
     [props, sendFeedback]
   );
+
+  const createAvatar = (iconType: IconType) => {
+    return (
+      <EuiAvatar
+        className="llm-chat-avatar"
+        name="llm"
+        size="l"
+        iconType={iconType}
+        iconColor="#fff"
+      />
+    );
+  };
+
   if ('loading' in props && props.loading) {
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          {darkMode ? (
-            <EuiAvatar
-              name="llm"
-              size="l"
-              iconType={EuiLoadingSpinner}
-              iconSize="m"
-              iconColor="#fff"
-              color="#0A121A"
-            />
-          ) : (
-            <EuiAvatar
-              name="llm"
-              size="l"
-              iconType={EuiLoadingSpinner}
-              iconSize="m"
-              iconColor="#fff"
-            />
-          )}
+          {createAvatar(() => (
+            <EuiLoadingSpinner size="l" />
+          ))}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel
@@ -123,18 +119,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          {darkMode ? (
-            <EuiAvatar
-              name="llm"
-              size="l"
-              iconType={chatIcon}
-              iconSize="l"
-              iconColor="#fff"
-              color="#0A121A"
-            />
-          ) : (
-            <EuiAvatar name="llm" size="l" iconType={chatIcon} iconSize="l" iconColor="#fff" />
-          )}
+          {props.message.contentType === 'error'
+            ? createAvatar('alert')
+            : createAvatar('chatRight')}
         </EuiFlexItem>
         <EuiFlexItem className="llm-chat-bubble-wrapper">
           <EuiPanel

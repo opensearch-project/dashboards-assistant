@@ -55,6 +55,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           rows={1}
           compressed
           autoFocus
+          disabled={props.disabled}
           placeholder="Ask me anything..."
           inputRef={inputRef}
           style={{ minHeight: 40, maxHeight: 400 }}
