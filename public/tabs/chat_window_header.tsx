@@ -124,9 +124,14 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceAround" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceAround"
+        alignItems="center"
+        responsive={false}
+      >
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" alignItems="center">
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} style={{ marginLeft: '8px' }}>
               <EuiIcon type={chatIcon} size="m" />
             </EuiFlexItem>

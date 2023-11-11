@@ -72,7 +72,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
         </EuiFlyoutHeader>
 
         {props.overrideComponent}
-        <EuiFlexGroup gutterSize="none" style={{ overflow: 'hidden' }}>
+        <EuiFlexGroup gutterSize="none" style={{ overflow: 'hidden' }} responsive={false}>
           <EuiFlexItem className={cs({ 'llm-chat-hidden': !chatPageVisible })}>
             <ChatPage />
           </EuiFlexItem>
