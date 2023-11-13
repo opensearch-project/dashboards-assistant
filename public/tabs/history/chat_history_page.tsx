@@ -4,17 +4,22 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFieldSearch,
   EuiFieldSearchProps,
   EuiFlyoutBody,
   EuiPage,
   EuiPageBody,
   EuiPanel,
+  EuiPageHeader,
   EuiSpacer,
   EuiTablePagination,
   EuiTablePaginationProps,
   EuiText,
   EuiTitle,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -23,6 +28,7 @@ import cs from 'classnames';
 import { SavedObjectsFindOptions } from '../../../../../src/core/public';
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useGetSessions } from '../../hooks/use_sessions';
+import { useChatContext } from '../../contexts/chat_context';
 import { ChatHistoryList, ChatHistoryListProps } from './chat_history_list';
 import { EditConversationNameModal } from '../../components/edit_conversation_name_modal';
 import { DeleteConversationConfirmModal } from './delete_conversation_confirm_modal';
@@ -136,6 +142,7 @@ interface ChatHistoryPageProps {
 
 export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
   const { loadChat } = useChatActions();
+  const { setSelectedTabId, flyoutFullScreen } = useChatContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchName, setSearchName] = useState<string>();
@@ -166,6 +173,10 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
     setPageSize(itemsPerPage);
   }, []);
 
+  const handleBack = useCallback(() => {
+    setSelectedTabId('chat');
+  }, [setSelectedTabId]);
+
   useDebounce(
     () => {
       setPageIndex(0);
@@ -183,6 +194,19 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
     <EuiFlyoutBody className={cs(props.className, 'llm-chat-flyout-body')}>
       <EuiPage>
         <EuiPageBody component="div">
+          <EuiPageHeader>
+            {flyoutFullScreen ? (
+              <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="cross" onClick={handleBack} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiButtonEmpty flush="left" size="xs" onClick={handleBack} iconType="arrowLeft">
+                Back
+              </EuiButtonEmpty>
+            )}
+          </EuiPageHeader>
           <EuiTitle size="s">
             <h3>
               <FormattedMessage id="assistant.olly.history.title" defaultMessage="Conversations" />
