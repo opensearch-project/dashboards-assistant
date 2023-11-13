@@ -10,6 +10,7 @@ import { useChatContext } from './contexts/chat_context';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatWindowHeader } from './tabs/chat_window_header';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
+import { LangchainTracesFlyoutBody } from './components/langchain_traces_flyout_body';
 
 let chatHistoryPageLoaded = false;
 
@@ -26,6 +27,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
 
   let chatPageVisible = false;
   let chatHistoryPageVisible = false;
+  let chatTraceVisible = false;
 
   if (!props.overrideComponent) {
     switch (chatContext.selectedTabId) {
@@ -35,6 +37,10 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
 
       case 'history':
         chatHistoryPageVisible = true;
+        break;
+
+      case 'trace':
+        chatTraceVisible = true;
         break;
 
       default:
@@ -87,6 +93,13 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
                 shouldRefresh={chatHistoryPageVisible}
               />
             )}
+          </EuiFlexItem>
+          <EuiFlexItem
+            style={props.flyoutFullScreen && chatTraceVisible ? { width: '30%' } : undefined}
+            grow={!props.flyoutFullScreen}
+            className={cs({ 'llm-chat-hidden': !chatTraceVisible })}
+          >
+            {chatTraceVisible && chatContext.traceId && <LangchainTracesFlyoutBody />}
           </EuiFlexItem>
         </EuiFlexGroup>
       </>

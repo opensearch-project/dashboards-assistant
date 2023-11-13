@@ -34,6 +34,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
+  const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
+  const [traceId, setTraceId] = useState<string | undefined>(undefined);
   const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
   const flyoutFullScreen = chatSize === 'fullscreen';
 
@@ -54,7 +56,11 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       sessionId,
       setSessionId,
       selectedTabId,
-      setSelectedTabId,
+      preSelectedTabId,
+      setSelectedTabId: (tabId: TabId) => {
+        setPreSelectedTabId(selectedTabId);
+        setSelectedTabId(tabId);
+      },
       flyoutVisible,
       flyoutFullScreen,
       setFlyoutVisible,
@@ -65,6 +71,8 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       currentAccount: props.currentAccount,
       title,
       setTitle,
+      traceId,
+      setTraceId,
     }),
     [
       appId,
@@ -72,12 +80,15 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       flyoutVisible,
       flyoutFullScreen,
       selectedTabId,
+      preSelectedTabId,
       props.chatEnabled,
       props.contentRenderers,
       props.actionExecutors,
       props.currentAccount,
       title,
       setTitle,
+      traceId,
+      setTraceId,
     ]
   );
 

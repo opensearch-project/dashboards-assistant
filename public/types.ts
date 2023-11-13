@@ -46,4 +46,4 @@ export interface ChatConfig {
   terms_accepted: boolean;
 }
 
-export type TabId = 'chat' | 'compose' | 'insights' | 'history';
+export type TabId = 'chat' | 'compose' | 'insights' | 'history' | 'trace';

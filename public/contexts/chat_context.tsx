@@ -11,7 +11,8 @@ export interface IChatContext {
   sessionId?: string;
   setSessionId: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedTabId: TabId;
-  setSelectedTabId: React.Dispatch<React.SetStateAction<TabId>>;
+  preSelectedTabId?: TabId;
+  setSelectedTabId: (tabId: TabId) => void;
   flyoutVisible: boolean;
   flyoutFullScreen: boolean;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,6 +23,8 @@ export interface IChatContext {
   currentAccount: UserAccount;
   title?: string;
   setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
+  traceId?: string;
+  setTraceId: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 

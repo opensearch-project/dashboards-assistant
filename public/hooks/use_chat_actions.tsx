@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { LangchainTracesFlyoutBody } from '../components/langchain_traces_flyout_body';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { IMessage, ISuggestedAction } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
@@ -103,12 +101,10 @@ export const useChatActions = (): AssistantActions => {
       }
 
       case 'view_trace':
-        chatContext.setFlyoutComponent(
-          <LangchainTracesFlyoutBody
-            closeFlyout={() => chatContext.setFlyoutComponent(null)}
-            traceId={suggestedAction.metadata.traceId}
-          />
-        );
+        if ('traceId' in message) {
+          chatContext.setSelectedTabId('trace');
+          chatContext.setTraceId(message.traceId);
+        }
         break;
 
       default:
