@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, EuiResizableContainer } from '@elastic/eui';
 import cs from 'classnames';
 import React from 'react';
 import { useChatContext } from './contexts/chat_context';
@@ -55,6 +55,30 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
 
   if (!chatHistoryPageLoaded && chatHistoryPageVisible) chatHistoryPageLoaded = true;
 
+  const resizable = props.flyoutFullScreen && (chatHistoryPageVisible || chatTraceVisible);
+  const getLeftPanelSize = () => {
+    if (resizable) {
+      return undefined;
+    }
+    if (chatPageVisible) {
+      return 100;
+    }
+    return 0;
+  };
+
+  const getRightPanelSize = () => {
+    if (resizable) {
+      return undefined;
+    }
+    if (chatHistoryPageVisible || chatTraceVisible) {
+      return 100;
+    }
+    return 0;
+  };
+
+  const leftPanelSize = getLeftPanelSize();
+  const rightPanelSize = getRightPanelSize();
+
   return (
     <EuiFlyout
       className={cs('llm-chat-flyout', {
@@ -78,30 +102,44 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
         </EuiFlyoutHeader>
 
         {props.overrideComponent}
-        <EuiFlexGroup gutterSize="none" style={{ overflow: 'hidden' }} responsive={false}>
-          <EuiFlexItem className={cs({ 'llm-chat-hidden': !chatPageVisible })}>
-            <ChatPage />
-          </EuiFlexItem>
-          <EuiFlexItem
-            style={props.flyoutFullScreen && chatHistoryPageVisible ? { width: '30%' } : undefined}
-            grow={!props.flyoutFullScreen}
-            className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
-          >
-            {chatHistoryPageLoaded && (
-              <ChatHistoryPage
-                // refresh data when user switched to table from another tab
-                shouldRefresh={chatHistoryPageVisible}
-              />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem
-            style={props.flyoutFullScreen && chatTraceVisible ? { width: '30%' } : undefined}
-            grow={!props.flyoutFullScreen}
-            className={cs({ 'llm-chat-hidden': !chatTraceVisible })}
-          >
-            {chatTraceVisible && chatContext.traceId && <LangchainTracesFlyoutBody />}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiResizableContainer style={{ height: '100%', overflow: 'hidden' }}>
+          {(Panel, Resizer) => (
+            <>
+              <Panel
+                className={cs('llm-chat-horizontal-resize-panel', {
+                  'llm-chat-hidden': leftPanelSize === 0,
+                })}
+                scrollable={false}
+                size={leftPanelSize}
+                initialSize={resizable ? 70 : undefined}
+                paddingSize="none"
+              >
+                <ChatPage />
+              </Panel>
+              <>
+                {resizable && <Resizer />}
+                <Panel
+                  className={cs('llm-chat-horizontal-resize-panel', {
+                    'llm-chat-hidden': leftPanelSize === 100,
+                  })}
+                  scrollable={false}
+                  size={rightPanelSize}
+                  initialSize={resizable ? 30 : undefined}
+                  paddingSize="none"
+                >
+                  {chatHistoryPageLoaded && (
+                    <ChatHistoryPage
+                      // refresh data when user switched to table from another tab
+                      shouldRefresh={chatHistoryPageVisible}
+                      className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
+                    />
+                  )}
+                  {chatTraceVisible && chatContext.traceId && <LangchainTracesFlyoutBody />}
+                </Panel>
+              </>
+            </>
+          )}
+        </EuiResizableContainer>
       </>
     </EuiFlyout>
   );

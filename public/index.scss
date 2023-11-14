@@ -133,3 +133,11 @@
 button.llm-chat-error-refresh-button.llm-chat-error-refresh-button {
   color: $ouiColorFullShade;
 }
+
+.llm-chat-horizontal-resize-panel{
+  display: flex;
+  flex-direction: column;
+  &.llm-chat-hidden{
+    display: none;
+  }
+}
