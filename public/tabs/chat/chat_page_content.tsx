@@ -14,7 +14,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useLayoutEffect, useRef } from 'react';
-import { useObservable } from 'react-use';
 import { IMessage, ISuggestedAction } from '../../../common/types/chat_saved_object_attributes';
 import { TermsAndConditions } from '../../components/terms_and_conditions';
 import { useChatContext } from '../../contexts/chat_context';
@@ -24,10 +23,6 @@ import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
 import { useChatActions } from '../../hooks/use_chat_actions';
-import { useCore } from '../../contexts/core_context';
-import { SavedObjectManager } from '../../services/saved_object_manager';
-import { ChatConfig } from '../../types';
-import { CHAT_CONFIG_SAVED_OBJECT_TYPE } from '../../../common/constants/saved_objects';
 
 interface ChatPageContentProps {
   showGreetings: boolean;
@@ -44,19 +39,11 @@ const findPreviousInput = (messages: IMessage[], index: number) => {
 };
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
-  const core = useCore();
   const chatContext = useChatContext();
   const { chatState } = useChatState();
   const pageEndRef = useRef<HTMLDivElement>(null);
   const loading = props.messagesLoading || chatState.llmResponding;
   const chatActions = useChatActions();
-
-  const chatConfigService = SavedObjectManager.getInstance<ChatConfig>(
-    core.services.savedObjects.client,
-    CHAT_CONFIG_SAVED_OBJECT_TYPE
-  );
-  const config = useObservable(chatConfigService.get$(chatContext.currentAccount.username));
-  const termsAccepted = Boolean(config?.terms_accepted);
 
   useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
@@ -125,33 +112,32 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       )}
       <EuiSpacer />
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
-      {termsAccepted &&
-        chatState.messages.map((message, i) => {
-          // The latest llm output, just after the last user input
-          const isLatestOutput = lastInputIndex > 0 && i > lastInputIndex;
-          // All the llm output in response to user's input, exclude outputs before user's first input
-          const isChatOutput = firstInputIndex > 0 && i > firstInputIndex;
-          // Only show suggestion on llm outputs after last user input
-          const showSuggestions = i > lastInputIndex;
+      {chatState.messages.map((message, i) => {
+        // The latest llm output, just after the last user input
+        const isLatestOutput = lastInputIndex > 0 && i > lastInputIndex;
+        // All the llm output in response to user's input, exclude outputs before user's first input
+        const isChatOutput = firstInputIndex > 0 && i > firstInputIndex;
+        // Only show suggestion on llm outputs after last user input
+        const showSuggestions = i > lastInputIndex;
 
-          return (
-            <React.Fragment key={i}>
-              <ToolsUsed message={message} />
-              <MessageBubble
-                message={message}
-                showActionBar={isChatOutput}
-                showRegenerate={isLatestOutput}
-                shouldActionBarVisibleOnHover={!isLatestOutput}
-                onRegenerate={chatActions.regenerate}
-              >
-                <MessageContent message={message} />
-                {/* <MessageFooter message={message} previousInput={findPreviousInput(array, i)} />*/}
-              </MessageBubble>
-              {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}
-              <EuiSpacer />
-            </React.Fragment>
-          );
-        })}
+        return (
+          <React.Fragment key={i}>
+            <ToolsUsed message={message} />
+            <MessageBubble
+              message={message}
+              showActionBar={isChatOutput}
+              showRegenerate={isLatestOutput}
+              shouldActionBarVisibleOnHover={!isLatestOutput}
+              onRegenerate={chatActions.regenerate}
+            >
+              <MessageContent message={message} />
+              {/* <MessageFooter message={message} previousInput={findPreviousInput(array, i)} />*/}
+            </MessageBubble>
+            {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}
+            <EuiSpacer />
+          </React.Fragment>
+        );
+      })}
       {loading && (
         <>
           <EuiSpacer />
