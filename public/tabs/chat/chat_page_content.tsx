@@ -114,9 +114,9 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatState.messages.map((message, i) => {
         // The latest llm output, just after the last user input
-        const isLatestOutput = lastInputIndex > 0 && i > lastInputIndex;
+        const isLatestOutput = lastInputIndex >= 0 && i > lastInputIndex;
         // All the llm output in response to user's input, exclude outputs before user's first input
-        const isChatOutput = firstInputIndex > 0 && i > firstInputIndex;
+        const isChatOutput = firstInputIndex >= 0 && i > firstInputIndex;
         // Only show suggestion on llm outputs after last user input
         const showSuggestions = i > lastInputIndex;
 
