@@ -13,10 +13,12 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import cx from 'classnames';
+import chatIcon from '../../../assets/chat.svg';
 import { IMessage, IOutput } from '../../../../common/types/chat_saved_object_attributes';
 import { useFeedback } from '../../../hooks/use_feed_back';
 
@@ -54,16 +56,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     [props, sendFeedback]
   );
 
-  const createAvatar = (iconType: IconType) => {
-    return (
-      <EuiAvatar
-        className="llm-chat-avatar"
-        name="llm"
-        size="l"
-        iconType={iconType}
-        iconColor="#fff"
-      />
-    );
+  const createAvatar = (iconType?: IconType) => {
+    if (iconType) {
+      return (
+        <EuiAvatar
+          className="llm-chat-avatar"
+          name="llm"
+          size="l"
+          iconType={iconType}
+          iconColor="#fff"
+        />
+      );
+    } else {
+      return <EuiIcon type={chatIcon} size="l" />;
+    }
   };
 
   if ('loading' in props && props.loading) {
@@ -119,9 +125,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          {props.message.contentType === 'error'
-            ? createAvatar('alert')
-            : createAvatar('chatRight')}
+          {props.message.contentType === 'error' ? createAvatar('alert') : createAvatar()}
         </EuiFlexItem>
         <EuiFlexItem className="llm-chat-bubble-wrapper">
           <EuiPanel
