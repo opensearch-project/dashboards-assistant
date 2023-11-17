@@ -19,7 +19,6 @@ const buildBasicGraph = () => ({
 });
 
 const ASSISTANT_MESSAGE_PREFIX = 'OpenSearch Assistant: ';
-const USER_MESSAGE_PREFIX = 'User: ';
 
 const createDashboardVizObject = (objectId: string) => {
   const vizUniqueId = htmlIdGenerator()();
@@ -64,7 +63,9 @@ const createDashboardVizObject = (objectId: string) => {
   return basicVizObject;
 };
 
-export const convertMessagesToParagraphs = (messages: IMessage[]) => {
+export const convertMessagesToParagraphs = (messages: IMessage[], username: string) => {
+  const userMessagePrefix = `${username}: `;
+
   return messages.map((message: IMessage) => {
     const paragraph = buildBasicGraph();
 
@@ -76,7 +77,7 @@ export const convertMessagesToParagraphs = (messages: IMessage[]) => {
         const messageText =
           // markdown and error represents assistant, text represents user.
           message.contentType === 'text'
-            ? USER_MESSAGE_PREFIX + message.content
+            ? userMessagePrefix + message.content
             : ASSISTANT_MESSAGE_PREFIX + message.content;
 
         Object.assign(paragraph, {

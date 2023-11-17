@@ -12,6 +12,7 @@ import { useChatState } from './use_chat_state';
 import { convertMessagesToParagraphs, Paragraphs } from '../utils';
 import { getCoreStart } from '../plugin';
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { useChatContext } from '../contexts/chat_context';
 
 interface SetParagraphResponse {
   objectId: string;
@@ -20,6 +21,7 @@ interface SetParagraphResponse {
 export const useSaveChat = () => {
   const core = useCore();
   const { chatState } = useChatState();
+  const chatContext = useChatContext();
 
   const createNotebook = useCallback(
     async (name: string) => {
@@ -62,7 +64,10 @@ export const useSaveChat = () => {
     async (name: string) => {
       try {
         const id = await createNotebook(name);
-        const paragraphs = convertMessagesToParagraphs(chatState.messages);
+        const paragraphs = convertMessagesToParagraphs(
+          chatState.messages,
+          chatContext.currentAccount.username
+        );
         await setParagraphs(id, paragraphs);
         const notebookLink = `./observability-notebooks#/${id}?view=view_both`;
 
@@ -92,7 +97,7 @@ export const useSaveChat = () => {
         }
       }
     },
-    [chatState, createNotebook, setParagraphs]
+    [chatState, createNotebook, setParagraphs, chatContext]
   );
 
   return { saveChat };

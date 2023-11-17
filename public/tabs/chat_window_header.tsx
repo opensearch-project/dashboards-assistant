@@ -115,8 +115,8 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
         );
         closePopover();
       }}
-      // There is only one message in initial discussion, which will not be stored.
-      disabled={chatState.messages.length <= 1}
+      // User only can save conversation when he send a message at least.
+      disabled={chatState.messages.filter((item) => item.type === 'input').length < 1}
     >
       Save to notebook
     </EuiContextMenuItem>,
