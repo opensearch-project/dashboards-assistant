@@ -38,6 +38,9 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [traceId, setTraceId] = useState<string | undefined>(undefined);
   const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
   const flyoutFullScreen = chatSize === 'fullscreen';
+  const [rootAgentId, setRootAgentId] = useState<string>(
+    new URL(window.location.href).searchParams.get('agent_id') || ''
+  );
 
   if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
 
@@ -73,6 +76,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       setTitle,
       traceId,
       setTraceId,
+      rootAgentId,
     }),
     [
       appId,

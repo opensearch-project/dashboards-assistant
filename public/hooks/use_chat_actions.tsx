@@ -36,6 +36,7 @@ export const useChatActions = (): AssistantActions => {
         // do not send abort signal to http client to allow LLM call run in background
         body: JSON.stringify({
           sessionId: chatContext.sessionId,
+          rootAgentId: chatContext.rootAgentId,
           ...(!chatContext.sessionId && { messages: chatState.messages }), // include all previous messages for new chats
           input,
         }),
