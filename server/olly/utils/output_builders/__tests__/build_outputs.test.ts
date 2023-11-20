@@ -35,14 +35,15 @@ describe('build outputs', () => {
   it('sanitizes markdown outputs', () => {
     const outputs = buildOutputs(
       'test question',
-      'normal text<b onmouseover=alert("XSS testing!")></b>',
+      'normal text<b onmouseover=alert("XSS testing!")></b> <img src="image.jpg" alt="image" width="500" height="600"> !!!!!!![](https://badurl) ![image](https://badurl) [good link](https://link)',
       'test-session',
       {},
       []
     );
     expect(outputs).toEqual([
       {
-        content: 'normal text<b></b>',
+        content:
+          'normal text<b></b>  [](https://badurl) [image](https://badurl) [good link](https://link)',
         contentType: 'markdown',
         traceId: 'test-session',
         suggestedActions: [],

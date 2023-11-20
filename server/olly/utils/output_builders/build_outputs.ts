@@ -50,6 +50,8 @@ const sanitize = (outputs: IMessage[]) => {
   const DOMPurify = createDOMPurify((window as unknown) as Window);
   return outputs.map((output) => ({
     ...output,
-    ...(output.contentType === 'markdown' && { content: DOMPurify.sanitize(output.content) }),
+    ...(output.contentType === 'markdown' && {
+      content: DOMPurify.sanitize(output.content, { FORBID_TAGS: ['img'] }).replace(/!+\[/g, '['),
+    }),
   }));
 };
