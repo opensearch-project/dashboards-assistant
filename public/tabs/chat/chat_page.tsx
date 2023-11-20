@@ -4,34 +4,36 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import cs from 'classnames';
 import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
-import { useGetSession } from '../../hooks/use_sessions';
 import { ChatPageContent } from './chat_page_content';
 import { ChatInputControls } from './controls/chat_input_controls';
+import { useObservable } from 'react-use';
+import { useCore } from '../../contexts/core_context';
 
 interface ChatPageProps {
   className?: string;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
+  const core = useCore();
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
   const [showGreetings, setShowGreetings] = useState(false);
-  const {
-    data: session,
-    loading: messagesLoading,
-    error: messagesLoadingError,
-    refresh,
-  } = useGetSession();
+  const sessionLoadStatus = useObservable(core.services.sessionLoad.status$);
+  const messagesLoading = sessionLoadStatus === 'loading';
 
-  useEffect(() => {
+  const refresh = useCallback(async () => {
+    if (!chatContext.sessionId) {
+      return;
+    }
+    const session = await core.services.sessionLoad.load(chatContext.sessionId);
     if (session) {
       chatStateDispatch({ type: 'receive', payload: session.messages });
     }
-  }, [session]);
+  }, [chatContext.sessionId, chatStateDispatch]);
 
   return (
     <>
@@ -42,7 +44,9 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
               showGreetings={showGreetings}
               setShowGreetings={setShowGreetings}
               messagesLoading={messagesLoading}
-              messagesLoadingError={messagesLoadingError}
+              messagesLoadingError={
+                typeof sessionLoadStatus !== 'string' ? sessionLoadStatus?.error : undefined
+              }
               onRefresh={refresh}
             />
           </EuiPageBody>

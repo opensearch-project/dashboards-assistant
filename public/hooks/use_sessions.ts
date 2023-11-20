@@ -6,45 +6,9 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
 import { HttpFetchQuery, SavedObjectsFindOptions } from '../../../../src/core/public';
 import { ASSISTANT_API } from '../../common/constants/llm';
-import { ISession, ISessionFindResponse } from '../../common/types/chat_saved_object_attributes';
-import { useChatContext } from '../contexts/chat_context';
+import { ISessionFindResponse } from '../../common/types/chat_saved_object_attributes';
 import { useCore } from '../contexts/core_context';
 import { GenericReducer, genericReducer, genericReducerWithAbortController } from './fetch_reducer';
-
-export const useGetSession = () => {
-  const chatContext = useChatContext();
-  const core = useCore();
-  const reducer: GenericReducer<ISession> = genericReducer;
-  const [state, dispatch] = useReducer(reducer, { loading: false });
-  const [refreshToggle, setRefreshToggle] = useState(false);
-
-  const refresh = useCallback(() => {
-    setRefreshToggle((flag) => !flag);
-  }, []);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    dispatch({ type: 'request' });
-    if (!chatContext.sessionId) {
-      dispatch({ type: 'success', payload: undefined });
-      return;
-    }
-
-    core.services.http
-      .get<ISession>(`${ASSISTANT_API.SESSION}/${chatContext.sessionId}`, {
-        signal: abortController.signal,
-      })
-      .then((payload) => dispatch({ type: 'success', payload }))
-      .catch((error) => dispatch({ type: 'failure', error }));
-
-    return () => {
-      abortController.abort();
-    };
-    // refreshToggle is used to force refresh session to get latest data
-  }, [chatContext.sessionId, refreshToggle]);
-
-  return { ...state, refresh };
-};
 
 export const useGetSessions = (options: Partial<SavedObjectsFindOptions> = {}) => {
   const core = useCore();

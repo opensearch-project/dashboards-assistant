@@ -53,8 +53,9 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const loadChat = (sessionId?: string, title?: string) => {
+  const loadChat = async (sessionId?: string, title?: string) => {
     abortControllerRef?.abort();
+    core.services.sessionLoad.abortController?.abort();
     chatContext.setSessionId(sessionId);
     chatContext.setTitle(title);
     // Chat page will always visible in fullscreen mode, we don't need to change the tab anymore
@@ -62,7 +63,14 @@ export const useChatActions = (): AssistantActions => {
       chatContext.setSelectedTabId('chat');
     }
     chatContext.setFlyoutComponent(null);
-    if (!sessionId) chatStateDispatch({ type: 'reset' });
+    if (!sessionId) {
+      chatStateDispatch({ type: 'reset' });
+      return;
+    }
+    const session = await core.services.sessionLoad.load(sessionId);
+    if (session) {
+      chatStateDispatch({ type: 'receive', payload: session.messages });
+    }
   };
 
   const openChatUI = () => {
