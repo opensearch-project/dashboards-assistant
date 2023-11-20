@@ -243,10 +243,6 @@ export const requestPPLGeneratorChain = async (
   callbacks?: Callbacks
 ): Promise<{ query: string }> => {
   const chain = new LLMChain({ llm: model, prompt });
-  const d = new Date();
-  const date = `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}-${(
-    '0' + d.getDate()
-  ).slice(-2)}`;
   const output = await chain.call({ question }, callbacks);
   const match = output.text.match(/<ppl>((.|[\r\n])+?)<\/ppl>/);
   if (match && match[1])
