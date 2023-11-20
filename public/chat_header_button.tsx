@@ -18,7 +18,7 @@ import { ActionExecutor, AssistantActions, ContentRenderer, UserAccount, TabId }
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
-  chatEnabled: boolean;
+  userHasAccess: boolean;
   contentRenderers: Record<string, ContentRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   assistantActions: AssistantActions;
@@ -68,7 +68,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       flyoutFullScreen,
       setFlyoutVisible,
       setFlyoutComponent,
-      chatEnabled: props.chatEnabled,
+      userHasAccess: props.userHasAccess,
       contentRenderers: props.contentRenderers,
       actionExecutors: props.actionExecutors,
       currentAccount: props.currentAccount,
@@ -84,7 +84,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       flyoutFullScreen,
       selectedTabId,
       preSelectedTabId,
-      props.chatEnabled,
+      props.userHasAccess,
       props.contentRenderers,
       props.actionExecutors,
       props.currentAccount,

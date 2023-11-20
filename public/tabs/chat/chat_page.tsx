@@ -6,11 +6,11 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import cs from 'classnames';
+import { useObservable } from 'react-use';
 import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
 import { ChatPageContent } from './chat_page_content';
 import { ChatInputControls } from './controls/chat_input_controls';
-import { useObservable } from 'react-use';
 import { useCore } from '../../contexts/core_context';
 
 interface ChatPageProps {
@@ -56,7 +56,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         <EuiSpacer />
         <ChatInputControls
           loading={chatState.llmResponding}
-          disabled={messagesLoading || chatState.llmResponding || !chatContext.chatEnabled}
+          disabled={messagesLoading || chatState.llmResponding || !chatContext.userHasAccess}
         />
         <EuiSpacer />
       </EuiFlyoutFooter>

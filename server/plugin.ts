@@ -17,7 +17,6 @@ import {
 import { OpenSearchAlertingPlugin } from './adaptors/opensearch_alerting_plugin';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
-import { AssistantServerConfig } from './config/schema';
 import './fetch-polyfill';
 import { setupRoutes } from './routes/index';
 import { chatSavedObject } from './saved_objects/chat_saved_object';
