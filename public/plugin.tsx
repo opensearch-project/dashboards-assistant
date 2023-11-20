@@ -28,8 +28,13 @@ export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreS
 
 interface PublicConfig {
   chat: {
+    // whether chat feature is enabled, UI should hide if false
     enabled: boolean;
   };
+}
+
+interface UserAccountResponse {
+  data: { roles: string[]; user_name: string; user_requested_tenant: string | null };
 }
 
 export class AssistantPlugin
@@ -46,23 +51,25 @@ export class AssistantPlugin
     const contentRenderers: Record<string, ContentRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
-    const getAccount = async () => {
-      return await core.http.get<{
-        data: { roles: string[]; user_name: string; user_requested_tenant: string | null };
-      }>('/api/v1/configuration/account');
-    };
-    const assistantEnabled = (() => {
-      let enabled: boolean;
+    /**
+     * Returns {@link UserAccountResponse} if request is successful,
+     * true if security plugin is not found, false if request failed.
+     */
+    const getAccount = (() => {
+      let account: UserAccountResponse | boolean;
       return async () => {
-        if (enabled === undefined) {
-          const account = await getAccount();
-          enabled = account.data.roles.some((role) =>
-            ['all_access', 'assistant_user'].includes(role)
-          );
+        if (account === undefined) {
+          account = await core.http
+            .get<UserAccountResponse>('/api/v1/configuration/account')
+            .catch((e) => e.body.statusCode === 404); // allow if security plugin is not installed
         }
-        return enabled;
+        return account;
       };
     })();
+    const checkAccess = (account: Awaited<ReturnType<typeof getAccount>>) =>
+      account === true ||
+      (account !== false &&
+        account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role)));
 
     if (this.config.chat.enabled) {
       core.getStartServices().then(async ([coreStart, startDeps]) => {
@@ -74,8 +81,8 @@ export class AssistantPlugin
           sessions: new SessionsService(coreStart.http),
         });
         const account = await getAccount();
-        const username = account.data.user_name;
-        const tenant = account.data.user_requested_tenant ?? '';
+        const username = typeof account === 'boolean' ? 'dashboards_user' : account.data.user_name;
+        const tenant = typeof account === 'boolean' ? '' : account.data.user_requested_tenant ?? '';
 
         coreStart.chrome.navControls.registerRight({
           order: 10000,
@@ -83,9 +90,7 @@ export class AssistantPlugin
             <CoreContext.Provider>
               <HeaderChatButton
                 application={coreStart.application}
-                chatEnabled={account.data.roles.some((role) =>
-                  ['all_access', 'assistant_user'].includes(role)
-                )}
+                userHasAccess={checkAccess(account)}
                 contentRenderers={contentRenderers}
                 actionExecutors={actionExecutors}
                 assistantActions={assistantActions}
@@ -108,7 +113,8 @@ export class AssistantPlugin
           console.warn(`Action executor type ${actionType} is already registered.`);
         actionExecutors[actionType] = execute;
       },
-      assistantEnabled,
+      assistantEnabled: async () =>
+        this.config.chat.enabled && (await getAccount().then(checkAccess)),
       assistantActions,
     };
   }
