@@ -43,6 +43,6 @@ Put each question in a <question> tag.`,
   const match = Array.from(output.text.matchAll(/<question>((.|[\r\n])+?)<\/question>/g)).map(
     (m) => (m as unknown[])[1]
   );
-  if (match.length === 0) return [output.text];
+  if (match.length === 0) throw new Error(output.text);
   return match as string[];
 };
