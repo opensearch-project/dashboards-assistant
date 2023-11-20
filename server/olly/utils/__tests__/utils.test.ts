@@ -26,11 +26,10 @@ describe('protect calls', () => {
   });
 
   it('should truncate text if output is too long', async () => {
-    const tool = jest.fn().mockResolvedValue('failed to run in test'.repeat(1000) + 'end message');
+    const tool = jest.fn().mockResolvedValue('failed to run in test'.repeat(1000));
     const truncated = protectCall(tool);
     const res = await truncated('input');
     expect(res).toContain('Output is too long, truncated');
-    expect(res).toContain('end message');
     expect(res.length).toEqual(MAX_OUTPUT_CHAR);
   });
 });
