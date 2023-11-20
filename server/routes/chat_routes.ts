@@ -15,6 +15,7 @@ import { ASSISTANT_API } from '../../common/constants/llm';
 import { OllyChatService } from '../services/chat/olly_chat_service';
 import { SavedObjectsStorageService } from '../services/storage/saved_objects_storage_service';
 import { IMessage, IInput } from '../../common/types/chat_saved_object_attributes';
+import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
 
 const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
@@ -22,6 +23,7 @@ const llmRequestRoute = {
     body: schema.object({
       sessionId: schema.maybe(schema.string()),
       messages: schema.maybe(schema.arrayOf(schema.any())),
+      rootAgentId: schema.string(),
       input: schema.object({
         type: schema.literal('input'),
         context: schema.object({
@@ -104,7 +106,7 @@ const updateSessionRoute = {
 
 export function registerChatRoutes(router: IRouter) {
   const createStorageService = (context: RequestHandlerContext) =>
-    new SavedObjectsStorageService(context.core.savedObjects.client);
+    new AgentFrameworkStorageService(context.core.opensearch.client.asCurrentUser);
   const createChatService = () => new OllyChatService();
 
   router.post(
@@ -114,34 +116,25 @@ export function registerChatRoutes(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { sessionId, input, messages = [] } = request.body;
+      const { messages = [], input, sessionId: sessionIdInRequestBody } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService();
 
-      // get history from the chat object for existing chats
-      if (sessionId && messages.length === 0) {
-        try {
-          const session = await storageService.getSession(sessionId);
-          messages.push(...session.messages);
-        } catch (error) {
-          return response.custom({ statusCode: error.statusCode || 500, body: error.message });
-        }
-      }
-
       try {
         const outputs = await chatService.requestLLM(
-          { messages, input, sessionId },
+          { messages, input, sessionId: sessionIdInRequestBody },
           context,
           request
         );
-        const title = input.content.substring(0, 50);
-        const saveMessagesResponse = await storageService.saveMessages(
-          title,
-          sessionId,
-          [...messages, input, ...outputs].filter((message) => message.content !== 'AbortError')
-        );
+        const sessionId = outputs.memoryId;
+        const finalMessage = await storageService.getSession(sessionId);
+
         return response.ok({
-          body: { ...saveMessagesResponse, title },
+          body: {
+            messages: finalMessage.messages,
+            sessionId: outputs.memoryId,
+            title: finalMessage.title
+          },
         });
       } catch (error) {
         context.assistant_plugin.logger.warn(error);
@@ -278,13 +271,13 @@ export function registerChatRoutes(router: IRouter) {
         const outputs = await chatService.requestLLM(
           { messages, input, sessionId },
           context,
-          request
+          request as any
         );
         const title = input.content.substring(0, 50);
         const saveMessagesResponse = await storageService.saveMessages(
           title,
           sessionId,
-          [...messages, input, ...outputs].filter((message) => message.content !== 'AbortError')
+          [...messages, input, ...outputs.messages].filter((message) => message.content !== 'AbortError')
         );
         return response.ok({
           body: { ...saveMessagesResponse, title },
