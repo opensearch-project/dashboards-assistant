@@ -16,6 +16,7 @@ import { OllyChatService } from '../services/chat/olly_chat_service';
 import { SavedObjectsStorageService } from '../services/storage/saved_objects_storage_service';
 import { IMessage, IInput } from '../../common/types/chat_saved_object_attributes';
 import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
+import { RoutesOptions } from '../types';
 
 const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
@@ -104,7 +105,7 @@ const updateSessionRoute = {
   },
 };
 
-export function registerChatRoutes(router: IRouter) {
+export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions) {
   const createStorageService = (context: RequestHandlerContext) =>
     new AgentFrameworkStorageService(context.core.opensearch.client.asCurrentUser);
   const createChatService = () => new OllyChatService();
