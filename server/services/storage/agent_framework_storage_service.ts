@@ -57,29 +57,7 @@ export class AgentFrameworkStorageService implements StorageService {
   }
 
   async getSessions(query: GetSessionsSchema): Promise<ISessionFindResponse> {
-    await this.createIndex();
-    const sessions = await this.client.search<ISession>({
-      index: LLM_INDEX.SESSIONS,
-      body: {
-        from: (query.page - 1) * query.perPage,
-        size: query.perPage,
-        ...(query.sortField &&
-          query.sortOrder && { sort: [{ [query.sortField]: query.sortOrder }] }),
-      },
-    });
-
-    return {
-      objects: sessions.body.hits.hits
-        .filter(
-          (hit): hit is RequiredKey<typeof hit, '_source'> =>
-            hit._source !== null && hit._source !== undefined
-        )
-        .map((session) => ({ ...session._source, id: session._id })),
-      total:
-        typeof sessions.body.hits.total === 'number'
-          ? sessions.body.hits.total
-          : sessions.body.hits.total.value,
-    };
+    throw new Error('Method not implemented.');
   }
 
   async saveMessages(
@@ -87,57 +65,7 @@ export class AgentFrameworkStorageService implements StorageService {
     sessionId: string | undefined,
     messages: IMessage[]
   ): Promise<{ sessionId: string; messages: IMessage[] }> {
-    await this.createIndex();
-    const timestamp = new Date().getTime();
-    if (!sessionId) {
-      const createResponse = await this.client.index<ISession>({
-        index: LLM_INDEX.SESSIONS,
-        body: {
-          title,
-          version: 1,
-          createdTimeMs: timestamp,
-          updatedTimeMs: timestamp,
-          messages,
-        },
-      });
-      return { sessionId: createResponse.body._id, messages };
-    }
-    const updateResponse = await this.client.update<Partial<ISession>>({
-      index: LLM_INDEX.SESSIONS,
-      id: sessionId,
-      body: {
-        doc: {
-          messages,
-          updatedTimeMs: timestamp,
-        },
-      },
-    });
-    return { sessionId, messages };
-  }
-
-  private async createIndex() {
-    const existsResponse = await this.client.indices.exists({ index: LLM_INDEX.SESSIONS });
-    if (!existsResponse.body) {
-      return this.client.indices.create({
-        index: LLM_INDEX.SESSIONS,
-        body: {
-          settings: {
-            index: {
-              number_of_shards: '1',
-              auto_expand_replicas: '0-2',
-              mapping: { ignore_malformed: true },
-            },
-          },
-          mappings: {
-            properties: {
-              title: { type: 'keyword' },
-              createdTimeMs: { type: 'date' },
-              updatedTimeMs: { type: 'date' },
-            },
-          },
-        },
-      });
-    }
+    throw new Error('Method not implemented.');
   }
   deleteSession(sessionId: string): Promise<{}> {
     throw new Error('Method not implemented.');
