@@ -26,8 +26,10 @@ export interface MessageParser {
    */
   id: string;
   /**
-   * Order declare the order message parser will be execute.
-   * parser with order 2 will be execute before parser with order 1.
+   * Order field declares the order message parser will be execute.
+   * parser with order 2 will be executed after parser with order 1.
+   * If not specified, the default order will be 999.
+   * @default 999
    */
   order?: number;
   /**
