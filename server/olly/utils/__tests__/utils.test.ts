@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MAX_TOOL_OUTPUT_CHAR } from '../constants';
+import { MAX_OUTPUT_CHAR } from '../constants';
 import { flatten, jsonToCsv, protectCall } from '../utils';
 
 describe('protect calls', () => {
@@ -26,11 +26,12 @@ describe('protect calls', () => {
   });
 
   it('should truncate text if output is too long', async () => {
-    const tool = jest.fn().mockResolvedValue('failed to run in test'.repeat(1000));
+    const tool = jest.fn().mockResolvedValue('failed to run in test'.repeat(1000) + 'end message');
     const truncated = protectCall(tool);
     const res = await truncated('input');
     expect(res).toContain('Output is too long, truncated');
-    expect(res.length).toEqual(MAX_TOOL_OUTPUT_CHAR);
+    expect(res).toContain('end message');
+    expect(res.length).toEqual(MAX_OUTPUT_CHAR);
   });
 });
 

@@ -4,7 +4,7 @@
  */
 
 import { DynamicToolInput } from 'langchain/tools';
-import { MAX_TOOL_OUTPUT_CHAR } from './constants';
+import { MAX_OUTPUT_CHAR } from './constants';
 
 /**
  * Use to wrap tool funcs to truncate when output is too long and swallow if
@@ -21,12 +21,18 @@ export const protectCall = (func: DynamicToolInput['func']): DynamicToolInput['f
     } catch (error) {
       response = `Error when running tool: ${error}`;
     }
-    if (response.length > MAX_TOOL_OUTPUT_CHAR) {
-      const tailMessage = '\n\nOutput is too long, truncated...';
-      response = response.slice(0, MAX_TOOL_OUTPUT_CHAR - tailMessage.length) + tailMessage;
-    }
-    return response;
+    return truncate(response);
   };
+};
+
+export const truncate = (text: string, maxLength: number = MAX_OUTPUT_CHAR) => {
+  if (text.length <= maxLength) return text;
+  const tailMessage = '\n\nOutput is too long, truncated... end:\n\n';
+  return (
+    text.slice(0, MAX_OUTPUT_CHAR - tailMessage.length - 300) +
+    tailMessage +
+    text.slice(text.length - 300)
+  );
 };
 
 export const jsonToCsv = (json: object[]) => {
