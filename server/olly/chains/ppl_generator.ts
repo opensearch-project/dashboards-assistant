@@ -6,7 +6,6 @@
 import { BaseLanguageModel } from 'langchain/base_language';
 import { Callbacks } from 'langchain/callbacks';
 import { LLMChain } from 'langchain/chains';
-import { StructuredOutputParser } from 'langchain/output_parsers';
 import { PromptTemplate } from 'langchain/prompts';
 
 const template = `
@@ -65,7 +64,7 @@ Question: Find the documents in index 'accounts' where firstname is not 'Hattie'
 PPL: source=\`accounts\` | where \`firstname\` != 'Hattie' AND \`lastname\` != 'frank'
 
 Question: Find the emails that contain '.com' in index 'accounts'
-PPL: source=\`accounts\` | where MATCH(\`email\`, '.com') | fields \`email\`
+PPL: source=\`accounts\` | where QUERY_STRING(['email'], '.com') | fields \`email\`
 
 Question: Find the documents in index 'accounts' where there is an email
 PPL: source=\`accounts\` | where ISNOTNULL(\`email\`)
@@ -78,6 +77,9 @@ PPL: source=\`accounts\` | where \`firstname\` ='Amber' | stats COUNT() AS \`cou
 
 Question: How many people are older than 33? index is 'accounts'
 PPL: source=\`accounts\` | where \`age\` > 33 | stats COUNT() AS \`count\`
+
+Question: How many distinct ages? index is 'accounts'
+PPL: source=\`accounts\` | stats DISTINCT_COUNT(age) AS \`distinct_count\`
 
 Question: How many males and females in index 'accounts'?
 PPL: source=\`accounts\` | stats COUNT() AS \`count\` BY \`gender\`
@@ -141,13 +143,13 @@ Fields:
 - user: keyword ("eddie")
 
 Question: What is the average price of products in clothing category ordered in the last 7 days? index is 'ecommerce'
-PPL: source=\`ecommerce\` | where MATCH(\`category\`, 'clothing') AND \`order_date\` < DATE_SUB(NOW(), INTERVAL 7 DAY) | stats AVG(\`taxful_total_price\`) AS \`avg_price\`
+PPL: source=\`ecommerce\` | where QUERY_STRING(['category'], 'clothing') AND \`order_date\` > DATE_SUB(NOW(), INTERVAL 7 DAY) | stats AVG(\`taxful_total_price\`) AS \`avg_price\`
 
-Question: What is the average price of products ordered today by every 2 hours? index is 'ecommerce'
-PPL: source=\`ecommerce\` | where \`order_date\` < DATE_SUB(NOW(), INTERVAL 24 HOUR) | stats AVG(\`taxful_total_price\`) AS \`avg_price\` by SPAN(\`order_date\`, 2h)
+Question: What is the average price of products in each city ordered today by every 2 hours? index is 'ecommerce'
+PPL: source=\`ecommerce\` | where \`order_date\` > DATE_SUB(NOW(), INTERVAL 24 HOUR) | stats AVG(\`taxful_total_price\`) AS \`avg_price\` by SPAN(\`order_date\`, 2h) AS \`span\`, \`geoip.city_name\`
 
 Question: What is the total revenue of shoes each day in this week? index is 'ecommerce'
-PPL: source=\`ecommerce\` | where MATCH(\`category\`, 'shoes') AND \`order_date\` < DATE_SUB(NOW(), INTERVAL 1 WEEK) | stats SUM(\`taxful_total_price\`) AS \`revenue\` by SPAN(\`order_date\`, 1d)
+PPL: source=\`ecommerce\` | where QUERY_STRING(['category'], 'shoes') AND \`order_date\` > DATE_SUB(NOW(), INTERVAL 1 WEEK) | stats SUM(\`taxful_total_price\`) AS \`revenue\` by SPAN(\`order_date\`, 1d) AS \`span\`
 
 ----------------
 
@@ -180,16 +182,22 @@ Fields:
 - trace_id: text ("102981ABCD2901")
 
 Question: What are recent logs with errors and contains word 'test'? index is 'events'
-PPL: source=\`events\` | where \`http.response.status_code\` != "200" AND MATCH(\`body\`, 'test') AND \`observerTime\` < DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+PPL: source=\`events\` | where QUERY_STRING(['http.response.status_code'], '4* OR 5*') AND QUERY_STRING(['body'], 'test') AND \`observerTime\` > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+
+Question: What is the total number of log with a status code other than 200 in 2023 Feburary? index is 'events'
+PPL: source=\`events\` | where QUERY_STRING(['http.response.status_code'], '!200') AND \`observerTime\` >= '2023-03-01 00:00:00' AND \`observerTime\` < '2023-04-01 00:00:00' | stats COUNT() AS \`count\`
+
+Question: Count the number of business days that have web category logs last week? index is 'events'
+PPL: source=\`events\` | where \`category\` = 'web' AND \`observerTime\` > DATE_SUB(NOW(), INTERVAL 1 WEEK) AND DAY_OF_WEEK(\`observerTime\`) >= 2 AND DAY_OF_WEEK(\`observerTime\`) <= 6 | stats DISTINCT_COUNT(DATE_FORMAT(\`observerTime\`, 'yyyy-MM-dd')) AS \`distinct_count\`
 
 Question: What are the top traces with largest bytes? index is 'events'
-PPL: source=\`events\` | stats SUM(\`http.response.bytes\`) as \`sum_bytes\` by \`trace_id\` | sort -sum_bytes | head
+PPL: source=\`events\` | stats SUM(\`http.response.bytes\`) AS \`sum_bytes\` by \`trace_id\` | sort -sum_bytes | head
 
 Question: Give me log patterns? index is 'events'
-PPL: source=\`events\` | patterns \`body\` | stats take(\`body\`, 1) as \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
+PPL: source=\`events\` | patterns \`body\` | stats take(\`body\`, 1) AS \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
 
 Question: Give me log patterns for logs with errors? index is 'events'
-PPL: source=\`events\` | where \`http.response.status_code\` != "200" | patterns \`body\` | stats take(\`body\`, 1) as \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
+PPL: source=\`events\` | where QUERY_STRING(['http.response.status_code'], '4* OR 5*') | patterns \`body\` | stats take(\`body\`, 1) AS \`sample_pattern\` by \`patterns_field\` | fields \`sample_pattern\`
 
 ----------------
 
@@ -208,34 +216,45 @@ Step 2. Pick the fields that are relevant to the question from the provided fiel
 #08 You must pick the field that contains a log line when asked about log patterns. Usually it is one of \`log\`, \`body\`, \`message\`.
 
 Step 3. Use the choosen fields to write the PPL query. Rules:
-#01 Always use comparisons to filter date/time, eg. 'where \`timestamp\` < DATE_SUB(NOW(), INTERVAL 1 DAY)'.
+#01 Always use comparisons to filter date/time, eg. 'where \`timestamp\` > DATE_SUB(NOW(), INTERVAL 1 DAY)'; or by absolute time: "where \`timestamp\` > 'yyyy-MM-dd HH:mm:ss'", eg.  "where \`timestamp\` < '2023-01-01 00:00:00'". Do not use \`DATE_FORMAT()\`.
 #02 Only use PPL syntax and keywords appeared in the question or in the examples.
 #03 If user asks for current or recent status, filter the time field for last 5 minutes.
 #04 The field used in 'SPAN(\`<field>\`, <interval>)' must have type \`date\`, not \`long\`.
-#05 You must put values in quotes when filtering fields with \`text\` or \`keyword\` field type.
+#05 When aggregating by \`SPAN\` and another field, put \`SPAN\` after \`by\` and before the other field, eg. 'stats COUNT() AS \`count\` by SPAN(\`timestamp\`, 1d) AS \`span\`, \`category\`'.
+#06 You must put values in quotes when filtering fields with \`text\` or \`keyword\` field type.
+#07 To find documents that contain certain phrases in string fields, use \`QUERY_STRING\` which supports multiple fields and wildcard, eg. "where QUERY_STRING(['field1', 'field2'], 'prefix*')".
+#08 To find 4xx and 5xx errors using status code, if the status code field type is numberic (eg. \`integer\`), then use 'where \`status_code\` >= 400'; if the field is a string (eg. \`text\` or \`keyword\`), then use "where QUERY_STRING(['status_code'], '4* OR 5*')".
 
 ----------------
-{format_instructions}
+Put your PPL query in <ppl> tags.
 ----------------
 
 {question}
 `.trim();
 
-const parser = StructuredOutputParser.fromNamesAndDescriptions({ query: 'This is a PPL query' });
-const formatInstructions = parser.getFormatInstructions();
-
 const prompt = new PromptTemplate({
   template,
   inputVariables: ['question'],
-  partialVariables: { format_instructions: formatInstructions },
 });
 
 export const requestPPLGeneratorChain = async (
   model: BaseLanguageModel,
   question: string,
   callbacks?: Callbacks
-) => {
+): Promise<{ query: string }> => {
   const chain = new LLMChain({ llm: model, prompt });
+  const d = new Date();
+  const date = `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}-${(
+    '0' + d.getDate()
+  ).slice(-2)}`;
   const output = await chain.call({ question }, callbacks);
-  return parser.parse(output.text);
+  const match = output.text.match(/<ppl>((.|[\r\n])+?)<\/ppl>/);
+  if (match && match[1])
+    return {
+      query: match[1]
+        .replace(/[\r\n]/g, ' ')
+        .replace(/ISNOTNULL/g, 'isnotnull') // TODO remove after https://github.com/opensearch-project/sql/issues/2431
+        .trim(),
+    };
+  throw new Error(output.text);
 };
