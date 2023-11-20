@@ -31,7 +31,7 @@ export class OllyChatService implements ChatService {
     messages: IMessage[];
     memoryId: string;
   }> {
-    const { input, sessionId } = payload;
+    const { input, sessionId, rootAgentId } = request.body;
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
 
     if (payload.sessionId) {
@@ -57,7 +57,7 @@ export class OllyChatService implements ChatService {
       }
       const agentFrameworkResponse = (await opensearchClient.transport.request({
         method: 'POST',
-        path: '/_plugins/_ml/agents/-jld3IsBXlmiPBu-5dDC/_execute',
+        path: `/_plugins/_ml/agents/${rootAgentId}/_execute`,
         body: {
           parameters: parametersPayload,
         },

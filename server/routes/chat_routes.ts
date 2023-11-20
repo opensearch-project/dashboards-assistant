@@ -23,6 +23,7 @@ const llmRequestRoute = {
     body: schema.object({
       sessionId: schema.maybe(schema.string()),
       messages: schema.maybe(schema.arrayOf(schema.any())),
+      rootAgentId: schema.string(),
       input: schema.object({
         type: schema.literal('input'),
         context: schema.object({
