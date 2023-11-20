@@ -18,4 +18,6 @@ export interface StorageService {
     sessionId: string | undefined,
     messages: IMessage[]
   ): Promise<{ sessionId: string; messages: IMessage[] }>;
+  deleteSession(sessionId: string): Promise<{}>;
+  updateSession(sessionId: string, title: string): Promise<{}>;
 }
