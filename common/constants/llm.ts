@@ -13,6 +13,7 @@ export const ASSISTANT_API = {
   SESSION: `${API_BASE}/session`,
   SESSIONS: `${API_BASE}/sessions`,
   PPL_GENERATOR: `${API_BASE}/generate_ppl`,
+  SUMMARIZATION: `${API_BASE}/summarize`,
   AGENT_TEST: `${API_BASE}/agent_test`,
   FEEDBACK: `${API_BASE}/feedback`,
   ABORT_AGENT_EXECUTION: `${API_BASE}/abort`,
