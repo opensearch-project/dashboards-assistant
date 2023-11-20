@@ -13,7 +13,10 @@ export interface ChatService {
     payload: { messages: IMessage[]; input: IInput; sessionId?: string },
     context: RequestHandlerContext,
     request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
-  ): Promise<IMessage[]>;
+  ): Promise<{
+    messages: IMessage[];
+    memoryId: string;
+  }>;
   generatePPL(
     context: RequestHandlerContext,
     request: OpenSearchDashboardsRequest<unknown, unknown, PPLGenerationRequestSchema, 'post'>
