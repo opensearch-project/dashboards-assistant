@@ -50,6 +50,18 @@ describe('MessageParserRunner', () => {
         },
       },
       {
+        id: 'testOrder1000',
+        order: 1000,
+        parserProvider(interaction, messageParserHelper) {
+          messageParserHelper.addMessage({
+            type: 'output',
+            contentType: 'markdown',
+            content: 'order1000',
+          });
+          return Promise.resolve('');
+        },
+      },
+      {
         id: 'testNoOrder',
         parserProvider(interaction, messageParserHelper) {
           messageParserHelper.addMessage({
@@ -94,6 +106,11 @@ describe('MessageParserRunner', () => {
         type: 'output',
         contentType: 'markdown',
         content: 'NoOrder',
+      },
+      {
+        type: 'output',
+        contentType: 'markdown',
+        content: 'order1000',
       },
     ]);
   });
