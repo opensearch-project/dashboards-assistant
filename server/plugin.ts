@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { first } from 'rxjs/operators';
 import 'web-streams-polyfill';
+import { AssistantConfig } from '.';
 import {
   CoreSetup,
   CoreStart,
@@ -15,6 +17,7 @@ import {
 import { OpenSearchAlertingPlugin } from './adaptors/opensearch_alerting_plugin';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
+import { AssistantServerConfig } from './config/schema';
 import './fetch-polyfill';
 import { setupRoutes } from './routes/index';
 import { chatSavedObject } from './saved_objects/chat_saved_object';
@@ -24,12 +27,16 @@ import { chatConfigSavedObject } from './saved_objects/chat_config_saved_object'
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public async setup(core: CoreSetup) {
     this.logger.debug('Assistant: Setup');
+    const config = await this.initializerContext.config
+      .create<AssistantConfig>()
+      .pipe(first())
+      .toPromise();
     const router = core.http.createRouter();
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
       'opensearch_observability',
@@ -40,6 +47,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
 
     core.http.registerRouteHandlerContext('assistant_plugin', (context, request) => {
       return {
+        config,
         logger: this.logger,
         observabilityClient: openSearchObservabilityClient,
       };

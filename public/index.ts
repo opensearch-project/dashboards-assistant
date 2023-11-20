@@ -3,8 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { PluginInitializerContext } from '../../../src/core/public';
 import { AssistantPlugin } from './plugin';
 
 export { AssistantPlugin as Plugin };
 
-export const plugin = () => new AssistantPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new AssistantPlugin(initializerContext);
+}
