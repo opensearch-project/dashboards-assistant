@@ -44,6 +44,7 @@ interface HistorySearchListProps
   onSearchChange: EuiFieldSearchProps['onChange'];
   onLoadChat: (sessionId?: string | undefined, title?: string | undefined) => void;
   onRefresh: () => void;
+  onHistoryDeleted: (id: string) => void;
 }
 
 const HistorySearchList = ({
@@ -57,6 +58,7 @@ const HistorySearchList = ({
   onLoadChat,
   onChangePage,
   onSearchChange,
+  onHistoryDeleted,
   onChangeItemsPerPage,
 }: HistorySearchListProps) => {
   const [editingConversation, setEditingConversation] = useState<{
@@ -80,9 +82,13 @@ const HistorySearchList = ({
       if (status === 'deleted') {
         onRefresh();
       }
+      if (!deletingConversation) {
+        return;
+      }
+      onHistoryDeleted(deletingConversation.id);
       setDeletingConversation(null);
     },
-    [setDeletingConversation, onRefresh]
+    [setDeletingConversation, onRefresh, deletingConversation, onHistoryDeleted]
   );
   return (
     <>
@@ -142,7 +148,7 @@ interface ChatHistoryPageProps {
 
 export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props) => {
   const { loadChat } = useChatActions();
-  const { setSelectedTabId, flyoutFullScreen } = useChatContext();
+  const { setSelectedTabId, flyoutFullScreen, sessionId } = useChatContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchName, setSearchName] = useState<string>();
@@ -176,6 +182,16 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
   const handleBack = useCallback(() => {
     setSelectedTabId('chat');
   }, [setSelectedTabId]);
+
+  const handleHistoryDeleted = useCallback(
+    (id: string) => {
+      if (sessionId === id) {
+        // Switch to new conversation when current session be deleted
+        loadChat();
+      }
+    },
+    [sessionId]
+  );
 
   useDebounce(
     () => {
@@ -234,6 +250,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={setPageIndex}
               {...(sessions ? { pageCount: Math.ceil(sessions.total / pageSize) } : {})}
+              onHistoryDeleted={handleHistoryDeleted}
             />
           )}
         </EuiPageBody>
