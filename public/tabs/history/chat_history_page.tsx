@@ -140,7 +140,7 @@ interface ChatHistoryPageProps {
   className?: string;
 }
 
-export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
+export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props) => {
   const { loadChat } = useChatActions();
   const { setSelectedTabId, flyoutFullScreen } = useChatContext();
   const [pageIndex, setPageIndex] = useState(0);
@@ -240,4 +240,4 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = (props) => {
       </EuiPage>
     </EuiFlyoutBody>
   );
-};
+});
