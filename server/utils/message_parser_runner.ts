@@ -11,7 +11,13 @@ export class MessageParserRunner {
   constructor(private readonly messageParsers: MessageParser[]) {}
   async run(interaction: Interaction): Promise<IMessage[]> {
     const messageParserHelper = new MessageParserHelper();
-    for (const messageParser of this.messageParsers) {
+    const sortedParsers = [...this.messageParsers];
+    sortedParsers.sort((parserA, parserB) => {
+      const { order: orderA = 999 } = parserA;
+      const { order: orderB = 999 } = parserB;
+      return orderA - orderB;
+    });
+    for (const messageParser of sortedParsers) {
       await messageParser.parserProvider(interaction, messageParserHelper);
     }
     return messageParserHelper.messages;
