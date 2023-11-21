@@ -21,7 +21,7 @@ export class AgentFrameworkStorageService implements StorageService {
   async getSession(sessionId: string): Promise<ISession> {
     const session = (await this.client.transport.request({
       method: 'GET',
-      path: `/_plugins/_ml/memory/conversation/${sessionId}`,
+      path: `/_plugins/_ml/memory/conversation/${sessionId}/_list`,
     })) as ApiResponse<{
       interactions: Array<{
         input: string;
