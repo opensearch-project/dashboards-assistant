@@ -155,7 +155,10 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
                 color="text"
                 onClick={() => {
                   chatContext.setFlyoutComponent(undefined);
-                  chatContext.setSelectedTabId('history');
+                  // Back to chat tab if history page already visible
+                  chatContext.setSelectedTabId(
+                    chatContext.selectedTabId === 'history' ? 'chat' : 'history'
+                  );
                 }}
                 display={chatContext.selectedTabId === 'history' ? 'fill' : undefined}
               />
