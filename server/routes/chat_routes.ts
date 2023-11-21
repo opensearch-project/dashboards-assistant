@@ -13,7 +13,6 @@ import {
 } from '../../../../src/core/server';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { OllyChatService } from '../services/chat/olly_chat_service';
-import { SavedObjectsStorageService } from '../services/storage/saved_objects_storage_service';
 import { IMessage, IInput } from '../../common/types/chat_saved_object_attributes';
 import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
 import { RoutesOptions } from '../types';
@@ -63,6 +62,7 @@ const regenerateRoute = {
   validate: {
     body: schema.object({
       sessionId: schema.string(),
+      rootAgentId: schema.string(),
     }),
   },
 };
@@ -105,9 +105,12 @@ const updateSessionRoute = {
   },
 };
 
-export function registerChatRoutes(router: IRouter) {
+export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions) {
   const createStorageService = (context: RequestHandlerContext) =>
-    new AgentFrameworkStorageService(context.core.opensearch.client.asCurrentUser);
+    new AgentFrameworkStorageService(
+      context.core.opensearch.client.asCurrentUser,
+      routeOptions.messageParsers
+    );
   const createChatService = () => new OllyChatService();
 
   router.post(
@@ -117,15 +120,14 @@ export function registerChatRoutes(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { messages = [], input, sessionId: sessionIdInRequestBody } = request.body;
+      const { messages = [], input, sessionId: sessionIdInRequestBody, rootAgentId } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService();
 
       try {
         const outputs = await chatService.requestLLM(
-          { messages, input, sessionId: sessionIdInRequestBody },
-          context,
-          request
+          { messages, input, sessionId: sessionIdInRequestBody, rootAgentId },
+          context
         );
         const sessionId = outputs.memoryId;
         const finalMessage = await storageService.getSession(sessionId);
@@ -250,7 +252,7 @@ export function registerChatRoutes(router: IRouter) {
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { sessionId } = request.body;
+      const { sessionId, rootAgentId } = request.body;
       const storageService = createStorageService(context);
       let messages: IMessage[] = [];
       const chatService = createChatService();
@@ -270,10 +272,8 @@ export function registerChatRoutes(router: IRouter) {
 
       try {
         const outputs = await chatService.requestLLM(
-          { messages, input, sessionId },
-          context,
-          // @ts-ignore
-          request
+          { messages, input, sessionId, rootAgentId },
+          context
         );
         const title = input.content.substring(0, 50);
         const saveMessagesResponse = await storageService.saveMessages(

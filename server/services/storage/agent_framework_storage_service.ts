@@ -5,7 +5,6 @@
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { OpenSearchClient } from '../../../../../src/core/server';
-import { LLM_INDEX } from '../../../common/constants/llm';
 import {
   IInput,
   IMessage,
@@ -15,9 +14,14 @@ import {
 } from '../../../common/types/chat_saved_object_attributes';
 import { GetSessionsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
+import { MessageParser } from '../../types';
+import { MessageParserRunner } from '../../utils/message_parser_runner';
 
 export class AgentFrameworkStorageService implements StorageService {
-  constructor(private readonly client: OpenSearchClient) {}
+  constructor(
+    private readonly client: OpenSearchClient,
+    private readonly messageParsers: MessageParser[] = []
+  ) {}
   async getSession(sessionId: string): Promise<ISession> {
     const session = (await this.client.transport.request({
       method: 'GET',
@@ -30,29 +34,18 @@ export class AgentFrameworkStorageService implements StorageService {
         interaction_id: string;
       }>;
     }>;
+    const messageParserRunner = new MessageParserRunner(this.messageParsers);
+    const allInteractions = session.body.interactions.filter((item) => !item.parent_interaction_id);
+    let finalMessages: IMessage[] = [];
+    for (const interaction of allInteractions) {
+      finalMessages = [...finalMessages, ...(await messageParserRunner.run(interaction))];
+    }
     return {
       title: 'test',
       version: 1,
       createdTimeMs: Date.now(),
       updatedTimeMs: Date.now(),
-      messages: session.body.interactions
-        .filter((item) => !item.parent_interaction_id)
-        .reduce((total, current) => {
-          const inputItem: IInput = {
-            type: 'input',
-            contentType: 'text',
-            content: current.input,
-          };
-          const outputItems: IOutput[] = [
-            {
-              type: 'output',
-              contentType: 'markdown',
-              content: current.response,
-              traceId: current.interaction_id,
-            },
-          ];
-          return [...total, inputItem, ...outputItems];
-        }, [] as IMessage[]),
+      messages: finalMessages,
     };
   }
 
