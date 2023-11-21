@@ -40,6 +40,7 @@ export interface AssistantStart {}
 
 export interface UserAccount {
   username: string;
+  tenant: string;
 }
 
 export interface ChatConfig {

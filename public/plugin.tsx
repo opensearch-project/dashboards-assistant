@@ -46,9 +46,9 @@ export class AssistantPlugin
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
     const getAccount = async () => {
-      return await core.http.get<{ data: { roles: string[]; user_name: string } }>(
-        '/api/v1/configuration/account'
-      );
+      return await core.http.get<{
+        data: { roles: string[]; user_name: string; user_requested_tenant: string | null };
+      }>('/api/v1/configuration/account');
     };
     const assistantEnabled = (() => {
       let enabled: boolean;
@@ -73,6 +73,7 @@ export class AssistantPlugin
         });
         const account = await getAccount();
         const username = account.data.user_name;
+        const tenant = account.data.user_requested_tenant ?? '';
 
         coreStart.chrome.navControls.registerRight({
           order: 10000,
@@ -86,7 +87,7 @@ export class AssistantPlugin
                 contentRenderers={contentRenderers}
                 actionExecutors={actionExecutors}
                 assistantActions={assistantActions}
-                currentAccount={{ username }}
+                currentAccount={{ username, tenant }}
               />
             </CoreContext.Provider>
           ),

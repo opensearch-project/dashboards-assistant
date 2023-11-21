@@ -10,12 +10,18 @@ import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { useChatState } from './use_chat_state';
 
+interface AccountResponse {
+  data: { user_name: string; user_requested_tenant: string; roles: string[] };
+}
+
 interface SendFeedbackBody {
   metadata: {
     type: 'event_analytics' | 'chat' | 'ppl_submit';
     sessionId?: string;
     traceId?: string;
     error?: boolean;
+    user: string;
+    tenant: string;
   };
   input: string;
   output: string;
@@ -44,12 +50,15 @@ export const useFeedback = () => {
       return;
     }
 
+    const { username, tenant } = chatContext.currentAccount;
     const body: SendFeedbackBody = {
       metadata: {
         type: 'chat', // currently type is only chat in feedback
         sessionId: chatContext.sessionId,
         traceId: outputMessage.traceId,
         error: false,
+        user: username,
+        tenant,
       },
       input: inputMessage.content,
       output: outputMessage.content,
@@ -59,7 +68,7 @@ export const useFeedback = () => {
     };
 
     try {
-      const response = await core.services.http.post(ASSISTANT_API.FEEDBACK, {
+      await core.services.http.post(ASSISTANT_API.FEEDBACK, {
         body: JSON.stringify(body),
       });
       setFeedbackResult(correct);
