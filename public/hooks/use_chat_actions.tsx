@@ -41,6 +41,15 @@ export const useChatActions = (): AssistantActions => {
         }),
       });
       if (abortController.signal.aborted) return;
+      // Refresh history list after new session created if new session saved and history list page visible
+      if (
+        !chatContext.sessionId &&
+        response.sessionId &&
+        core.services.sessions.options?.page === 1 &&
+        chatContext.selectedTabId === 'history'
+      ) {
+        core.services.sessions.reload();
+      }
       chatContext.setSessionId(response.sessionId);
       // set title for first time
       if (!chatContext.title) {
