@@ -20,6 +20,12 @@ export class MessageParserRunner {
       let tempResult: IMessage[] = [];
       try {
         tempResult = await messageParser.parserProvider(interaction);
+        /**
+         * Make sure the tempResult is an array.
+         */
+        if (!Array.isArray(tempResult)) {
+          tempResult = [];
+        }
       } catch (e) {
         tempResult = [];
       }
