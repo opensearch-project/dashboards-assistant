@@ -16,6 +16,7 @@ import { OllyChatService } from '../services/chat/olly_chat_service';
 import { SavedObjectsStorageService } from '../services/storage/saved_objects_storage_service';
 import { IMessage, IInput } from '../../common/types/chat_saved_object_attributes';
 import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
+import { RoutesOptions } from '../types';
 
 const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
@@ -133,7 +134,7 @@ export function registerChatRoutes(router: IRouter) {
           body: {
             messages: finalMessage.messages,
             sessionId: outputs.memoryId,
-            title: finalMessage.title
+            title: finalMessage.title,
           },
         });
       } catch (error) {
@@ -271,13 +272,16 @@ export function registerChatRoutes(router: IRouter) {
         const outputs = await chatService.requestLLM(
           { messages, input, sessionId },
           context,
-          request as any
+          // @ts-ignore
+          request
         );
         const title = input.content.substring(0, 50);
         const saveMessagesResponse = await storageService.saveMessages(
           title,
           sessionId,
-          [...messages, input, ...outputs.messages].filter((message) => message.content !== 'AbortError')
+          [...messages, input, ...outputs.messages].filter(
+            (message) => message.content !== 'AbortError'
+          )
         );
         return response.ok({
           body: { ...saveMessagesResponse, title },
