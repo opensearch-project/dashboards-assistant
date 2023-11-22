@@ -6,12 +6,23 @@
 export const CHAT_SAVED_OBJECT = 'assistant-chat';
 export const SAVED_OBJECT_VERSION = 1;
 
+export interface Interaction {
+  input: string;
+  response: string;
+  conversation_id: string;
+  interaction_id: string;
+  create_time: string;
+  additional_info: Record<string, unknown>;
+  parent_interaction_id?: string;
+}
+
 export interface ISession {
   title: string;
   version: number;
   createdTimeMs: number;
   updatedTimeMs: number;
   messages: IMessage[];
+  interactions: Interaction[];
 }
 
 export interface ISessionFindResponse {

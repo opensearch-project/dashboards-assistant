@@ -6,15 +6,14 @@
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
-  IInput,
   IMessage,
-  IOutput,
   ISession,
   ISessionFindResponse,
+  Interaction,
 } from '../../../common/types/chat_saved_object_attributes';
 import { GetSessionsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
-import { Interaction, MessageParser } from '../../types';
+import { MessageParser } from '../../types';
 import { MessageParserRunner } from '../../utils/message_parser_runner';
 
 export class AgentFrameworkStorageService implements StorageService {
@@ -55,6 +54,7 @@ export class AgentFrameworkStorageService implements StorageService {
       createdTimeMs: Date.now(),
       updatedTimeMs: Date.now(),
       messages: finalMessages,
+      interactions: session.body.interactions,
     };
   }
 

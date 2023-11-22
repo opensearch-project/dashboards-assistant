@@ -3,23 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IMessage } from '../common/types/chat_saved_object_attributes';
+import { IMessage, Interaction } from '../common/types/chat_saved_object_attributes';
 import { ILegacyClusterClient, Logger } from '../../../src/core/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantPluginStart {}
-
-export interface Interaction {
-  input: string;
-  response: string;
-  conversation_id: string;
-  interaction_id: string;
-  create_time: string;
-  additional_info: Record<string, unknown>;
-  parent_interaction_id: string;
-}
 
 export interface MessageParser {
   /**
