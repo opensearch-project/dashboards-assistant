@@ -5,7 +5,6 @@
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { OpenSearchClient } from '../../../../../src/core/server';
-import { LLM_INDEX } from '../../../common/constants/llm';
 import {
   IInput,
   IMessage,
@@ -15,44 +14,47 @@ import {
 } from '../../../common/types/chat_saved_object_attributes';
 import { GetSessionsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
+import { Interaction, MessageParser } from '../../types';
+import { MessageParserRunner } from '../../utils/message_parser_runner';
 
 export class AgentFrameworkStorageService implements StorageService {
-  constructor(private readonly client: OpenSearchClient) {}
+  constructor(
+    private readonly client: OpenSearchClient,
+    private readonly messageParsers: MessageParser[] = []
+  ) {}
   async getSession(sessionId: string): Promise<ISession> {
     const session = (await this.client.transport.request({
       method: 'GET',
       path: `/_plugins/_ml/memory/conversation/${sessionId}/_list`,
     })) as ApiResponse<{
-      interactions: Array<{
-        input: string;
-        response: string;
-        parent_interaction_id: string;
-        interaction_id: string;
-      }>;
+      interactions: Interaction[];
     }>;
+    const messageParserRunner = new MessageParserRunner(this.messageParsers);
+    const finalInteractions: Interaction[] = [...session.body.interactions];
+
+    /**
+     * Sort interactions according to create_time
+     */
+    finalInteractions.sort((interactionA, interactionB) => {
+      const { create_time: createTimeA } = interactionA;
+      const { create_time: createTimeB } = interactionB;
+      const createTimeMSA = +new Date(createTimeA);
+      const createTimeMSB = +new Date(createTimeB);
+      if (isNaN(createTimeMSA) || isNaN(createTimeMSB)) {
+        return 0;
+      }
+      return createTimeMSA - createTimeMSB;
+    });
+    let finalMessages: IMessage[] = [];
+    for (const interaction of finalInteractions) {
+      finalMessages = [...finalMessages, ...(await messageParserRunner.run(interaction))];
+    }
     return {
       title: 'test',
       version: 1,
       createdTimeMs: Date.now(),
       updatedTimeMs: Date.now(),
-      messages: session.body.interactions
-        .filter((item) => !item.parent_interaction_id)
-        .reduce((total, current) => {
-          const inputItem: IInput = {
-            type: 'input',
-            contentType: 'text',
-            content: current.input,
-          };
-          const outputItems: IOutput[] = [
-            {
-              type: 'output',
-              contentType: 'markdown',
-              content: current.response,
-              traceId: current.interaction_id,
-            },
-          ];
-          return [...total, inputItem, ...outputItems];
-        }, [] as IMessage[]),
+      messages: finalMessages,
     };
   }
 
