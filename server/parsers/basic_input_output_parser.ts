@@ -4,12 +4,12 @@
  */
 
 import { IInput, IOutput } from '../../common/types/chat_saved_object_attributes';
-import { Interaction, IMessageParserHelper } from '../types';
+import { Interaction } from '../types';
 
 export const BasicInputOutputParser = {
   order: 0,
   id: 'output_message',
-  async parserProvider(interaction: Interaction, messageParserHelper: IMessageParserHelper) {
+  async parserProvider(interaction: Interaction) {
     const inputItem: IInput = {
       type: 'input',
       contentType: 'text',
@@ -23,7 +23,6 @@ export const BasicInputOutputParser = {
         traceId: interaction.interaction_id,
       },
     ];
-    [inputItem, ...outputItems].forEach((item) => messageParserHelper.addMessage(item));
-    return null;
+    return [inputItem, ...outputItems];
   },
 };

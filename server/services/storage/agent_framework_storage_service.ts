@@ -14,7 +14,7 @@ import {
 } from '../../../common/types/chat_saved_object_attributes';
 import { GetSessionsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
-import { MessageParser } from '../../types';
+import { Interaction, MessageParser } from '../../types';
 import { MessageParserRunner } from '../../utils/message_parser_runner';
 
 export class AgentFrameworkStorageService implements StorageService {
@@ -27,12 +27,7 @@ export class AgentFrameworkStorageService implements StorageService {
       method: 'GET',
       path: `/_plugins/_ml/memory/conversation/${sessionId}/_list`,
     })) as ApiResponse<{
-      interactions: Array<{
-        input: string;
-        response: string;
-        parent_interaction_id: string;
-        interaction_id: string;
-      }>;
+      interactions: Interaction[];
     }>;
     const messageParserRunner = new MessageParserRunner(this.messageParsers);
     const allInteractions = session.body.interactions.filter((item) => !item.parent_interaction_id);
