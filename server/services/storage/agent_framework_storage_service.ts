@@ -54,7 +54,7 @@ export class AgentFrameworkStorageService implements StorageService {
       createdTimeMs: Date.now(),
       updatedTimeMs: Date.now(),
       messages: finalMessages,
-      interactions: session.body.interactions,
+      interactions: finalInteractions,
     };
   }
 
