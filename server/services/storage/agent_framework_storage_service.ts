@@ -30,9 +30,24 @@ export class AgentFrameworkStorageService implements StorageService {
       interactions: Interaction[];
     }>;
     const messageParserRunner = new MessageParserRunner(this.messageParsers);
-    const allInteractions = session.body.interactions.filter((item) => !item.parent_interaction_id);
+    let finalInteractions: Interaction[] = [];
+    finalInteractions = session.body.interactions.filter((item) => !item.parent_interaction_id);
+
+    /**
+     * Sort interactions according to create_time
+     */
+    finalInteractions.sort((interactionA, interactionB) => {
+      const { create_time: createTimeA } = interactionA;
+      const { create_time: createTimeB } = interactionB;
+      const createTimeMSA = +new Date(createTimeA);
+      const createTimeMSB = +new Date(createTimeB);
+      if (isNaN(createTimeMSA) || isNaN(createTimeMSB)) {
+        return 0;
+      }
+      return createTimeMSA - createTimeMSB;
+    });
     let finalMessages: IMessage[] = [];
-    for (const interaction of allInteractions) {
+    for (const interaction of finalInteractions) {
       finalMessages = [...finalMessages, ...(await messageParserRunner.run(interaction))];
     }
     return {
