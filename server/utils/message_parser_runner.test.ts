@@ -10,13 +10,14 @@ describe('MessageParserRunner', () => {
     const messageParserRunner = new MessageParserRunner([
       {
         id: 'test',
-        parserProvider(interaction, messageParserHelper) {
-          messageParserHelper.addMessage({
-            type: 'output',
-            contentType: 'markdown',
-            content: interaction.response,
-          });
-          return Promise.resolve('');
+        parserProvider(interaction) {
+          return Promise.resolve([
+            {
+              type: 'output',
+              contentType: 'markdown',
+              content: interaction.response,
+            },
+          ]);
         },
       },
     ]);
@@ -40,48 +41,52 @@ describe('MessageParserRunner', () => {
       {
         id: 'testA',
         order: 2,
-        parserProvider(interaction, messageParserHelper) {
-          messageParserHelper.addMessage({
-            type: 'output',
-            contentType: 'markdown',
-            content: 'A',
-          });
-          return Promise.resolve('');
+        parserProvider() {
+          return Promise.resolve([
+            {
+              type: 'output',
+              contentType: 'markdown',
+              content: 'A',
+            },
+          ]);
         },
       },
       {
         id: 'testOrder1000',
         order: 1000,
-        parserProvider(interaction, messageParserHelper) {
-          messageParserHelper.addMessage({
-            type: 'output',
-            contentType: 'markdown',
-            content: 'order1000',
-          });
-          return Promise.resolve('');
+        parserProvider() {
+          return Promise.resolve([
+            {
+              type: 'output',
+              contentType: 'markdown',
+              content: 'order1000',
+            },
+          ]);
         },
       },
       {
         id: 'testNoOrder',
-        parserProvider(interaction, messageParserHelper) {
-          messageParserHelper.addMessage({
-            type: 'output',
-            contentType: 'markdown',
-            content: 'NoOrder',
-          });
-          return Promise.resolve('');
+        parserProvider(interaction) {
+          return Promise.resolve([
+            {
+              type: 'output',
+              contentType: 'markdown',
+              content: 'NoOrder',
+            },
+          ]);
         },
       },
       {
         id: 'testB',
         order: 1,
-        parserProvider(interaction, messageParserHelper) {
-          messageParserHelper.addMessage({
-            type: 'output',
-            contentType: 'markdown',
-            content: 'B',
-          });
-          return Promise.resolve('');
+        parserProvider() {
+          return Promise.resolve([
+            {
+              type: 'output',
+              contentType: 'markdown',
+              content: 'B',
+            },
+          ]);
         },
       },
     ]);
