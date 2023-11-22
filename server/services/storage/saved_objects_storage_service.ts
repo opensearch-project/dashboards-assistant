@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MessageParser } from '../../types';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import {
   CHAT_SAVED_OBJECT,
@@ -16,10 +15,7 @@ import { GetSessionsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
 
 export class SavedObjectsStorageService implements StorageService {
-  constructor(
-    private readonly client: SavedObjectsClientContract,
-    private readonly messageParsers: MessageParser[]
-  ) {}
+  constructor(private readonly client: SavedObjectsClientContract) {}
 
   private convertUpdatedTimeField(updatedAt: string | undefined) {
     return updatedAt ? new Date(updatedAt).getTime() : undefined;

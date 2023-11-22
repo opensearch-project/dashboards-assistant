@@ -4,21 +4,24 @@
 
 ![message parser](https://github.com/opensearch-project/dashboards-assistant/assets/13493605/b4ec1ff8-5339-4119-ad20-b2c31057bb0b)
 
-
 ## API
 
 ### registerMessageParser
 
-```
+```typescript
 dashboardAssistant.registerMessageParser({
-    id: "foo_parser",
-    parserProvider: async (interaction, messageParserHelper) => {
-        if (interaction.additional_info?.visualizationId) {
-            messageParserHelper.addMessage({
-                contentType: "visualization",
-                content: interaction.additional_info.visualizationId
-            })
-        }
+  id: 'foo_parser',
+  parserProvider: async (interaction) => {
+    if (interaction.input) {
+      return [
+        {
+          type: 'input',
+          contentType: 'text',
+          content: interaction.input,
+        },
+      ];
     }
-})
+    return [];
+  },
+});
 ```
