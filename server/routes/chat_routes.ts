@@ -105,7 +105,7 @@ const updateSessionRoute = {
   },
 };
 
-export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions) {
+export function registerChatRoutes(router: IRouter) {
   const createStorageService = (context: RequestHandlerContext) =>
     new AgentFrameworkStorageService(context.core.opensearch.client.asCurrentUser);
   const createChatService = () => new OllyChatService();
@@ -134,7 +134,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
           body: {
             messages: finalMessage.messages,
             sessionId: outputs.memoryId,
-            title: finalMessage.title
+            title: finalMessage.title,
           },
         });
       } catch (error) {
@@ -272,13 +272,16 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         const outputs = await chatService.requestLLM(
           { messages, input, sessionId },
           context,
-          request as any
+          // @ts-ignore
+          request
         );
         const title = input.content.substring(0, 50);
         const saveMessagesResponse = await storageService.saveMessages(
           title,
           sessionId,
-          [...messages, input, ...outputs.messages].filter((message) => message.content !== 'AbortError')
+          [...messages, input, ...outputs.messages].filter(
+            (message) => message.content !== 'AbortError'
+          )
         );
         return response.ok({
           body: { ...saveMessagesResponse, title },
