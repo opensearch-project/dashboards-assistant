@@ -11,13 +11,13 @@ export interface AssistantPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantPluginStart {}
 
-export interface IMessageParserHelper {
-  addMessage: (message: IMessage) => boolean;
-}
-
 export interface Interaction {
   input: string;
   response: string;
+  conversation_id: string;
+  interaction_id: string;
+  create_time: string;
+  additional_info: Record<string, unknown>;
 }
 
 export interface MessageParser {
