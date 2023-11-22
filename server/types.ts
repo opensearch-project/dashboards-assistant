@@ -35,10 +35,7 @@ export interface MessageParser {
   /**
    * parserProvider is the callback that will be triggered in each message
    */
-  parserProvider: (
-    interaction: Interaction,
-    messageParserHelper: IMessageParserHelper
-  ) => Promise<unknown>;
+  parserProvider: (interaction: Interaction) => Promise<IMessage[]>;
 }
 
 export interface RoutesOptions {
