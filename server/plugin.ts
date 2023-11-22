@@ -55,9 +55,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     });
 
     // Register server side APIs
-    setupRoutes(router, {
-      messageParsers: this.messageParsers,
-    });
+    setupRoutes(router);
 
     core.savedObjects.registerType(chatSavedObject);
     core.savedObjects.registerType(chatConfigSavedObject);
