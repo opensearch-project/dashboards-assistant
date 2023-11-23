@@ -35,7 +35,7 @@ describe('build outputs', () => {
   it('sanitizes markdown outputs', () => {
     const outputs = buildOutputs(
       'test question',
-      'normal text<b onmouseover=alert("XSS testing!")></b> <img src="image.jpg" alt="image" width="500" height="600"> !!!!!!![](https://badurl) ![image](https://badurl) [good link](https://link)',
+      'normal text<b onmouseover=alert("XSS testing!")></b> <img src="image.jpg" alt="image" width="500" height="600"> !!!!!!![](http://evil.com/) ![image](http://evil.com/) [good link](https://link)',
       'test-session',
       {},
       []
@@ -43,7 +43,7 @@ describe('build outputs', () => {
     expect(outputs).toEqual([
       {
         content:
-          'normal text<b></b>  [](https://badurl) [image](https://badurl) [good link](https://link)',
+          'normal text<b></b>  [](http://evil.com/) [image](http://evil.com/) [good link](https://link)',
         contentType: 'markdown',
         traceId: 'test-session',
         suggestedActions: [],
