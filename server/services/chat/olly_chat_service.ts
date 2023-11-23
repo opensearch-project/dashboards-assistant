@@ -3,14 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { v4 as uuid } from 'uuid';
 import { ApiResponse } from '@opensearch-project/opensearch';
-import { OpenSearchDashboardsRequest, RequestHandlerContext } from '../../../../../src/core/server';
+import { RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
-import { OpenSearchTracer } from '../../olly/callbacks/opensearch_tracer';
-import { LLMModelFactory } from '../../olly/models/llm_model_factory';
-import { PPLTools } from '../../olly/tools/tool_sets/ppl';
-import { PPLGenerationRequestSchema } from '../../routes/langchain_routes';
 import { ChatService } from './chat_service';
 import { ML_COMMONS_BASE_API } from '../../olly/models/constants';
 
@@ -94,28 +89,5 @@ export class OllyChatService implements ChatService {
     if (OllyChatService.abortControllers.has(sessionId)) {
       OllyChatService.abortControllers.get(sessionId)?.abort();
     }
-  }
-
-  generatePPL(
-    context: RequestHandlerContext,
-    request: OpenSearchDashboardsRequest<unknown, unknown, PPLGenerationRequestSchema, 'post'>
-  ): Promise<string> {
-    const { index, question } = request.body;
-    const observabilityClient = context.assistant_plugin.observabilityClient.asScoped(request);
-    const opensearchClient = context.core.opensearch.client.asCurrentUser;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const traceId = uuid();
-    const callbacks = [new OpenSearchTracer(opensearchClient, traceId)];
-    const model = LLMModelFactory.createModel({ client: opensearchClient });
-    const embeddings = LLMModelFactory.createEmbeddings({ client: opensearchClient });
-    const pplTools = new PPLTools(
-      model,
-      embeddings,
-      opensearchClient,
-      observabilityClient,
-      savedObjectsClient,
-      callbacks
-    );
-    return pplTools.generatePPL(question, index);
   }
 }

@@ -19,9 +19,7 @@ import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observabili
 import { PPLPlugin } from './adaptors/ppl_plugin';
 import './fetch-polyfill';
 import { setupRoutes } from './routes/index';
-import { chatSavedObject } from './saved_objects/chat_saved_object';
 import { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
-import { chatConfigSavedObject } from './saved_objects/chat_config_saved_object';
 import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
 import { VisualizationCardParser } from './parsers/visualization_card_parser';
 
@@ -59,9 +57,6 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     setupRoutes(router, {
       messageParsers: this.messageParsers,
     });
-
-    core.savedObjects.registerType(chatSavedObject);
-    core.savedObjects.registerType(chatConfigSavedObject);
 
     core.capabilities.registerProvider(() => ({
       observability: {
