@@ -4,7 +4,11 @@
  */
 
 import { ASSISTANT_API } from '../../common/constants/llm';
-import { IMessage, ISuggestedAction } from '../../common/types/chat_saved_object_attributes';
+import {
+  IMessage,
+  ISuggestedAction,
+  Interaction,
+} from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { AssistantActions } from '../types';
@@ -14,6 +18,7 @@ interface SendResponse {
   sessionId: string;
   title: string;
   messages: IMessage[];
+  interactions: Interaction[];
 }
 
 interface SetParagraphResponse {
@@ -56,7 +61,13 @@ export const useChatActions = (): AssistantActions => {
       if (!chatContext.title) {
         chatContext.setTitle(response.title);
       }
-      chatStateDispatch({ type: 'receive', payload: response.messages });
+      chatStateDispatch({
+        type: 'receive',
+        payload: {
+          messages: response.messages,
+          interactions: response.interactions,
+        },
+      });
     } catch (error) {
       if (abortController.signal.aborted) return;
       chatStateDispatch({ type: 'error', payload: error });
@@ -79,7 +90,13 @@ export const useChatActions = (): AssistantActions => {
     }
     const session = await core.services.sessionLoad.load(sessionId);
     if (session) {
-      chatStateDispatch({ type: 'receive', payload: session.messages });
+      chatStateDispatch({
+        type: 'receive',
+        payload: {
+          messages: session.messages,
+          interactions: session.interactions,
+        },
+      });
     }
   };
 
@@ -156,7 +173,13 @@ export const useChatActions = (): AssistantActions => {
         if (abortController.signal.aborted) {
           return;
         }
-        chatStateDispatch({ type: 'receive', payload: response.messages });
+        chatStateDispatch({
+          type: 'receive',
+          payload: {
+            messages: response.messages,
+            interactions: response.interactions,
+          },
+        });
       } catch (error) {
         if (abortController.signal.aborted) {
           return;

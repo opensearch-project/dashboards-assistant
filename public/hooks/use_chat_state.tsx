@@ -5,10 +5,11 @@
 
 import { produce } from 'immer';
 import React, { useContext, useMemo, useReducer } from 'react';
-import { IMessage } from '../../common/types/chat_saved_object_attributes';
+import { IMessage, Interaction } from '../../common/types/chat_saved_object_attributes';
 
 interface ChatState {
   messages: IMessage[];
+  interactions: Interaction[];
   llmResponding: boolean;
   llmError?: Error;
 }
@@ -18,7 +19,13 @@ type ChatStateAction =
   | { type: 'abort' }
   | { type: 'reset' }
   | { type: 'send'; payload: IMessage }
-  | { type: 'receive'; payload: ChatState['messages'] }
+  | {
+      type: 'receive';
+      payload: {
+        messages: ChatState['messages'];
+        interactions: ChatState['interactions'];
+      };
+    }
   | {
       type: 'error';
       payload: NonNullable<ChatState['llmError']> | { body: NonNullable<ChatState['llmError']> };
@@ -31,6 +38,7 @@ interface IChatStateContext {
 const ChatStateContext = React.createContext<IChatStateContext | null>(null);
 
 const initialState: ChatState = {
+  interactions: [],
   messages: [],
   llmResponding: false,
 };
@@ -48,7 +56,8 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
         break;
 
       case 'receive':
-        draft.messages = action.payload;
+        draft.messages = action.payload.messages;
+        draft.interactions = action.payload.interactions;
         draft.llmResponding = false;
         draft.llmError = undefined;
         break;
