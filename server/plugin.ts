@@ -17,13 +17,13 @@ import {
 import { OpenSearchAlertingPlugin } from './adaptors/opensearch_alerting_plugin';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
-import { AssistantServerConfig } from './config/schema';
 import './fetch-polyfill';
 import { setupRoutes } from './routes/index';
 import { chatSavedObject } from './saved_objects/chat_saved_object';
 import { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
 import { chatConfigSavedObject } from './saved_objects/chat_config_saved_object';
 import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
+import { VisualizationCardParser } from './parsers/visualization_card_parser';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
@@ -79,6 +79,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     };
 
     registerMessageParser(BasicInputOutputParser);
+    registerMessageParser(VisualizationCardParser);
 
     return {
       registerMessageParser,
