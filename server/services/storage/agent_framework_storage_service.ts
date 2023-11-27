@@ -64,6 +64,7 @@ export class AgentFrameworkStorageService implements StorageService {
     };
   }
 
+  // TODO: return real update_time in the response once the agent framework supports update_time field
   async getSessions(query: GetSessionsSchema): Promise<ISessionFindResponse> {
     let sortField = '';
     if (query.sortField === 'updatedTimeMs') {
@@ -131,7 +132,7 @@ export class AgentFrameworkStorageService implements StorageService {
     sessionId: string | undefined,
     messages: IMessage[]
   ): Promise<{ sessionId: string; messages: IMessage[] }> {
-    throw new Error('Method is no need');
+    throw new Error('Method is not needed');
   }
 
   async deleteSession(sessionId: string): Promise<SessionOptResponse> {
