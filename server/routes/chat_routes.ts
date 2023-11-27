@@ -137,6 +137,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
             messages: finalMessage.messages,
             sessionId: outputs.memoryId,
             title: finalMessage.title,
+            interactions: finalMessage.interactions,
           },
         });
       } catch (error) {

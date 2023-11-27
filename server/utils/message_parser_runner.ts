@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IMessage } from '../../common/types/chat_saved_object_attributes';
-import { Interaction, MessageParser } from '../types';
+import { IMessage, Interaction } from '../../common/types/chat_saved_object_attributes';
+import { MessageParser } from '../types';
 
 export class MessageParserRunner {
   constructor(private readonly messageParsers: MessageParser[]) {}

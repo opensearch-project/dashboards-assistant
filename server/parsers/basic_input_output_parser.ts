@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IInput, IOutput } from '../../common/types/chat_saved_object_attributes';
-import { Interaction } from '../types';
+import { IInput, IOutput, Interaction } from '../../common/types/chat_saved_object_attributes';
 
 export const BasicInputOutputParser = {
   order: 0,
@@ -20,7 +19,7 @@ export const BasicInputOutputParser = {
         type: 'output',
         contentType: 'markdown',
         content: interaction.response,
-        traceId: interaction.parent_interaction_id,
+        traceId: interaction.interaction_id,
       },
     ];
     return [inputItem, ...outputItems];

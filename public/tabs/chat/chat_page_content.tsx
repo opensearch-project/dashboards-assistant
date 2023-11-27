@@ -14,7 +14,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useLayoutEffect, useRef } from 'react';
-import { IMessage, ISuggestedAction } from '../../../common/types/chat_saved_object_attributes';
+import {
+  IMessage,
+  ISuggestedAction,
+  Interaction,
+} from '../../../common/types/chat_saved_object_attributes';
 import { TermsAndConditions } from '../../components/terms_and_conditions';
 import { useChatContext } from '../../contexts/chat_context';
 import { useChatState } from '../../hooks/use_chat_state';
@@ -120,6 +124,13 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         // Only show suggestion on llm outputs after last user input
         const showSuggestions = i > lastInputIndex;
 
+        let interaction: Interaction | undefined;
+        if (message.type === 'output' && message.traceId) {
+          interaction = chatState.interactions.find(
+            (item) => item.interaction_id === message.traceId
+          );
+        }
+
         return (
           <React.Fragment key={i}>
             <ToolsUsed message={message} />
@@ -129,6 +140,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
               showRegenerate={isLatestOutput}
               shouldActionBarVisibleOnHover={!isLatestOutput}
               onRegenerate={chatActions.regenerate}
+              interaction={interaction}
             >
               <MessageContent message={message} />
               {/* <MessageFooter message={message} previousInput={findPreviousInput(array, i)} />*/}
