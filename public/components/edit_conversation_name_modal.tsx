@@ -20,12 +20,12 @@ export const EditConversationNameModal = ({
   defaultTitle,
 }: EditConversationNameModalProps) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const { loading, abortController, patchSession } = usePatchSession();
+  const { loading, abort, patchSession } = usePatchSession();
 
   const handleCancel = useCallback(() => {
-    abortController?.abort();
+    abort();
     onClose?.('cancelled');
-  }, [onClose, abortController]);
+  }, [onClose, abort]);
   const handleConfirm = useCallback(async () => {
     const title = titleInputRef.current?.value.trim();
     if (!title) {
