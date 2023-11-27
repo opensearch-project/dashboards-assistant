@@ -26,6 +26,7 @@ export interface AppPluginStartDependencies {
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
+  securityDashboards?: {};
 }
 
 export interface AssistantSetup {
