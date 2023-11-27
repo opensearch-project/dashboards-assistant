@@ -30,7 +30,13 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
     }
     const session = await core.services.sessionLoad.load(chatContext.sessionId);
     if (session) {
-      chatStateDispatch({ type: 'receive', payload: session.messages });
+      chatStateDispatch({
+        type: 'receive',
+        payload: {
+          messages: session.messages,
+          interactions: session.interactions,
+        },
+      });
     }
   }, [chatContext.sessionId, chatStateDispatch]);
 

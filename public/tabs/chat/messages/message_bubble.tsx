@@ -19,7 +19,11 @@ import React, { useCallback } from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import cx from 'classnames';
 import chatIcon from '../../../assets/chat.svg';
-import { IMessage, IOutput } from '../../../../common/types/chat_saved_object_attributes';
+import {
+  IMessage,
+  IOutput,
+  Interaction,
+} from '../../../../common/types/chat_saved_object_attributes';
 import { useFeedback } from '../../../hooks/use_feed_back';
 
 type MessageBubbleProps = {
@@ -30,6 +34,7 @@ type MessageBubbleProps = {
 } & (
   | {
       message: IMessage;
+      interaction?: Interaction;
     }
   | {
       loading: boolean;
