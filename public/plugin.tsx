@@ -12,6 +12,8 @@ import {
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
+import { SessionsService } from './services/sessions_service';
+import { SessionLoadService } from './services/session_load_service';
 import {
   ActionExecutor,
   AppPluginStartDependencies,
@@ -21,8 +23,6 @@ import {
   ContentRenderer,
   SetupDependencies,
 } from './types';
-import { SessionLoadService } from './services/session_load_service';
-import { SessionsService } from './services/sessions_service';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -58,10 +58,14 @@ export class AssistantPlugin
     const getAccount = (() => {
       let account: UserAccountResponse | boolean;
       return async () => {
+        if (setupDeps.securityDashboards === undefined) return true;
         if (account === undefined) {
           account = await core.http
             .get<UserAccountResponse>('/api/v1/configuration/account')
-            .catch((e) => e.body.statusCode === 404); // allow if security plugin is not installed
+            .catch((e) => {
+              console.error(`Failed to request user account information: ${String(e.body || e)}`);
+              return false;
+            });
         }
         return account;
       };
