@@ -27,12 +27,8 @@ export const protectCall = (func: DynamicToolInput['func']): DynamicToolInput['f
 
 export const truncate = (text: string, maxLength: number = MAX_OUTPUT_CHAR) => {
   if (text.length <= maxLength) return text;
-  const tailMessage = '\n\nOutput is too long, truncated... end:\n\n';
-  return (
-    text.slice(0, MAX_OUTPUT_CHAR - tailMessage.length - 300) +
-    tailMessage +
-    text.slice(text.length - 300)
-  );
+  const tailMessage = '\n\nOutput is too long, truncated...';
+  return text.slice(0, MAX_OUTPUT_CHAR - tailMessage.length) + tailMessage;
 };
 
 export const jsonToCsv = (json: object[]) => {
