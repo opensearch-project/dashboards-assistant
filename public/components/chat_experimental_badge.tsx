@@ -3,15 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState } from 'react';
-import {
-  EuiPopover,
-  EuiButtonIcon,
-  EuiTitle,
-  EuiHorizontalRule,
-  EuiText,
-  EuiPopoverProps,
-} from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiPopover, EuiButtonIcon, EuiTitle, EuiHorizontalRule, EuiText } from '@elastic/eui';
 
 interface ChatExperimentalBadgeProps {
   onClick?: React.MouseEventHandler<HTMLDivElement>;
@@ -20,13 +13,13 @@ interface ChatExperimentalBadgeProps {
 export const ChatExperimentalBadge = ({ onClick }: ChatExperimentalBadgeProps) => {
   const [visible, setVisible] = useState(false);
 
-  const closePopover = useCallback(() => {
+  const closePopover = () => {
     setVisible(false);
-  }, []);
+  };
 
-  const handleIconClick = useCallback((e) => {
+  const handleIconClick = () => {
     setVisible((flag) => !flag);
-  }, []);
+  };
 
   return (
     <EuiPopover
@@ -42,6 +35,7 @@ export const ChatExperimentalBadge = ({ onClick }: ChatExperimentalBadgeProps) =
       <EuiText>
         This is an experimental feature.
         <br />
+        {/* TODO: update correct email and slack address */}
         Send feedback via <a href="mailto:">Email</a> or <a href="slack:">Slack</a>.
       </EuiText>
     </EuiPopover>
