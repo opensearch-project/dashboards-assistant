@@ -97,7 +97,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
         closePopover();
       }}
       // User only can save conversation when he send a message at least.
-      disabled={chatState.messages.filter((item) => item.type === 'input').length < 1}
+      disabled={chatState.messages.every((item) => item.type !== 'input')}
     >
       Save to notebook
     </EuiContextMenuItem>,
