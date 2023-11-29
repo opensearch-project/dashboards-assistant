@@ -26,7 +26,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
   const { loadChat } = useChatActions();
   const core = useCore();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const [isRenameModelOpen, setRenameModelOpen] = useState(false);
+  const [isRenameModalOpen, setRenameModalOpen] = useState(false);
   const { chatState } = useChatState();
   const { saveChat } = useSaveChat();
 
@@ -43,7 +43,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       if (status === 'updated') {
         chatContext.setTitle(newTitle);
       }
-      setRenameModelOpen(false);
+      setRenameModalOpen(false);
     },
     [chatContext]
   );
@@ -74,7 +74,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       key="rename-conversation"
       onClick={() => {
         closePopover();
-        setRenameModelOpen(true);
+        setRenameModalOpen(true);
       }}
     >
       Rename conversation
@@ -115,7 +115,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       >
         <EuiContextMenuPanel size="m" items={items} />
       </EuiPopover>
-      {isRenameModelOpen && (
+      {isRenameModalOpen && (
         <EditConversationNameModal
           sessionId={chatContext.sessionId!}
           onClose={handleEditConversationClose}
