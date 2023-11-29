@@ -105,7 +105,11 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
             {flyoutFullScreen ? (
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="cross" onClick={handleBack} />
+                  <EuiButtonIcon
+                    aria-label="full screen back"
+                    iconType="cross"
+                    onClick={handleBack}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (

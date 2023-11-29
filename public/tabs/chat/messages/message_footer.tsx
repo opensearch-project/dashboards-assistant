@@ -7,9 +7,9 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@e
 import React from 'react';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { FeedbackModal } from '../../../components/feedback_modal';
-import { LangchainTracesFlyoutBody } from '../../../components/langchain_traces_flyout_body';
 import { useChatContext } from '../../../contexts/chat_context';
 import { useCore } from '../../../contexts/core_context';
+import { AgentFrameworkTracesFlyoutBody } from '../../..//components/agent_framework_traces_flyout_body';
 
 interface MessageFooterProps {
   message: IMessage;
@@ -32,7 +32,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
           flush="left"
           onClick={() => {
             chatContext.setFlyoutComponent(
-              <LangchainTracesFlyoutBody
+              <AgentFrameworkTracesFlyoutBody
                 closeFlyout={() => chatContext.setFlyoutComponent(null)}
                 traceId={traceId}
               />

@@ -18,6 +18,7 @@ export const ASSISTANT_API = {
   FEEDBACK: `${API_BASE}/feedback`,
   ABORT_AGENT_EXECUTION: `${API_BASE}/abort`,
   REGENERATE: `${API_BASE}/regenerate`,
+  TRACE: `${API_BASE}/trace`,
 } as const;
 
 export const LLM_INDEX = {

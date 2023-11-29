@@ -4,6 +4,7 @@
  */
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
+import { AgentFrameworkTrace } from 'common/utils/llm_chat/traces';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
   IMessage,
@@ -179,6 +180,40 @@ export class AgentFrameworkStorageService implements StorageService {
       }
     } catch (error) {
       throw new Error('update converstaion failed, reason:' + JSON.stringify(error.meta?.body));
+    }
+  }
+
+  async getTraces(interactionId: string): Promise<AgentFrameworkTrace[]> {
+    try {
+      const response = (await this.client.transport.request({
+        method: 'GET',
+        path: `/_plugins/_ml/memory/trace/${interactionId}/_list`,
+      })) as ApiResponse<{
+        traces: Array<{
+          conversation_id: string;
+          interaction_id: string;
+          create_time: string;
+          input: string;
+          response: string;
+          origin: string;
+          parent_interaction_id: string;
+          trace_number: number;
+        }>;
+      }>;
+
+      return response.body.traces
+        .map((item) => ({
+          interactionId: item.interaction_id,
+          parentInteractionId: item.parent_interaction_id,
+          input: item.input,
+          output: item.response,
+          createTime: item.create_time,
+          origin: item.origin,
+          traceNumber: item.trace_number,
+        }))
+        .reverse();
+    } catch (error) {
+      throw new Error('get traces failed, reason:' + JSON.stringify(error.meta?.body));
     }
   }
 }

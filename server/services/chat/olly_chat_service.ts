@@ -12,7 +12,6 @@ import { LLMModelFactory } from '../../olly/models/llm_model_factory';
 import { PPLTools } from '../../olly/tools/tool_sets/ppl';
 import { PPLGenerationRequestSchema } from '../../routes/langchain_routes';
 import { ChatService } from './chat_service';
-import { LLMRequestSchema } from '../../routes/chat_routes';
 
 const MEMORY_ID_FIELD = 'memory_id';
 
