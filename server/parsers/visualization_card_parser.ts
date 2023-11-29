@@ -6,7 +6,7 @@
 import { IMessage, Interaction } from '../../common/types/chat_saved_object_attributes';
 import { getJsonFromString } from '../utils/csv-parser-helper';
 
-const extractNthColumn = async (csv: string, column: number) => {
+const extractIdsFromCsvString = async (csv: string) => {
   const lines = (await getJsonFromString(csv)) as Array<{ Id: string }>;
   return lines
     .map((line) => line.Id)
@@ -16,16 +16,15 @@ const extractNthColumn = async (csv: string, column: number) => {
 export const VisualizationCardParser = {
   id: 'core_visualization',
   async parserProvider(interaction: Interaction) {
-    const additionalInfo = interaction.additional_info as {
-      'VisualizationTool.output': string[];
-    } | null;
-    const visualizationOutputs = additionalInfo?.['VisualizationTool.output'];
+    const visualizationOutputs = interaction.additional_info?.['VisualizationTool.output'] as
+      | string[]
+      | undefined;
     if (!visualizationOutputs) {
       return [];
     }
     const visualizationIds = (
-      await Promise.all(visualizationOutputs.map((output) => extractNthColumn(output, 1)))
-    ).flatMap((id) => id); // second column is id field
+      await Promise.all(visualizationOutputs.map((output) => extractIdsFromCsvString(output)))
+    ).flatMap((id) => id);
 
     const visOutputs: IMessage[] = visualizationIds
       /**
