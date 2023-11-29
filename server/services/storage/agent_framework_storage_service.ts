@@ -216,4 +216,32 @@ export class AgentFrameworkStorageService implements StorageService {
       throw new Error('get traces failed, reason:' + JSON.stringify(error.meta?.body));
     }
   }
+
+  async updateInteraction(
+    interactionId: string,
+    additionalInfo: Record<string, string | boolean>
+  ): Promise<SessionOptResponse> {
+    try {
+      const response = await this.client.transport.request({
+        method: 'PUT',
+        path: `/_plugins/_ml/memory/interaction/${interactionId}/_update`,
+        body: {
+          additional_info: additionalInfo,
+        },
+      });
+      if (response.statusCode === 200) {
+        return {
+          success: true,
+        };
+      } else {
+        return {
+          success: false,
+          statusCode: response.statusCode,
+          message: JSON.stringify(response.body),
+        };
+      }
+    } catch (error) {
+      throw new Error('update interaction failed, reason:' + JSON.stringify(error.meta?.body));
+    }
+  }
 }

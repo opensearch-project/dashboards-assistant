@@ -114,6 +114,20 @@ const getTracesRoute = {
   },
 };
 
+const feedbackRoute = {
+  path: `${ASSISTANT_API.FEEDBACK}/{interactionId}`,
+  validate: {
+    params: schema.object({
+      interactionId: schema.string(),
+    }),
+    body: schema.object({
+      username: schema.string(),
+      tenant: schema.string(),
+      feedback: schema.boolean(),
+    }),
+  },
+};
+
 export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions) {
   const createStorageService = (context: RequestHandlerContext) =>
     new AgentFrameworkStorageService(
@@ -317,6 +331,26 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         });
       } catch (error) {
         context.assistant_plugin.logger.warn(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
+    }
+  );
+
+  router.put(
+    feedbackRoute,
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      const storageService = createStorageService(context);
+      const { interactionId } = request.params;
+
+      try {
+        const getResponse = await storageService.updateInteraction(interactionId, request.body);
+        return response.ok({ body: getResponse });
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }

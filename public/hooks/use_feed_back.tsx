@@ -15,20 +15,9 @@ interface AccountResponse {
 }
 
 interface SendFeedbackBody {
-  metadata: {
-    type: 'event_analytics' | 'chat' | 'ppl_submit';
-    sessionId?: string;
-    traceId?: string;
-    error?: boolean;
-    user: string;
-    tenant: string;
-  };
-  input: string;
-  output: string;
-  correct: boolean | undefined;
-  // Currently unused but required.
-  expectedOutput: string;
-  comment: string;
+  username: string;
+  tenant: string;
+  feedback: boolean;
 }
 
 export const useFeedback = () => {
@@ -39,7 +28,9 @@ export const useFeedback = () => {
 
   const sendFeedback = async (message: IOutput, correct: boolean) => {
     const outputMessage = message;
-    // Markdown type output all has traceId.
+    // Markdown type output all has traceId. The traceId of message is equal to interaction id.
+    const { traceId } = outputMessage;
+    if (!traceId) return;
     const outputMessageIndex = chatState.messages.findIndex((item) => {
       return item.type === 'output' && item.traceId === message.traceId;
     });
@@ -52,23 +43,13 @@ export const useFeedback = () => {
 
     const { username, tenant } = chatContext.currentAccount;
     const body: SendFeedbackBody = {
-      metadata: {
-        type: 'chat', // currently type is only chat in feedback
-        sessionId: chatContext.sessionId,
-        traceId: outputMessage.traceId,
-        error: false,
-        user: username,
-        tenant,
-      },
-      input: inputMessage.content,
-      output: outputMessage.content,
-      correct,
-      expectedOutput: '',
-      comment: '',
+      username,
+      tenant,
+      feedback: correct,
     };
 
     try {
-      await core.services.http.post(ASSISTANT_API.FEEDBACK, {
+      await core.services.http.put(`${ASSISTANT_API.FEEDBACK}/${traceId}`, {
         body: JSON.stringify(body),
       });
       setFeedbackResult(correct);
