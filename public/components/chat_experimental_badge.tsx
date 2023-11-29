@@ -4,7 +4,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiButtonIcon, EuiTitle, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiButtonIcon,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiText,
+  EuiLink,
+} from '@elastic/eui';
 
 interface ChatExperimentalBadgeProps {
   onClick?: React.MouseEventHandler<HTMLDivElement>;
@@ -31,12 +38,15 @@ export const ChatExperimentalBadge = ({ onClick }: ChatExperimentalBadgeProps) =
       <EuiTitle size="xs">
         <h4>Experimental</h4>
       </EuiTitle>
-      <EuiHorizontalRule margin="none" />
+      <EuiHorizontalRule margin="s" />
       <EuiText>
         This is an experimental feature.
         <br />
-        {/* TODO: update correct email and slack address */}
-        Send feedback via <a href="mailto:">Email</a> or <a href="slack:">Slack</a>.
+        Send feedback via{' '}
+        <EuiLink href="https://forum.opensearch.org/t/feedback-opensearch-assistant/16741">
+          Forum
+        </EuiLink>{' '}
+        or <EuiLink href="https://opensearch.slack.com/channels/assistant-feedback">Slack</EuiLink>.
       </EuiText>
     </EuiPopover>
   );
