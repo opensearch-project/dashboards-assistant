@@ -18,7 +18,7 @@ export const DeleteConversationConfirmModal = ({
   onClose,
   sessionId,
 }: DeleteConversationConfirmModalProps) => {
-  const { loading, data, deleteSession, abortController } = useDeleteSession();
+  const { loading, deleteSession, abortController } = useDeleteSession();
 
   const handleCancel = useCallback(() => {
     abortController?.abort();
