@@ -1,6 +1,7 @@
 ## Getting started guide
 
-Below are the set of steps to run OpenSearch and OpenSearch dashboards with the OpenSearch assistant running correctly on the cluster.
+### How to run assistant on your own machine
+Below are the set of steps to run OpenSearch and OpenSearch dashboards with the OpenSearch assistant and the query generation functionality in the Observability Log Explorer page correctly on the cluster.
 **Note** that the `feature/langchain` is the branch used in this guide.
 
 1. Follow steps here to setup docker for OpenSearch: https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/
@@ -9,6 +10,7 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
 
 2. Follow steps here to setup docker to OpenSearch Dashboards: https://opensearch.org/docs/latest/install-and-configure/install-dashboards/docker/
    1. Note: When running docker pull, use this command instead for OSD: `docker pull public.ecr.aws/w1m7p7g2/opensearch-dashboards-reinvent2023:latest`
+   2. If you want to enable the chat assistant feature, set `assistant.chat.enabled` to `true` in the `opensearch_dashboards.yml` file.
 3. After OpenSearch and OpenSearch Dashboards are running, we will setup ML Commons to connect to the LLM model
 4. Run ML commons on Data node
    ```
@@ -124,3 +126,8 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
      "model_id":"<model-id>",
      "embeddings_model_id":"<embedding-model-id>"
    } 
+   ```
+### How to create your own skill
+1. To create your skill, you need to work backwards to see how that skill can be achieved by accessing different OpenSearch APIs/functions. For example, a skill to find the alerts related to a question would need to use the Alerting plugin APIs to get this info. 
+1. To power the skill to get alerts, we must build a tool to search alerts.
+1. To create a tool, you must extend this [class](https://github.com/opensearch-project/ml-commons/blob/feature/agent_framework_dev/spi/src/main/java/org/opensearch/ml/common/spi/tools/Tool.java) and implement the specific tool. [This is an example tool](https://github.com/opensearch-project/ml-commons/pull/1629) that search alerts.

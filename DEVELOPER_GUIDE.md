@@ -29,6 +29,7 @@ You will need to install [node.js](https://nodejs.org/en/), [nvm](https://github
 1. Change your node version to the version specified in `.node-version` inside the OpenSearch-Dashboards root directory.
 1. cd into the `plugins` directory of the OpenSearch-Dashboards source code directory.
 1. Check out this package from version control into the `plugins` directory.
+1. Set `assistant.chat.enabled` to `true` in `opensearch_dashboards.yml` if you want to enable the chat feature.
 1. Run `yarn osd bootstrap` inside `Opensearch-Dashboards/plugins/dashboards-assistant`.
 
 Ultimately, your directory structure should look like this:
