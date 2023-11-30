@@ -7,6 +7,16 @@ import { Run } from 'langchain/callbacks';
 import { AgentRun } from 'langchain/dist/callbacks/handlers/tracer';
 import _ from 'lodash';
 
+export interface AgentFrameworkTrace {
+  interactionId: string;
+  parentInteractionId: string;
+  createTime: string;
+  input: string;
+  output: string;
+  origin: string;
+  traceNumber: number;
+}
+
 export interface LangchainTrace {
   id: Run['id'];
   parentRunId?: Run['parent_run_id'];

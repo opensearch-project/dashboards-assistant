@@ -15,6 +15,7 @@ import { ChatStateProvider } from './hooks/use_chat_state';
 import './index.scss';
 import chatIcon from './assets/chat.svg';
 import { ActionExecutor, AssistantActions, ContentRenderer, UserAccount, TabId } from './types';
+import { TAB_ID } from './utils/constants';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -33,7 +34,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
   const [title, setTitle] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
-  const [selectedTabId, setSelectedTabId] = useState<TabId>('chat');
+  const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
   const [traceId, setTraceId] = useState<string | undefined>(undefined);
   const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');

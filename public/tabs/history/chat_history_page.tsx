@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useDebounce, useObservable } from 'react-use';
 import cs from 'classnames';
+import { TAB_ID } from 'public/utils/constants';
 import { useChatActions } from '../../hooks/use_chat_actions';
 import { useChatContext } from '../../contexts/chat_context';
 import { useCore } from '../../contexts/core_context';
@@ -64,7 +65,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
   }, []);
 
   const handleBack = useCallback(() => {
-    setSelectedTabId('chat');
+    setSelectedTabId(TAB_ID.CHAT);
   }, [setSelectedTabId]);
 
   const handleHistoryDeleted = useCallback(
@@ -105,7 +106,11 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
             {flyoutFullScreen ? (
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="cross" onClick={handleBack} />
+                  <EuiButtonIcon
+                    aria-label="full screen back"
+                    iconType="cross"
+                    onClick={handleBack}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (

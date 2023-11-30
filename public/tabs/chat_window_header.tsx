@@ -22,6 +22,7 @@ import { useCore } from '../contexts/core_context';
 import { useChatState } from '../hooks/use_chat_state';
 import { useSaveChat } from '../hooks/use_save_chat';
 import chatIcon from '../assets/chat.svg';
+import { TAB_ID } from '../utils/constants';
 interface ChatWindowHeaderProps {
   flyoutFullScreen: boolean;
   toggleFlyoutFullScreen: () => void;
@@ -157,10 +158,10 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
                   chatContext.setFlyoutComponent(undefined);
                   // Back to chat tab if history page already visible
                   chatContext.setSelectedTabId(
-                    chatContext.selectedTabId === 'history' ? 'chat' : 'history'
+                    chatContext.selectedTabId === TAB_ID.HISTORY ? TAB_ID.CHAT : TAB_ID.HISTORY
                   );
                 }}
-                display={chatContext.selectedTabId === 'history' ? 'fill' : undefined}
+                display={chatContext.selectedTabId === TAB_ID.HISTORY ? 'fill' : undefined}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
