@@ -51,7 +51,7 @@ export const ChatHistorySearchList = ({
   } | null>(null);
   const [deletingConversation, setDeletingConversation] = useState<{ id: string } | null>(null);
 
-  const handleEditConversationConfirmModalClose = useCallback(
+  const handleEditConversationModalClose = useCallback(
     (status: 'updated' | string) => {
       if (status === 'updated') {
         onRefresh();
@@ -108,7 +108,7 @@ export const ChatHistorySearchList = ({
           />
           {editingConversation && (
             <EditConversationNameModal
-              onClose={handleEditConversationConfirmModalClose}
+              onClose={handleEditConversationModalClose}
               sessionId={editingConversation.id}
               defaultTitle={editingConversation.title}
             />
