@@ -21,7 +21,7 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
      }
    }
      ```
-5. Add Trusted Endpoints (reference doc)
+5. Add Trusted Endpoints ([reference doc](https://opensearch.org/docs/latest/ml-commons-plugin/remote-models/index/))
    ```
    PUT _cluster/settings
    {
@@ -35,7 +35,7 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
      }
    }
    ```
-6. Create a connector (reference doc). The below example is for connecting to the AWS Bedrock Claude model. Keep note of the connector id from the API response. (Ensure the credentials passed should have access to call the LLM model) 
+6. Create a connector ([reference doc](https://opensearch.org/docs/latest/ml-commons-plugin/remote-models/index/)). The below example is for connecting to the AWS Bedrock Claude model. Keep note of the connector id from the API response. (Ensure the credentials passed should have access to call the LLM model) 
    ```
    POST /_plugins/_ml/connectors/_create
    {
@@ -72,7 +72,7 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
      ]
    }
    ```
-7. Create a model group with an example below (reference doc) and note the model group id.
+7. Create a model group with an example below ([reference doc](https://opensearch.org/docs/latest/ml-commons-plugin/remote-models/index/)) and note the model group id.
    ```
    POST /_plugins/_ml/model_groups/_register
    {

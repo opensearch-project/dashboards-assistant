@@ -4,9 +4,14 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 
 ## Current Maintainers
 
-| Maintainer            | GitHub ID                                     | Affiliation |
-|-----------------------|-----------------------------------------------| ----------- |
-| Ashish Agrawal        | [lezzago](https://github.com/lezzago)         | Amazon      |
-| Joshua Li             | [joshuali925](https://github.com/joshuali925) | Amazon      |
-| Anirudha Jadhav       | [anirudha](https://github.com/anirudha)       | Amazon      |
-| Sean Li               | [sejli](https://github.com/sejli)             | Amazon      |
+| Maintainer      | GitHub ID                                     | Affiliation |
+|-----------------|-----------------------------------------------| ----------- |
+| Ashish Agrawal  | [lezzago](https://github.com/lezzago)         | Amazon      |
+| Joshua Li       | [joshuali925](https://github.com/joshuali925) | Amazon      |
+| Anirudha Jadhav | [anirudha](https://github.com/anirudha)       | Amazon      |
+| Sean Li         | [sejli](https://github.com/sejli)             | Amazon      |
+| Yulong Ruan     | [ruanyl](https://github.com/ruanyl)           | Amazon      |
+| Su Zhou         | [SuZhou-Joe](https://github.com/SuZhou-Joe)   | Amazon      |
+| Tianyu Gao      | [raintygao](https://github.com/raintygao)     | Amazon      |
+| Hailong Cui     | [Hailong-am](https://github.com/Hailong-am)   | Amazon      |
+| HLin Wang       | [wanglam](https://github.com/wanglam)         | Amazon      |
