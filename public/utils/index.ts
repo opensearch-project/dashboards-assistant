@@ -4,3 +4,4 @@
  */
 
 export * from './notebook';
+export { TAB_ID } from './constants';
