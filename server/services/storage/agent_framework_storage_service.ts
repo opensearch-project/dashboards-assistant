@@ -4,6 +4,7 @@
  */
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
+import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { AgentFrameworkTrace } from '../../../common/utils/llm_chat/traces';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
@@ -29,37 +30,38 @@ export class AgentFrameworkStorageService implements StorageService {
     private readonly messageParsers: MessageParser[] = []
   ) {}
   async getSession(sessionId: string): Promise<ISession> {
-    const session = (await this.client.transport.request({
-      method: 'GET',
-      path: `/_plugins/_ml/memory/conversation/${sessionId}/_list`,
-    })) as ApiResponse<{
-      interactions: Interaction[];
-    }>;
+    const [interactionsResp, conversation] = await Promise.all([
+      this.client.transport.request({
+        method: 'GET',
+        path: `/_plugins/_ml/memory/conversation/${sessionId}/_list`,
+      }) as TransportRequestPromise<
+        ApiResponse<{
+          interactions: Interaction[];
+        }>
+      >,
+      this.client.transport.request({
+        method: 'GET',
+        path: `/_plugins/_ml/memory/conversation/${sessionId}`,
+      }) as TransportRequestPromise<
+        ApiResponse<{
+          conversation_id: string;
+          create_time: string;
+          updated_time: string;
+          name: string;
+        }>
+      >,
+    ]);
     const messageParserRunner = new MessageParserRunner(this.messageParsers);
-    const finalInteractions: Interaction[] = [...session.body.interactions];
+    const finalInteractions: Interaction[] = [...interactionsResp.body.interactions];
 
-    /**
-     * Sort interactions according to create_time
-     */
-    finalInteractions.sort((interactionA, interactionB) => {
-      const { create_time: createTimeA } = interactionA;
-      const { create_time: createTimeB } = interactionB;
-      const createTimeMSA = +new Date(createTimeA);
-      const createTimeMSB = +new Date(createTimeB);
-      if (isNaN(createTimeMSA) || isNaN(createTimeMSB)) {
-        return 0;
-      }
-      return createTimeMSA - createTimeMSB;
-    });
     let finalMessages: IMessage[] = [];
     for (const interaction of finalInteractions) {
       finalMessages = [...finalMessages, ...(await messageParserRunner.run(interaction))];
     }
     return {
-      title: 'test',
-      version: 1,
-      createdTimeMs: Date.now(),
-      updatedTimeMs: Date.now(),
+      title: conversation.body.name,
+      createdTimeMs: +new Date(conversation.body.create_time),
+      updatedTimeMs: +new Date(conversation.body.updated_time),
       messages: finalMessages,
       interactions: finalInteractions,
     };

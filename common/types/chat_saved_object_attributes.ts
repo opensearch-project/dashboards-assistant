@@ -18,7 +18,7 @@ export interface Interaction {
 
 export interface ISession {
   title: string;
-  version: number;
+  version?: number;
   createdTimeMs: number;
   updatedTimeMs: number;
   messages: IMessage[];

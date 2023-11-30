@@ -99,7 +99,7 @@ const updateSessionRoute = {
     params: schema.object({
       sessionId: schema.string(),
     }),
-    query: schema.object({
+    body: schema.object({
       title: schema.string(),
     }),
   },
@@ -225,7 +225,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       try {
         const getResponse = await storageService.updateSession(
           request.params.sessionId,
-          request.query.title
+          request.body.title
         );
         return response.ok({ body: getResponse });
       } catch (error) {
