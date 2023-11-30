@@ -121,7 +121,7 @@ const feedbackRoute = {
       interactionId: schema.string(),
     }),
     body: schema.object({
-      feedback: schema.boolean(),
+      satisfaction: schema.boolean(),
     }),
   },
 };
@@ -345,7 +345,9 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const { interactionId } = request.params;
 
       try {
-        const getResponse = await storageService.updateInteraction(interactionId, request.body);
+        const getResponse = await storageService.updateInteraction(interactionId, {
+          feedback: request.body,
+        });
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
