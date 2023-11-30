@@ -33,9 +33,13 @@ export interface AssistantSetup {
   registerContentRenderer: (contentType: string, render: ContentRenderer) => void;
   registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
   /**
-   * Returns true if chat feature is enabled and current user has permission to use chat.
+   * Returns true if chat UI is enabled.
    */
-  assistantEnabled: () => Promise<boolean>;
+  chatEnabled: () => boolean;
+  /**
+   * Returns true if current user has permission to use assistant features.
+   */
+  userHasAccess: () => Promise<boolean>;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
 }
 

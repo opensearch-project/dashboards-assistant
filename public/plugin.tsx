@@ -117,8 +117,8 @@ export class AssistantPlugin
           console.warn(`Action executor type ${actionType} is already registered.`);
         actionExecutors[actionType] = execute;
       },
-      assistantEnabled: async () =>
-        this.config.chat.enabled && (await getAccount().then(checkAccess)),
+      chatEnabled: () => this.config.chat.enabled,
+      userHasAccess: async () => await getAccount().then(checkAccess),
       assistantActions,
     };
   }
