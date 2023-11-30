@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { TAB_ID } from '../utils/constants';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import {
   IMessage,
@@ -52,7 +53,7 @@ export const useChatActions = (): AssistantActions => {
         !chatContext.sessionId &&
         response.sessionId &&
         core.services.sessions.options?.page === 1 &&
-        chatContext.selectedTabId === 'history'
+        chatContext.selectedTabId === TAB_ID.HISTORY
       ) {
         core.services.sessions.reload();
       }
@@ -81,7 +82,7 @@ export const useChatActions = (): AssistantActions => {
     chatContext.setTitle(title);
     // Chat page will always visible in fullscreen mode, we don't need to change the tab anymore
     if (!chatContext.flyoutFullScreen) {
-      chatContext.setSelectedTabId('chat');
+      chatContext.setSelectedTabId(TAB_ID.CHAT);
     }
     chatContext.setFlyoutComponent(null);
     if (!sessionId) {
@@ -102,7 +103,7 @@ export const useChatActions = (): AssistantActions => {
 
   const openChatUI = () => {
     chatContext.setFlyoutVisible(true);
-    chatContext.setSelectedTabId('chat');
+    chatContext.setSelectedTabId(TAB_ID.CHAT);
   };
 
   const executeAction = async (suggestedAction: ISuggestedAction, message: IMessage) => {

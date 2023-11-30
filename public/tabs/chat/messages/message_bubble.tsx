@@ -188,6 +188,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     {feedbackResult !== false ? (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
+                          aria-label="feedback"
                           color={feedbackResult === true ? 'primary' : 'text'}
                           iconType="thumbsUp"
                           onClick={() => feedbackOutput(true, feedbackResult)}
@@ -197,6 +198,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     {feedbackResult !== true ? (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
+                          aria-label="feedback result"
                           color={feedbackResult === false ? 'primary' : 'text'}
                           iconType="thumbsDown"
                           onClick={() => feedbackOutput(false, feedbackResult)}
