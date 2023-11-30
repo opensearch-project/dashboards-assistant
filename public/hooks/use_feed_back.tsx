@@ -11,7 +11,7 @@ import { useCore } from '../contexts/core_context';
 import { useChatState } from './use_chat_state';
 
 interface SendFeedbackBody {
-  feedback: boolean;
+  satisfaction: boolean;
 }
 
 export const useFeedback = () => {
@@ -34,7 +34,7 @@ export const useFeedback = () => {
     }
 
     const body: SendFeedbackBody = {
-      feedback: correct,
+      satisfaction: correct,
     };
 
     try {

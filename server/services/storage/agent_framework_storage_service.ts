@@ -184,7 +184,7 @@ export class AgentFrameworkStorageService implements StorageService {
 
   async updateInteraction(
     interactionId: string,
-    additionalInfo: Record<string, string | boolean>
+    additionalInfo: Record<string, Record<string, boolean | string>>
   ): Promise<SessionOptResponse> {
     try {
       const response = await this.client.transport.request({
