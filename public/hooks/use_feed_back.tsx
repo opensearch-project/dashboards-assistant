@@ -23,8 +23,6 @@ export const useFeedback = () => {
   const sendFeedback = async (message: IOutput, correct: boolean) => {
     const outputMessage = message;
     // Markdown type output all has traceId. The traceId of message is equal to interaction id.
-    const { traceId } = outputMessage;
-    if (!traceId) return;
     const outputMessageIndex = chatState.messages.findIndex((item) => {
       return item.type === 'output' && item.traceId === message.traceId;
     });
@@ -40,7 +38,7 @@ export const useFeedback = () => {
     };
 
     try {
-      await core.services.http.put(`${ASSISTANT_API.FEEDBACK}/${traceId}`, {
+      await core.services.http.put(`${ASSISTANT_API.FEEDBACK}/${message.traceId}`, {
         body: JSON.stringify(body),
       });
       setFeedbackResult(correct);
