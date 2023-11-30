@@ -105,6 +105,15 @@ const updateSessionRoute = {
   },
 };
 
+const getTracesRoute = {
+  path: `${ASSISTANT_API.TRACE}/{traceId}`,
+  validate: {
+    params: schema.object({
+      traceId: schema.string(),
+    }),
+  },
+};
+
 export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions) {
   const createStorageService = (context: RequestHandlerContext) =>
     new AgentFrameworkStorageService(
@@ -218,6 +227,25 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
           request.params.sessionId,
           request.query.title
         );
+        return response.ok({ body: getResponse });
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
+    }
+  );
+
+  router.get(
+    getTracesRoute,
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      const storageService = createStorageService(context);
+
+      try {
+        const getResponse = await storageService.getTraces(request.params.traceId);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);

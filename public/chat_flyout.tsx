@@ -10,7 +10,8 @@ import { useChatContext } from './contexts/chat_context';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatWindowHeader } from './tabs/chat_window_header';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
-import { LangchainTracesFlyoutBody } from './components/langchain_traces_flyout_body';
+import { AgentFrameworkTracesFlyoutBody } from './components/agent_framework_traces_flyout_body';
+import { TAB_ID } from './utils/constants';
 
 let chatHistoryPageLoaded = false;
 
@@ -31,15 +32,15 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
 
   if (!props.overrideComponent) {
     switch (chatContext.selectedTabId) {
-      case 'chat':
+      case TAB_ID.CHAT:
         chatPageVisible = true;
         break;
 
-      case 'history':
+      case TAB_ID.HISTORY:
         chatHistoryPageVisible = true;
         break;
 
-      case 'trace':
+      case TAB_ID.TRACE:
         chatTraceVisible = true;
         break;
 
@@ -134,7 +135,7 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
                       className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
                     />
                   )}
-                  {chatTraceVisible && chatContext.traceId && <LangchainTracesFlyoutBody />}
+                  {chatTraceVisible && chatContext.traceId && <AgentFrameworkTracesFlyoutBody />}
                 </Panel>
               </>
             </>

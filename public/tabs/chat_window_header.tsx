@@ -8,6 +8,7 @@ import React from 'react';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatWindowHeaderTitle } from '../components/chat_window_header_title';
 import chatIcon from '../assets/chat.svg';
+import { TAB_ID } from '../utils/constants';
 interface ChatWindowHeaderProps {
   flyoutFullScreen: boolean;
   toggleFlyoutFullScreen: () => void;
@@ -35,60 +36,62 @@ export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((pro
   );
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="spaceAround"
-      alignItems="center"
-      responsive={false}
-    >
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false} style={{ marginLeft: '8px' }}>
-            <EuiIcon type={chatIcon} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ChatWindowHeaderTitle />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label="history"
-              iconType="clock"
-              size="xs"
-              color="text"
-              onClick={() => {
-                chatContext.setFlyoutComponent(undefined);
-                // Back to chat tab if history page already visible
-                chatContext.setSelectedTabId(
-                  chatContext.selectedTabId === 'history' ? 'chat' : 'history'
-                );
-              }}
-              display={chatContext.selectedTabId === 'history' ? 'fill' : undefined}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label="fullScreen"
-          color="text"
-          size="xs"
-          // TODO replace svg with built-in icon
-          iconType={props.flyoutFullScreen ? dockRight : dockBottom}
-          onClick={props.toggleFlyoutFullScreen}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label="close"
-          size="xs"
-          color="text"
-          iconType="cross"
-          onClick={() => {
-            chatContext.setFlyoutVisible(false);
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} />
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceAround"
+        alignItems="center"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false} style={{ marginLeft: '8px' }}>
+              <EuiIcon type={chatIcon} size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ChatWindowHeaderTitle />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label="history"
+                iconType="clock"
+                size="xs"
+                color="text"
+                onClick={() => {
+                  chatContext.setFlyoutComponent(undefined);
+                  // Back to chat tab if history page already visible
+                  chatContext.setSelectedTabId(
+                    chatContext.selectedTabId === TAB_ID.HISTORY ? TAB_ID.CHAT : TAB_ID.HISTORY
+                  );
+                }}
+                display={chatContext.selectedTabId === TAB_ID.HISTORY ? 'fill' : undefined}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label="fullScreen"
+            color="text"
+            size="xs"
+            // TODO replace svg with built-in icon
+            iconType={props.flyoutFullScreen ? dockRight : dockBottom}
+            onClick={props.toggleFlyoutFullScreen}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label="close"
+            size="xs"
+            color="text"
+            iconType="cross"
+            onClick={() => {
+              chatContext.setFlyoutVisible(false);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} />
+      </EuiFlexGroup>
+    </>
   );
 });

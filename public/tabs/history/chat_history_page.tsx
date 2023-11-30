@@ -22,6 +22,7 @@ import { useDebounce, useObservable } from 'react-use';
 import cs from 'classnames';
 import { useChatActions, useChatState } from '../../hooks';
 import { useChatContext, useCore } from '../../contexts';
+import { TAB_ID } from '../../utils/constants';
 import { ChatHistorySearchList } from './chat_history_search_list';
 
 interface ChatHistoryPageProps {
@@ -70,7 +71,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
   }, []);
 
   const handleBack = useCallback(() => {
-    setSelectedTabId('chat');
+    setSelectedTabId(TAB_ID.CHAT);
   }, [setSelectedTabId]);
 
   const handleHistoryDeleted = useCallback(
@@ -113,7 +114,11 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
             {flyoutFullScreen ? (
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="cross" onClick={handleBack} />
+                  <EuiButtonIcon
+                    aria-label="full screen back"
+                    iconType="cross"
+                    onClick={handleBack}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
