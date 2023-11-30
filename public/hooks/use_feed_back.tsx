@@ -10,13 +10,7 @@ import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { useChatState } from './use_chat_state';
 
-interface AccountResponse {
-  data: { user_name: string; user_requested_tenant: string; roles: string[] };
-}
-
 interface SendFeedbackBody {
-  username: string;
-  tenant: string;
   feedback: boolean;
 }
 
@@ -41,10 +35,7 @@ export const useFeedback = () => {
       return;
     }
 
-    const { username, tenant } = chatContext.currentAccount;
     const body: SendFeedbackBody = {
-      username,
-      tenant,
       feedback: correct,
     };
 

@@ -121,8 +121,6 @@ const feedbackRoute = {
       interactionId: schema.string(),
     }),
     body: schema.object({
-      username: schema.string(),
-      tenant: schema.string(),
       feedback: schema.boolean(),
     }),
   },
