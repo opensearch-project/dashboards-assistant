@@ -31,12 +31,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
           size="xs"
           flush="left"
           onClick={() => {
-            chatContext.setFlyoutComponent(
-              <AgentFrameworkTracesFlyoutBody
-                closeFlyout={() => chatContext.setFlyoutComponent(null)}
-                traceId={traceId}
-              />
-            );
+            chatContext.setFlyoutComponent(<AgentFrameworkTracesFlyoutBody />);
           }}
         >
           How was this generated?

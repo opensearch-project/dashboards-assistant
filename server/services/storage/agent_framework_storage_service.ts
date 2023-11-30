@@ -201,17 +201,15 @@ export class AgentFrameworkStorageService implements StorageService {
         }>;
       }>;
 
-      return response.body.traces
-        .map((item) => ({
-          interactionId: item.interaction_id,
-          parentInteractionId: item.parent_interaction_id,
-          input: item.input,
-          output: item.response,
-          createTime: item.create_time,
-          origin: item.origin,
-          traceNumber: item.trace_number,
-        }))
-        .reverse();
+      return response.body.traces.map((item) => ({
+        interactionId: item.interaction_id,
+        parentInteractionId: item.parent_interaction_id,
+        input: item.input,
+        output: item.response,
+        createTime: item.create_time,
+        origin: item.origin,
+        traceNumber: item.trace_number,
+      }));
     } catch (error) {
       throw new Error('get traces failed, reason:' + JSON.stringify(error.meta?.body));
     }

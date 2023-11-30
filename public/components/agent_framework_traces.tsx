@@ -45,8 +45,8 @@ export const AgentFrameworkTraces: React.FC<AgentFrameworkTracesProps> = (props)
     return <EuiText>Data not available.</EuiText>;
   }
 
-  const question = traces[0].input;
-  const result = traces[0].output;
+  const question = traces[traces.length - 1].input;
+  const result = traces[traces.length - 1].output;
   const questionAndResult = `# How was this generated
 #### Question
 ${question}
@@ -64,7 +64,7 @@ ${result}
         <h3>Response</h3>
       </EuiText>
       {traces
-        .filter((trace) => trace.origin?.includes('Tool') && (trace.input || trace.output))
+        .filter((trace) => trace.origin && (trace.input || trace.output))
         .map((trace, i) => {
           const stepContent = `Step ${i + 1}`;
           return (

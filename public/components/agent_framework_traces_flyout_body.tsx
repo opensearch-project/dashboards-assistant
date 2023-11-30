@@ -16,6 +16,7 @@ import {
 import React from 'react';
 import { useChatContext } from '../contexts/chat_context';
 import { AgentFrameworkTraces } from './agent_framework_traces';
+import { TAB_ID } from '../utils/constants';
 
 export const AgentFrameworkTracesFlyoutBody: React.FC = () => {
   const chatContext = useChatContext();
@@ -25,7 +26,7 @@ export const AgentFrameworkTracesFlyoutBody: React.FC = () => {
   }
 
   // docked right or fullscreen with history open
-  const showBack = !chatContext.flyoutFullScreen || chatContext.preSelectedTabId === 'history';
+  const showBack = !chatContext.flyoutFullScreen || chatContext.preSelectedTabId === TAB_ID.HISTORY;
 
   return (
     <EuiFlyoutBody className="llm-chat-flyout llm-chat-flyout-body">
@@ -38,7 +39,9 @@ export const AgentFrameworkTracesFlyoutBody: React.FC = () => {
                   size="xs"
                   flush="left"
                   onClick={() => {
-                    chatContext.setSelectedTabId(chatContext.flyoutFullScreen ? 'history' : 'chat');
+                    chatContext.setSelectedTabId(
+                      chatContext.flyoutFullScreen ? TAB_ID.HISTORY : TAB_ID.CHAT
+                    );
                   }}
                   iconType="arrowLeft"
                 >
@@ -54,7 +57,7 @@ export const AgentFrameworkTracesFlyoutBody: React.FC = () => {
                   color="text"
                   iconType="cross"
                   onClick={() => {
-                    chatContext.setSelectedTabId('chat');
+                    chatContext.setSelectedTabId(TAB_ID.CHAT);
                   }}
                 />
               )}
