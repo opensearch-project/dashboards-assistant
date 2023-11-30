@@ -6,11 +6,13 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
 
 1. Follow steps here to setup docker for OpenSearch: https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/
    1. Note: When running docker pull, use this command instead: `docker pull public.ecr.aws/w1m7p7g2/opensearch-reinvent2023:latest`
+   2. Note: This docker image may get incrementally updated over time.
 
 
 2. Follow steps here to setup docker to OpenSearch Dashboards: https://opensearch.org/docs/latest/install-and-configure/install-dashboards/docker/
    1. Note: When running docker pull, use this command instead for OSD: `docker pull public.ecr.aws/w1m7p7g2/opensearch-dashboards-reinvent2023:latest`
-   2. If you want to enable the chat assistant feature, set `assistant.chat.enabled` to `true` in the `opensearch_dashboards.yml` file.
+   2. Note: This docker image may get incrementally updated over time.
+   3. If you want to enable the chat assistant feature, set `assistant.chat.enabled` to `true` in the `opensearch_dashboards.yml` file.
 3. After OpenSearch and OpenSearch Dashboards are running, we will setup ML Commons to connect to the LLM model
 4. Run ML commons on Data node
    ```
@@ -71,6 +73,24 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
         }
      ]
    }
+   ```
+   1. If you are using AWS Bedrock, ensure the IAM user or IAM role used have these policy permissions. Feel free to restrict the resources to the specific endpoints you want ML Commons to connect to.
+   ```
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "Stmt1688544995813",
+                "Action": [
+                    "bedrock:ListBuiltInModels",
+                    "bedrock:ListFoundationModels",
+                    "bedrock:InvokeModel"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+            }
+       ]
+   } 
    ```
 7. Create a model group with an example below ([reference doc](https://opensearch.org/docs/latest/ml-commons-plugin/remote-models/index/)) and note the model group id.
    ```
