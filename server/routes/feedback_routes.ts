@@ -12,7 +12,7 @@ import {
 } from '../../../../src/core/server';
 import { ASSISTANT_API, LLM_INDEX } from '../../common/constants/llm';
 
-export function registerLangchainRoutes(router: IRouter) {
+export function registerFeedbackRoutes(router: IRouter) {
   router.post(
     {
       path: ASSISTANT_API.FEEDBACK,

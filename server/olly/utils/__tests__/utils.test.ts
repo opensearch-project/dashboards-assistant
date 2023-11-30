@@ -3,36 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MAX_OUTPUT_CHAR } from '../constants';
-import { flatten, jsonToCsv, protectCall } from '../utils';
-
-describe('protect calls', () => {
-  it('should swallow errors for sync functions', async () => {
-    const tool = jest.fn().mockImplementation(() => {
-      throw new Error('failed to run in test');
-    });
-    const toolNoThrow = protectCall(tool);
-    const res = await toolNoThrow('input');
-    expect(res).toEqual('Error when running tool: Error: failed to run in test');
-    expect(toolNoThrow('input')).resolves.not.toThrowError();
-  });
-
-  it('should swallow errors for async functions', async () => {
-    const tool = jest.fn().mockRejectedValue(new Error('failed to run in test'));
-    const toolNoThrow = protectCall(tool);
-    const res = await toolNoThrow('input');
-    expect(res).toEqual('Error when running tool: Error: failed to run in test');
-    expect(toolNoThrow('input')).resolves.not.toThrowError();
-  });
-
-  it('should truncate text if output is too long', async () => {
-    const tool = jest.fn().mockResolvedValue('failed to run in test'.repeat(1000));
-    const truncated = protectCall(tool);
-    const res = await truncated('input');
-    expect(res).toContain('Output is too long, truncated');
-    expect(res.length).toEqual(MAX_OUTPUT_CHAR);
-  });
-});
+import { flatten, jsonToCsv } from '../utils';
 
 describe('utils', () => {
   it('converts json to csv', () => {

@@ -8,7 +8,6 @@ import { JSDOM } from 'jsdom';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { LangchainTrace } from '../../../../common/utils/llm_chat/traces';
 import { buildPPLOutputs } from './ppl';
-import { buildCoreVisualizations } from './saved_objects';
 import { buildSuggestions, SuggestedQuestions } from './suggestions';
 
 export const buildOutputs = (
@@ -29,7 +28,6 @@ export const buildOutputs = (
   ];
   outputs = buildToolsUsed(traces, outputs);
   outputs = buildPPLOutputs(traces, outputs, question);
-  outputs = buildCoreVisualizations(traces, outputs);
   outputs = buildSuggestions(suggestions, outputs);
   return sanitize(outputs);
 };

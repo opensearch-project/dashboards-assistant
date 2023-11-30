@@ -15,9 +15,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { useChatContext } from '../contexts/chat_context';
-import { LangchainTraces } from './langchain_traces';
+import { Traces } from './traces';
 
-export const LangchainTracesFlyoutBody: React.FC = () => {
+export const TracesFlyoutBody: React.FC = () => {
   const chatContext = useChatContext();
   const traceId = chatContext.traceId;
   if (!traceId) {
@@ -61,7 +61,7 @@ export const LangchainTracesFlyoutBody: React.FC = () => {
             </EuiPageHeaderSection>
           </EuiPageHeader>
           <EuiPageContentBody>
-            <LangchainTraces traceId={traceId} />
+            <Traces traceId={traceId} />
           </EuiPageContentBody>
         </EuiPageBody>
       </EuiPage>

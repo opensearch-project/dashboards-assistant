@@ -3,27 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DynamicToolInput } from 'langchain/tools';
 import { MAX_OUTPUT_CHAR } from './constants';
-
-/**
- * Use to wrap tool funcs to truncate when output is too long and swallow if
- * output is an error.
- *
- * @param func - function for a tool
- * @returns a string even when the function throws error
- */
-export const protectCall = (func: DynamicToolInput['func']): DynamicToolInput['func'] => {
-  return async (...args) => {
-    let response;
-    try {
-      response = await func(...args);
-    } catch (error) {
-      response = `Error when running tool: ${error}`;
-    }
-    return truncate(response);
-  };
-};
 
 export const truncate = (text: string, maxLength: number = MAX_OUTPUT_CHAR) => {
   if (text.length <= maxLength) return text;

@@ -17,7 +17,6 @@ import {
 import { OpenSearchAlertingPlugin } from './adaptors/opensearch_alerting_plugin';
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
-import './fetch-polyfill';
 import { setupRoutes } from './routes/index';
 import { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
 import { BasicInputOutputParser } from './parsers/basic_input_output_parser';

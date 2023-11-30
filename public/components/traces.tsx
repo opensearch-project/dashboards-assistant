@@ -27,7 +27,7 @@ interface LangchainTracesProps {
   traceId: string;
 }
 
-export const LangchainTraces: React.FC<LangchainTracesProps> = (props) => {
+export const Traces: React.FC<LangchainTracesProps> = (props) => {
   const { data: traces, loading, error } = useFetchLangchainTraces(props.traceId);
 
   if (loading) {
