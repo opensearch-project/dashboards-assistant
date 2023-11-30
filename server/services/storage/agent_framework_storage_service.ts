@@ -4,7 +4,7 @@
  */
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
-import { AgentFrameworkTrace } from 'common/utils/llm_chat/traces';
+import { AgentFrameworkTrace } from '../../../common/utils/llm_chat/traces';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
   IMessage,

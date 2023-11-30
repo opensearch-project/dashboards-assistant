@@ -9,7 +9,7 @@ import { IMessage } from '../../../../common/types/chat_saved_object_attributes'
 import { FeedbackModal } from '../../../components/feedback_modal';
 import { useChatContext } from '../../../contexts/chat_context';
 import { useCore } from '../../../contexts/core_context';
-import { AgentFrameworkTracesFlyoutBody } from '../../..//components/agent_framework_traces_flyout_body';
+import { AgentFrameworkTracesFlyoutBody } from '../../../components/agent_framework_traces_flyout_body';
 
 interface MessageFooterProps {
   message: IMessage;
