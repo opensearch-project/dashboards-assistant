@@ -76,21 +76,21 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
    ```
    1. If you are using AWS Bedrock, ensure the IAM user or IAM role used have these policy permissions. Feel free to restrict the resources to the specific endpoints you want ML Commons to connect to.
    ```
-   {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "Stmt1688544995813",
-            "Action": [
-                "bedrock:ListBuiltInModels",
-                "bedrock:ListFoundationModels",
-                "bedrock:InvokeModel"
-            ],
-            "Effect": "Allow",
-            "Resource": "*"
-        }
-    ]
-} 
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "Stmt1688544995813",
+                "Action": [
+                    "bedrock:ListBuiltInModels",
+                    "bedrock:ListFoundationModels",
+                    "bedrock:InvokeModel"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+            }
+       ]
+   } 
    ```
 7. Create a model group with an example below ([reference doc](https://opensearch.org/docs/latest/ml-commons-plugin/remote-models/index/)) and note the model group id.
    ```
