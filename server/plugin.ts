@@ -14,9 +14,6 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../src/core/server';
-import { OpenSearchAlertingPlugin } from './adaptors/opensearch_alerting_plugin';
-import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
-import { PPLPlugin } from './adaptors/ppl_plugin';
 import { setupRoutes } from './routes/index';
 import { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
 import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
@@ -40,7 +37,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
       'opensearch_observability',
       {
-        plugins: [PPLPlugin, OpenSearchObservabilityPlugin, OpenSearchAlertingPlugin],
+        plugins: [],
       }
     );
 

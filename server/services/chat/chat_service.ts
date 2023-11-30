@@ -16,4 +16,6 @@ export interface ChatService {
     messages: IMessage[];
     memoryId: string;
   }>;
+
+  abortAgentExecution(sessionId: string): void;
 }

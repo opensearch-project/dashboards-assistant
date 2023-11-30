@@ -23,7 +23,7 @@ module.exports = {
     '/__utils__/',
   ],
   // https://github.com/jestjs/jest/issues/6229#issuecomment-403539460
-  transformIgnorePatterns: ['node_modules/(?!langchain|langsmith)'],
+  transformIgnorePatterns: ['node_modules/(?!langsmith)'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/test/__mocks__/styleMock.js',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__mocks__/fileMock.js',
