@@ -24,6 +24,34 @@ Ultimately, your directory structure should look like this:
 │       └── dashboards-assistant
 ```
 
+Setup local stack
+
+1. Export keys locally:
+```sh
+# defaults to us-west-2
+export REGION=
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export AWS_SESSION_TOKEN=
+```
+2. Setup OSD plugins
+```sh
+# from OSD root folder
+cd plugins
+# example with security plugin
+git clone --depth 1 --branch $VERSION https://github.com/opensearch-project/security-dashboards-plugin.git
+cd dashboards-assistant
+# NOTE: this will change OSD to be version 2.11.0 for dev purposes
+yarn setup
+cd ../../
+yarn osd bootstrap
+```
+2. Start local environment
+```sh
+# from OSD root folder
+yarn start:assistant
+```
+
 ### Build
 
 To build the plugin's distributable zip simply run `yarn build` in the plugin's directory.

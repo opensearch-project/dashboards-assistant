@@ -10,7 +10,8 @@
     "plugin-helpers": "node ../../scripts/plugin_helpers",
     "prepare": "husky install",
     "lint:es": "node ../../scripts/eslint",
-    "lint": "yarn lint:es"
+    "lint": "yarn lint:es",
+    "setup": "scripts/pre_install.sh"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
