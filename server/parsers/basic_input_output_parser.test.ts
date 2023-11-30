@@ -29,4 +29,30 @@ describe('BasicInputOutputParser', () => {
       },
     ]);
   });
+
+  it('sanitizes markdown outputs', async () => {
+    const outputs = await BasicInputOutputParser.parserProvider({
+      input: 'test question',
+      response:
+        'normal text<b onmouseover=alert("XSS testing!")></b> <img src="image.jpg" alt="image" width="500" height="600"> !!!!!!![](http://evil.com/) ![image](http://evil.com/) [good link](https://link)',
+      conversation_id: 'test-session',
+      interaction_id: 'interaction_id',
+      create_time: '',
+    });
+
+    expect(outputs).toEqual([
+      {
+        type: 'input',
+        contentType: 'text',
+        content: 'test question',
+      },
+      {
+        content:
+          'normal text<b></b>  [](http://evil.com/) [image](http://evil.com/) [good link](https://link)',
+        contentType: 'markdown',
+        traceId: 'interaction_id',
+        type: 'output',
+      },
+    ]);
+  });
 });
