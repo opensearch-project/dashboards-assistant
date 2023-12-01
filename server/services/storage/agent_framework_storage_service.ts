@@ -16,7 +16,7 @@ import { GetSessionsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
 import { MessageParser } from '../../types';
 import { MessageParserRunner } from '../../utils/message_parser_runner';
-import { ML_COMMONS_BASE_API } from '../../olly/models/constants';
+import { ML_COMMONS_BASE_API } from '../../utils/constants';
 
 export interface SessionOptResponse {
   success: boolean;

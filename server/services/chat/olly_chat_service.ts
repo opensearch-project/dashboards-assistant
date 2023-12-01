@@ -7,7 +7,7 @@ import { ApiResponse } from '@opensearch-project/opensearch';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
-import { ML_COMMONS_BASE_API } from '../../olly/models/constants';
+import { ML_COMMONS_BASE_API } from '../../utils/constants';
 
 const MEMORY_ID_FIELD = 'memory_id';
 
