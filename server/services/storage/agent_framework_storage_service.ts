@@ -52,7 +52,7 @@ export class AgentFrameworkStorageService implements StorageService {
       >,
     ]);
     const messageParserRunner = new MessageParserRunner(this.messageParsers);
-    const finalInteractions: Interaction[] = [...interactionsResp.body.interactions];
+    const finalInteractions = interactionsResp.body.interactions;
 
     let finalMessages: IMessage[] = [];
     for (const interaction of finalInteractions) {
