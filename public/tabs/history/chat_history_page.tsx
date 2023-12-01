@@ -22,8 +22,7 @@ import { useDebounce, useObservable } from 'react-use';
 import cs from 'classnames';
 import { TAB_ID } from 'public/utils/constants';
 import { useChatActions } from '../../hooks/use_chat_actions';
-import { useChatContext } from '../../contexts/chat_context';
-import { useCore } from '../../contexts/core_context';
+import { useChatContext, useCore } from '../../contexts';
 import { ChatHistorySearchList } from './chat_history_search_list';
 
 interface ChatHistoryPageProps {
