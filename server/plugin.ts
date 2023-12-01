@@ -8,7 +8,6 @@ import { AssistantConfig } from '.';
 import {
   CoreSetup,
   CoreStart,
-  ILegacyClusterClient,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -33,18 +32,11 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
       .pipe(first())
       .toPromise();
     const router = core.http.createRouter();
-    const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
-      'opensearch_observability',
-      {
-        plugins: [],
-      }
-    );
 
-    core.http.registerRouteHandlerContext('assistant_plugin', (context, request) => {
+    core.http.registerRouteHandlerContext('assistant_plugin', () => {
       return {
         config,
         logger: this.logger,
-        observabilityClient: openSearchObservabilityClient,
       };
     });
 
