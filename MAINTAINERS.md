@@ -12,7 +12,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Yulong Ruan     | [ruanyl](https://github.com/ruanyl)           | Amazon      |
 | Su Zhou         | [SuZhou-Joe](https://github.com/SuZhou-Joe)   | Amazon      |
 | Xuesong Luo     | [xluo-aws](https://github.com/xluo-aws)       | Amazon      |
-| Binlong Gao     | [gaobinlong](https://github.com/gaobinlong)       | Amazon      |
+| Binlong Gao     | [gaobinlong](https://github.com/gaobinlong)   | Amazon      |
 | Hailong Cui     | [Hailong-am](https://github.com/Hailong-am)   | Amazon      |
-| Lin Wang        | [wanglam](https://github.com/wanglam)               | Amazon      |
-| Tianyu Gao      | [raintygao](https://github.com/raintygao)           | Amazon      |
+| Lin Wang        | [wanglam](https://github.com/wanglam)         | Amazon      |
+| Tianyu Gao      | [raintygao](https://github.com/raintygao)     | Amazon      |
