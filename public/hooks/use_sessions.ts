@@ -3,22 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useReducer } from 'react';
+import { useCallback, useReducer, useRef } from 'react';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { useCore } from '../contexts/core_context';
-import { genericReducerWithAbortController } from './fetch_reducer';
+import { genericReducer } from './fetch_reducer';
 
 export const useDeleteSession = () => {
   const core = useCore();
-  const [state, dispatch] = useReducer(genericReducerWithAbortController, { loading: false });
+  const [state, dispatch] = useReducer(genericReducer, { loading: false });
+  const abortControllerRef = useRef<AbortController>();
 
   const deleteSession = useCallback(
     (sessionId: string) => {
-      const abortController = new AbortController();
-      dispatch({ type: 'request', abortController });
+      abortControllerRef.current = new AbortController();
+      dispatch({ type: 'request' });
       return core.services.http
         .delete(`${ASSISTANT_API.SESSION}/${sessionId}`, {
-          signal: abortController.signal,
+          signal: abortControllerRef.current.signal,
         })
         .then((payload) => dispatch({ type: 'success', payload }))
         .catch((error) => dispatch({ type: 'failure', error }));
@@ -26,26 +27,32 @@ export const useDeleteSession = () => {
     [core.services.http]
   );
 
+  const abort = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
+
   return {
     ...state,
+    abort,
     deleteSession,
   };
 };
 
 export const usePatchSession = () => {
   const core = useCore();
-  const [state, dispatch] = useReducer(genericReducerWithAbortController, { loading: false });
+  const [state, dispatch] = useReducer(genericReducer, { loading: false });
+  const abortControllerRef = useRef<AbortController>();
 
   const patchSession = useCallback(
     (sessionId: string, title: string) => {
-      const abortController = new AbortController();
-      dispatch({ type: 'request', abortController });
+      abortControllerRef.current = new AbortController();
+      dispatch({ type: 'request' });
       return core.services.http
         .put(`${ASSISTANT_API.SESSION}/${sessionId}`, {
           query: {
             title,
           },
-          signal: abortController.signal,
+          signal: abortControllerRef.current.signal,
         })
         .then((payload) => dispatch({ type: 'success', payload }))
         .catch((error) => dispatch({ type: 'failure', error }));
@@ -53,8 +60,13 @@ export const usePatchSession = () => {
     [core.services.http]
   );
 
+  const abort = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
+
   return {
     ...state,
+    abort,
     patchSession,
   };
 };

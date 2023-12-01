@@ -18,12 +18,12 @@ export const DeleteConversationConfirmModal = ({
   onClose,
   sessionId,
 }: DeleteConversationConfirmModalProps) => {
-  const { loading, data, deleteSession, abortController } = useDeleteSession();
+  const { loading, deleteSession, abort } = useDeleteSession();
 
   const handleCancel = useCallback(() => {
-    abortController?.abort();
+    abort();
     onClose?.('canceled');
-  }, [onClose, abortController]);
+  }, [onClose, abort]);
   const handleConfirm = useCallback(async () => {
     try {
       await deleteSession(sessionId);
@@ -32,7 +32,7 @@ export const DeleteConversationConfirmModal = ({
       return;
     }
     onClose?.('deleted');
-  }, [onClose, deleteSession]);
+  }, [onClose, deleteSession, sessionId]);
 
   return (
     <EuiConfirmModal
