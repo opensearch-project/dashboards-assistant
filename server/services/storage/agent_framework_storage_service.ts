@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ApiResponse } from '@opensearch-project/opensearch/.';
-import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
+import { TransportRequestPromise, ApiResponse } from '@opensearch-project/opensearch/lib/Transport';
 import { AgentFrameworkTrace } from '../../../common/utils/llm_chat/traces';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
