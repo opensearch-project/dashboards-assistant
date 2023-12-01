@@ -4,7 +4,6 @@
  */
 
 import { first } from 'rxjs/operators';
-import 'web-streams-polyfill';
 import { AssistantConfig } from '.';
 import {
   CoreSetup,
