@@ -12,6 +12,7 @@ import { LLMModelFactory } from '../../olly/models/llm_model_factory';
 import { PPLTools } from '../../olly/tools/tool_sets/ppl';
 import { PPLGenerationRequestSchema } from '../../routes/langchain_routes';
 import { ChatService } from './chat_service';
+import { ML_COMMONS_BASE_API } from '../../olly/models/constants';
 
 const MEMORY_ID_FIELD = 'memory_id';
 
@@ -49,7 +50,7 @@ export class OllyChatService implements ChatService {
       }
       const agentFrameworkResponse = (await opensearchClient.transport.request({
         method: 'POST',
-        path: `/_plugins/_ml/agents/${rootAgentId}/_execute`,
+        path: `${ML_COMMONS_BASE_API}/agents/${rootAgentId}/_execute`,
         body: {
           parameters: parametersPayload,
         },

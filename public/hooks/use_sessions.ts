@@ -49,9 +49,9 @@ export const usePatchSession = () => {
       dispatch({ type: 'request' });
       return core.services.http
         .put(`${ASSISTANT_API.SESSION}/${sessionId}`, {
-          query: {
+          body: JSON.stringify({
             title,
-          },
+          }),
           signal: abortControllerRef.current.signal,
         })
         .then((payload) => dispatch({ type: 'success', payload }))
