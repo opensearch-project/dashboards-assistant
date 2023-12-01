@@ -11,7 +11,7 @@ import { ApplicationStart } from '../../../src/core/public';
 import { ChatFlyout } from './chat_flyout';
 import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
-import { ChatStateProvider } from './hooks/use_chat_state';
+import { ChatStateProvider } from './hooks';
 import './index.scss';
 import chatIcon from './assets/chat.svg';
 import { ActionExecutor, AssistantActions, ContentRenderer, UserAccount, TabId } from './types';

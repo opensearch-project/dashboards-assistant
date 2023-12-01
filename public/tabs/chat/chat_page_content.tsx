@@ -16,13 +16,12 @@ import {
 import React, { useLayoutEffect, useRef } from 'react';
 import { IMessage, ISuggestedAction } from '../../../common/types/chat_saved_object_attributes';
 import { TermsAndConditions } from '../../components/terms_and_conditions';
-import { useChatContext } from '../../contexts/chat_context';
-import { useChatState } from '../../hooks/use_chat_state';
+import { useChatContext } from '../../contexts';
+import { useChatState, useChatActions } from '../../hooks';
 import { ChatPageGreetings } from './chat_page_greetings';
 import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
-import { useChatActions } from '../../hooks/use_chat_actions';
 
 interface ChatPageContentProps {
   showGreetings: boolean;

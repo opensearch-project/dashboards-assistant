@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { useChatActions } from '../hooks/use_chat_actions';
+import { useChatActions } from '../hooks';
 import { AssistantActions } from '../types';
 
 interface SetContextProps {

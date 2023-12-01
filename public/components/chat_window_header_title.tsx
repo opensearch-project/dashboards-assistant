@@ -12,13 +12,11 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { useChatContext } from '../contexts/chat_context';
-import { useChatActions } from '../hooks/use_chat_actions';
+import { useChatContext } from '../contexts';
+import { useChatActions, useChatState, useSaveChat } from '../hooks';
 import { NotebookNameModal } from './notebook/notebook_name_modal';
 import { ChatExperimentalBadge } from './chat_experimental_badge';
 import { useCore } from '../contexts/core_context';
-import { useChatState } from '../hooks/use_chat_state';
-import { useSaveChat } from '../hooks/use_save_chat';
 import { EditConversationNameModal } from './edit_conversation_name_modal';
 
 export const ChatWindowHeaderTitle = React.memo(() => {

@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
 import autosize from 'autosize';
 import React, { useRef } from 'react';
 import { useEffectOnce } from 'react-use';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
-import { useChatContext } from '../../../contexts/chat_context';
-import { useChatActions } from '../../../hooks/use_chat_actions';
+import { useChatContext } from '../../../contexts';
+import { useChatActions } from '../../../hooks';
 
 interface ChatInputControlsProps {
   disabled: boolean;
