@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ApiResponse } from '@opensearch-project/opensearch/.';
+import { TransportRequestPromise, ApiResponse } from '@opensearch-project/opensearch/lib/Transport';
 import { AgentFrameworkTrace } from '../../../common/utils/llm_chat/traces';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
@@ -16,6 +16,7 @@ import { GetSessionsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
 import { MessageParser } from '../../types';
 import { MessageParserRunner } from '../../utils/message_parser_runner';
+import { ML_COMMONS_BASE_API } from '../../olly/models/constants';
 
 export interface SessionOptResponse {
   success: boolean;
@@ -29,37 +30,38 @@ export class AgentFrameworkStorageService implements StorageService {
     private readonly messageParsers: MessageParser[] = []
   ) {}
   async getSession(sessionId: string): Promise<ISession> {
-    const session = (await this.client.transport.request({
-      method: 'GET',
-      path: `/_plugins/_ml/memory/conversation/${sessionId}/_list`,
-    })) as ApiResponse<{
-      interactions: Interaction[];
-    }>;
+    const [interactionsResp, conversation] = await Promise.all([
+      this.client.transport.request({
+        method: 'GET',
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/_list`,
+      }) as TransportRequestPromise<
+        ApiResponse<{
+          interactions: Interaction[];
+        }>
+      >,
+      this.client.transport.request({
+        method: 'GET',
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}`,
+      }) as TransportRequestPromise<
+        ApiResponse<{
+          conversation_id: string;
+          create_time: string;
+          updated_time: string;
+          name: string;
+        }>
+      >,
+    ]);
     const messageParserRunner = new MessageParserRunner(this.messageParsers);
-    const finalInteractions: Interaction[] = [...session.body.interactions];
+    const finalInteractions = interactionsResp.body.interactions;
 
-    /**
-     * Sort interactions according to create_time
-     */
-    finalInteractions.sort((interactionA, interactionB) => {
-      const { create_time: createTimeA } = interactionA;
-      const { create_time: createTimeB } = interactionB;
-      const createTimeMSA = +new Date(createTimeA);
-      const createTimeMSB = +new Date(createTimeB);
-      if (isNaN(createTimeMSA) || isNaN(createTimeMSB)) {
-        return 0;
-      }
-      return createTimeMSA - createTimeMSB;
-    });
     let finalMessages: IMessage[] = [];
     for (const interaction of finalInteractions) {
       finalMessages = [...finalMessages, ...(await messageParserRunner.run(interaction))];
     }
     return {
-      title: 'test',
-      version: 1,
-      createdTimeMs: Date.now(),
-      updatedTimeMs: Date.now(),
+      title: conversation.body.name,
+      createdTimeMs: +new Date(conversation.body.create_time),
+      updatedTimeMs: +new Date(conversation.body.updated_time),
       messages: finalMessages,
       interactions: finalInteractions,
     };
@@ -101,7 +103,7 @@ export class AgentFrameworkStorageService implements StorageService {
 
     const sessions = await this.client.transport.request({
       method: 'GET',
-      path: `/_plugins/_ml/memory/conversation/_search`,
+      path: `${ML_COMMONS_BASE_API}/memory/conversation/_search`,
       body: requestParams,
     });
 
@@ -140,7 +142,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'DELETE',
-        path: `/_plugins/_ml/memory/conversation/${sessionId}/_delete`,
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/_delete`,
       });
       if (response.statusCode === 200) {
         return {
@@ -162,7 +164,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'PUT',
-        path: `/_plugins/_ml/memory/conversation/${sessionId}/_update`,
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/_update`,
         body: {
           name: title,
         },
@@ -187,7 +189,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = (await this.client.transport.request({
         method: 'GET',
-        path: `/_plugins/_ml/memory/trace/${interactionId}/_list`,
+        path: `${ML_COMMONS_BASE_API}/memory/trace/${interactionId}/_list`,
       })) as ApiResponse<{
         traces: Array<{
           conversation_id: string;
