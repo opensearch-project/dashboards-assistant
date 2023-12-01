@@ -53,6 +53,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       style={{ maxWidth: '300px', padding: '0 8px' }}
       gutterSize="xs"
       alignItems="center"
+      responsive={false}
     >
       <EuiFlexItem onClick={onButtonClick} style={{ overflow: 'hidden' }}>
         <h3 className="eui-textTruncate">

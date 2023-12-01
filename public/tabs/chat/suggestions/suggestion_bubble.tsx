@@ -30,7 +30,7 @@ export const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
       grow={false}
       paddingSize="none"
     >
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} style={{ marginRight: 5 }} />
         </EuiFlexItem>
