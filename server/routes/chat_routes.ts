@@ -345,13 +345,16 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const { interactionId } = request.params;
 
       try {
-        const getResponse = await storageService.updateInteraction(interactionId, {
+        const updateResponse = await storageService.updateInteraction(interactionId, {
           feedback: request.body,
         });
-        return response.ok({ body: getResponse });
+        return response.ok({ body: { ...updateResponse, success: true } });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
-        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: error.message,
+        });
       }
     }
   );

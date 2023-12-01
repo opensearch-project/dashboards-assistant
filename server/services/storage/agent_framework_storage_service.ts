@@ -224,7 +224,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'PUT',
-        path: `/_plugins/_ml/memory/interaction/${interactionId}/_update`,
+        path: `${ML_COMMONS_BASE_API}/memory/interaction/${interactionId}/_update`,
         body: {
           additional_info: additionalInfo,
         },
