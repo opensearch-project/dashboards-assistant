@@ -22,12 +22,9 @@ module.exports = {
     '<rootDir>/public/requests/',
     '/__utils__/',
   ],
-  // https://github.com/jestjs/jest/issues/6229#issuecomment-403539460
-  transformIgnorePatterns: ['node_modules/(?!langchain|langsmith)'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/test/__mocks__/styleMock.js',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__mocks__/fileMock.js',
-    '\\@algolia/autocomplete-theme-classic$': '<rootDir>/test/__mocks__/styleMock.js',
     '^!!raw-loader!.*': 'jest-raw-loader',
   },
   testEnvironment: 'jsdom',

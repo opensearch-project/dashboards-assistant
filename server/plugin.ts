@@ -4,24 +4,16 @@
  */
 
 import { first } from 'rxjs/operators';
-import 'web-streams-polyfill';
 import { AssistantConfig } from '.';
 import {
   CoreSetup,
   CoreStart,
-  ILegacyClusterClient,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '../../../src/core/server';
-import { OpenSearchAlertingPlugin } from './adaptors/opensearch_alerting_plugin';
-import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
-import { PPLPlugin } from './adaptors/ppl_plugin';
-import './fetch-polyfill';
 import { setupRoutes } from './routes/index';
-import { chatSavedObject } from './saved_objects/chat_saved_object';
 import { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
-import { chatConfigSavedObject } from './saved_objects/chat_config_saved_object';
 import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
 import { VisualizationCardParser } from './parsers/visualization_card_parser';
 
@@ -40,18 +32,11 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
       .pipe(first())
       .toPromise();
     const router = core.http.createRouter();
-    const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
-      'opensearch_observability',
-      {
-        plugins: [PPLPlugin, OpenSearchObservabilityPlugin, OpenSearchAlertingPlugin],
-      }
-    );
 
-    core.http.registerRouteHandlerContext('assistant_plugin', (context, request) => {
+    core.http.registerRouteHandlerContext('assistant_plugin', () => {
       return {
         config,
         logger: this.logger,
-        observabilityClient: openSearchObservabilityClient,
       };
     });
 
@@ -59,9 +44,6 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     setupRoutes(router, {
       messageParsers: this.messageParsers,
     });
-
-    core.savedObjects.registerType(chatSavedObject);
-    core.savedObjects.registerType(chatConfigSavedObject);
 
     core.capabilities.registerProvider(() => ({
       observability: {
