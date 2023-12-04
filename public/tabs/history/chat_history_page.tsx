@@ -109,7 +109,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     <EuiFlyoutBody className={cs(props.className, 'llm-chat-flyout-body')}>
       <EuiPage>
         <EuiPageBody component="div">
-          <EuiPageHeader>
+          <EuiPageHeader responsive={false}>
             {flyoutFullScreen ? (
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>

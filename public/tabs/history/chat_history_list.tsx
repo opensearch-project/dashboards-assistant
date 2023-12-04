@@ -51,7 +51,7 @@ export const ChatHistoryListItem = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" responsive={false}>
         <EuiFlexItem>
           <EuiLink onClick={handleTitleClick}>
             <EuiText size="s">
@@ -73,7 +73,7 @@ export const ChatHistoryListItem = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 onClick={handleEditClick}

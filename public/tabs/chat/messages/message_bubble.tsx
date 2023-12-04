@@ -74,7 +74,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
 
   if ('loading' in props && props.loading) {
     return (
-      <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
+      <EuiFlexGroup
+        gutterSize="m"
+        justifyContent="flexStart"
+        alignItems="flexStart"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           {createAvatar(() => (
             <EuiLoadingSpinner size="l" />
@@ -98,7 +103,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
   if ('message' in props) {
     if (props.message.type === 'input') {
       return (
-        <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems="flexStart">
+        <EuiFlexGroup
+          gutterSize="m"
+          justifyContent="flexEnd"
+          alignItems="flexStart"
+          responsive={false}
+        >
           <EuiFlexItem>
             <EuiPanel
               hasShadow={false}
@@ -123,7 +133,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     );
 
     return (
-      <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="flexStart">
+      <EuiFlexGroup
+        gutterSize="m"
+        justifyContent="flexStart"
+        alignItems="flexStart"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           {props.message.contentType === 'error' ? createAvatar('alert') : createAvatar()}
         </EuiFlexItem>
