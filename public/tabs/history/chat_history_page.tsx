@@ -20,9 +20,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useDebounce, useObservable } from 'react-use';
 import cs from 'classnames';
-import { useChatActions } from '../../hooks/use_chat_actions';
-import { useChatContext } from '../../contexts/chat_context';
-import { useCore } from '../../contexts/core_context';
+import { useChatActions, useChatState } from '../../hooks';
+import { useChatContext, useCore } from '../../contexts';
 import { ChatHistorySearchList } from './chat_history_search_list';
 
 interface ChatHistoryPageProps {
@@ -33,7 +32,14 @@ interface ChatHistoryPageProps {
 export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props) => {
   const { services } = useCore();
   const { loadChat } = useChatActions();
-  const { setSelectedTabId, flyoutFullScreen, sessionId } = useChatContext();
+  const { chatStateDispatch } = useChatState();
+  const {
+    setSelectedTabId,
+    flyoutFullScreen,
+    sessionId,
+    setSessionId,
+    setTitle,
+  } = useChatContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchName, setSearchName] = useState<string>();
@@ -70,11 +76,13 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
   const handleHistoryDeleted = useCallback(
     (id: string) => {
       if (sessionId === id) {
-        // Switch to new conversation when current session be deleted
-        loadChat();
+        // Clear old session chat states
+        setTitle(undefined);
+        setSessionId(undefined);
+        chatStateDispatch({ type: 'reset' });
       }
     },
-    [sessionId, loadChat]
+    [sessionId, setSessionId, setTitle, chatStateDispatch]
   );
 
   useDebounce(

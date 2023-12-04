@@ -51,7 +51,7 @@ export const ChatHistorySearchList = ({
   } | null>(null);
   const [deletingConversation, setDeletingConversation] = useState<{ id: string } | null>(null);
 
-  const handleEditConversationCancel = useCallback(
+  const handleEditConversationModalClose = useCallback(
     (status: 'updated' | string) => {
       if (status === 'updated') {
         onRefresh();
@@ -61,7 +61,7 @@ export const ChatHistorySearchList = ({
     [setEditingConversation, onRefresh]
   );
 
-  const handleDeleteConversationCancel = useCallback(
+  const handleDeleteConversationConfirmModalClose = useCallback(
     (status: 'deleted' | string) => {
       if (status === 'deleted') {
         onRefresh();
@@ -108,7 +108,7 @@ export const ChatHistorySearchList = ({
           />
           {editingConversation && (
             <EditConversationNameModal
-              onClose={handleEditConversationCancel}
+              onClose={handleEditConversationModalClose}
               sessionId={editingConversation.id}
               defaultTitle={editingConversation.title}
             />
@@ -116,7 +116,7 @@ export const ChatHistorySearchList = ({
           {deletingConversation && (
             <DeleteConversationConfirmModal
               sessionId={deletingConversation.id}
-              onClose={handleDeleteConversationCancel}
+              onClose={handleDeleteConversationConfirmModalClose}
             />
           )}
         </>
