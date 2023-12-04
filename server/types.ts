@@ -36,7 +36,6 @@ export interface RoutesOptions {
 declare module '../../../src/core/server' {
   interface RequestHandlerContext {
     assistant_plugin: {
-      observabilityClient: ILegacyClusterClient;
       logger: Logger;
     };
   }

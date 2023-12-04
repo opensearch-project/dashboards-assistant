@@ -3,11 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import '@testing-library/jest-dom/extend-expect';
 import { configure } from '@testing-library/react';
 import { TextDecoder, TextEncoder } from 'util';
-import 'web-streams-polyfill';
-import '../server/fetch-polyfill';
 
 configure({ testIdAttribute: 'data-test-subj' });
 
