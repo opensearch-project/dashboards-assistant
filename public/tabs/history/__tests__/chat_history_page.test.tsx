@@ -8,8 +8,9 @@ import { act, fireEvent, render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@osd/i18n/react';
 
-import * as useChatStateExports from '../../../hooks';
-import * as contextsExports from '../../../contexts';
+import * as useChatStateExports from '../../../hooks/use_chat_state';
+import * as chatContextExports from '../../../contexts/chat_context';
+import * as coreContextExports from '../../../contexts/core_context';
 
 import { ChatHistoryPage } from '../chat_history_page';
 
@@ -40,9 +41,9 @@ const setup = () => {
     setSessionId: jest.fn(),
     setTitle: jest.fn(),
   };
-  jest.spyOn(contextsExports, 'useCore').mockReturnValue(useCoreMock);
+  jest.spyOn(coreContextExports, 'useCore').mockReturnValue(useCoreMock);
   jest.spyOn(useChatStateExports, 'useChatState').mockReturnValue(useChatStateMock);
-  jest.spyOn(contextsExports, 'useChatContext').mockReturnValue(useChatContextMock);
+  jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue(useChatContextMock);
 
   const renderResult = render(
     <I18nProvider>
