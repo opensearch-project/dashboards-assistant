@@ -26,6 +26,44 @@ describe('BasicInputOutputParser', () => {
         contentType: 'markdown',
         content: 'response',
         traceId: 'interaction_id',
+        suggestedActions: [],
+      },
+    ]);
+  });
+
+  it('return suggestions when additional_info has related info', async () => {
+    expect(
+      await BasicInputOutputParser.parserProvider({
+        input: 'input',
+        response: 'response',
+        conversation_id: '',
+        interaction_id: 'interaction_id',
+        create_time: '',
+        additional_info: {
+          'QuestionSuggestor.output': '["Foo", "Bar"]',
+        },
+      })
+    ).toEqual([
+      {
+        type: 'input',
+        contentType: 'text',
+        content: 'input',
+      },
+      {
+        type: 'output',
+        contentType: 'markdown',
+        content: 'response',
+        traceId: 'interaction_id',
+        suggestedActions: [
+          {
+            actionType: 'send_as_input',
+            message: 'Foo',
+          },
+          {
+            actionType: 'send_as_input',
+            message: 'Bar',
+          },
+        ],
       },
     ]);
   });
@@ -52,6 +90,7 @@ describe('BasicInputOutputParser', () => {
         contentType: 'markdown',
         traceId: 'interaction_id',
         type: 'output',
+        suggestedActions: [],
       },
     ]);
   });
