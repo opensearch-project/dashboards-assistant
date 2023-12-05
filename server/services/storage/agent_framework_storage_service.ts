@@ -67,10 +67,11 @@ export class AgentFrameworkStorageService implements StorageService {
     };
   }
 
-  // TODO: return real update_time in the response once the agent framework supports update_time field
   async getSessions(query: GetSessionsSchema): Promise<ISessionFindResponse> {
     let sortField = '';
     if (query.sortField === 'updatedTimeMs') {
+      sortField = 'updated_time';
+    } else if (query.sortField === 'createTimeMs') {
       sortField = 'create_time';
     }
     let searchFields: string[] = [];
@@ -111,18 +112,23 @@ export class AgentFrameworkStorageService implements StorageService {
       objects: sessions.body.hits.hits
         .filter(
           (hit: {
-            _source: { name: string; create_time: string };
+            _source: { name: string; create_time: string; updated_time: string };
           }): hit is RequiredKey<typeof hit, '_source'> =>
             hit._source !== null && hit._source !== undefined
         )
-        .map((item: { _id: string; _source: { name: string; create_time: string } }) => ({
-          id: item._id,
-          title: item._source.name,
-          version: 1,
-          createdTimeMs: Date.parse(item._source.create_time),
-          updatedTimeMs: Date.parse(item._source.create_time),
-          messages: [] as IMessage[],
-        })),
+        .map(
+          (item: {
+            _id: string;
+            _source: { name: string; create_time: string; updated_time: string };
+          }) => ({
+            id: item._id,
+            title: item._source.name,
+            version: 1,
+            createdTimeMs: Date.parse(item._source.create_time),
+            updatedTimeMs: Date.parse(item._source.updated_time),
+            messages: [] as IMessage[],
+          })
+        ),
       total:
         typeof sessions.body.hits.total === 'number'
           ? sessions.body.hits.total
