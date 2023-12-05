@@ -7,8 +7,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, getByRole } from '@testing-library/react';
 
 import { ChatInputControls } from './chat_input_controls';
-import * as contextExports from '../../../contexts';
-import * as hookExports from '../../../hooks';
+import * as contextExports from '../../../contexts/chat_context';
+import * as hookExports from '../../../hooks/use_chat_actions';
 
 describe('<ChatInputControls />', () => {
   const sendMock = jest.fn();
