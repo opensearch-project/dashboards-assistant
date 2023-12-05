@@ -155,7 +155,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           <MessageBubble loading showActionBar={false} />
         </>
       )}
-      {chatState.llmResponding && chatContext.sessionId && (
+      {chatState.llmResponding && chatContext.conversationId && (
         <div style={{ marginLeft: '55px', marginTop: 10 }}>
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
             <EuiFlexItem>
@@ -163,7 +163,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
                 content="Stop generating response"
                 color="default"
                 iconType="crossInACircleFilled"
-                onClick={() => chatActions.abortAction(chatContext.sessionId)}
+                onClick={() => chatActions.abortAction(chatContext.conversationId)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

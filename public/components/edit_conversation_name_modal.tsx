@@ -6,21 +6,21 @@
 import React, { useCallback, useRef } from 'react';
 
 import { EuiConfirmModal, EuiFieldText, EuiSpacer, EuiText } from '@elastic/eui';
-import { usePatchSession } from '../hooks/use_sessions';
+import { usePatchConversation } from '../hooks/use_conversations';
 
 interface EditConversationNameModalProps {
   onClose?: (status: 'updated' | 'cancelled' | 'errored', newTitle?: string) => void;
-  sessionId: string;
+  conversationId: string;
   defaultTitle: string;
 }
 
 export const EditConversationNameModal = ({
   onClose,
-  sessionId,
+  conversationId,
   defaultTitle,
 }: EditConversationNameModalProps) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const { loading, abort, patchSession } = usePatchSession();
+  const { loading, abort, patchConversation } = usePatchConversation();
 
   const handleCancel = useCallback(() => {
     abort();
@@ -32,13 +32,13 @@ export const EditConversationNameModal = ({
       return;
     }
     try {
-      await patchSession(sessionId, title);
+      await patchConversation(conversationId, title);
     } catch (_e) {
       onClose?.('errored');
       return;
     }
     onClose?.('updated', title);
-  }, [onClose, sessionId, patchSession]);
+  }, [onClose, conversationId, patchConversation]);
 
   return (
     <EuiConfirmModal

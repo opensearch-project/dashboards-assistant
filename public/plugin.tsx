@@ -21,8 +21,8 @@ import {
   ContentRenderer,
   SetupDependencies,
 } from './types';
-import { SessionLoadService } from './services/session_load_service';
-import { SessionsService } from './services/sessions_service';
+import { ConversationLoadService } from './services/conversation_load_service';
+import { ConversationsService } from './services/conversations_service';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -70,8 +70,8 @@ export class AssistantPlugin
           ...coreStart,
           setupDeps,
           startDeps,
-          sessionLoad: new SessionLoadService(coreStart.http),
-          sessions: new SessionsService(coreStart.http),
+          conversationLoad: new ConversationLoadService(coreStart.http),
+          conversations: new ConversationsService(coreStart.http),
         });
         const account = await getAccount();
         const username = account.data.user_name;

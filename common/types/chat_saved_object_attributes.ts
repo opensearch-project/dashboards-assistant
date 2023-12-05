@@ -9,14 +9,14 @@ export const SAVED_OBJECT_VERSION = 1;
 export interface Interaction {
   input: string;
   response: string;
-  conversation_id: string;
+  conversationId: string;
   interaction_id: string;
   create_time: string;
   additional_info?: Record<string, unknown>;
   parent_interaction_id?: string;
 }
 
-export interface ISession {
+export interface IConversation {
   title: string;
   version?: number;
   createdTimeMs: number;
@@ -25,8 +25,8 @@ export interface ISession {
   interactions: Interaction[];
 }
 
-export interface ISessionFindResponse {
-  objects: Array<ISession & { id: string }>;
+export interface IConversationFindResponse {
+  objects: Array<IConversation & { id: string }>;
   total: number;
 }
 

@@ -16,8 +16,8 @@ import { ChatHistoryPage } from '../chat_history_page';
 const setup = () => {
   const useCoreMock = {
     services: {
-      sessions: {
-        sessions$: new BehaviorSubject({
+      conversations: {
+        conversations$: new BehaviorSubject({
           objects: [
             {
               id: '1',
@@ -29,15 +29,15 @@ const setup = () => {
         status$: new BehaviorSubject('idle'),
         load: jest.fn(),
       },
-      sessionLoad: {},
+      conversationLoad: {},
     },
   };
   const useChatStateMock = {
     chatStateDispatch: jest.fn(),
   };
   const useChatContextMock = {
-    sessionId: '1',
-    setSessionId: jest.fn(),
+    conversationId: '1',
+    setConversationId: jest.fn(),
     setTitle: jest.fn(),
   };
   jest.spyOn(contextsExports, 'useCore').mockReturnValue(useCoreMock);
@@ -59,14 +59,14 @@ const setup = () => {
 };
 
 describe('<ChatHistoryPage />', () => {
-  it('should clear old session data after current session deleted', async () => {
+  it('should clear old conversation data after current conversation deleted', async () => {
     const { renderResult, useChatStateMock, useChatContextMock } = setup();
 
     act(() => {
       fireEvent.click(renderResult.getByLabelText('Delete conversation'));
     });
 
-    expect(useChatContextMock.setSessionId).not.toHaveBeenCalled();
+    expect(useChatContextMock.setConversationId).not.toHaveBeenCalled();
     expect(useChatContextMock.setTitle).not.toHaveBeenCalled();
     expect(useChatStateMock.chatStateDispatch).not.toHaveBeenCalled();
 
@@ -74,7 +74,7 @@ describe('<ChatHistoryPage />', () => {
       fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
     });
 
-    expect(useChatContextMock.setSessionId).toHaveBeenLastCalledWith(undefined);
+    expect(useChatContextMock.setConversationId).toHaveBeenLastCalledWith(undefined);
     expect(useChatContextMock.setTitle).toHaveBeenLastCalledWith(undefined);
     expect(useChatStateMock.chatStateDispatch).toHaveBeenLastCalledWith({ type: 'reset' });
   });

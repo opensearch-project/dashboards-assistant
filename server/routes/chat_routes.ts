@@ -21,7 +21,7 @@ const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
   validate: {
     body: schema.object({
-      sessionId: schema.maybe(schema.string()),
+      conversationId: schema.maybe(schema.string()),
       messages: schema.maybe(schema.arrayOf(schema.any())),
       rootAgentId: schema.string(),
       input: schema.object({
@@ -37,21 +37,21 @@ const llmRequestRoute = {
 };
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
 
-const getSessionRoute = {
-  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+const getConversationRoute = {
+  path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
   validate: {
     params: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
     }),
   },
 };
-export type GetSessionSchema = TypeOf<typeof getSessionRoute.validate.params>;
+export type GetConversationSchema = TypeOf<typeof getConversationRoute.validate.params>;
 
 const abortAgentExecutionRoute = {
   path: `${ASSISTANT_API.ABORT_AGENT_EXECUTION}`,
   validate: {
     body: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
     }),
   },
 };
@@ -61,15 +61,15 @@ const regenerateRoute = {
   path: `${ASSISTANT_API.REGENERATE}`,
   validate: {
     body: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
       rootAgentId: schema.string(),
     }),
   },
 };
 export type RegenerateSchema = TypeOf<typeof regenerateRoute.validate.body>;
 
-const getSessionsRoute = {
-  path: ASSISTANT_API.SESSIONS,
+const getConversationsRoute = {
+  path: ASSISTANT_API.CONVERSATIONS,
   validate: {
     query: schema.object({
       perPage: schema.number({ min: 0, defaultValue: 20 }),
@@ -82,22 +82,22 @@ const getSessionsRoute = {
     }),
   },
 };
-export type GetSessionsSchema = TypeOf<typeof getSessionsRoute.validate.query>;
+export type GetConversationsSchema = TypeOf<typeof getConversationsRoute.validate.query>;
 
-const deleteSessionRoute = {
-  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+const deleteConversationRoute = {
+  path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
   validate: {
     params: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
     }),
   },
 };
 
-const updateSessionRoute = {
-  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+const updateConversationRoute = {
+  path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
   validate: {
     params: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
     }),
     body: schema.object({
       title: schema.string(),
@@ -141,22 +141,27 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { messages = [], input, sessionId: sessionIdInRequestBody, rootAgentId } = request.body;
+      const {
+        messages = [],
+        input,
+        conversationId: conversationIdInRequestBody,
+        rootAgentId,
+      } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService();
 
       try {
         const outputs = await chatService.requestLLM(
-          { messages, input, sessionId: sessionIdInRequestBody, rootAgentId },
+          { messages, input, conversationId: conversationIdInRequestBody, rootAgentId },
           context
         );
-        const sessionId = outputs.memoryId;
-        const finalMessage = await storageService.getSession(sessionId);
+        const conversationId = outputs.memoryId;
+        const finalMessage = await storageService.getConversation(conversationId);
 
         return response.ok({
           body: {
             messages: finalMessage.messages,
-            sessionId: outputs.memoryId,
+            conversationId: outputs.memoryId,
             title: finalMessage.title,
             interactions: finalMessage.interactions,
           },
@@ -169,7 +174,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   );
 
   router.get(
-    getSessionRoute,
+    getConversationRoute,
     async (
       context,
       request,
@@ -178,7 +183,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.getSession(request.params.sessionId);
+        const getResponse = await storageService.getConversation(request.params.conversationId);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -188,7 +193,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   );
 
   router.get(
-    getSessionsRoute,
+    getConversationsRoute,
     async (
       context,
       request,
@@ -197,7 +202,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.getSessions(request.query);
+        const getResponse = await storageService.getConversations(request.query);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -207,7 +212,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   );
 
   router.delete(
-    deleteSessionRoute,
+    deleteConversationRoute,
     async (
       context,
       request,
@@ -216,7 +221,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.deleteSession(request.params.sessionId);
+        const getResponse = await storageService.deleteConversation(request.params.conversationId);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -226,7 +231,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   );
 
   router.put(
-    updateSessionRoute,
+    updateConversationRoute,
     async (
       context,
       request,
@@ -235,8 +240,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.updateSession(
-          request.params.sessionId,
+        const getResponse = await storageService.updateConversation(
+          request.params.conversationId,
           request.body.title
         );
         return response.ok({ body: getResponse });
@@ -276,8 +281,10 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const chatService = createChatService();
 
       try {
-        chatService.abortAgentExecution(request.body.sessionId);
-        context.assistant_plugin.logger.info(`Abort agent execution: ${request.body.sessionId}`);
+        chatService.abortAgentExecution(request.body.conversationId);
+        context.assistant_plugin.logger.info(
+          `Abort agent execution: ${request.body.conversationId}`
+        );
         return response.ok();
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -293,14 +300,14 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { sessionId, rootAgentId } = request.body;
+      const { conversationId, rootAgentId } = request.body;
       const storageService = createStorageService(context);
       let messages: IMessage[] = [];
       const chatService = createChatService();
 
       try {
-        const session = await storageService.getSession(sessionId);
-        messages.push(...session.messages);
+        const conversation = await storageService.getConversation(conversationId);
+        messages.push(...conversation.messages);
       } catch (error) {
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
@@ -313,13 +320,13 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
 
       try {
         const outputs = await chatService.requestLLM(
-          { messages, input, sessionId, rootAgentId },
+          { messages, input, conversationId, rootAgentId },
           context
         );
         const title = input.content.substring(0, 50);
         const saveMessagesResponse = await storageService.saveMessages(
           title,
-          sessionId,
+          conversationId,
           [...messages, input, ...outputs.messages].filter(
             (message) => message.content !== 'AbortError'
           )

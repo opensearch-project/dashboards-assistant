@@ -7,18 +7,18 @@ import React, { useCallback } from 'react';
 
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
 
-import { useDeleteSession } from '../../hooks/use_sessions';
+import { useDeleteConversation } from '../../hooks/use_conversations';
 
 interface DeleteConversationConfirmModalProps {
   onClose?: (status: 'canceled' | 'errored' | 'deleted') => void;
-  sessionId: string;
+  conversationId: string;
 }
 
 export const DeleteConversationConfirmModal = ({
   onClose,
-  sessionId,
+  conversationId,
 }: DeleteConversationConfirmModalProps) => {
-  const { loading, deleteSession, abort } = useDeleteSession();
+  const { loading, deleteConversation, abort } = useDeleteConversation();
 
   const handleCancel = useCallback(() => {
     abort();
@@ -26,13 +26,13 @@ export const DeleteConversationConfirmModal = ({
   }, [onClose, abort]);
   const handleConfirm = useCallback(async () => {
     try {
-      await deleteSession(sessionId);
+      await deleteConversation(conversationId);
     } catch (_e) {
       onClose?.('errored');
       return;
     }
     onClose?.('deleted');
-  }, [onClose, deleteSession, sessionId]);
+  }, [onClose, deleteConversation, conversationId]);
 
   return (
     <EuiConfirmModal

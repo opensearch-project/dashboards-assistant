@@ -11,7 +11,7 @@ describe('VisualizationCardParser', () => {
       await VisualizationCardParser.parserProvider({
         input: 'input',
         response: 'response',
-        conversation_id: '',
+        conversationId: '',
         interaction_id: 'interaction_id',
         create_time: '',
         additional_info: {
@@ -50,7 +50,7 @@ describe('VisualizationCardParser', () => {
       await VisualizationCardParser.parserProvider({
         input: 'input',
         response: 'response',
-        conversation_id: '',
+        conversationId: '',
         interaction_id: 'interaction_id',
         create_time: '',
         additional_info: {
@@ -81,7 +81,7 @@ describe('VisualizationCardParser', () => {
       await VisualizationCardParser.parserProvider({
         input: 'input',
         response: 'response',
-        conversation_id: '',
+        conversationId: '',
         interaction_id: 'interaction_id',
         create_time: '',
         additional_info: {},
@@ -94,7 +94,7 @@ describe('VisualizationCardParser', () => {
       await VisualizationCardParser.parserProvider({
         input: 'input',
         response: 'response',
-        conversation_id: '',
+        conversationId: '',
         interaction_id: 'interaction_id',
         create_time: '',
         additional_info: {

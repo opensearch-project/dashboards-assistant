@@ -55,7 +55,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
     >
       <EuiFlexItem onClick={onButtonClick} style={{ overflow: 'hidden' }}>
         <h3 className="eui-textTruncate">
-          {chatContext.sessionId ? chatContext.title : 'OpenSearch Assistant'}
+          {chatContext.conversationId ? chatContext.title : 'OpenSearch Assistant'}
         </h3>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -69,7 +69,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
 
   const items = [
     <EuiContextMenuItem
-      disabled={!chatContext.sessionId}
+      disabled={!chatContext.conversationId}
       key="rename-conversation"
       onClick={() => {
         closePopover();
@@ -116,7 +116,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       </EuiPopover>
       {isRenameModalOpen && (
         <EditConversationNameModal
-          sessionId={chatContext.sessionId!}
+          conversationId={chatContext.conversationId!}
           onClose={handleEditConversationClose}
           defaultTitle={chatContext.title!}
         />

@@ -9,7 +9,7 @@ import { LLMRequestSchema } from '../../routes/chat_routes';
 
 export interface ChatService {
   requestLLM(
-    payload: { messages: IMessage[]; input: IInput; sessionId?: string },
+    payload: { messages: IMessage[]; input: IInput; conversationId?: string },
     context: RequestHandlerContext,
     request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
   ): Promise<{
@@ -17,5 +17,5 @@ export interface ChatService {
     memoryId: string;
   }>;
 
-  abortAgentExecution(sessionId: string): void;
+  abortAgentExecution(conversationId: string): void;
 }

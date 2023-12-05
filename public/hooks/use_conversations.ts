@@ -8,17 +8,17 @@ import { ASSISTANT_API } from '../../common/constants/llm';
 import { useCore } from '../contexts/core_context';
 import { genericReducer } from './fetch_reducer';
 
-export const useDeleteSession = () => {
+export const useDeleteConversation = () => {
   const core = useCore();
   const [state, dispatch] = useReducer(genericReducer, { loading: false });
   const abortControllerRef = useRef<AbortController>();
 
-  const deleteSession = useCallback(
-    (sessionId: string) => {
+  const deleteConversation = useCallback(
+    (conversationId: string) => {
       abortControllerRef.current = new AbortController();
       dispatch({ type: 'request' });
       return core.services.http
-        .delete(`${ASSISTANT_API.SESSION}/${sessionId}`, {
+        .delete(`${ASSISTANT_API.CONVERSATION}/${conversationId}`, {
           signal: abortControllerRef.current.signal,
         })
         .then((payload) => dispatch({ type: 'success', payload }))
@@ -34,21 +34,21 @@ export const useDeleteSession = () => {
   return {
     ...state,
     abort,
-    deleteSession,
+    deleteConversation,
   };
 };
 
-export const usePatchSession = () => {
+export const usePatchConversation = () => {
   const core = useCore();
   const [state, dispatch] = useReducer(genericReducer, { loading: false });
   const abortControllerRef = useRef<AbortController>();
 
-  const patchSession = useCallback(
-    (sessionId: string, title: string) => {
+  const patchConversation = useCallback(
+    (conversationId: string, title: string) => {
       abortControllerRef.current = new AbortController();
       dispatch({ type: 'request' });
       return core.services.http
-        .put(`${ASSISTANT_API.SESSION}/${sessionId}`, {
+        .put(`${ASSISTANT_API.CONVERSATION}/${conversationId}`, {
           body: JSON.stringify({
             title,
           }),
@@ -67,6 +67,6 @@ export const usePatchSession = () => {
   return {
     ...state,
     abort,
-    patchSession,
+    patchConversation,
   };
 };

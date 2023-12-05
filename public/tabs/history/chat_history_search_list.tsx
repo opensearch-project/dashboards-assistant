@@ -26,7 +26,7 @@ interface ChatHistorySearchListProps
   loading: boolean;
   histories: ChatHistoryListProps['chatHistories'];
   onSearchChange: EuiFieldSearchProps['onChange'];
-  onLoadChat: (sessionId?: string | undefined, title?: string | undefined) => void;
+  onLoadChat: (conversationId?: string | undefined, title?: string | undefined) => void;
   onRefresh: () => void;
   onHistoryDeleted: (id: string) => void;
 }
@@ -109,13 +109,13 @@ export const ChatHistorySearchList = ({
           {editingConversation && (
             <EditConversationNameModal
               onClose={handleEditConversationModalClose}
-              sessionId={editingConversation.id}
+              conversationId={editingConversation.id}
               defaultTitle={editingConversation.title}
             />
           )}
           {deletingConversation && (
             <DeleteConversationConfirmModal
-              sessionId={deletingConversation.id}
+              conversationId={deletingConversation.id}
               onClose={handleDeleteConversationConfirmModalClose}
             />
           )}

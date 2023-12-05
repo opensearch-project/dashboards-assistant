@@ -15,17 +15,17 @@ export class OllyChatService implements ChatService {
   static abortControllers: Map<string, AbortController> = new Map();
 
   public async requestLLM(
-    payload: { messages: IMessage[]; input: IInput; sessionId?: string; rootAgentId: string },
+    payload: { messages: IMessage[]; input: IInput; conversationId?: string; rootAgentId: string },
     context: RequestHandlerContext
   ): Promise<{
     messages: IMessage[];
     memoryId: string;
   }> {
-    const { input, sessionId, rootAgentId } = payload;
+    const { input, conversationId, rootAgentId } = payload;
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
 
-    if (payload.sessionId) {
-      OllyChatService.abortControllers.set(payload.sessionId, new AbortController());
+    if (payload.conversationId) {
+      OllyChatService.abortControllers.set(payload.conversationId, new AbortController());
     }
 
     try {
@@ -40,8 +40,8 @@ export class OllyChatService implements ChatService {
         question: input.content,
         verbose: true,
       };
-      if (sessionId) {
-        parametersPayload.memory_id = sessionId;
+      if (conversationId) {
+        parametersPayload.memory_id = conversationId;
       }
       const agentFrameworkResponse = (await opensearchClient.transport.request({
         method: 'POST',
@@ -79,15 +79,15 @@ export class OllyChatService implements ChatService {
         memoryId: '',
       };
     } finally {
-      if (payload.sessionId) {
-        OllyChatService.abortControllers.delete(payload.sessionId);
+      if (payload.conversationId) {
+        OllyChatService.abortControllers.delete(payload.conversationId);
       }
     }
   }
 
-  abortAgentExecution(sessionId: string) {
-    if (OllyChatService.abortControllers.has(sessionId)) {
-      OllyChatService.abortControllers.get(sessionId)?.abort();
+  abortAgentExecution(conversationId: string) {
+    if (OllyChatService.abortControllers.has(conversationId)) {
+      OllyChatService.abortControllers.get(conversationId)?.abort();
     }
   }
 }

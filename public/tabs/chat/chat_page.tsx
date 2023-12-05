@@ -21,24 +21,24 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
   const [showGreetings, setShowGreetings] = useState(false);
-  const sessionLoadStatus = useObservable(core.services.sessionLoad.status$);
-  const messagesLoading = sessionLoadStatus === 'loading';
+  const conversationLoadStatus = useObservable(core.services.conversationLoad.status$);
+  const messagesLoading = conversationLoadStatus === 'loading';
 
   const refresh = useCallback(async () => {
-    if (!chatContext.sessionId) {
+    if (!chatContext.conversationId) {
       return;
     }
-    const session = await core.services.sessionLoad.load(chatContext.sessionId);
-    if (session) {
+    const conversation = await core.services.conversationLoad.load(chatContext.conversationId);
+    if (conversation) {
       chatStateDispatch({
         type: 'receive',
         payload: {
-          messages: session.messages,
-          interactions: session.interactions,
+          messages: conversation.messages,
+          interactions: conversation.interactions,
         },
       });
     }
-  }, [chatContext.sessionId, chatStateDispatch]);
+  }, [chatContext.conversationId, chatStateDispatch]);
 
   return (
     <>
@@ -50,7 +50,9 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
               setShowGreetings={setShowGreetings}
               messagesLoading={messagesLoading}
               messagesLoadingError={
-                typeof sessionLoadStatus !== 'string' ? sessionLoadStatus?.error : undefined
+                typeof conversationLoadStatus !== 'string'
+                  ? conversationLoadStatus?.error
+                  : undefined
               }
               onRefresh={refresh}
             />

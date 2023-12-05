@@ -53,7 +53,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = React.memo((props) =>
                 output={props.message.content}
                 metadata={{
                   type: 'chat',
-                  sessionId: chatContext.sessionId,
+                  conversationId: chatContext.conversationId,
                   traceId,
                   error: props.message.contentType === 'error',
                 }}

@@ -5,19 +5,19 @@
 
 import {
   IMessage,
-  ISession,
-  ISessionFindResponse,
+  IConversation,
+  IConversationFindResponse,
 } from '../../../common/types/chat_saved_object_attributes';
-import { GetSessionsSchema } from '../../routes/chat_routes';
+import { GetConversationsSchema } from '../../routes/chat_routes';
 
 export interface StorageService {
-  getSession(sessionId: string): Promise<ISession>;
-  getSessions(query: GetSessionsSchema): Promise<ISessionFindResponse>;
+  getConversation(conversationId: string): Promise<IConversation>;
+  getConversations(query: GetConversationsSchema): Promise<IConversationFindResponse>;
   saveMessages(
     title: string,
-    sessionId: string | undefined,
+    conversationId: string | undefined,
     messages: IMessage[]
-  ): Promise<{ sessionId: string; messages: IMessage[] }>;
-  deleteSession(sessionId: string): Promise<{}>;
-  updateSession(sessionId: string, title: string): Promise<{}>;
+  ): Promise<{ conversationId: string; messages: IMessage[] }>;
+  deleteConversation(conversationId: string): Promise<{}>;
+  updateConversation(conversationId: string, title: string): Promise<{}>;
 }

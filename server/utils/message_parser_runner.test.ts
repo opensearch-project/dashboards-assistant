@@ -26,11 +26,11 @@ describe('MessageParserRunner', () => {
       await messageParserRunner.run({
         response: 'output',
         input: 'input',
-        conversation_id: '',
+        conversationId: '',
         interaction_id: '',
         create_time: '',
         additional_info: {},
-        parent_interaction_id: ''
+        parent_interaction_id: '',
       })
     ).toEqual([
       {
@@ -100,11 +100,11 @@ describe('MessageParserRunner', () => {
       await messageParserRunner.run({
         response: 'output',
         input: 'input',
-        conversation_id: '',
+        conversationId: '',
         interaction_id: '',
         create_time: '',
         additional_info: {},
-        parent_interaction_id: ''
+        parent_interaction_id: '',
       })
     ).toEqual([
       {
@@ -154,11 +154,11 @@ describe('MessageParserRunner', () => {
       await messageParserRunner.run({
         response: 'output',
         input: 'input',
-        conversation_id: '',
+        conversationId: '',
         interaction_id: '',
         create_time: '',
         additional_info: {},
-        parent_interaction_id: ''
+        parent_interaction_id: '',
       })
     ).toEqual([]);
   });
