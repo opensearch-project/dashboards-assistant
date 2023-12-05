@@ -4,7 +4,7 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import cs from 'classnames';
 import { useObservable } from 'react-use';
 import { useChatContext, useCore } from '../../contexts';
@@ -20,7 +20,6 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const core = useCore();
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
-  const [showGreetings, setShowGreetings] = useState(false);
   const sessionLoadStatus = useObservable(core.services.sessionLoad.status$);
   const messagesLoading = sessionLoadStatus === 'loading';
 
@@ -46,8 +45,6 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         <EuiPage paddingSize="s">
           <EuiPageBody component="div">
             <ChatPageContent
-              showGreetings={showGreetings}
-              setShowGreetings={setShowGreetings}
               messagesLoading={messagesLoading}
               messagesLoadingError={
                 typeof sessionLoadStatus !== 'string' ? sessionLoadStatus?.error : undefined
