@@ -71,7 +71,7 @@ export class OllyChatService implements ChatService {
         messages: [
           {
             type: 'output',
-            traceId: '',
+            interactionId: '',
             contentType: 'error',
             content: error.message,
           },

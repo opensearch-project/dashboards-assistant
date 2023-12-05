@@ -17,11 +17,11 @@ import React from 'react';
 import { useFetchAgentFrameworkTraces } from '../hooks/use_fetch_agentframework_traces';
 
 interface AgentFrameworkTracesProps {
-  traceId: string;
+  interactionId: string;
 }
 
 export const AgentFrameworkTraces: React.FC<AgentFrameworkTracesProps> = (props) => {
-  const { data: traces, loading, error } = useFetchAgentFrameworkTraces(props.traceId);
+  const { data: traces, loading, error } = useFetchAgentFrameworkTraces(props.interactionId);
 
   if (loading) {
     return (

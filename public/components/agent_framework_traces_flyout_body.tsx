@@ -20,8 +20,8 @@ import { TAB_ID } from '../utils/constants';
 
 export const AgentFrameworkTracesFlyoutBody: React.FC = () => {
   const chatContext = useChatContext();
-  const traceId = chatContext.traceId;
-  if (!traceId) {
+  const interactionId = chatContext.interactionId;
+  if (!interactionId) {
     return null;
   }
 
@@ -64,7 +64,7 @@ export const AgentFrameworkTracesFlyoutBody: React.FC = () => {
             </EuiPageHeaderSection>
           </EuiPageHeader>
           <EuiPageContentBody>
-            <AgentFrameworkTraces traceId={traceId} />
+            <AgentFrameworkTraces interactionId={interactionId} />
           </EuiPageContentBody>
         </EuiPageBody>
       </EuiPage>

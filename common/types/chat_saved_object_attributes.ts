@@ -10,7 +10,7 @@ export interface Interaction {
   input: string;
   response: string;
   conversationId: string;
-  interaction_id: string;
+  interactionId: string;
   create_time: string;
   additional_info?: Record<string, unknown>;
   parent_interaction_id?: string;
@@ -40,7 +40,7 @@ export interface IInput {
 }
 export interface IOutput {
   type: 'output';
-  traceId?: string; // used for tracing agent calls
+  interactionId?: string; // used for tracing agent calls
   toolsUsed?: string[];
   contentType: 'error' | 'markdown' | 'visualization' | 'ppl_visualization';
   content: string;
@@ -61,6 +61,6 @@ export type ISuggestedAction = ISuggestedActionBase &
       }
     | {
         actionType: 'view_trace';
-        metadata: { traceId: string; icon: string };
+        metadata: { interactionId: string; icon: string };
       }
   );

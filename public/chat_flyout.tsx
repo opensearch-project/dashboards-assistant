@@ -135,7 +135,9 @@ export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
                       className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
                     />
                   )}
-                  {chatTraceVisible && chatContext.traceId && <AgentFrameworkTracesFlyoutBody />}
+                  {chatTraceVisible && chatContext.interactionId && (
+                    <AgentFrameworkTracesFlyoutBody />
+                  )}
                 </Panel>
               </>
             </>

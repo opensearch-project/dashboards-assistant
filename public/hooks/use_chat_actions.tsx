@@ -137,9 +137,9 @@ export const useChatActions = (): AssistantActions => {
       }
 
       case 'view_trace':
-        if ('traceId' in message) {
+        if ('interactionId' in message) {
           chatContext.setSelectedTabId('trace');
-          chatContext.setTraceId(message.traceId);
+          chatContext.setInteractionId(message.interactionId);
         }
         break;
 

@@ -27,7 +27,7 @@ export const BasicInputOutputParser = {
         type: 'output',
         contentType: 'markdown',
         content: sanitize(interaction.response),
-        traceId: interaction.interaction_id,
+        interactionId: interaction.interaction_id,
       },
     ];
     return [inputItem, ...outputItems];

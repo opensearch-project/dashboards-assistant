@@ -9,7 +9,7 @@ import { AgentFrameworkTrace } from '../../common/utils/llm_chat/traces';
 import { useCore } from '../contexts/core_context';
 import { GenericReducer, genericReducer } from './fetch_reducer';
 
-export const useFetchAgentFrameworkTraces = (traceId: string) => {
+export const useFetchAgentFrameworkTraces = (interactionId: string) => {
   const core = useCore();
   const reducer: GenericReducer<AgentFrameworkTrace[]> = genericReducer;
   const [state, dispatch] = useReducer(reducer, { loading: false });
@@ -17,13 +17,13 @@ export const useFetchAgentFrameworkTraces = (traceId: string) => {
   useEffect(() => {
     const abortController = new AbortController();
     dispatch({ type: 'request' });
-    if (!traceId) {
+    if (!interactionId) {
       dispatch({ type: 'success', payload: undefined });
       return;
     }
 
     core.services.http
-      .get<AgentFrameworkTrace[]>(`${ASSISTANT_API.TRACE}/${traceId}`)
+      .get<AgentFrameworkTrace[]>(`${ASSISTANT_API.TRACE}/${interactionId}`)
       .then((payload) =>
         dispatch({
           type: 'success',
@@ -33,7 +33,7 @@ export const useFetchAgentFrameworkTraces = (traceId: string) => {
       .catch((error) => dispatch({ type: 'failure', error }));
 
     return () => abortController.abort();
-  }, [traceId]);
+  }, [interactionId]);
 
   return { ...state };
 };

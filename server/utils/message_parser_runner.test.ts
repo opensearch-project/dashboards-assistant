@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IMessage } from 'common/types/chat_saved_object_attributes';
 import { MessageParserRunner } from './message_parser_runner';
 
 describe('MessageParserRunner', () => {
@@ -141,11 +142,14 @@ describe('MessageParserRunner', () => {
       {
         id: 'test_with_incorrect_format_of_return',
         parserProvider() {
-          return Promise.resolve({
+          /**
+           * The typecasting here is designed to evaluate an error case.
+           */
+          return Promise.resolve(({
             type: 'output',
             contentType: 'markdown',
             content: 'order1000',
-          });
+          } as unknown) as IMessage[]);
         },
       },
     ]);

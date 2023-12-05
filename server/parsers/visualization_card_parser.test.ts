@@ -12,7 +12,7 @@ describe('VisualizationCardParser', () => {
         input: 'input',
         response: 'response',
         conversationId: '',
-        interaction_id: 'interaction_id',
+        interactionId: 'interaction_id',
         create_time: '',
         additional_info: {
           'VisualizationTool.output': [
@@ -51,7 +51,7 @@ describe('VisualizationCardParser', () => {
         input: 'input',
         response: 'response',
         conversationId: '',
-        interaction_id: 'interaction_id',
+        interactionId: 'interaction_id',
         create_time: '',
         additional_info: {
           'VisualizationTool.output': [
@@ -82,7 +82,7 @@ describe('VisualizationCardParser', () => {
         input: 'input',
         response: 'response',
         conversationId: '',
-        interaction_id: 'interaction_id',
+        interactionId: 'interaction_id',
         create_time: '',
         additional_info: {},
       })
@@ -95,7 +95,7 @@ describe('VisualizationCardParser', () => {
         input: 'input',
         response: 'response',
         conversationId: '',
-        interaction_id: 'interaction_id',
+        interactionId: 'interaction_id',
         create_time: '',
         additional_info: {
           'VisualizationTool.output': [
