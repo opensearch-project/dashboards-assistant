@@ -24,7 +24,7 @@ export const DeleteConversationConfirmModal = ({
       notifications: { toasts },
     },
   } = useCore();
-  const { loading, deleteSession, abort } = useDeleteSession();
+  const { loading, deleteSession, abort, isAborted } = useDeleteSession();
 
   const handleCancel = useCallback(() => {
     abort();
@@ -35,11 +35,15 @@ export const DeleteConversationConfirmModal = ({
       await deleteSession(sessionId);
       toasts.addSuccess('The conversation was successfully deleted.');
     } catch (_e) {
+      if (isAborted()) {
+        return;
+      }
       onClose?.('errored');
+      toasts.addDanger('There was an error. The conversation failed to delete.');
       return;
     }
     onClose?.('deleted');
-  }, [onClose, deleteSession, sessionId, toasts.addSuccess]);
+  }, [onClose, deleteSession, sessionId, toasts.addSuccess, toasts.addDanger, isAborted]);
 
   return (
     <EuiConfirmModal

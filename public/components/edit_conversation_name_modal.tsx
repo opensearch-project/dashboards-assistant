@@ -26,7 +26,7 @@ export const EditConversationNameModal = ({
     },
   } = useCore();
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const { loading, abort, patchSession } = usePatchSession();
+  const { loading, abort, patchSession, isAborted } = usePatchSession();
 
   const handleCancel = useCallback(() => {
     abort();
@@ -41,11 +41,15 @@ export const EditConversationNameModal = ({
       await patchSession(sessionId, title);
       toasts.addSuccess('This conversation was successfully updated.');
     } catch (_e) {
+      if (isAborted()) {
+        return;
+      }
       onClose?.('errored');
+      toasts.addDanger('There was an error. The name failed to update.');
       return;
     }
     onClose?.('updated', title);
-  }, [onClose, sessionId, patchSession, toasts.addSuccess]);
+  }, [onClose, sessionId, patchSession, toasts.addSuccess, toasts.addDanger, isAborted]);
 
   return (
     <EuiConfirmModal
