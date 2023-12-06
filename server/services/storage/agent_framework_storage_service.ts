@@ -33,7 +33,7 @@ export class AgentFrameworkStorageService implements StorageService {
     const [interactionsResp, conversation] = await Promise.all([
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/_list`,
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/_list?max_results=1000`,
       }) as TransportRequestPromise<
         ApiResponse<{
           interactions: Interaction[];
