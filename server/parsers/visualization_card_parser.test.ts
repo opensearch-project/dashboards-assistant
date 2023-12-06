@@ -113,4 +113,37 @@ describe('VisualizationCardParser', () => {
       },
     ]);
   });
+
+  it('filter duplicate visualization id in a single interaction', async () => {
+    expect(
+      await VisualizationCardParser.parserProvider({
+        input: 'input',
+        response: 'response',
+        conversation_id: '',
+        interaction_id: 'interaction_id',
+        create_time: '',
+        additional_info: {
+          'VisualizationTool.output': [
+            'row_number,Id,title\n' +
+              '1,id1,[Flights] Total Flights\n' +
+              '2,id2,[Flights] Total Flights\n',
+            'row_number,Id,title\n' + '2,id2,[Flights] Controls\n',
+          ],
+        },
+      })
+    ).toEqual([
+      {
+        content: 'id1',
+        contentType: 'visualization',
+        suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
+        type: 'output',
+      },
+      {
+        content: 'id2',
+        contentType: 'visualization',
+        suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
+        type: 'output',
+      },
+    ]);
+  });
 });
