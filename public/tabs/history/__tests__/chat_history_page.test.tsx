@@ -17,6 +17,13 @@ import { ChatHistoryPage } from '../chat_history_page';
 const setup = () => {
   const useCoreMock = {
     services: {
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+          addDanger: jest.fn(),
+          addError: jest.fn(),
+        },
+      },
       sessions: {
         sessions$: new BehaviorSubject({
           objects: [
