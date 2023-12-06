@@ -12,7 +12,7 @@ export interface Interaction {
   conversation_id: string;
   interaction_id: string;
   create_time: string;
-  additional_info?: Record<string, Record<string, boolean>>;
+  additional_info?: Record<string, string | Record<string, boolean>>;
   parent_interaction_id?: string;
 }
 
