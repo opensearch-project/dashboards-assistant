@@ -6,13 +6,9 @@
 import { useState } from 'react';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { IOutput, Interaction } from '../../common/types/chat_saved_object_attributes';
-import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { useChatState } from './use_chat_state';
-
-interface SendFeedbackBody {
-  satisfaction: boolean;
-}
+import { SendFeedbackBody } from '../../common/types/chat_saved_object_attributes';
 
 export const useFeedback = (interaction?: Interaction | null) => {
   const core = useCore();

@@ -12,7 +12,7 @@ export interface Interaction {
   conversation_id: string;
   interaction_id: string;
   create_time: string;
-  additional_info?: Record<string, string | Record<string, boolean>>;
+  additional_info?: { feedback?: SendFeedbackBody; [key: string]: unknown };
   parent_interaction_id?: string;
 }
 
@@ -64,3 +64,6 @@ export type ISuggestedAction = ISuggestedActionBase &
         metadata: { traceId: string; icon: string };
       }
   );
+export interface SendFeedbackBody {
+  satisfaction: boolean;
+}
