@@ -8,6 +8,7 @@ import React, { useCallback } from 'react';
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
 
 import { useDeleteSession } from '../../hooks/use_sessions';
+import { useCore } from '../../contexts/core_context';
 
 interface DeleteConversationConfirmModalProps {
   onClose?: (status: 'canceled' | 'errored' | 'deleted') => void;
@@ -18,7 +19,12 @@ export const DeleteConversationConfirmModal = ({
   onClose,
   sessionId,
 }: DeleteConversationConfirmModalProps) => {
-  const { loading, deleteSession, abort } = useDeleteSession();
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useCore();
+  const { loading, deleteSession, abort, isAborted } = useDeleteSession();
 
   const handleCancel = useCallback(() => {
     abort();
@@ -27,12 +33,17 @@ export const DeleteConversationConfirmModal = ({
   const handleConfirm = useCallback(async () => {
     try {
       await deleteSession(sessionId);
+      toasts.addSuccess('The conversation was successfully deleted.');
     } catch (_e) {
+      if (isAborted()) {
+        return;
+      }
       onClose?.('errored');
+      toasts.addDanger('There was an error. The conversation failed to delete.');
       return;
     }
     onClose?.('deleted');
-  }, [onClose, deleteSession, sessionId]);
+  }, [onClose, deleteSession, sessionId, toasts.addSuccess, toasts.addDanger, isAborted]);
 
   return (
     <EuiConfirmModal

@@ -83,6 +83,12 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       onClick={() => {
         closePopover();
         loadChat(undefined);
+        // Only show toast when previous session saved
+        if (!!chatContext.sessionId) {
+          core.services.notifications.toasts.addSuccess(
+            'A new conversation is started and the previous one is saved.'
+          );
+        }
       }}
     >
       New conversation

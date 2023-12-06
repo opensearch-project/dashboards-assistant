@@ -7,6 +7,7 @@ import React, { useCallback, useRef } from 'react';
 
 import { EuiConfirmModal, EuiFieldText, EuiSpacer, EuiText } from '@elastic/eui';
 import { usePatchSession } from '../hooks/use_sessions';
+import { useCore } from '../contexts/core_context';
 
 interface EditConversationNameModalProps {
   onClose?: (status: 'updated' | 'cancelled' | 'errored', newTitle?: string) => void;
@@ -19,8 +20,13 @@ export const EditConversationNameModal = ({
   sessionId,
   defaultTitle,
 }: EditConversationNameModalProps) => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useCore();
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const { loading, abort, patchSession } = usePatchSession();
+  const { loading, abort, patchSession, isAborted } = usePatchSession();
 
   const handleCancel = useCallback(() => {
     abort();
@@ -33,12 +39,17 @@ export const EditConversationNameModal = ({
     }
     try {
       await patchSession(sessionId, title);
+      toasts.addSuccess('This conversation was successfully updated.');
     } catch (_e) {
+      if (isAborted()) {
+        return;
+      }
       onClose?.('errored');
+      toasts.addDanger('There was an error. The name failed to update.');
       return;
     }
     onClose?.('updated', title);
-  }, [onClose, sessionId, patchSession]);
+  }, [onClose, sessionId, patchSession, toasts.addSuccess, toasts.addDanger, isAborted]);
 
   return (
     <EuiConfirmModal

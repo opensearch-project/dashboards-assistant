@@ -21,8 +21,13 @@ export const useDeleteSession = () => {
         .delete(`${ASSISTANT_API.SESSION}/${sessionId}`, {
           signal: abortControllerRef.current.signal,
         })
-        .then((payload) => dispatch({ type: 'success', payload }))
-        .catch((error) => dispatch({ type: 'failure', error }));
+        .then((payload) => {
+          dispatch({ type: 'success', payload });
+        })
+        .catch((error) => {
+          dispatch({ type: 'failure', error });
+          throw error;
+        });
     },
     [core.services.http]
   );
@@ -31,9 +36,12 @@ export const useDeleteSession = () => {
     abortControllerRef.current?.abort();
   }, []);
 
+  const isAborted = useCallback(() => !!abortControllerRef.current?.signal.aborted, []);
+
   return {
     ...state,
     abort,
+    isAborted,
     deleteSession,
   };
 };
@@ -55,7 +63,10 @@ export const usePatchSession = () => {
           signal: abortControllerRef.current.signal,
         })
         .then((payload) => dispatch({ type: 'success', payload }))
-        .catch((error) => dispatch({ type: 'failure', error }));
+        .catch((error) => {
+          dispatch({ type: 'failure', error });
+          throw error;
+        });
     },
     [core.services.http]
   );
@@ -64,9 +75,12 @@ export const usePatchSession = () => {
     abortControllerRef.current?.abort();
   }, []);
 
+  const isAborted = useCallback(() => !!abortControllerRef.current?.signal.aborted, []);
+
   return {
     ...state,
     abort,
+    isAborted,
     patchSession,
   };
 };
