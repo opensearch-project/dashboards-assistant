@@ -26,7 +26,7 @@ export const VisualizationCardParser = {
       await Promise.all(visualizationOutputs.map((output) => extractIdsFromCsvString(output)))
     ).flatMap((id) => id);
 
-    const visOutputs: IMessage[] = visualizationIds
+    const visOutputs: IMessage[] = [...new Set(visualizationIds)]
       /**
        * Empty id will be filtered
        */
