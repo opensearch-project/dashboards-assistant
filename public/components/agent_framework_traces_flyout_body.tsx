@@ -36,6 +36,7 @@ export const AgentFrameworkTracesFlyoutBody: React.FC = () => {
             <EuiPageHeaderSection>
               {showBack && (
                 <EuiButtonEmpty
+                  aria-label="back"
                   size="xs"
                   flush="left"
                   onClick={() => {
