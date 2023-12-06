@@ -10,15 +10,14 @@ module.exports = function (api) {
   if (api.env('test')) {
     return {
       presets: [
-        require('@babel/preset-env'),
+        require('@babel/preset-env', {
+          useBuiltIns: false,
+          targets: {
+            node: 'current',
+          },
+        }),
         require('@babel/preset-react'),
         require('@babel/preset-typescript'),
-      ],
-      plugins: [
-        [require('@babel/plugin-transform-runtime'), { regenerator: true }],
-        require('@babel/plugin-transform-class-properties'),
-        require('@babel/plugin-transform-object-rest-spread'),
-        [require('@babel/plugin-transform-modules-commonjs'), { allowTopLevelThis: true }],
       ],
     };
   }
