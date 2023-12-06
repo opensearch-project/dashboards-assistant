@@ -43,13 +43,25 @@ export class OllyChatService implements ChatService {
       if (sessionId) {
         parametersPayload.memory_id = sessionId;
       }
-      const agentFrameworkResponse = (await opensearchClient.transport.request({
-        method: 'POST',
-        path: `${ML_COMMONS_BASE_API}/agents/${rootAgentId}/_execute`,
-        body: {
-          parameters: parametersPayload,
+      const agentFrameworkResponse = (await opensearchClient.transport.request(
+        {
+          method: 'POST',
+          path: `${ML_COMMONS_BASE_API}/agents/${rootAgentId}/_execute`,
+          body: {
+            parameters: parametersPayload,
+          },
         },
-      })) as ApiResponse<{
+        {
+          /**
+           * It is time-consuming for LLM to generate final answer
+           */
+          requestTimeout: 60 * 1000,
+          /**
+           * Do not retry
+           */
+          maxRetries: 0,
+        }
+      )) as ApiResponse<{
         inference_results: Array<{
           output: Array<{ name: string; result?: string }>;
         }>;
