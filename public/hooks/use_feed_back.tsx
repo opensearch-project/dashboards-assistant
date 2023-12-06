@@ -5,20 +5,17 @@
 
 import { useState } from 'react';
 import { ASSISTANT_API } from '../../common/constants/llm';
-import { IOutput } from '../../common/types/chat_saved_object_attributes';
-import { useChatContext } from '../contexts/chat_context';
+import { IOutput, Interaction } from '../../common/types/chat_saved_object_attributes';
 import { useCore } from '../contexts/core_context';
 import { useChatState } from './use_chat_state';
+import { SendFeedbackBody } from '../../common/types/chat_saved_object_attributes';
 
-interface SendFeedbackBody {
-  satisfaction: boolean;
-}
-
-export const useFeedback = () => {
-  const chatContext = useChatContext();
+export const useFeedback = (interaction?: Interaction | null) => {
   const core = useCore();
   const { chatState } = useChatState();
-  const [feedbackResult, setFeedbackResult] = useState<undefined | boolean>(undefined);
+  const [feedbackResult, setFeedbackResult] = useState<undefined | boolean>(
+    interaction?.additional_info?.feedback?.satisfaction ?? undefined
+  );
 
   const sendFeedback = async (message: IOutput, correct: boolean) => {
     const outputMessage = message;

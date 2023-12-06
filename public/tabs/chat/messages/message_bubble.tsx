@@ -42,7 +42,9 @@ type MessageBubbleProps = {
 );
 
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
-  const { feedbackResult, sendFeedback } = useFeedback();
+  const { feedbackResult, sendFeedback } = useFeedback(
+    'interaction' in props ? props.interaction : null
+  );
 
   // According to the design of the feedback, only markdown type output is supported.
   const showFeedback =
