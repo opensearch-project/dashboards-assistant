@@ -8,7 +8,9 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import { ApplicationStart } from '../../../src/core/public';
+// TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';
+import { getPalantirRegistry } from './services';
 import { ChatFlyout } from './chat_flyout';
 import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
@@ -41,6 +43,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [inputFocus, setInputFocus] = useState(false);
   const flyoutFullScreen = chatSize === 'fullscreen';
   const inputRef = useRef<HTMLInputElement>(null);
+  const registry = getPalantirRegistry();
 
   if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
 
@@ -137,6 +140,28 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       document.removeEventListener('keydown', onGlobalMouseUp);
     };
   }, [props.userHasAccess]);
+
+  useEffect(() => {
+    const handleSuggestion = (event: { suggestion: string }) => {
+      if (!flyoutVisible) {
+        // open chat window
+        setFlyoutVisible(true);
+        // start a new chat
+        props.assistantActions.loadChat();
+      }
+      // send message
+      props.assistantActions.send({
+        type: 'input',
+        contentType: 'text',
+        content: event.suggestion,
+        context: { appId },
+      });
+    };
+    registry.on('onSuggestion', handleSuggestion);
+    return () => {
+      registry.off('onSuggestion', handleSuggestion);
+    };
+  }, [appId, flyoutVisible, props.assistantActions, registry]);
 
   return (
     <>

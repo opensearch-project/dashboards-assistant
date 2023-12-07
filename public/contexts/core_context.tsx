@@ -7,13 +7,12 @@ import {
   OpenSearchDashboardsServices,
   useOpenSearchDashboards,
 } from '../../../../src/plugins/opensearch_dashboards_react/public';
-import { AppPluginStartDependencies, SetupDependencies } from '../types';
-import { ConversationLoadService } from '../services/conversation_load_service';
-import { ConversationsService } from '../services/conversations_service';
+import { AssistantPluginStartDependencies, AssistantPluginSetupDependencies } from '../types';
+import { ConversationLoadService, ConversationsService } from '../services';
 
 export interface AssistantServices extends Required<OpenSearchDashboardsServices> {
-  setupDeps: SetupDependencies;
-  startDeps: AppPluginStartDependencies;
+  setupDeps: AssistantPluginSetupDependencies;
+  startDeps: AssistantPluginStartDependencies;
   conversationLoad: ConversationLoadService;
   conversations: ConversationsService;
 }

@@ -18,6 +18,7 @@ import {
 import React, { useCallback } from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import cx from 'classnames';
+// TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../../assets/chat.svg';
 import {
   IMessage,

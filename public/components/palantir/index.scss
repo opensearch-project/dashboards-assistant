@@ -1,0 +1,88 @@
+.palantirAnchor {
+  text-align: center;
+}
+
+.palantirAnchorButton {
+  padding-top: 0;
+  padding-bottom: 0;
+  box-shadow: none;
+
+  img {
+    opacity: 0;
+    height: 100%;
+    width: auto;
+  }
+}
+
+.palantirAnchorButton:hover {
+  padding-top: 0;
+  padding-bottom: 0;
+  box-shadow: 0 0 0 1.25px $ouiBorderColor;
+  border-radius: 5px;
+
+  img {
+    margin: 0 0 0 -2px;
+    padding: 0 2px 0 0;
+    opacity: 1;
+    transition: opacity 100ms linear;
+  }
+}
+
+.palantirAnchorContent {
+  text-decoration: underline dashed 1.5px;
+  text-underline-offset: 2px;
+}
+
+.palantirPopoverTitle {
+  // TODO: Remove this one paddingSize is fixed
+  padding: 0 !important;
+  border: none;
+
+  :first-child {
+    border: none;
+  }
+
+  .euiBadge__text {
+    text-transform: none;
+    font-weight: bold;
+  }
+
+  .euiBadge__icon {
+    margin: 2px 0 2px 0;
+  }
+
+  .euiIcon--small {
+    height: 100%;
+    width: auto;
+  }
+}
+
+.palantirPopoverFooter {
+  // TODO: Remove this one paddingSize is fixed
+  padding: 4px 12px 8px !important;
+  border: none;
+}
+
+.palantirPopoverBody {
+  width: 300px;
+}
+
+.palantirSummary {
+  border: $euiBorderThin;
+  border-radius: 4px;
+}
+
+.palantirSuggestionListItem {
+  margin-top: 0;
+  border: $euiBorderThin;
+  border-radius: 4px;
+
+  .euiListGroupItem__button {
+    padding: 0;
+  }
+
+  .euiListGroupItem__icon {
+    margin: 2px;
+    margin-right: 5px;
+  }
+}
