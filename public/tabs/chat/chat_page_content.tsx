@@ -131,7 +131,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         }
 
         return (
-          <React.Fragment key={i}>
+          <React.Fragment key={`${interaction?.conversation_id}-${i}`}>
             <ToolsUsed message={message} />
             <MessageBubble
               message={message}
