@@ -6,10 +6,10 @@
 import React, { useCallback, useRef } from 'react';
 
 import { EuiConfirmModal, EuiFieldText, EuiSpacer, EuiText } from '@elastic/eui';
-import { usePatchSession } from '../hooks/use_sessions';
 import { useCore } from '../contexts/core_context';
+import { usePatchSession } from '../hooks';
 
-interface EditConversationNameModalProps {
+export interface EditConversationNameModalProps {
   onClose?: (status: 'updated' | 'cancelled' | 'errored', newTitle?: string) => void;
   sessionId: string;
   defaultTitle: string;
@@ -65,7 +65,11 @@ export const EditConversationNameModal = ({
         <p>Please enter a new name for your conversation.</p>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiFieldText inputRef={titleInputRef} defaultValue={defaultTitle} />
+      <EuiFieldText
+        inputRef={titleInputRef}
+        defaultValue={defaultTitle}
+        aria-label="Conversation name input"
+      />
     </EuiConfirmModal>
   );
 };
