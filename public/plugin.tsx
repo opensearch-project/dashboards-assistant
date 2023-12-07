@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../src/core/public';
 import {
   createOpenSearchDashboardsReactContext,
@@ -12,19 +13,34 @@ import {
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
-import { SessionLoadService } from './services/session_load_service';
-import { SessionsService } from './services/sessions_service';
 import {
   ActionExecutor,
-  AppPluginStartDependencies,
+  AssistantPluginStartDependencies,
+  AssistantPluginSetupDependencies,
   AssistantActions,
   AssistantSetup,
   AssistantStart,
   ContentRenderer,
-  SetupDependencies,
 } from './types';
+import {
+  PalantirRegistry,
+  SessionLoadService,
+  SessionsService,
+  setChrome,
+  setPalantirRegistry,
+} from './services';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
+
+// @ts-ignore
+const LazyPalantirComponent = lazy(() => import('./components/palantir'));
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const PalantirComponent = (props: any) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <LazyPalantirComponent {...props} />
+  </Suspense>
+);
 
 interface PublicConfig {
   chat: {
@@ -39,16 +55,26 @@ interface UserAccountResponse {
 }
 
 export class AssistantPlugin
-  implements Plugin<AssistantSetup, AssistantStart, SetupDependencies, AppPluginStartDependencies> {
+  implements
+    Plugin<
+      AssistantSetup,
+      AssistantStart,
+      AssistantPluginSetupDependencies,
+      AssistantPluginStartDependencies
+    > {
   private config: PublicConfig;
+  palantirRegistry: PalantirRegistry | undefined;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfig>();
   }
 
   public setup(
-    core: CoreSetup<AppPluginStartDependencies>,
-    setupDeps: SetupDependencies
+    core: CoreSetup<AssistantPluginStartDependencies>,
+    setupDeps: AssistantPluginSetupDependencies
   ): AssistantSetup {
+    this.palantirRegistry = new PalantirRegistry();
+    setPalantirRegistry(this.palantirRegistry);
     const contentRenderers: Record<string, ContentRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
@@ -76,7 +102,9 @@ export class AssistantPlugin
       account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role));
 
     if (this.config.chat.enabled) {
-      core.getStartServices().then(async ([coreStart, startDeps]) => {
+      const setupChat = async () => {
+        const [coreStart, startDeps] = await core.getStartServices();
+
         const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
           ...coreStart,
           setupDeps,
@@ -103,7 +131,8 @@ export class AssistantPlugin
             </CoreContext.Provider>
           ),
         });
-      });
+      };
+      setupChat();
     }
 
     return {
@@ -120,11 +149,13 @@ export class AssistantPlugin
       chatEnabled: () => this.config.chat.enabled,
       userHasAccess: async () => await getAccount().then(checkAccess),
       assistantActions,
+      registerPalantir: this.palantirRegistry.register.bind(this.palantirRegistry),
     };
   }
 
-  public start(core: CoreStart, startDeps: AppPluginStartDependencies): AssistantStart {
+  public start(core: CoreStart): AssistantStart {
     setCoreStart(core);
+    setChrome(core.chrome);
 
     return {};
   }

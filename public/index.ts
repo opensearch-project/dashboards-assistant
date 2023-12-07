@@ -4,9 +4,18 @@
  */
 
 import { PluginInitializerContext } from '../../../src/core/public';
-import { AssistantPlugin } from './plugin';
+import { AssistantPlugin, PalantirComponent } from './plugin';
+import { AssistantSetup, AssistantStart, Palantir } from './types';
 
-export { AssistantPlugin as Plugin };
+export {
+  AssistantPlugin as Plugin,
+  AssistantSetup as AssistantPublicPluginSetup,
+  AssistantStart as AssistantPublicPluginStart,
+  Palantir,
+  PalantirComponent,
+};
+
+export * from './services';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AssistantPlugin(initializerContext);

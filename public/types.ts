@@ -6,6 +6,7 @@
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { IMessage, ISuggestedAction } from '../common/types/chat_saved_object_attributes';
+import { PalantirRegistry } from './services';
 
 // TODO should pair with server side registered output parser
 export type ContentRenderer = (content: unknown) => React.ReactElement;
@@ -19,12 +20,12 @@ export interface AssistantActions {
   regenerate: (interactionId: string) => Promise<void>;
 }
 
-export interface AppPluginStartDependencies {
+export interface AssistantPluginStartDependencies {
   embeddable: EmbeddableStart;
   dashboard: DashboardStart;
 }
 
-export interface SetupDependencies {
+export interface AssistantPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   securityDashboards?: {};
 }
@@ -41,6 +42,7 @@ export interface AssistantSetup {
    */
   userHasAccess: () => Promise<boolean>;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
+  registerPalantir: PalantirRegistry['register'];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -53,6 +55,14 @@ export interface UserAccount {
 
 export interface ChatConfig {
   terms_accepted: boolean;
+}
+
+export type Palantiri = Map<string, Palantir>;
+
+export interface Palantir {
+  key: string;
+  suggestion: string;
+  description?: string;
 }
 
 export type TabId = 'chat' | 'compose' | 'insights' | 'history' | 'trace';
