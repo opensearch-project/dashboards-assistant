@@ -12,8 +12,8 @@ import {
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
-import { SessionsService } from './services/sessions_service';
 import { SessionLoadService } from './services/session_load_service';
+import { SessionsService } from './services/sessions_service';
 import {
   ActionExecutor,
   AppPluginStartDependencies,
@@ -34,7 +34,7 @@ interface PublicConfig {
 }
 
 interface UserAccountResponse {
-  data: { roles: string[]; user_name: string; user_requested_tenant: string | null };
+  data: { roles: string[]; user_name: string; user_requested_tenant?: string };
 }
 
 export class AssistantPlugin
@@ -52,28 +52,27 @@ export class AssistantPlugin
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
     /**
-     * Returns {@link UserAccountResponse} if request is successful,
-     * true if security plugin is not found, false if request failed.
+     * Returns {@link UserAccountResponse}. Provides default roles and user
+     * name if security plugin call fails.
      */
-    const getAccount = (() => {
-      let account: UserAccountResponse | boolean;
+    const getAccount: () => Promise<UserAccountResponse> = (() => {
+      let account: UserAccountResponse;
       return async () => {
-        if (setupDeps.securityDashboards === undefined) return true;
+        if (setupDeps.securityDashboards === undefined)
+          return { data: { roles: ['all_access'], user_name: 'dashboards_user' } };
         if (account === undefined) {
           account = await core.http
             .get<UserAccountResponse>('/api/v1/configuration/account')
             .catch((e) => {
               console.error(`Failed to request user account information: ${String(e.body || e)}`);
-              return false;
+              return { data: { roles: [], user_name: '' } };
             });
         }
         return account;
       };
     })();
     const checkAccess = (account: Awaited<ReturnType<typeof getAccount>>) =>
-      account === true ||
-      (account !== false &&
-        account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role)));
+      account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role));
 
     if (this.config.chat.enabled) {
       core.getStartServices().then(async ([coreStart, startDeps]) => {
@@ -85,8 +84,8 @@ export class AssistantPlugin
           sessions: new SessionsService(coreStart.http),
         });
         const account = await getAccount();
-        const username = typeof account === 'boolean' ? 'dashboards_user' : account.data.user_name;
-        const tenant = typeof account === 'boolean' ? '' : account.data.user_requested_tenant ?? '';
+        const username = account.data.user_name;
+        const tenant = account.data.user_requested_tenant ?? '';
 
         coreStart.chrome.navControls.registerRight({
           order: 10000,
