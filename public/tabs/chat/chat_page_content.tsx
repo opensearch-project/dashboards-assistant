@@ -19,7 +19,7 @@ import {
   ISuggestedAction,
   Interaction,
 } from '../../../common/types/chat_saved_object_attributes';
-import { TermsAndConditions } from '../../components/terms_and_conditions';
+import { WelcomeMessage } from '../../components/chat_welcome_message';
 import { useChatContext } from '../../contexts';
 import { useChatState, useChatActions } from '../../hooks';
 import { MessageBubble } from './messages/message_bubble';
@@ -89,7 +89,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         message={{ type: 'output', contentType: 'markdown', content: '' }}
         showActionBar={false}
       >
-        <TermsAndConditions username={chatContext.currentAccount.username} />
+        <WelcomeMessage username={chatContext.currentAccount.username} />
       </MessageBubble>
       {firstInputIndex < 0 && (
         <Suggestions
@@ -220,7 +220,7 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
   }
 
   return (
-    <div style={{ marginLeft: '55px', marginTop: '5px' }}>
+    <div aria-label="chat suggestions" style={{ marginLeft: '55px', marginTop: '5px' }}>
       <EuiText color="subdued" size="xs" style={{ paddingLeft: 10 }}>
         <small>Available suggestions</small>
       </EuiText>

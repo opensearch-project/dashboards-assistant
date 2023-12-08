@@ -1,0 +1,232 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ChatPageContent } from './chat_page_content';
+import * as chatContextExports from '../../contexts/chat_context';
+import * as chatStateHookExports from '../../hooks/use_chat_state';
+import * as chatActionHookExports from '../../hooks/use_chat_actions';
+import { IMessage } from '../../../common/types/chat_saved_object_attributes';
+
+jest.mock('./messages/message_bubble', () => {
+  return {
+    MessageBubble: ({ children }: { children?: React.ReactNode }) => (
+      <div aria-label="chat message bubble">{children}</div>
+    ),
+  };
+});
+
+jest.mock('./messages/message_content', () => {
+  return { MessageContent: () => <div /> };
+});
+
+describe('<ChatPageContent />', () => {
+  const abortActionMock = jest.fn();
+  const executeActionMock = jest.fn();
+
+  beforeEach(() => {
+    jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
+      sessionId: 'test_session_id',
+      actionExecutors: {
+        view_ppl_visualization: jest.fn(),
+      },
+      currentAccount: {
+        username: 'test_user',
+        tenant: 'private',
+      },
+    });
+
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages: [], llmResponding: false, interactions: [] },
+      chatStateDispatch: jest.fn(),
+    });
+
+    jest.spyOn(chatActionHookExports, 'useChatActions').mockReturnValue({
+      regenerate: jest.fn(),
+      send: jest.fn(),
+      loadChat: jest.fn(),
+      openChatUI: jest.fn(),
+      executeAction: executeActionMock,
+      abortAction: abortActionMock,
+    });
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should display welcome message by default', () => {
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(1);
+    expect(screen.queryByLabelText('chat welcome message')).toBeInTheDocument();
+  });
+
+  it('should display a default suggested action', () => {
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(1);
+    expect(screen.queryByText('What are the indices in my cluster?')).toBeInTheDocument();
+  });
+
+  it('should display messages', () => {
+    const messages: IMessage[] = [
+      {
+        type: 'input',
+        content: 'what indices are in my cluster?',
+        contentType: 'text',
+      },
+      {
+        type: 'output',
+        content: 'here are the indices in your cluster: .alert',
+        contentType: 'markdown',
+        suggestedActions: [{ actionType: 'send_as_input', message: 'suggested action mock' }],
+      },
+    ];
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages, llmResponding: false, interactions: [] },
+      chatStateDispatch: jest.fn(),
+    });
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(3);
+  });
+
+  it('should only display the suggested actions of last output', () => {
+    const messages: IMessage[] = [
+      {
+        type: 'input',
+        content: 'what indices are in my cluster?',
+        contentType: 'text',
+      },
+      {
+        type: 'output',
+        content: 'here are the indices in your cluster: .kibana',
+        contentType: 'markdown',
+        suggestedActions: [{ actionType: 'send_as_input', message: 'suggested action mock' }],
+      },
+    ];
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages, llmResponding: false, interactions: [] },
+      chatStateDispatch: jest.fn(),
+    });
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(1);
+    expect(screen.queryByText('suggested action mock')).toBeInTheDocument();
+  });
+
+  it('should NOT display the suggested actions if no suggested actions', () => {
+    const messages: IMessage[] = [
+      {
+        type: 'input',
+        content: 'what indices are in my cluster?',
+        contentType: 'text',
+      },
+      {
+        type: 'output',
+        content: 'here are the indices in your cluster: .kibana',
+        contentType: 'markdown',
+        suggestedActions: [],
+      },
+    ];
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages, llmResponding: false, interactions: [] },
+      chatStateDispatch: jest.fn(),
+    });
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(0);
+  });
+
+  it('should not display suggested actions on user input message bubble', () => {
+    const messages: IMessage[] = [
+      {
+        type: 'input',
+        content: 'what indices are in my cluster?',
+        contentType: 'text',
+      },
+      {
+        type: 'output',
+        content: 'here are the indices in your cluster: .kibana',
+        contentType: 'markdown',
+        suggestedActions: [{ actionType: 'send_as_input', message: 'suggested action mock' }],
+      },
+      {
+        type: 'input',
+        content: 'show me visualizations about sales',
+        contentType: 'text',
+      },
+    ];
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages, llmResponding: false, interactions: [] },
+      chatStateDispatch: jest.fn(),
+    });
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(0);
+  });
+
+  it('should display loading screen when loading the messages', () => {
+    render(<ChatPageContent messagesLoading={true} onRefresh={jest.fn()} />);
+    expect(screen.queryByText('Loading conversation')).toBeInTheDocument();
+    expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(0);
+  });
+
+  it('should show error message with refresh button', () => {
+    const onRefreshMock = jest.fn();
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        messagesLoadingError={new Error('failed to get response')}
+        onRefresh={onRefreshMock}
+      />
+    );
+    expect(screen.queryByText('failed to get response')).toBeInTheDocument();
+    expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(0);
+
+    fireEvent.click(screen.getByText('Refresh'));
+    expect(onRefreshMock).toHaveBeenCalled();
+  });
+
+  it('should display `Stop generating response` when llm is responding', () => {
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages: [], llmResponding: true, interactions: [] },
+      chatStateDispatch: jest.fn(),
+    });
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    expect(screen.queryByText('Stop generating response')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Stop generating response'));
+    expect(abortActionMock).toHaveBeenCalledWith('test_session_id');
+  });
+
+  it('should display `How was this generated?`', () => {
+    const messages: IMessage[] = [
+      {
+        type: 'input',
+        content: 'what indices are in my cluster?',
+        contentType: 'text',
+      },
+      {
+        type: 'output',
+        content: 'here are the indices in your cluster: .kibana',
+        contentType: 'markdown',
+        suggestedActions: [],
+        traceId: 'trace_id_mock',
+      },
+    ];
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages, llmResponding: false, interactions: [] },
+      chatStateDispatch: jest.fn(),
+    });
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    expect(screen.queryByText('How was this generated?')).toBeInTheDocument();
+  });
+
+  it('should call executeAction', () => {
+    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    fireEvent.click(screen.getByText('What are the indices in my cluster?'));
+    expect(executeActionMock).toHaveBeenCalled();
+  });
+});

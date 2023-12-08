@@ -82,6 +82,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
   if ('loading' in props && props.loading) {
     return (
       <EuiFlexGroup
+        aria-label="chat message loading"
         gutterSize="m"
         justifyContent="flexStart"
         alignItems="flexStart"
@@ -111,6 +112,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     if (props.message.type === 'input') {
       return (
         <EuiFlexGroup
+          aria-label="chat message bubble"
           gutterSize="m"
           justifyContent="flexEnd"
           alignItems="flexStart"
@@ -141,6 +143,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
 
     return (
       <EuiFlexGroup
+        aria-label="chat message bubble"
         gutterSize="m"
         justifyContent="flexStart"
         alignItems="flexStart"
@@ -164,6 +167,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
             <>
               <EuiSpacer size="xs" />
               <EuiFlexGroup
+                aria-label="message actions"
                 className={cx({
                   'llm-chat-action-buttons-hidden': props.shouldActionBarVisibleOnHover,
                 })}
@@ -178,7 +182,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     <EuiCopy textToCopy={props.message.content ?? ''}>
                       {(copy) => (
                         <EuiButtonIcon
-                          aria-label="copy"
+                          aria-label="copy message"
                           title="copy message"
                           onClick={copy}
                           color="text"
@@ -191,7 +195,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                 {props.showRegenerate && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
-                      aria-label="regenerate"
+                      aria-label="regenerate message"
                       onClick={props.onRegenerate}
                       title="regenerate message"
                       color="text"
@@ -205,7 +209,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     {feedbackResult !== false ? (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
-                          aria-label="feedback"
+                          aria-label="feedback thumbs up"
                           color={feedbackResult === true ? 'primary' : 'text'}
                           iconType="thumbsUp"
                           onClick={() => feedbackOutput(true, feedbackResult)}
@@ -215,7 +219,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     {feedbackResult !== true ? (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
-                          aria-label="feedback result"
+                          aria-label="feedback thumbs down"
                           color={feedbackResult === false ? 'primary' : 'text'}
                           iconType="thumbsDown"
                           onClick={() => feedbackOutput(false, feedbackResult)}

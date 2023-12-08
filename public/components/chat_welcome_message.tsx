@@ -10,9 +10,10 @@ interface Props {
   username: string;
 }
 
-export const TermsAndConditions = (props: Props) => {
+export const WelcomeMessage = (props: Props) => {
   return (
     <EuiEmptyPrompt
+      aria-label="chat welcome message"
       iconType="cheer"
       iconColor="primary"
       titleSize="s"
