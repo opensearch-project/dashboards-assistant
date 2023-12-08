@@ -109,6 +109,17 @@ describe('<ChatPageContent />', () => {
         contentType: 'markdown',
         suggestedActions: [{ actionType: 'send_as_input', message: 'suggested action mock' }],
       },
+      {
+        type: 'input',
+        content: 'Are there any alerts in my system?',
+        contentType: 'text',
+      },
+      {
+        type: 'output',
+        content: 'there is no alert in the system',
+        contentType: 'markdown',
+        suggestedActions: [{ actionType: 'send_as_input', message: 'suggested action mock' }],
+      },
     ];
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
       chatState: { messages, llmResponding: false, interactions: [] },
