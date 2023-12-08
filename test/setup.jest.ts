@@ -5,6 +5,7 @@
 
 import { configure } from '@testing-library/react';
 import { TextDecoder, TextEncoder } from 'util';
+import '@testing-library/jest-dom';
 
 configure({ testIdAttribute: 'data-test-subj' });
 

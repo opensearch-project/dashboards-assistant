@@ -22,24 +22,15 @@ import {
 import { TermsAndConditions } from '../../components/terms_and_conditions';
 import { useChatContext } from '../../contexts';
 import { useChatState, useChatActions } from '../../hooks';
-import { ChatPageGreetings } from './chat_page_greetings';
 import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
 
 interface ChatPageContentProps {
-  showGreetings: boolean;
-  setShowGreetings: React.Dispatch<React.SetStateAction<boolean>>;
   messagesLoading: boolean;
   messagesLoadingError?: Error;
   onRefresh: () => void;
 }
-
-const findPreviousInput = (messages: IMessage[], index: number) => {
-  for (let i = index - 1; i >= 0; i--) {
-    if (messages[i].type === 'input') return messages[i];
-  }
-};
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
   const chatContext = useChatContext();
@@ -114,7 +105,6 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         />
       )}
       <EuiSpacer />
-      {props.showGreetings && <ChatPageGreetings dismiss={() => props.setShowGreetings(false)} />}
       {chatState.messages.map((message, i) => {
         // The latest llm output, just after the last user input
         const isLatestOutput = lastInputIndex >= 0 && i > lastInputIndex;
@@ -142,7 +132,6 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
               interaction={interaction}
             >
               <MessageContent message={message} />
-              {/* <MessageFooter message={message} previousInput={findPreviousInput(array, i)} />*/}
             </MessageBubble>
             {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}
             <EuiSpacer />
