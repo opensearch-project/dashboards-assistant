@@ -14,6 +14,7 @@ import {
   EditConversationNameModal,
   EditConversationNameModalProps,
 } from '../edit_conversation_name_modal';
+import { HttpHandler } from '../../../../../src/core/public';
 
 const setup = ({ onClose, defaultTitle, sessionId }: EditConversationNameModalProps) => {
   const useCoreMock = {
@@ -142,15 +143,20 @@ describe('<EditConversationNameModal />', () => {
 
   it('should call onClose with cancelled after patch session aborted', async () => {
     const onCloseMock = jest.fn();
-    const pendingPromise = new Promise((resolve) => {
-      setTimeout(resolve, 99999);
-    });
     const { renderResult, useCoreMock } = setup({
       sessionId: '1',
       defaultTitle: 'foo',
       onClose: onCloseMock,
     });
-    useCoreMock.services.http.put.mockImplementation(() => pendingPromise);
+    useCoreMock.services.http.put.mockImplementation(((_path, options) => {
+      return new Promise((_resolve, reject) => {
+        if (options?.signal) {
+          options.signal.onabort = () => {
+            reject(new Error('Aborted'));
+          };
+        }
+      });
+    }) as HttpHandler);
 
     act(() => {
       fireEvent.change(renderResult.getByLabelText('Conversation name input'), {

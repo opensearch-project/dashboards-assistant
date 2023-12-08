@@ -14,6 +14,7 @@ import {
   DeleteConversationConfirmModal,
   DeleteConversationConfirmModalProps,
 } from '../delete_conversation_confirm_modal';
+import { HttpHandler } from '../../../../../../src/core/public';
 
 const setup = ({ onClose, sessionId }: DeleteConversationConfirmModalProps) => {
   const useCoreMock = {
@@ -52,7 +53,7 @@ describe('<DeleteConversationConfirmModal />', () => {
 
   it('should call onClose with "canceled" after cancel button click', async () => {
     const onCloseMock = jest.fn();
-    const { renderResult, useCoreMock } = setup({
+    const { renderResult } = setup({
       sessionId: '1',
       onClose: onCloseMock,
     });
@@ -111,14 +112,19 @@ describe('<DeleteConversationConfirmModal />', () => {
 
   it('should call onClose with cancelled after delete session aborted', async () => {
     const onCloseMock = jest.fn();
-    const pendingPromise = new Promise((resolve) => {
-      setTimeout(resolve, 99999);
-    });
     const { renderResult, useCoreMock } = setup({
       sessionId: '1',
       onClose: onCloseMock,
     });
-    useCoreMock.services.http.delete.mockImplementation(() => pendingPromise);
+    useCoreMock.services.http.delete.mockImplementation(((_path, options) => {
+      return new Promise((_resolve, reject) => {
+        if (options?.signal) {
+          options.signal.onabort = () => {
+            reject(new Error('Aborted'));
+          };
+        }
+      });
+    }) as HttpHandler);
 
     expect(onCloseMock).not.toHaveBeenCalled();
     expect(useCoreMock.services.http.delete).not.toHaveBeenCalled();
