@@ -160,7 +160,7 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const regenerate = async () => {
+  const regenerate = async (interactionId: string) => {
     if (chatContext.sessionId) {
       const abortController = new AbortController();
       abortControllerRef = abortController;
@@ -168,7 +168,11 @@ export const useChatActions = (): AssistantActions => {
 
       try {
         const response = await core.services.http.put(`${ASSISTANT_API.REGENERATE}`, {
-          body: JSON.stringify({ sessionId: chatContext.sessionId }),
+          body: JSON.stringify({
+            sessionId: chatContext.sessionId,
+            rootAgentId: chatContext.rootAgentId,
+            interactionId,
+          }),
         });
 
         if (abortController.signal.aborted) {
