@@ -16,6 +16,7 @@ import { OllyChatService } from '../services/chat/olly_chat_service';
 import { IMessage, IInput } from '../../common/types/chat_saved_object_attributes';
 import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
 import { RoutesOptions } from '../types';
+import { ChatService } from '../services/chat/chat_service';
 
 const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
@@ -145,24 +146,44 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
       const chatService = createChatService();
 
+      let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
+
+      /**
+       * Get final answer from Agent framework
+       */
       try {
-        const outputs = await chatService.requestLLM(
+        outputs = await chatService.requestLLM(
           { messages, input, sessionId: sessionIdInRequestBody, rootAgentId },
           context
         );
-        const sessionId = outputs.memoryId;
-        const finalMessage = await storageService.getSession(sessionId);
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
+        const sessionId = outputs?.memoryId || sessionIdInRequestBody;
+        if (!sessionId) {
+          return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+        }
+      }
+
+      /**
+       * Retrieve latest interactions from memory
+       */
+      const sessionId = outputs?.memoryId || (sessionIdInRequestBody as string);
+      try {
+        if (!sessionId) {
+          throw new Error('Not a valid conversation');
+        }
+        const conversation = await storageService.getSession(sessionId);
 
         return response.ok({
           body: {
-            messages: finalMessage.messages,
-            sessionId: outputs.memoryId,
-            title: finalMessage.title,
-            interactions: finalMessage.interactions,
+            messages: conversation.messages,
+            sessionId,
+            title: conversation.title,
+            interactions: conversation.interactions,
           },
         });
       } catch (error) {
-        context.assistant_plugin.logger.warn(error);
+        context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
