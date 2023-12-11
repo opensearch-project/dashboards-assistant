@@ -54,8 +54,9 @@ export class OllyChatService implements ChatService {
         {
           /**
            * It is time-consuming for LLM to generate final answer
+           * Give it a large timeout window
            */
-          requestTimeout: 60 * 1000,
+          requestTimeout: 5 * 60 * 1000,
           /**
            * Do not retry
            */
@@ -78,18 +79,7 @@ export class OllyChatService implements ChatService {
         memoryId: memoryIdItem?.result || '',
       };
     } catch (error) {
-      context.assistant_plugin.logger.error(error);
-      return {
-        messages: [
-          {
-            type: 'output',
-            traceId: '',
-            contentType: 'error',
-            content: error.message,
-          },
-        ],
-        memoryId: '',
-      };
+      throw error;
     } finally {
       if (payload.sessionId) {
         OllyChatService.abortControllers.delete(payload.sessionId);
