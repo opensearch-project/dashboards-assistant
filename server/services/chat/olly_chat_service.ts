@@ -15,38 +15,22 @@ export class OllyChatService implements ChatService {
   static abortControllers: Map<string, AbortController> = new Map();
 
   private async requestAgentRun(
-    payload: { input?: IInput; sessionId?: string; rootAgentId: string; interactionId?: string },
-    context: RequestHandlerContext
-  ) {
-    const { input, sessionId, interactionId, rootAgentId } = payload;
-    const parametersPayload: {
+    rootAgentId: string,
+    payload: {
       question?: string;
       verbose?: boolean;
       memory_id?: string;
       regenerate_interaction_id?: string;
-    } = {
-      verbose: true,
-    };
-
-    if (input) {
-      parametersPayload.question = input.content;
-    }
-
-    if (interactionId) {
-      parametersPayload.regenerate_interaction_id = interactionId;
-    }
-
-    if (sessionId) {
-      parametersPayload.memory_id = sessionId;
-    }
-
+    },
+    context: RequestHandlerContext
+  ) {
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
     const agentFrameworkResponse = (await opensearchClient.transport.request(
       {
         method: 'POST',
         path: `${ML_COMMONS_BASE_API}/agents/${rootAgentId}/_execute`,
         body: {
-          parameters: parametersPayload,
+          parameters: payload,
         },
       },
       {
@@ -85,12 +69,26 @@ export class OllyChatService implements ChatService {
     messages: IMessage[];
     memoryId: string;
   }> {
+    const { input, sessionId, rootAgentId } = payload;
     if (payload.sessionId) {
       OllyChatService.abortControllers.set(payload.sessionId, new AbortController());
     }
 
+    const parametersPayload: {
+      question?: string;
+      verbose?: boolean;
+      memory_id?: string;
+    } = {
+      question: input.content,
+      verbose: true,
+    };
+
+    if (sessionId) {
+      parametersPayload.memory_id = sessionId;
+    }
+
     try {
-      return await this.requestAgentRun(payload, context);
+      return await this.requestAgentRun(rootAgentId, parametersPayload, context);
     } catch (error) {
       throw error;
     } finally {
@@ -104,12 +102,21 @@ export class OllyChatService implements ChatService {
     payload: { sessionId: string; interactionId: string; rootAgentId: string },
     context: RequestHandlerContext
   ): Promise<{ messages: IMessage[]; memoryId: string }> {
-    if (payload.sessionId) {
-      OllyChatService.abortControllers.set(payload.sessionId, new AbortController());
-    }
+    const { sessionId, interactionId, rootAgentId } = payload;
+    const parametersPayload: {
+      verbose?: boolean;
+      memory_id?: string;
+      regenerate_interaction_id?: string;
+    } = {
+      memory_id: sessionId,
+      regenerate_interaction_id: interactionId,
+      verbose: true,
+    };
+
+    OllyChatService.abortControllers.set(sessionId, new AbortController());
 
     try {
-      return await this.requestAgentRun(payload, context);
+      return await this.requestAgentRun(rootAgentId, parametersPayload, context);
     } catch (error) {
       throw error;
     } finally {
