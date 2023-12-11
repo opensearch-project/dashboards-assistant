@@ -65,7 +65,11 @@ export const EditConversationNameModal = ({
         <p>Please enter a new name for your conversation.</p>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiFieldText inputRef={titleInputRef} defaultValue={defaultTitle} />
+      <EuiFieldText
+        inputRef={titleInputRef}
+        defaultValue={defaultTitle}
+        aria-label="Conversation name input"
+      />
     </EuiConfirmModal>
   );
 };

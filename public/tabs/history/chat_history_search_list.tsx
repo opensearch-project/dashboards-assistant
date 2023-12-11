@@ -16,6 +16,7 @@ import React, { useCallback, useState } from 'react';
 import { ChatHistoryList, ChatHistoryListProps } from './chat_history_list';
 import { EditConversationNameModal } from '../../components/edit_conversation_name_modal';
 import { DeleteConversationConfirmModal } from './delete_conversation_confirm_modal';
+import { useChatContext } from '../../contexts';
 
 interface ChatHistorySearchListProps
   extends Pick<
@@ -45,6 +46,7 @@ export const ChatHistorySearchList = ({
   onHistoryDeleted,
   onChangeItemsPerPage,
 }: ChatHistorySearchListProps) => {
+  const { sessionId, setTitle } = useChatContext();
   const [editingConversation, setEditingConversation] = useState<{
     id: string;
     title: string;
@@ -52,13 +54,16 @@ export const ChatHistorySearchList = ({
   const [deletingConversation, setDeletingConversation] = useState<{ id: string } | null>(null);
 
   const handleEditConversationModalClose = useCallback(
-    (status: 'updated' | string) => {
+    (status: 'updated' | string, newTitle?: string) => {
       if (status === 'updated') {
         onRefresh();
+        if (sessionId === editingConversation?.id) {
+          setTitle(newTitle);
+        }
       }
       setEditingConversation(null);
     },
-    [setEditingConversation, onRefresh]
+    [setEditingConversation, onRefresh, editingConversation, sessionId, setTitle]
   );
 
   const handleDeleteConversationConfirmModalClose = useCallback(

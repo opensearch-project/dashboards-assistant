@@ -40,10 +40,14 @@ export const ChatWindowHeaderTitle = React.memo(() => {
     (status: 'updated' | string, newTitle?: string) => {
       if (status === 'updated') {
         chatContext.setTitle(newTitle);
+        const sessions = core.services.sessions.sessions$.getValue();
+        if (sessions?.objects.find((session) => session.id === chatContext.sessionId)) {
+          core.services.sessions.reload();
+        }
       }
       setRenameModalOpen(false);
     },
-    [chatContext]
+    [chatContext, core.services.sessions]
   );
 
   const button = (
