@@ -6,10 +6,10 @@
 import React, { useCallback, useRef } from 'react';
 
 import { EuiConfirmModal, EuiFieldText, EuiSpacer, EuiText } from '@elastic/eui';
-import { usePatchSession } from '../hooks/use_sessions';
 import { useCore } from '../contexts/core_context';
+import { usePatchSession } from '../hooks';
 
-interface EditConversationNameModalProps {
+export interface EditConversationNameModalProps {
   onClose?: (status: 'updated' | 'cancelled' | 'errored', newTitle?: string) => void;
   sessionId: string;
   defaultTitle: string;
