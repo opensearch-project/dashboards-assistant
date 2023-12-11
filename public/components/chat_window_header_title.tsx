@@ -25,6 +25,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
   const core = useCore();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [isRenameModalOpen, setRenameModalOpen] = useState(false);
+  const [isSaveNotebookModalOpen, setSaveNotebookModalOpen] = useState(false);
   const { chatState } = useChatState();
   const { saveChat } = useSaveChat();
 
@@ -49,6 +50,10 @@ export const ChatWindowHeaderTitle = React.memo(() => {
     },
     [chatContext, core.services.sessions]
   );
+
+  const handleSaveNotebookModalClose = () => {
+    setSaveNotebookModalOpen(false);
+  };
 
   const button = (
     <EuiFlexGroup
@@ -100,10 +105,8 @@ export const ChatWindowHeaderTitle = React.memo(() => {
     <EuiContextMenuItem
       key="save-as-notebook"
       onClick={() => {
-        const modal = core.overlays.openModal(
-          <NotebookNameModal onClose={() => modal.close()} saveChat={saveChat} />
-        );
         closePopover();
+        setSaveNotebookModalOpen(true);
       }}
       // User only can save conversation when he send a message at least.
       disabled={chatState.messages.every((item) => item.type !== 'input')}
@@ -130,6 +133,9 @@ export const ChatWindowHeaderTitle = React.memo(() => {
           onClose={handleEditConversationClose}
           defaultTitle={chatContext.title!}
         />
+      )}
+      {isSaveNotebookModalOpen && (
+        <NotebookNameModal onClose={handleSaveNotebookModalClose} saveChat={saveChat} />
       )}
     </>
   );
