@@ -93,7 +93,7 @@ export const ChatHistoryListItem = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasBottomBorder && <EuiHorizontalRule />}
+      {hasBottomBorder && <EuiHorizontalRule aria-label="history horizontal rule" />}
     </>
   );
 };
