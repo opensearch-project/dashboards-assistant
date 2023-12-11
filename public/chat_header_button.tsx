@@ -65,7 +65,9 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
       selectedTabId,
       preSelectedTabId,
       setSelectedTabId: (tabId: TabId) => {
-        setPreSelectedTabId(selectedTabId);
+        if (selectedTabId !== tabId) {
+          setPreSelectedTabId(selectedTabId);
+        }
         setSelectedTabId(tabId);
       },
       flyoutVisible,
