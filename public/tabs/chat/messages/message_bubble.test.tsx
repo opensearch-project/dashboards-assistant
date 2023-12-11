@@ -130,6 +130,13 @@ describe('<MessageBubble />', () => {
           contentType: 'markdown',
           content: 'here are the indices in your cluster: .alert',
         }}
+        interaction={{
+          input: 'foo',
+          response: 'bar',
+          conversation_id: 'foo',
+          interaction_id: 'bar',
+          create_time: new Date().toLocaleString(),
+        }}
       />
     );
     expect(screen.queryAllByTitle('regenerate message')).toHaveLength(1);
