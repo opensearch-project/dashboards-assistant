@@ -77,7 +77,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('Observability: Started');
+    this.logger.debug('Assistant: Started');
     return {};
   }
 
