@@ -16,7 +16,7 @@ export interface AssistantActions {
   openChatUI: (sessionId?: string) => void;
   executeAction: (suggestedAction: ISuggestedAction, message: IMessage) => void;
   abortAction: (sessionId?: string) => void;
-  regenerate: () => void;
+  regenerate: (interactionId: string) => void;
 }
 
 export interface AppPluginStartDependencies {

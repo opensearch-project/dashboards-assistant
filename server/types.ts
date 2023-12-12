@@ -4,7 +4,7 @@
  */
 
 import { IMessage, Interaction } from '../common/types/chat_saved_object_attributes';
-import { ILegacyClusterClient, Logger } from '../../../src/core/server';
+import { Logger } from '../../../src/core/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantPluginSetup {}

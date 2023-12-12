@@ -13,7 +13,6 @@ import {
 } from '../../../../src/core/server';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { OllyChatService } from '../services/chat/olly_chat_service';
-import { IMessage, IInput } from '../../common/types/chat_saved_object_attributes';
 import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
 import { RoutesOptions } from '../types';
 import { ChatService } from '../services/chat/chat_service';
@@ -64,6 +63,7 @@ const regenerateRoute = {
     body: schema.object({
       sessionId: schema.string(),
       rootAgentId: schema.string(),
+      interactionId: schema.string(),
     }),
   },
 };
@@ -314,42 +314,35 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { sessionId, rootAgentId } = request.body;
+      const { sessionId, rootAgentId, interactionId } = request.body;
       const storageService = createStorageService(context);
-      let messages: IMessage[] = [];
       const chatService = createChatService();
 
+      let outputs: Awaited<ReturnType<ChatService['regenerate']>> | undefined;
+
+      /**
+       * Get final answer from Agent framework
+       */
       try {
-        const session = await storageService.getSession(sessionId);
-        messages.push(...session.messages);
+        outputs = await chatService.regenerate({ sessionId, rootAgentId, interactionId }, context);
       } catch (error) {
-        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+        context.assistant_plugin.logger.error(error);
       }
 
-      const lastInputIndex = messages.findLastIndex((msg) => msg.type === 'input');
-      // Find last input message
-      const input = messages[lastInputIndex] as IInput;
-      // Take the messages before last input message as memory as regenerate will exclude the last outputs
-      messages = messages.slice(0, lastInputIndex);
-
+      /**
+       * Retrieve latest interactions from memory
+       */
       try {
-        const outputs = await chatService.requestLLM(
-          { messages, input, sessionId, rootAgentId },
-          context
-        );
-        const title = input.content.substring(0, 50);
-        const saveMessagesResponse = await storageService.saveMessages(
-          title,
-          sessionId,
-          [...messages, input, ...outputs.messages].filter(
-            (message) => message.content !== 'AbortError'
-          )
-        );
+        const conversation = await storageService.getSession(sessionId);
+
         return response.ok({
-          body: { ...saveMessagesResponse, title },
+          body: {
+            ...conversation,
+            sessionId,
+          },
         });
       } catch (error) {
-        context.assistant_plugin.logger.warn(error);
+        context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }

@@ -9,46 +9,35 @@ import { IMessage, IInput } from '../../../common/types/chat_saved_object_attrib
 import { ChatService } from './chat_service';
 import { ML_COMMONS_BASE_API } from '../../utils/constants';
 
+interface AgentRunPayload {
+  question?: string;
+  verbose?: boolean;
+  memory_id?: string;
+  regenerate_interaction_id?: string;
+}
+
 const MEMORY_ID_FIELD = 'memory_id';
 
 export class OllyChatService implements ChatService {
   static abortControllers: Map<string, AbortController> = new Map();
 
-  public async requestLLM(
-    payload: { messages: IMessage[]; input: IInput; sessionId?: string; rootAgentId: string },
+  private async requestAgentRun(
+    rootAgentId: string,
+    payload: AgentRunPayload,
     context: RequestHandlerContext
-  ): Promise<{
-    messages: IMessage[];
-    memoryId: string;
-  }> {
-    const { input, sessionId, rootAgentId } = payload;
+  ) {
+    if (payload.memory_id) {
+      OllyChatService.abortControllers.set(payload.memory_id, new AbortController());
+    }
     const opensearchClient = context.core.opensearch.client.asCurrentUser;
 
-    if (payload.sessionId) {
-      OllyChatService.abortControllers.set(payload.sessionId, new AbortController());
-    }
-
     try {
-      /**
-       * Wait for an API to fetch root agent id.
-       */
-      const parametersPayload: {
-        question: string;
-        verbose?: boolean;
-        memory_id?: string;
-      } = {
-        question: input.content,
-        verbose: true,
-      };
-      if (sessionId) {
-        parametersPayload.memory_id = sessionId;
-      }
       const agentFrameworkResponse = (await opensearchClient.transport.request(
         {
           method: 'POST',
           path: `${ML_COMMONS_BASE_API}/agents/${rootAgentId}/_execute`,
           body: {
-            parameters: parametersPayload,
+            parameters: payload,
           },
         },
         {
@@ -69,7 +58,6 @@ export class OllyChatService implements ChatService {
       }>;
       const outputBody = agentFrameworkResponse.body.inference_results?.[0]?.output;
       const memoryIdItem = outputBody?.find((item) => item.name === MEMORY_ID_FIELD);
-
       return {
         /**
          * Interactions will be stored in Agent framework,
@@ -81,10 +69,48 @@ export class OllyChatService implements ChatService {
     } catch (error) {
       throw error;
     } finally {
-      if (payload.sessionId) {
-        OllyChatService.abortControllers.delete(payload.sessionId);
+      if (payload.memory_id) {
+        OllyChatService.abortControllers.delete(payload.memory_id);
       }
     }
+  }
+
+  public async requestLLM(
+    payload: { messages: IMessage[]; input: IInput; sessionId?: string; rootAgentId: string },
+    context: RequestHandlerContext
+  ): Promise<{
+    messages: IMessage[];
+    memoryId: string;
+  }> {
+    const { input, sessionId, rootAgentId } = payload;
+
+    const parametersPayload: Pick<AgentRunPayload, 'question' | 'verbose' | 'memory_id'> = {
+      question: input.content,
+      verbose: true,
+    };
+
+    if (sessionId) {
+      parametersPayload.memory_id = sessionId;
+    }
+
+    return await this.requestAgentRun(rootAgentId, parametersPayload, context);
+  }
+
+  async regenerate(
+    payload: { sessionId: string; interactionId: string; rootAgentId: string },
+    context: RequestHandlerContext
+  ): Promise<{ messages: IMessage[]; memoryId: string }> {
+    const { sessionId, interactionId, rootAgentId } = payload;
+    const parametersPayload: Pick<
+      AgentRunPayload,
+      'regenerate_interaction_id' | 'verbose' | 'memory_id'
+    > = {
+      memory_id: sessionId,
+      regenerate_interaction_id: interactionId,
+      verbose: true,
+    };
+
+    return await this.requestAgentRun(rootAgentId, parametersPayload, context);
   }
 
   abortAgentExecution(sessionId: string) {

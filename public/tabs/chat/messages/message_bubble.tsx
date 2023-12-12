@@ -30,7 +30,7 @@ type MessageBubbleProps = {
   showActionBar: boolean;
   showRegenerate?: boolean;
   shouldActionBarVisibleOnHover?: boolean;
-  onRegenerate?: () => void;
+  onRegenerate?: (interactionId: string) => void;
 } & (
   | {
       message: IMessage;
@@ -192,17 +192,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     </EuiCopy>
                   </EuiFlexItem>
                 )}
-                {props.showRegenerate && (
+                {props.showRegenerate && props.interaction?.interaction_id ? (
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
                       aria-label="regenerate message"
-                      onClick={props.onRegenerate}
+                      onClick={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
                       title="regenerate message"
                       color="text"
                       iconType="refresh"
                     />
                   </EuiFlexItem>
-                )}
+                ) : null}
                 {showFeedback && (
                   // After feedback, only corresponding thumb icon will be kept and disabled.
                   <>

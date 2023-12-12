@@ -10,8 +10,15 @@ import { LLMRequestSchema } from '../../routes/chat_routes';
 export interface ChatService {
   requestLLM(
     payload: { messages: IMessage[]; input: IInput; sessionId?: string },
-    context: RequestHandlerContext,
-    request: OpenSearchDashboardsRequest<unknown, unknown, LLMRequestSchema, 'post'>
+    context: RequestHandlerContext
+  ): Promise<{
+    messages: IMessage[];
+    memoryId: string;
+  }>;
+
+  regenerate(
+    payload: { sessionId: string; interactionId: string; rootAgentId: string },
+    context: RequestHandlerContext
   ): Promise<{
     messages: IMessage[];
     memoryId: string;
