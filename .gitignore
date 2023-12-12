@@ -1,0 +1,12 @@
+node_modules/
+target/
+build/
+coverage/
+.cypress/screenshots
+.cypress/videos
+.cypress/downloads
+common/query_manager/antlr/output
+.eslintcache
+.logs
+.env
+.idea/

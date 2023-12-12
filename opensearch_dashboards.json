@@ -1,0 +1,16 @@
+{
+  "id": "assistantDashboards",
+  "version": "2.11.0.0",
+  "opensearchDashboardsVersion": "2.11.0",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "dashboard",
+    "embeddable",
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils"
+  ],
+  "configPath": [
+    "assistant"
+  ]
+}
