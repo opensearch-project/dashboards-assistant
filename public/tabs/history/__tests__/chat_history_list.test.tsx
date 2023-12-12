@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
 import { ChatHistoryList } from '../chat_history_list';
 
@@ -36,9 +36,7 @@ describe('<ChatHistoryList />', () => {
     );
 
     expect(onChatHistoryTitleClickMock).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(getByText('foo'));
-    });
+    fireEvent.click(getByText('foo'));
     expect(onChatHistoryTitleClickMock).toHaveBeenCalledWith('1', 'foo');
   });
 
@@ -52,9 +50,7 @@ describe('<ChatHistoryList />', () => {
     );
 
     expect(onChatHistoryEditClickMock).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(getByLabelText('Edit conversation name'));
-    });
+    fireEvent.click(getByLabelText('Edit conversation name'));
     expect(onChatHistoryEditClickMock).toHaveBeenCalledWith({ id: '1', title: 'foo' });
   });
 
@@ -68,9 +64,7 @@ describe('<ChatHistoryList />', () => {
     );
 
     expect(onChatHistoryDeleteClickMock).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(getByLabelText('Delete conversation'));
-    });
+    fireEvent.click(getByLabelText('Delete conversation'));
     expect(onChatHistoryDeleteClickMock).toHaveBeenCalledWith({ id: '1' });
   });
 });
