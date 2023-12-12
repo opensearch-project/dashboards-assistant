@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BasicInputOutputParser } from './basic_input_output_parser';
+import { BasicInputOutputParser, parseSuggestedActions } from './basic_input_output_parser';
 
 describe('BasicInputOutputParser', () => {
   it('return input and output', async () => {
@@ -93,5 +93,39 @@ describe('BasicInputOutputParser', () => {
         suggestedActions: [],
       },
     ]);
+  });
+});
+
+describe('parseSuggestedActions', () => {
+  it('should return parsed array when string matches valid json format', () => {
+    expect(parseSuggestedActions('["1", "2"]')).toEqual(['1', '2']);
+  });
+
+  it('should return parsed array when there is json inside the string', () => {
+    expect(parseSuggestedActions('Here are result { "response": ["1", "2"] }')).toEqual(['1', '2']);
+  });
+
+  it('should return parsed array when there is {} inside the string', () => {
+    expect(parseSuggestedActions('Here are result { "response": ["{1}", "{2}"] }')).toEqual([
+      '{1}',
+      '{2}',
+    ]);
+  });
+
+  it('should return parsed array when there is additional field in response', () => {
+    expect(
+      parseSuggestedActions('Here are result { "response": ["{1}", "{2}"], "foo": "bar" }')
+    ).toEqual(['{1}', '{2}']);
+  });
+
+  it('should return empty array when there the json is invalid', () => {
+    expect(
+      parseSuggestedActions('Here are result { response": ["{1}", "{2}"], "foo": "bar" }')
+    ).toEqual([]);
+  });
+
+  it('should return empty array when input is not valid', () => {
+    expect(parseSuggestedActions('')).toEqual([]);
+    expect(parseSuggestedActions((null as unknown) as string)).toEqual([]);
   });
 });
