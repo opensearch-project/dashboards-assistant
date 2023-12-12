@@ -314,7 +314,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { sessionId: sessionIdInRequestBody, rootAgentId, interactionId } = request.body;
+      const { sessionId, rootAgentId, interactionId } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService();
 
@@ -324,10 +324,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Get final answer from Agent framework
        */
       try {
-        outputs = await chatService.regenerate(
-          { sessionId: sessionIdInRequestBody, rootAgentId, interactionId },
-          context
-        );
+        outputs = await chatService.regenerate({ sessionId, rootAgentId, interactionId }, context);
       } catch (error) {
         context.assistant_plugin.logger.error(error);
       }
@@ -335,7 +332,6 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       /**
        * Retrieve latest interactions from memory
        */
-      const sessionId = sessionIdInRequestBody;
       try {
         const conversation = await storageService.getSession(sessionId);
 
