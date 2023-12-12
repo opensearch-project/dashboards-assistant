@@ -19,10 +19,9 @@ import { IMessage } from '../../../common/types/chat_saved_object_attributes';
 import { ChatWindowHeaderTitle } from '../chat_window_header_title';
 
 const setup = ({
-  title = 'foo',
   messages = [],
-  sessionId = '1',
-}: { title?: string; messages?: IMessage[]; sessionId?: string } = {}) => {
+  ...rest
+}: { messages?: IMessage[]; sessionId?: string | undefined } = {}) => {
   const useCoreMock = {
     services: {
       ...coreMock.createStart(),
@@ -46,8 +45,8 @@ const setup = ({
     chatState: { messages },
   };
   const useChatContextMock = {
-    sessionId,
-    title,
+    sessionId: 'sessionId' in rest ? rest.sessionId : '1',
+    title: 'foo',
     setSessionId: jest.fn(),
     setTitle: jest.fn(),
   };
@@ -201,17 +200,11 @@ describe('<ChatWindowHeaderTitle />', () => {
     expect(renderResult.getByRole('button', { name: 'Save to notebook' })).toBeDisabled();
   });
 
-  it('should show "OpenSearch Assistant" when sessionId is not defined', async () => {
+  it('should show "OpenSearch Assistant" when sessionId is undefined', async () => {
     const { renderResult } = setup({
       sessionId: undefined,
     });
 
-    act(() => {
-      fireEvent.click(renderResult.getByText('foo'));
-    });
-
-    await waitFor(() => {
-      expect(renderResult.queryByText('OpenSearch Assistant')).not.toBeInTheDocument();
-    });
+    expect(renderResult.getByText('OpenSearch Assistant')).toBeInTheDocument();
   });
 });
