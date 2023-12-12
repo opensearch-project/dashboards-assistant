@@ -48,7 +48,7 @@ HTMLCollection [
           class="euiAccordion__triggerWrapper"
         >
           <button
-            aria-controls="Step 1"
+            aria-controls="Step 1 - CatIndexTool"
             aria-expanded="false"
             class="euiAccordion__button"
             id="random_html_id"
@@ -71,14 +71,14 @@ HTMLCollection [
             <span
               class="euiIEFlexWrapFix"
             >
-              Step 1
+              Step 1 - CatIndexTool
             </span>
           </button>
         </div>
         <div
           aria-labelledby="random_html_id"
           class="euiAccordion__childWrapper"
-          id="Step 1"
+          id="Step 1 - CatIndexTool"
           role="region"
           tabindex="-1"
         >
