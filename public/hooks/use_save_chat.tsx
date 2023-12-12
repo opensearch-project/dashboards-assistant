@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { useCallback } from 'react';
 import { NOTEBOOK_API } from '../../common/constants/llm';
 import { useCore } from '../contexts/core_context';

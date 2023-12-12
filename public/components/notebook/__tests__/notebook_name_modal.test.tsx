@@ -47,7 +47,7 @@ describe('<NotebookNameModal />', () => {
     expect(onCloseMock).not.toHaveBeenCalled();
 
     act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmNotebookCancelButton'));
+      fireEvent.click(renderResult.getByTestId('cancelSaveToNotebookButton'));
     });
 
     await waitFor(() => {
@@ -74,7 +74,7 @@ describe('<NotebookNameModal />', () => {
     expect(onCloseMock).not.toHaveBeenCalled();
 
     act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmNotebookConfirmButton'));
+      fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
     });
 
     await waitFor(() => {
@@ -104,11 +104,43 @@ describe('<NotebookNameModal />', () => {
     expect(onCloseMock).not.toHaveBeenCalled();
 
     act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmNotebookConfirmButton'));
+      fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
     });
 
     await waitFor(() => {
       expect(useCoreMock.services.notifications.toasts.addDanger).toHaveBeenCalled();
+      expect(onCloseMock).toHaveBeenCalled();
+    });
+  });
+
+  it('should show observability dependency toasts and call onClose after not found error', async () => {
+    const onCloseMock = jest.fn();
+    const saveChatMock = jest.fn(() => {
+      throw new Error('Not Found');
+    });
+    const { renderResult, useCoreMock } = setup({
+      onClose: onCloseMock,
+      saveChat: saveChatMock,
+    });
+
+    act(() => {
+      fireEvent.change(renderResult.getByLabelText('Notebook name input'), {
+        target: {
+          value: 'notebook-name',
+        },
+      });
+    });
+
+    expect(onCloseMock).not.toHaveBeenCalled();
+
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
+    });
+
+    await waitFor(() => {
+      expect(useCoreMock.services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'This feature depends on the observability plugin, please install it before use.'
+      );
       expect(onCloseMock).toHaveBeenCalled();
     });
   });

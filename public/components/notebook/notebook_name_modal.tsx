@@ -22,7 +22,7 @@ import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_r
 export interface NotebookNameModalProps {
   onClose: () => void;
   // SaveChat hook depends on context. Runtime modal component can't get context, so saveChat needs to be passed in.
-  saveChat: (name: string) => void;
+  saveChat: (name: string) => Promise<string>;
 }
 
 export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps) => {
@@ -42,15 +42,13 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
 
       toasts.addSuccess({
         text: toMountPoint(
-          <>
-            <p>
-              This conversation was saved as{' '}
-              <EuiLink href={notebookLink} target="_blank">
-                {name}
-              </EuiLink>
-              .
-            </p>
-          </>
+          <p>
+            This conversation was saved as{' '}
+            <EuiLink href={notebookLink} target="_blank">
+              {name}
+            </EuiLink>
+            .
+          </p>
         ),
       });
     } catch (error) {
@@ -83,7 +81,7 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose} data-test-subj="confirmNotebookCancelButton">
+          <EuiButtonEmpty onClick={onClose} data-test-subj="cancelSaveToNotebookButton">
             Cancel
           </EuiButtonEmpty>
           <EuiButton
@@ -92,7 +90,7 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
             isLoading={loading}
             disabled={name.length < 1}
             onClick={onSubmit}
-            data-test-subj="confirmNotebookConfirmButton"
+            data-test-subj="confirmSaveToNotebookButton"
           >
             Confirm name
           </EuiButton>
