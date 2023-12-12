@@ -9,6 +9,13 @@ import { IMessage, IInput } from '../../../common/types/chat_saved_object_attrib
 import { ChatService } from './chat_service';
 import { ML_COMMONS_BASE_API } from '../../utils/constants';
 
+interface AgentRunPayload {
+  question?: string;
+  verbose?: boolean;
+  memory_id?: string;
+  regenerate_interaction_id?: string;
+}
+
 const MEMORY_ID_FIELD = 'memory_id';
 
 export class OllyChatService implements ChatService {
@@ -16,12 +23,7 @@ export class OllyChatService implements ChatService {
 
   private async requestAgentRun(
     rootAgentId: string,
-    payload: {
-      question?: string;
-      verbose?: boolean;
-      memory_id?: string;
-      regenerate_interaction_id?: string;
-    },
+    payload: AgentRunPayload,
     context: RequestHandlerContext
   ) {
     if (payload.memory_id) {
@@ -82,11 +84,7 @@ export class OllyChatService implements ChatService {
   }> {
     const { input, sessionId, rootAgentId } = payload;
 
-    const parametersPayload: {
-      question?: string;
-      verbose?: boolean;
-      memory_id?: string;
-    } = {
+    const parametersPayload: Pick<AgentRunPayload, 'question' | 'verbose' | 'memory_id'> = {
       question: input.content,
       verbose: true,
     };
@@ -103,11 +101,10 @@ export class OllyChatService implements ChatService {
     context: RequestHandlerContext
   ): Promise<{ messages: IMessage[]; memoryId: string }> {
     const { sessionId, interactionId, rootAgentId } = payload;
-    const parametersPayload: {
-      verbose?: boolean;
-      memory_id?: string;
-      regenerate_interaction_id?: string;
-    } = {
+    const parametersPayload: Pick<
+      AgentRunPayload,
+      'regenerate_interaction_id' | 'verbose' | 'memory_id'
+    > = {
       memory_id: sessionId,
       regenerate_interaction_id: interactionId,
       verbose: true,
