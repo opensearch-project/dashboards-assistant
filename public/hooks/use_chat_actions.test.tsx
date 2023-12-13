@@ -7,7 +7,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useChatActions } from './use_chat_actions';
 import * as chatContextHookExports from '../contexts/chat_context';
 import * as coreHookExports from '../contexts/core_context';
-import { coreMock } from '../../../../src/core/public/mocks';
+import { httpServiceMock } from '../../../../src/core/public/mocks';
 import { SessionsService } from '../services/sessions_service';
 import { SessionLoadService } from '../services/session_load_service';
 import * as chatStateHookExports from './use_chat_state';
@@ -56,7 +56,7 @@ const SEND_MESSAGE_RESPONSE = {
 };
 
 describe('useChatActions hook', () => {
-  const httpMock = coreMock.createStart().http;
+  const httpMock = httpServiceMock.createStartContract();
   const chatStateDispatchMock = jest.fn();
   const setFlyoutVisibleMock = jest.fn();
   const setSelectedTabIdMock = jest.fn();
