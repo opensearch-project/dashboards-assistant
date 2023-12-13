@@ -24,8 +24,8 @@ jobs:
       id: lychee
       uses: lycheeverse/lychee-action@v1.0.9
       with:
-        # exclude fake urls and urls that end with '$', which are regexes
-        args: --accept=200,403,429 --exclude https://.+\$$ --exclude http://www.site.com/* --exclude ${{ env.LYCHEE_EXCLUDE }} --exclude-mail "**/*.html" "**/*.md" "**/*.txt" "**/*.json" "**/*.js" "**/*.ts" "**/*.tsx"
+        # exclude urls that end with '$', which are regexes
+        args: --accept=200,403,429 --exclude https://.+\$$ --exclude ${{ env.LYCHEE_EXCLUDE }} --exclude-mail "**/*.html" "**/*.md" "**/*.txt" "**/*.json" "**/*.js" "**/*.ts" "**/*.tsx"
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
     - name: Fail if there were link errors
