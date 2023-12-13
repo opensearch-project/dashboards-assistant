@@ -56,7 +56,10 @@ export class AgentFrameworkStorageService implements StorageService {
 
     let finalMessages: IMessage[] = [];
     for (const interaction of finalInteractions) {
-      finalMessages = [...finalMessages, ...(await messageParserRunner.run(interaction))];
+      finalMessages = [
+        ...finalMessages,
+        ...(await messageParserRunner.run(interaction, { interactions: finalInteractions })),
+      ];
     }
     return {
       title: conversation.body.name,

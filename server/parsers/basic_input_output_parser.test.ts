@@ -7,13 +7,16 @@ import { BasicInputOutputParser, parseSuggestedActions } from './basic_input_out
 
 describe('BasicInputOutputParser', () => {
   it('return input and output', async () => {
+    const item = {
+      input: 'input',
+      response: 'response',
+      conversation_id: '',
+      interaction_id: 'interaction_id',
+      create_time: '',
+    };
     expect(
-      await BasicInputOutputParser.parserProvider({
-        input: 'input',
-        response: 'response',
-        conversation_id: '',
-        interaction_id: 'interaction_id',
-        create_time: '',
+      await BasicInputOutputParser.parserProvider(item, {
+        interactions: [item],
       })
     ).toEqual([
       {
@@ -32,16 +35,19 @@ describe('BasicInputOutputParser', () => {
   });
 
   it('return suggestions when additional_info has related info', async () => {
+    const item = {
+      input: 'input',
+      response: 'response',
+      conversation_id: '',
+      interaction_id: 'interaction_id',
+      create_time: '',
+      additional_info: {
+        'QuestionSuggestor.output': '["Foo", "Bar"]',
+      },
+    };
     expect(
-      await BasicInputOutputParser.parserProvider({
-        input: 'input',
-        response: 'response',
-        conversation_id: '',
-        interaction_id: 'interaction_id',
-        create_time: '',
-        additional_info: {
-          'QuestionSuggestor.output': '["Foo", "Bar"]',
-        },
+      await BasicInputOutputParser.parserProvider(item, {
+        interactions: [item],
       })
     ).toEqual([
       {
@@ -68,14 +74,54 @@ describe('BasicInputOutputParser', () => {
     ]);
   });
 
+  it("should only parse latest interaction's suggestions field", async () => {
+    const item = {
+      input: 'input',
+      response: 'response',
+      conversation_id: '',
+      interaction_id: 'interaction_id',
+      create_time: '',
+      additional_info: {
+        'QuestionSuggestor.output': '["Foo", "Bar"]',
+      },
+    };
+    expect(
+      await BasicInputOutputParser.parserProvider(item, {
+        interactions: [
+          item,
+          {
+            ...item,
+            interaction_id: 'foo',
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        type: 'input',
+        contentType: 'text',
+        content: 'input',
+      },
+      {
+        type: 'output',
+        contentType: 'markdown',
+        content: 'response',
+        traceId: 'interaction_id',
+        suggestedActions: [],
+      },
+    ]);
+  });
+
   it('sanitizes markdown outputs', async () => {
-    const outputs = await BasicInputOutputParser.parserProvider({
+    const item = {
       input: 'test question',
       response:
         'normal text<b onmouseover=alert("XSS testing!")></b> <img src="image.jpg" alt="image" width="500" height="600"> !!!!!!![](http://evil.com/) ![image](http://evil.com/) [good link](https://link)',
       conversation_id: 'test-session',
       interaction_id: 'interaction_id',
       create_time: '',
+    };
+    const outputs = await BasicInputOutputParser.parserProvider(item, {
+      interactions: [item],
     });
 
     expect(outputs).toEqual([
@@ -118,10 +164,30 @@ describe('parseSuggestedActions', () => {
     ).toEqual(['{1}', '{2}']);
   });
 
-  it('should return empty array when there the json is invalid', () => {
+  it('should return empty array when value is not a string array', () => {
+    expect(parseSuggestedActions('[{ "a": 1 }, "{2}"]')).toEqual([]);
+  });
+
+  it('should return empty array when there is no json-like string inside', () => {
+    expect(parseSuggestedActions('Here are result "response": ["1", "2"], "foo": "bar" }')).toEqual(
+      []
+    );
+  });
+
+  it('should return empty array when the json-like string is invalid', () => {
     expect(
       parseSuggestedActions('Here are result { response": ["{1}", "{2}"], "foo": "bar" }')
     ).toEqual([]);
+  });
+
+  it('should return empty array when the key is not response', () => {
+    expect(
+      parseSuggestedActions('Here are result { "result": ["{1}", "{2}"], "foo": "bar" }')
+    ).toEqual([]);
+  });
+
+  it('should return empty array when the json is invalid', () => {
+    expect(parseSuggestedActions('Here are result { "response": 1, "foo": "bar" }')).toEqual([]);
   });
 
   it('should return empty array when input is not valid', () => {

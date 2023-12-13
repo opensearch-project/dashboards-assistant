@@ -5,7 +5,8 @@
 
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
-import { IInput, IOutput, Interaction } from '../../common/types/chat_saved_object_attributes';
+import { IInput, IOutput } from '../../common/types/chat_saved_object_attributes';
+import { MessageParser } from '../types';
 
 const sanitize = (content: string) => {
   const window = new JSDOM('').window;
@@ -13,47 +14,47 @@ const sanitize = (content: string) => {
   return DOMPurify.sanitize(content, { FORBID_TAGS: ['img'] }).replace(/!+\[/g, '[');
 };
 
-const isEveryItemString = (array?: unknown) =>
-  !!(Array.isArray(array) && array.every((item) => typeof item === 'string'));
+const isStringArray = (array?: unknown): array is string[] =>
+  Array.isArray(array) && array.every((item) => typeof item === 'string');
 
-export const parseSuggestedActions = (string: string): string[] => {
-  if (!string) {
+export const parseSuggestedActions = (value: string): string[] => {
+  if (!value) {
     return [];
   }
-  const suggestedOutputString = string;
+  const suggestedOutputString = value;
   let suggestedActions: string[] = [];
   try {
-    suggestedActions = JSON.parse(suggestedOutputString || '[]');
+    suggestedActions = JSON.parse(suggestedOutputString);
   } catch (e) {
     suggestedActions = [];
   }
 
   if (suggestedActions.length) {
-    return suggestedActions;
+    if (isStringArray(suggestedActions)) {
+      return suggestedActions;
+    }
+
+    return [];
   }
 
   /**
    * Get json-like substring from a string
    *
-   *  /\{               // Match an opening curly brace
-   *    (?:            // Start a non-capturing group
-   *      [^{}]        // Match any character that is not a curly brace
-   *      |            // OR
-   *      (?:          // Start a non-capturing group
-   *        \{         // Match an opening curly brace
-   *        [^{}]*     // Match any characters that are not curly braces (allowing nested structures)
-   *        \}         // Match a closing curly brace
-   *      )
-   *    )*             // Repeat the non-capturing group zero or more times (allowing nested structures)
+   *  /\{                  // Match an opening curly brace
+   *    .*                 // Match any preleading spaces and letters
+   *    response[^\n]*\:   // Match "response" key because suggestion tool uses { response: [action1, action2] }
+   *                       // in its prompt so that the parsedResult may contain a "response" field.
+   *                       // If prompt changed, the logic here need to change accordingly.
+   *    .*                 // Match any any string behind the "response:"
    *  \}/g             // Match a closing curly brace, and 'g' flag for global search
    *
    */
-  const jsonPattern = /\{(?:[^{}]|(?:\{[^{}]*\}))*\}/g;
+  const jsonPattern = /\{.*response[^\n]*\:.*\}/g;
 
   /**
    * Use the regular expression to find the JSON substring
    */
-  const match = string.match(jsonPattern);
+  const match = value.match(jsonPattern);
 
   const matchedResult = match && match[0];
 
@@ -64,12 +65,7 @@ export const parseSuggestedActions = (string: string): string[] => {
   try {
     const parsedResult = JSON.parse(matchedResult);
 
-    /**
-     * Suggestion tool uses { response: [action1, action2] } in its prompt
-     * so that the parsedResult may contains a response field.
-     * If prompt changed, the logic here need to change accordingly.
-     */
-    if (parsedResult?.response && isEveryItemString(parsedResult.response)) {
+    if (parsedResult?.response && isStringArray(parsedResult.response)) {
       return parsedResult.response;
     }
   } catch (e) {
@@ -79,13 +75,20 @@ export const parseSuggestedActions = (string: string): string[] => {
   return [];
 };
 
-export const BasicInputOutputParser = {
+export const BasicInputOutputParser: MessageParser = {
   order: 0,
   id: 'output_message',
-  async parserProvider(interaction: Interaction) {
-    const suggestedActions = parseSuggestedActions(
-      (interaction.additional_info?.['QuestionSuggestor.output'] as string | null) || ''
-    );
+  async parserProvider(interaction, options) {
+    /**
+     * From UX, only the last interaction need to parse suggestedActions.
+     */
+    const isLatestInteraction =
+      options.interactions.reverse()[0]?.interaction_id === interaction.interaction_id;
+    const suggestedActions = isLatestInteraction
+      ? parseSuggestedActions(
+          (interaction.additional_info?.['QuestionSuggestor.output'] as string | null) || ''
+        )
+      : [];
     const inputItem: IInput = {
       type: 'input',
       contentType: 'text',
