@@ -21,13 +21,13 @@ export class SessionLoadService {
     this.status$.next('loading');
     this.abortController = new AbortController();
     try {
-      return await this._http.get<ISession>(`${ASSISTANT_API.SESSION}/${sessionId}`, {
+      const payload = await this._http.get<ISession>(`${ASSISTANT_API.SESSION}/${sessionId}`, {
         signal: this.abortController.signal,
       });
+      this.status$.next('idle');
+      return payload;
     } catch (error) {
       this.status$.next({ status: 'error', error });
-    } finally {
-      this.status$.next('idle');
     }
   };
 }
