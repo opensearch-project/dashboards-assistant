@@ -4,11 +4,11 @@
  */
 
 import { IMessage, Interaction } from '../../common/types/chat_saved_object_attributes';
-import { MessageParser } from '../types';
+import { MessageParser, ProviderOptions } from '../types';
 
 export class MessageParserRunner {
   constructor(private readonly messageParsers: MessageParser[]) {}
-  async run(interaction: Interaction): Promise<IMessage[]> {
+  async run(interaction: Interaction, options: ProviderOptions): Promise<IMessage[]> {
     const sortedParsers = [...this.messageParsers];
     sortedParsers.sort((parserA, parserB) => {
       const { order: orderA = 999 } = parserA;
@@ -19,7 +19,7 @@ export class MessageParserRunner {
     for (const messageParser of sortedParsers) {
       let tempResult: IMessage[] = [];
       try {
-        tempResult = await messageParser.parserProvider(interaction);
+        tempResult = await messageParser.parserProvider(interaction, options);
         /**
          * Make sure the tempResult is an array.
          */
