@@ -20,7 +20,7 @@ describe('<MessageBubble />', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should display message bubble', () => {

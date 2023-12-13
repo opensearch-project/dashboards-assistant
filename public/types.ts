@@ -11,12 +11,12 @@ import { IMessage, ISuggestedAction } from '../common/types/chat_saved_object_at
 export type ContentRenderer = (content: unknown) => React.ReactElement;
 export type ActionExecutor = (params: Record<string, unknown>) => void;
 export interface AssistantActions {
-  send: (input: IMessage) => void;
-  loadChat: (sessionId?: string, title?: string) => void;
+  send: (input: IMessage) => Promise<void>;
+  loadChat: (sessionId?: string, title?: string) => Promise<void>;
   openChatUI: (sessionId?: string) => void;
-  executeAction: (suggestedAction: ISuggestedAction, message: IMessage) => void;
-  abortAction: (sessionId?: string) => void;
-  regenerate: (interactionId: string) => void;
+  executeAction: (suggestedAction: ISuggestedAction, message: IMessage) => Promise<void>;
+  abortAction: (sessionId?: string) => Promise<void>;
+  regenerate: (interactionId: string) => Promise<void>;
 }
 
 export interface AppPluginStartDependencies {

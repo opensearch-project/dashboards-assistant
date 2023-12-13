@@ -58,7 +58,7 @@ describe('<ChatPage />', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should reload the current conversation when user click refresh', async () => {

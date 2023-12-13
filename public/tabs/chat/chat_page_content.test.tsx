@@ -55,7 +55,7 @@ describe('<ChatPageContent />', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   afterAll(() => {

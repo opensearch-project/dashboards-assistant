@@ -22,10 +22,6 @@ interface SendResponse {
   interactions: Interaction[];
 }
 
-interface SetParagraphResponse {
-  objectId: string;
-}
-
 let abortControllerRef: AbortController;
 
 export const useChatActions = (): AssistantActions => {
@@ -109,7 +105,7 @@ export const useChatActions = (): AssistantActions => {
   const executeAction = async (suggestedAction: ISuggestedAction, message: IMessage) => {
     switch (suggestedAction.actionType) {
       case 'send_as_input': {
-        send({
+        await send({
           type: 'input',
           content: suggestedAction.message,
           contentType: 'text',
