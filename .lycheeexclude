@@ -1,0 +1,5 @@
+# exclude regexes
+https?://.+\$$
+
+https://bedrock-runtime.*.amazonaws.com/*
+https://link

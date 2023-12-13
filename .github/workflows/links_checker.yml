@@ -18,14 +18,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Load Excludes
       run: |
-        LYCHEE_EXCLUDE=$(curl -fsSL https://raw.githubusercontent.com/opensearch-project/OpenSearch-Dashboards/HEAD/.lycheeexclude | grep -v '^#\|^$' | sed -e :a  -e 'N;s/\n/ --exclude /;ta')
+        LYCHEE_EXCLUDE=$(curl -fsSL https://raw.githubusercontent.com/opensearch-project/OpenSearch-Dashboards/HEAD/.lycheeexclude | cat - .lycheeexclude | grep -v '^#\|^$' | sed -e :a  -e 'N;s/\n/ --exclude /;ta')
         echo "LYCHEE_EXCLUDE=$LYCHEE_EXCLUDE" >> $GITHUB_ENV
     - name: Lychee Link Checker
       id: lychee
       uses: lycheeverse/lychee-action@v1.0.9
       with:
-        # exclude urls that end with '$', which are regexes
-        args: --accept=200,403,429 --exclude https://.+\$$ --exclude ${{ env.LYCHEE_EXCLUDE }} --exclude-mail "**/*.html" "**/*.md" "**/*.txt" "**/*.json" "**/*.js" "**/*.ts" "**/*.tsx"
+        args: --accept=200,403,429 --exclude --exclude ${{ env.LYCHEE_EXCLUDE }} --exclude-mail "**/*.html" "**/*.md" "**/*.txt" "**/*.json" "**/*.js" "**/*.ts" "**/*.tsx"
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
     - name: Fail if there were link errors
