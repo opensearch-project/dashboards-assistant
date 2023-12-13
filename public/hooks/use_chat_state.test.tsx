@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useChatState, ChatStateProvider } from './use_chat_state';
@@ -85,7 +84,7 @@ describe('useChatState hook', () => {
               response: 'output mock',
               conversation_id: 'conversation_id_mock',
               interaction_id: 'interaction_id_mock',
-              create_time: new Date().toLocaleString(),
+              create_time: new Date('2023-01-02').toLocaleString(),
             },
           ],
         },
@@ -103,7 +102,7 @@ describe('useChatState hook', () => {
         response: 'output mock',
         conversation_id: 'conversation_id_mock',
         interaction_id: 'interaction_id_mock',
-        create_time: new Date().toLocaleString(),
+        create_time: new Date('2023-01-02').toLocaleString(),
       },
     ]);
   });
