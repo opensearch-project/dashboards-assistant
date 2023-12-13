@@ -53,9 +53,7 @@ describe('<ChatWindowHeader />', () => {
     const { renderResult, useChatContextMock } = setup();
 
     expect(useChatContextMock.setFlyoutVisible).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('close'));
-    });
+    fireEvent.click(renderResult.getByLabelText('close'));
     expect(useChatContextMock.setFlyoutVisible).toHaveBeenLastCalledWith(false);
   });
 
@@ -63,9 +61,7 @@ describe('<ChatWindowHeader />', () => {
     const { renderResult, useChatContextMock } = setup();
 
     expect(useChatContextMock.setFlyoutComponent).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('history'));
-    });
+    fireEvent.click(renderResult.getByLabelText('history'));
     expect(useChatContextMock.setFlyoutComponent).toHaveBeenLastCalledWith(undefined);
   });
 
@@ -75,9 +71,7 @@ describe('<ChatWindowHeader />', () => {
     });
 
     expect(useChatContextMock.setSelectedTabId).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('history'));
-    });
+    fireEvent.click(renderResult.getByLabelText('history'));
     expect(useChatContextMock.setSelectedTabId).toHaveBeenLastCalledWith('chat');
   });
 
@@ -87,9 +81,7 @@ describe('<ChatWindowHeader />', () => {
     });
 
     expect(useChatContextMock.setSelectedTabId).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('history'));
-    });
+    fireEvent.click(renderResult.getByLabelText('history'));
     expect(useChatContextMock.setSelectedTabId).toHaveBeenLastCalledWith('history');
   });
 
@@ -101,9 +93,7 @@ describe('<ChatWindowHeader />', () => {
     });
 
     expect(toggleFlyoutFullScreenMock).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('fullScreen'));
-    });
+    fireEvent.click(renderResult.getByLabelText('fullScreen'));
     expect(toggleFlyoutFullScreenMock).toHaveBeenCalled();
   });
 });

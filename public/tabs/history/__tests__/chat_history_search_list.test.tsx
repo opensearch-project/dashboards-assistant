@@ -58,21 +58,15 @@ describe('<ChatHistorySearchList />', () => {
   it('should set new window title after edit conversation name', async () => {
     const { renderResult, useChatContextMock } = setup();
 
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('Edit conversation name'));
-    });
+    fireEvent.click(renderResult.getByLabelText('Edit conversation name'));
 
-    act(() => {
-      fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
-        target: { value: 'bar' },
-      });
+    fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
+      target: { value: 'bar' },
     });
 
     expect(useChatContextMock.setTitle).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
 
     waitFor(() => {
       expect(useChatContextMock.setTitle).toHaveBeenLastCalledWith('bar');
@@ -88,9 +82,7 @@ describe('<ChatHistorySearchList />', () => {
       onHistoryDeleted: onHistoryDeletedMock,
     });
 
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('Delete conversation'));
-    });
+    fireEvent.click(renderResult.getByLabelText('Delete conversation'));
 
     expect(onRefreshMock).not.toHaveBeenCalled();
     expect(onHistoryDeletedMock).not.toHaveBeenCalled();

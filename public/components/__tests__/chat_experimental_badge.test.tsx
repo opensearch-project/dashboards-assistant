@@ -29,9 +29,7 @@ describe('<ChatWindowHeaderTitle />', () => {
       </I18nProvider>
     );
 
-    act(() => {
-      fireEvent.click(getByRole('button'));
-    });
+    fireEvent.click(getByRole('button'));
 
     await waitFor(() => {
       expect(getByText('Experimental')).toBeInTheDocument();
@@ -42,9 +40,7 @@ describe('<ChatWindowHeaderTitle />', () => {
       ).toBeInTheDocument();
     });
 
-    act(() => {
-      fireEvent.mouseDown(document.body);
-    });
+    fireEvent.mouseDown(document.body);
 
     await waitFor(() => {
       expect(queryByText('Experimental')).not.toBeInTheDocument();

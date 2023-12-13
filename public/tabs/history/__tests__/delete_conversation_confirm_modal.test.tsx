@@ -60,9 +60,7 @@ describe('<DeleteConversationConfirmModal />', () => {
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenLastCalledWith('cancelled');
@@ -79,9 +77,7 @@ describe('<DeleteConversationConfirmModal />', () => {
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenLastCalledWith('deleted');
@@ -101,9 +97,7 @@ describe('<DeleteConversationConfirmModal />', () => {
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenLastCalledWith('errored');
@@ -129,14 +123,10 @@ describe('<DeleteConversationConfirmModal />', () => {
     expect(onCloseMock).not.toHaveBeenCalled();
     expect(useCoreMock.services.http.delete).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
     expect(useCoreMock.services.http.delete).toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenLastCalledWith('cancelled');

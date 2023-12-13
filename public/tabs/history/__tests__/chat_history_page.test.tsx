@@ -84,17 +84,13 @@ describe('<ChatHistoryPage />', () => {
       expect(renderResult.getByLabelText('Delete conversation')).toBeTruthy();
     });
 
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('Delete conversation'));
-    });
+    fireEvent.click(renderResult.getByLabelText('Delete conversation'));
 
     expect(useChatContextMock.setSessionId).not.toHaveBeenCalled();
     expect(useChatContextMock.setTitle).not.toHaveBeenCalled();
     expect(useChatStateMock.chatStateDispatch).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
 
     expect(useChatContextMock.setSessionId).toHaveBeenLastCalledWith(undefined);
     expect(useChatContextMock.setTitle).toHaveBeenLastCalledWith(undefined);
@@ -147,12 +143,10 @@ describe('<ChatHistoryPage />', () => {
     await waitFor(async () => {
       expect(renderResult.getByPlaceholderText('Search by conversation name')).toBeTruthy();
     });
-    act(() => {
-      fireEvent.change(renderResult.getByPlaceholderText('Search by conversation name'), {
-        target: {
-          value: 'bar',
-        },
-      });
+    fireEvent.change(renderResult.getByPlaceholderText('Search by conversation name'), {
+      target: {
+        value: 'bar',
+      },
     });
     await waitFor(() => {
       expect(useCoreMock.services.http.get).toHaveBeenLastCalledWith(
@@ -169,12 +163,8 @@ describe('<ChatHistoryPage />', () => {
 
   it('should call get sessions with new page size', async () => {
     const { renderResult, useCoreMock } = setup();
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('tablePagination-50-rows'));
-    });
+    fireEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
+    fireEvent.click(renderResult.getByTestId('tablePagination-50-rows'));
     await waitFor(() => {
       expect(useCoreMock.services.http.get).toHaveBeenLastCalledWith(
         expect.any(String),
@@ -192,9 +182,7 @@ describe('<ChatHistoryPage />', () => {
     const { renderResult, useChatContextMock } = setup();
 
     expect(useChatContextMock.setSelectedTabId).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(renderResult.getByRole('button', { name: 'Back' }));
-    });
+    fireEvent.click(renderResult.getByRole('button', { name: 'Back' }));
     await waitFor(() => {
       expect(useChatContextMock.setSelectedTabId).toHaveBeenLastCalledWith('chat');
     });
@@ -208,9 +196,7 @@ describe('<ChatHistoryPage />', () => {
     });
 
     expect(useChatContextMock.setSelectedTabId).not.toHaveBeenCalled();
-    act(() => {
-      fireEvent.click(renderResult.getByLabelText('full screen back'));
-    });
+    fireEvent.click(renderResult.getByLabelText('full screen back'));
     await waitFor(() => {
       expect(useChatContextMock.setSelectedTabId).toHaveBeenLastCalledWith('chat');
     });

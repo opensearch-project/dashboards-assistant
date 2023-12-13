@@ -60,19 +60,15 @@ describe('<EditConversationNameModal />', () => {
       onClose: onCloseMock,
     });
 
-    act(() => {
-      fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
-        target: {
-          value: 'bar',
-        },
-      });
+    fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
+      target: {
+        value: 'bar',
+      },
     });
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenLastCalledWith('cancelled');
@@ -88,19 +84,15 @@ describe('<EditConversationNameModal />', () => {
     });
     useCoreMock.services.http.put.mockImplementation(() => Promise.resolve());
 
-    act(() => {
-      fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
-        target: {
-          value: 'bar',
-        },
-      });
+    fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
+      target: {
+        value: 'bar',
+      },
     });
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenLastCalledWith('updated', 'bar');
@@ -119,19 +111,15 @@ describe('<EditConversationNameModal />', () => {
     });
     useCoreMock.services.http.put.mockImplementation(() => Promise.reject(new Error()));
 
-    act(() => {
-      fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
-        target: {
-          value: 'bar',
-        },
-      });
+    fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
+      target: {
+        value: 'bar',
+      },
     });
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenLastCalledWith('errored');
@@ -158,25 +146,19 @@ describe('<EditConversationNameModal />', () => {
       });
     }) as HttpHandler);
 
-    act(() => {
-      fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
-        target: {
-          value: 'bar',
-        },
-      });
+    fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
+      target: {
+        value: 'bar',
+      },
     });
 
     expect(onCloseMock).not.toHaveBeenCalled();
     expect(useCoreMock.services.http.put).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
     expect(useCoreMock.services.http.put).toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenLastCalledWith('cancelled');
