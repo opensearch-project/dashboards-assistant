@@ -83,7 +83,7 @@ export const BasicInputOutputParser: MessageParser = {
      * From UX, only the last interaction need to parse suggestedActions.
      */
     const isLatestInteraction =
-      options.interactions.reverse()[0]?.interaction_id === interaction.interaction_id;
+      [...options.interactions].reverse()[0]?.interaction_id === interaction.interaction_id;
     const suggestedActions = isLatestInteraction
       ? parseSuggestedActions(
           (interaction.additional_info?.['QuestionSuggestor.output'] as string | null) || ''

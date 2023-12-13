@@ -58,7 +58,9 @@ export class AgentFrameworkStorageService implements StorageService {
     for (const interaction of finalInteractions) {
       finalMessages = [
         ...finalMessages,
-        ...(await messageParserRunner.run(interaction, { interactions: finalInteractions })),
+        ...(await messageParserRunner.run(interaction, {
+          interactions: [...(finalInteractions || [])],
+        })),
       ];
     }
     return {
