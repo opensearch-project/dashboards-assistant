@@ -1,0 +1,173 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.llm-chat-header-icon-wrapper {
+  margin: 0 8px;
+
+  .euiFormControlLayout__prepend {
+    background-color: transparent !important;
+    width: 36px !important;
+  }
+
+  .euiFieldText {
+    width: 96px;
+    transition: width 0.3s ease-in-out;
+
+    &:focus {
+      width: 250px;
+      background-image: none;
+      background-color: transparent;
+    }
+  }
+
+  .euiIcon {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  .llm-chat-header-shortcut {
+    display: flex;
+    align-items: center;
+    padding-right: 6px;
+  }
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    border-radius: 9px;
+    z-index: -1;
+  }
+}
+.llm-chat-header-icon-wrapper-selected {
+  &::after {
+    background-color: $ouiColorPrimary;
+  }
+}
+
+.llm-chat-avatar {
+  background-image: url('./assets/chat_avatar_bg.svg');
+  background-size: cover;
+  background-position: center;
+
+  .euiLoadingSpinner {
+    border-color: rgba(0, 0, 0, 0.2) rgba(255, 255, 255, 0.8) rgba(255, 255, 255, 0.8)
+      rgba(255, 255, 255, 0.8);
+  }
+}
+
+.llm-chat-flyout {
+  .euiFlyoutFooter {
+    background: transparent;
+  }
+  // .euiPage {
+  //   margin: 8px;
+  //   border-radius: 8px;
+  //   background: $euiPageBackgroundColor;
+  // }
+  .euiFlyoutBody__overflow {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}
+
+.euiFlyoutHeader.llm-chat-flyout-header {
+  padding-top: 4px;
+}
+
+.llm-chat-flyout-body {
+  background-color: $euiPageBackgroundColor;
+  margin: 8px;
+  border-radius: 8px;
+}
+
+.llm-chat-bubble-wrapper {
+  .llm-chat-action-buttons-hidden {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &:hover {
+    .llm-chat-action-buttons-hidden {
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
+  }
+}
+
+.euiPanel {
+  &.llm-chat-bubble-panel {
+    word-break: break-word;
+    border-radius: 16px;
+    padding: 8px 16px 8px 16px;
+    max-width: 95%;
+  }
+  &.llm-chat-greeting-card-panel {
+    width: 357px;
+    background: #f2f4f7;
+    border-color: white;
+    border-radius: 18px;
+    .llm-chat-greeting-card-panel-title {
+      font-family: Inter;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 48px;
+      letter-spacing: -1px;
+      text-align: center;
+    }
+  }
+  &.llm-chat-suggestion-bubble-panel {
+    padding: 4px;
+    border-radius: 4px;
+    text-align: left;
+  }
+}
+
+.llm-chat-bubble-panel.llm-chat-bubble-panel-input {
+  background: #159d8d;
+  margin-left: auto;
+  color: #fcfeff;
+  max-width: 85%;
+}
+.llm-chat-bubble-panel.llm-chat-bubble-panel-output {
+  margin-right: auto;
+}
+.llm-chat-bubble-panel.llm-chat-bubble-panel-output.llm-chat-bubble-panel-loading {
+  min-width: 85%;
+}
+
+.llm-chat-greeting-header {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -1px;
+}
+
+.llm-chat-visualizations {
+  // remove some padding added by EuiPage
+  // margin-left: -12px;
+  // margin-right: -16px;
+  min-height: 450px;
+}
+
+.llm-chat-hidden {
+  display: none;
+}
+
+button.llm-chat-error-refresh-button.llm-chat-error-refresh-button {
+  color: $ouiColorFullShade;
+}
+
+.llm-chat-horizontal-resize-panel {
+  display: flex;
+  flex-direction: column;
+  &.llm-chat-hidden {
+    display: none;
+  }
+}

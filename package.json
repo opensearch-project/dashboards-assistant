@@ -1,0 +1,43 @@
+{
+  "name": "assistant-dashboards",
+  "version": "2.11.0.0",
+  "main": "index.ts",
+  "license": "Apache-2.0",
+  "scripts": {
+    "osd": "node ../../scripts/osd",
+    "build": "yarn plugin-helpers build",
+    "test:jest": "../../node_modules/.bin/jest --config ./test/jest.config.js",
+    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "prepare": "husky install",
+    "lint:es": "node ../../scripts/eslint",
+    "lint": "yarn lint:es"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "yarn lint --fix"
+    ]
+  },
+  "dependencies": {
+    "autosize": "^6.0.1",
+    "csv-parser": "^3.0.0",
+    "dompurify": "^2.4.1",
+    "jsdom": "^22.1.0",
+    "postinstall": "^0.7.4"
+  },
+  "devDependencies": {
+    "@types/autosize": "^4.0.1",
+    "@types/dompurify": "^2.3.3",
+    "@types/enzyme-adapter-react-16": "^1.0.6",
+    "@types/jsdom": "^21.1.2",
+    "@types/react-test-renderer": "^16.9.1",
+    "eslint": "^6.8.0",
+    "husky": "^8.0.0",
+    "jest-dom": "^4.0.0",
+    "lint-staged": "^13.1.0",
+    "ts-jest": "^29.1.0"
+  },
+  "eslintIgnore": [
+    "node_modules/*",
+    "target/*"
+  ]
+}
