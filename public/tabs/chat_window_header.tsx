@@ -9,7 +9,8 @@ import { useChatContext } from '../contexts/chat_context';
 import { ChatWindowHeaderTitle } from '../components/chat_window_header_title';
 import chatIcon from '../assets/chat.svg';
 import { TAB_ID } from '../utils/constants';
-interface ChatWindowHeaderProps {
+
+export interface ChatWindowHeaderProps {
   flyoutFullScreen: boolean;
   toggleFlyoutFullScreen: () => void;
 }
