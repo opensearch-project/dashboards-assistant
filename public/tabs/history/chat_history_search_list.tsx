@@ -18,7 +18,7 @@ import { EditConversationNameModal } from '../../components/edit_conversation_na
 import { DeleteConversationConfirmModal } from './delete_conversation_confirm_modal';
 import { useChatContext } from '../../contexts';
 
-interface ChatHistorySearchListProps
+export interface ChatHistorySearchListProps
   extends Pick<
     EuiTablePaginationProps,
     'activePage' | 'itemsPerPage' | 'onChangeItemsPerPage' | 'onChangePage' | 'pageCount'

@@ -34,6 +34,7 @@ export class SessionsService {
     this.abortController = new AbortController();
     this._options = query;
     try {
+      this.status$.next('loading');
       this.sessions$.next(
         await this._http.get<ISessionFindResponse>(ASSISTANT_API.SESSIONS, {
           query: this._options as HttpFetchQuery,
