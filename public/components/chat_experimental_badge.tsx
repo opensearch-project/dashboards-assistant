@@ -31,7 +31,14 @@ export const ChatExperimentalBadge = ({ onClick }: ChatExperimentalBadgeProps) =
   return (
     <EuiPopover
       isOpen={visible}
-      button={<EuiButtonIcon color="text" iconType="beaker" onClick={handleIconClick} />}
+      button={
+        <EuiButtonIcon
+          color="text"
+          iconType="beaker"
+          onClick={handleIconClick}
+          aria-label="Experimental badge"
+        />
+      }
       closePopover={closePopover}
       onClick={onClick}
     >

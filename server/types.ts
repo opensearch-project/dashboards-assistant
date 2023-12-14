@@ -11,6 +11,10 @@ export interface AssistantPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantPluginStart {}
 
+export interface ProviderOptions {
+  interactions: Interaction[];
+}
+
 export interface MessageParser {
   /**
    * The id of the parser, should be unique among the parsers.
@@ -26,7 +30,7 @@ export interface MessageParser {
   /**
    * parserProvider is the callback that will be triggered in each message
    */
-  parserProvider: (interaction: Interaction) => Promise<IMessage[]>;
+  parserProvider: (interaction: Interaction, options: ProviderOptions) => Promise<IMessage[]>;
 }
 
 export interface RoutesOptions {

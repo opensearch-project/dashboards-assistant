@@ -43,8 +43,8 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
   } = useChatContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [searchName, setSearchName] = useState<string>();
-  const [debouncedSearchName, setDebouncedSearchName] = useState<string>();
+  const [searchName, setSearchName] = useState<string>('');
+  const [debouncedSearchName, setDebouncedSearchName] = useState<string>('');
   const bulkGetOptions = useMemo(
     () => ({
       page: pageIndex + 1,
