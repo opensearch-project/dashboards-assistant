@@ -33,7 +33,7 @@ export const useFetchAgentFrameworkTraces = (traceId: string) => {
       .catch((error) => dispatch({ type: 'failure', error }));
 
     return () => abortController.abort();
-  }, [traceId]);
+  }, [core.services.http, traceId]);
 
   return { ...state };
 };
