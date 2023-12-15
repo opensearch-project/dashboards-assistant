@@ -61,6 +61,7 @@ describe('useChatActions hook', () => {
   const setFlyoutVisibleMock = jest.fn();
   const setSelectedTabIdMock = jest.fn();
   const pplVisualizationRenderMock = jest.fn();
+  const setTraceIdMock = jest.fn();
 
   const chatContextMock = {
     rootAgentId: 'root_agent_id_mock',
@@ -73,7 +74,7 @@ describe('useChatActions hook', () => {
     actionExecutors: {
       view_ppl_visualization: pplVisualizationRenderMock,
     },
-    setTraceId: jest.fn(),
+    setTraceId: setTraceIdMock,
   };
 
   beforeEach(() => {
@@ -229,6 +230,7 @@ describe('useChatActions hook', () => {
       }
     );
     expect(setSelectedTabIdMock).toHaveBeenCalledWith('trace');
+    expect(setTraceIdMock).toHaveBeenCalledWith('trace_id_mock');
   });
 
   it('should abort agent execution', async () => {
@@ -262,6 +264,33 @@ describe('useChatActions hook', () => {
     );
   });
 
+  it('should not handle regenerate response if the regenerate operation has already aborted', async () => {
+    const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
+      signal: { aborted: true },
+    }));
+
+    httpMock.put.mockResolvedValue(SEND_MESSAGE_RESPONSE);
+    jest
+      .spyOn(chatContextHookExports, 'useChatContext')
+      .mockReturnValue({ ...chatContextMock, sessionId: 'session_id_mock' });
+
+    const { result } = renderHook(() => useChatActions());
+    await result.current.regenerate('interaction_id_mock');
+
+    expect(chatStateDispatchMock).toHaveBeenCalledWith({ type: 'regenerate' });
+    expect(httpMock.put).toHaveBeenCalledWith(ASSISTANT_API.REGENERATE, {
+      body: JSON.stringify({
+        sessionId: 'session_id_mock',
+        rootAgentId: 'root_agent_id_mock',
+        interactionId: 'interaction_id_mock',
+      }),
+    });
+    expect(chatStateDispatchMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'receive' })
+    );
+    AbortControllerMock.mockRestore();
+  });
+
   it('should handle regenerate error', async () => {
     httpMock.put.mockImplementationOnce(() => {
       throw new Error();
@@ -274,5 +303,25 @@ describe('useChatActions hook', () => {
     await result.current.regenerate('interaction_id_mock');
 
     expect(chatStateDispatchMock).toHaveBeenCalledWith(expect.objectContaining({ type: 'error' }));
+  });
+
+  it('should not handle regenerate error if the regenerate operation has already aborted', async () => {
+    const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
+      signal: { aborted: true },
+    }));
+    httpMock.put.mockImplementationOnce(() => {
+      throw new Error();
+    });
+    jest
+      .spyOn(chatContextHookExports, 'useChatContext')
+      .mockReturnValue({ ...chatContextMock, sessionId: 'session_id_mock' });
+
+    const { result } = renderHook(() => useChatActions());
+    await result.current.regenerate('interaction_id_mock');
+
+    expect(chatStateDispatchMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'error' })
+    );
+    AbortControllerMock.mockRestore();
   });
 });
