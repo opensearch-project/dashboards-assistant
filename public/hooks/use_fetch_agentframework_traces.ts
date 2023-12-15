@@ -23,7 +23,9 @@ export const useFetchAgentFrameworkTraces = (traceId: string) => {
     }
 
     core.services.http
-      .get<AgentFrameworkTrace[]>(`${ASSISTANT_API.TRACE}/${traceId}`)
+      .get<AgentFrameworkTrace[]>(`${ASSISTANT_API.TRACE}/${traceId}`, {
+        signal: abortController.signal,
+      })
       .then((payload) =>
         dispatch({
           type: 'success',

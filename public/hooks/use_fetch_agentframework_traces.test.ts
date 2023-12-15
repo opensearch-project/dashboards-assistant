@@ -3,23 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useFetchAgentFrameworkTraces } from './use_fetch_agentframework_traces';
 import { createOpenSearchDashboardsReactContext } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../src/core/public/mocks';
+import { HttpHandler } from '../../../../src/core/public';
 
 describe('useFetchAgentFrameworkTraces hook', () => {
+  const traceId = 'foo';
+  const services = coreMock.createStart();
+  const { Provider } = createOpenSearchDashboardsReactContext(services);
+  const wrapper = { wrapper: Provider };
+
   it('return undefined when trace id is not specfied', () => {
     const { result } = renderHook(() => useFetchAgentFrameworkTraces(''));
-    expect(result.current).toEqual({
+    expect(result.current).toMatchObject({
       data: undefined,
       loading: false,
     });
   });
 
   it('return trace data successfully', async () => {
-    const services = coreMock.createStart();
-    const { Provider: wrapper } = createOpenSearchDashboardsReactContext(services);
     const traces = [
       {
         interactionId: 'test_interactionId',
@@ -34,14 +38,17 @@ describe('useFetchAgentFrameworkTraces hook', () => {
 
     services.http.get.mockResolvedValueOnce(traces);
     const { result, waitForNextUpdate } = renderHook(
-      () => useFetchAgentFrameworkTraces('traceId'),
-      {
-        wrapper,
-      }
+      () => useFetchAgentFrameworkTraces(traceId),
+      wrapper
     );
 
     await waitForNextUpdate();
-    expect(services.http.get).toHaveBeenCalledWith('/api/assistant/trace/traceId');
+    expect(services.http.get).toHaveBeenCalledWith(
+      `/api/assistant/trace/${traceId}`,
+      expect.objectContaining({
+        signal: expect.any(Object),
+      })
+    );
 
     expect(result.current).toEqual({
       data: traces,
@@ -50,23 +57,63 @@ describe('useFetchAgentFrameworkTraces hook', () => {
   });
 
   it('return error when fetch trace error happend', async () => {
-    const traceId = 'foo';
-    const services = coreMock.createStart();
-    const { Provider: wrapper } = createOpenSearchDashboardsReactContext(services);
-
     services.http.get.mockRejectedValue(new Error('trace not found'));
-    const { result, waitForNextUpdate } = renderHook(() => useFetchAgentFrameworkTraces(traceId), {
-      wrapper,
-    });
+    const { result, waitForNextUpdate } = renderHook(
+      () => useFetchAgentFrameworkTraces(traceId),
+      wrapper
+    );
 
     await waitForNextUpdate();
 
-    expect(services.http.get).toHaveBeenCalledWith('/api/assistant/trace/foo');
+    expect(services.http.get).toHaveBeenCalledWith(
+      `/api/assistant/trace/${traceId}`,
+      expect.objectContaining({
+        signal: expect.any(Object),
+      })
+    );
 
     expect(result.current).toEqual({
       data: undefined,
       loading: false,
       error: new Error('trace not found'),
+    });
+  });
+
+  it('abort the request when unmount', async () => {
+    const abortError = new Error('abort');
+
+    services.http.get.mockImplementation(((_path, options) => {
+      return new Promise((_resolve, reject) => {
+        if (options?.signal) {
+          options.signal.onabort = () => {
+            reject(abortError);
+          };
+        }
+      });
+    }) as HttpHandler);
+
+    const { result, unmount, waitFor } = renderHook(
+      () => useFetchAgentFrameworkTraces(traceId),
+      wrapper
+    );
+
+    act(() => {
+      unmount();
+    });
+
+    expect(services.http.get).toHaveBeenCalledWith(
+      `/api/assistant/trace/${traceId}`,
+      expect.objectContaining({
+        signal: expect.any(Object),
+      })
+    );
+
+    waitFor(() => {
+      expect(result.current).toEqual({
+        data: undefined,
+        loading: false,
+        error: abortError,
+      });
     });
   });
 });
