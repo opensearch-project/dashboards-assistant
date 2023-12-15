@@ -41,11 +41,10 @@ export class SessionsService {
           signal: this.abortController.signal,
         })
       );
+      this.status$.next('idle');
     } catch (error) {
       this.sessions$.next(null);
       this.status$.next({ error });
-    } finally {
-      this.status$.next('idle');
     }
   };
 
