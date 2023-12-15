@@ -17,7 +17,7 @@ export interface IChatContext {
   flyoutFullScreen: boolean;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
-  chatEnabled: boolean;
+  userHasAccess: boolean;
   contentRenderers: Record<string, ContentRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   currentAccount: UserAccount;

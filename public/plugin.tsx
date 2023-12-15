@@ -12,6 +12,8 @@ import {
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
+import { SessionLoadService } from './services/session_load_service';
+import { SessionsService } from './services/sessions_service';
 import {
   ActionExecutor,
   AppPluginStartDependencies,
@@ -21,15 +23,18 @@ import {
   ContentRenderer,
   SetupDependencies,
 } from './types';
-import { SessionLoadService } from './services/session_load_service';
-import { SessionsService } from './services/sessions_service';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 interface PublicConfig {
   chat: {
+    // whether chat feature is enabled, UI should hide if false
     enabled: boolean;
   };
+}
+
+interface UserAccountResponse {
+  data: { roles: string[]; user_name: string; user_requested_tenant?: string };
 }
 
 export class AssistantPlugin
@@ -46,23 +51,28 @@ export class AssistantPlugin
     const contentRenderers: Record<string, ContentRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
-    const getAccount = async () => {
-      return await core.http.get<{
-        data: { roles: string[]; user_name: string; user_requested_tenant: string | null };
-      }>('/api/v1/configuration/account');
-    };
-    const assistantEnabled = (() => {
-      let enabled: boolean;
+    /**
+     * Returns {@link UserAccountResponse}. Provides default roles and user
+     * name if security plugin call fails.
+     */
+    const getAccount: () => Promise<UserAccountResponse> = (() => {
+      let account: UserAccountResponse;
       return async () => {
-        if (enabled === undefined) {
-          const account = await getAccount();
-          enabled = account.data.roles.some((role) =>
-            ['all_access', 'assistant_user'].includes(role)
-          );
+        if (setupDeps.securityDashboards === undefined)
+          return { data: { roles: ['all_access'], user_name: 'dashboards_user' } };
+        if (account === undefined) {
+          account = await core.http
+            .get<UserAccountResponse>('/api/v1/configuration/account')
+            .catch((e) => {
+              console.error(`Failed to request user account information: ${String(e.body || e)}`);
+              return { data: { roles: [], user_name: '' } };
+            });
         }
-        return enabled;
+        return account;
       };
     })();
+    const checkAccess = (account: Awaited<ReturnType<typeof getAccount>>) =>
+      account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role));
 
     if (this.config.chat.enabled) {
       core.getStartServices().then(async ([coreStart, startDeps]) => {
@@ -83,9 +93,7 @@ export class AssistantPlugin
             <CoreContext.Provider>
               <HeaderChatButton
                 application={coreStart.application}
-                chatEnabled={account.data.roles.some((role) =>
-                  ['all_access', 'assistant_user'].includes(role)
-                )}
+                userHasAccess={checkAccess(account)}
                 contentRenderers={contentRenderers}
                 actionExecutors={actionExecutors}
                 assistantActions={assistantActions}
@@ -108,7 +116,8 @@ export class AssistantPlugin
           console.warn(`Action executor type ${actionType} is already registered.`);
         actionExecutors[actionType] = execute;
       },
-      assistantEnabled,
+      chatEnabled: () => this.config.chat.enabled,
+      userHasAccess: async () => await getAccount().then(checkAccess),
       assistantActions,
     };
   }

@@ -26,12 +26,20 @@ export interface AppPluginStartDependencies {
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
+  securityDashboards?: {};
 }
 
 export interface AssistantSetup {
   registerContentRenderer: (contentType: string, render: ContentRenderer) => void;
   registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
-  assistantEnabled: () => Promise<boolean>;
+  /**
+   * Returns true if chat UI is enabled.
+   */
+  chatEnabled: () => boolean;
+  /**
+   * Returns true if current user has permission to use assistant features.
+   */
+  userHasAccess: () => Promise<boolean>;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
 }
 
