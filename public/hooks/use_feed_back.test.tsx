@@ -56,7 +56,7 @@ describe('useFeedback hook', () => {
     expect(result.current.feedbackResult).toBe(undefined);
   });
 
-  it('should call feedback api regularly with passed correct value and set feedback state after success', async () => {
+  it('should call feedback api regularly with passed correct value and set feedback state if call API success', async () => {
     const mockInputMessage = {
       type: 'input',
     } as IMessage;
@@ -86,7 +86,7 @@ describe('useFeedback hook', () => {
     expect(result.current.feedbackResult).toBe(true);
   });
 
-  it('should not set feedback state after API fail', async () => {
+  it('should not update feedback state if API fail', async () => {
     httpMock.put.mockRejectedValueOnce(new Error(''));
 
     const mockInputMessage = {
