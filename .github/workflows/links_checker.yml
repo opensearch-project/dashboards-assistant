@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Load Excludes
       run: |
-        LYCHEE_EXCLUDE=$(curl -fsSL https://raw.githubusercontent.com/opensearch-project/OpenSearch-Dashboards/HEAD/.lycheeexclude | cat - .lycheeexclude | grep -v '^#\|^$' | sed -e :a  -e 'N;s/\n/ --exclude /;ta')
+        LYCHEE_EXCLUDE=$(grep -v '^#\|^$' .lycheeexclude | sed -e :a  -e 'N;s/\n/ --exclude /;ta')
         echo "LYCHEE_EXCLUDE=$LYCHEE_EXCLUDE" >> $GITHUB_ENV
     - name: Lychee Link Checker
       id: lychee
