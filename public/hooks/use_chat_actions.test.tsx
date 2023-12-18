@@ -64,7 +64,6 @@ describe('useChatActions hook', () => {
   const setTraceIdMock = jest.fn();
 
   const chatContextMock = {
-    rootAgentId: 'root_agent_id_mock',
     selectedTabId: 'chat',
     setSessionId: jest.fn(),
     setTitle: jest.fn(),
@@ -109,7 +108,6 @@ describe('useChatActions hook', () => {
     // it should call send message api
     expect(httpMock.post).toHaveBeenCalledWith(ASSISTANT_API.SEND_MESSAGE, {
       body: JSON.stringify({
-        rootAgentId: 'root_agent_id_mock',
         messages: [],
         input: INPUT_MESSAGE,
       }),
@@ -173,7 +171,6 @@ describe('useChatActions hook', () => {
     // sending message with the suggestion
     expect(httpMock.post).toHaveBeenCalledWith(ASSISTANT_API.SEND_MESSAGE, {
       body: JSON.stringify({
-        rootAgentId: 'root_agent_id_mock',
         messages: [],
         input: { type: 'input', content: 'message that send as input', contentType: 'text' },
       }),
@@ -255,7 +252,6 @@ describe('useChatActions hook', () => {
     expect(httpMock.put).toHaveBeenCalledWith(ASSISTANT_API.REGENERATE, {
       body: JSON.stringify({
         sessionId: 'session_id_mock',
-        rootAgentId: 'root_agent_id_mock',
         interactionId: 'interaction_id_mock',
       }),
     });
@@ -281,7 +277,6 @@ describe('useChatActions hook', () => {
     expect(httpMock.put).toHaveBeenCalledWith(ASSISTANT_API.REGENERATE, {
       body: JSON.stringify({
         sessionId: 'session_id_mock',
-        rootAgentId: 'root_agent_id_mock',
         interactionId: 'interaction_id_mock',
       }),
     });
