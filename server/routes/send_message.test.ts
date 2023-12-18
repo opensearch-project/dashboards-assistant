@@ -11,25 +11,25 @@ import { mockOllyChatService } from '../services/chat/olly_chat_service.mock';
 import { mockAgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service.mock';
 import { httpServerMock } from '../../../../src/core/server/http/http_server.mocks';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
-import { registerChatRoutes, LLMRequestSchema } from './chat_routes';
+import { registerChatRoutes, LLMRequestSchema, AgentIdNotFoundError } from './chat_routes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
 const mockedLogger = loggerMock.create();
 
-const router = new Router(
-  '',
-  mockedLogger,
-  enhanceWithContext({
-    assistant_plugin: {
-      logger: mockedLogger,
-    },
-  })
-);
-registerChatRoutes(router, {
-  messageParsers: [],
-});
-
-describe('send_message route', () => {
+describe('send_message route when rootAgentId is provided', () => {
+  const router = new Router(
+    '',
+    mockedLogger,
+    enhanceWithContext({
+      assistant_plugin: {
+        logger: mockedLogger,
+      },
+    })
+  );
+  registerChatRoutes(router, {
+    messageParsers: [],
+    rootAgentId: 'foo',
+  });
   const sendMessageRequest = (payload: LLMRequestSchema) =>
     triggerHandler(router, {
       method: 'post',
@@ -199,5 +199,58 @@ describe('send_message route', () => {
           "statusCode": 500,
         }
       `);
+  });
+});
+
+describe('send_message route when rootAgentId is not provided', () => {
+  const router = new Router(
+    '',
+    mockedLogger,
+    enhanceWithContext({
+      assistant_plugin: {
+        logger: mockedLogger,
+      },
+    })
+  );
+  registerChatRoutes(router, {
+    messageParsers: [],
+  });
+  const sendMessageRequest = (payload: LLMRequestSchema) =>
+    triggerHandler(router, {
+      method: 'post',
+      path: ASSISTANT_API.SEND_MESSAGE,
+      req: httpServerMock.createRawRequest({
+        payload: JSON.stringify(payload),
+      }),
+    });
+  beforeEach(() => {
+    loggerMock.clear(mockedLogger);
+  });
+
+  it('return 400', async () => {
+    const result = (await sendMessageRequest({
+      input: {
+        content: '1',
+        contentType: 'text',
+        type: 'input',
+        context: {
+          appId: '',
+        },
+      },
+      sessionId: 'foo',
+    })) as Boom;
+    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error).toBeCalledWith(AgentIdNotFoundError);
+    expect(result.output).toMatchInlineSnapshot(`
+      Object {
+        "headers": Object {},
+        "payload": Object {
+          "error": "Bad Request",
+          "message": "rootAgentId is required, please specify one in opensearch_dashboards.yml",
+          "statusCode": 400,
+        },
+        "statusCode": 400,
+      }
+    `);
   });
 });

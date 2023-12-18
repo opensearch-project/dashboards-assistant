@@ -36,6 +36,9 @@ const llmRequestRoute = {
 };
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
 
+export const AgentIdNotFoundError =
+  'rootAgentId is required, please specify one in opensearch_dashboards.yml';
+
 const getSessionRoute = {
   path: `${ASSISTANT_API.SESSION}/{sessionId}`,
   validate: {
@@ -141,7 +144,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       if (!routeOptions.rootAgentId) {
-        return response.custom({ statusCode: 400, body: 'rootAgentId is required' });
+        context.assistant_plugin.logger.error(AgentIdNotFoundError);
+        return response.custom({ statusCode: 400, body: AgentIdNotFoundError });
       }
       const { messages = [], input, sessionId: sessionIdInRequestBody } = request.body;
       const storageService = createStorageService(context);
@@ -321,7 +325,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       if (!routeOptions.rootAgentId) {
-        return response.custom({ statusCode: 400, body: 'rootAgentId is required' });
+        context.assistant_plugin.logger.error(AgentIdNotFoundError);
+        return response.custom({ statusCode: 400, body: AgentIdNotFoundError });
       }
       const { sessionId, interactionId } = request.body;
       const storageService = createStorageService(context);
