@@ -25,7 +25,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup): Promise<AssistantPluginSetup> {
     this.logger.debug('Assistant: Setup');
     const config = await this.initializerContext.config
       .create<AssistantConfig>()

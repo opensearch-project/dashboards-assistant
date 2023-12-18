@@ -11,3 +11,5 @@ export { AssistantPlugin as Plugin };
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AssistantPlugin(initializerContext);
 }
+
+export { AssistantSetup } from './types';
