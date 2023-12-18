@@ -43,6 +43,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     // Register server side APIs
     setupRoutes(router, {
       messageParsers: this.messageParsers,
+      rootAgentId: config.chat.rootAgentId,
     });
 
     core.capabilities.registerProvider(() => ({

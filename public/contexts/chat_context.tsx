@@ -25,7 +25,6 @@ export interface IChatContext {
   setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
   traceId?: string;
   setTraceId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  rootAgentId?: string;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 

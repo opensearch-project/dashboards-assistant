@@ -30,6 +30,7 @@ interface PublicConfig {
   chat: {
     // whether chat feature is enabled, UI should hide if false
     enabled: boolean;
+    rootAgentId?: string;
   };
 }
 
@@ -74,7 +75,7 @@ export class AssistantPlugin
     const checkAccess = (account: Awaited<ReturnType<typeof getAccount>>) =>
       account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role));
 
-    if (this.config.chat.enabled) {
+    if (this.config.chat.enabled && this.config.chat.rootAgentId) {
       core.getStartServices().then(async ([coreStart, startDeps]) => {
         const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
           ...coreStart,

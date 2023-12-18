@@ -58,7 +58,6 @@ describe('send_message route', () => {
       };
     });
     const result = (await sendMessageRequest({
-      rootAgentId: 'foo',
       input: {
         content: '1',
         contentType: 'text',
@@ -81,7 +80,6 @@ describe('send_message route', () => {
       throw new Error('something went wrong');
     });
     const result = (await sendMessageRequest({
-      rootAgentId: 'foo',
       input: {
         content: '1',
         contentType: 'text',
@@ -111,7 +109,6 @@ describe('send_message route', () => {
       };
     });
     const result = (await sendMessageRequest({
-      rootAgentId: 'foo',
       input: {
         content: '1',
         contentType: 'text',
@@ -147,7 +144,6 @@ describe('send_message route', () => {
       };
     });
     const result = (await sendMessageRequest({
-      rootAgentId: 'foo',
       input: {
         content: '1',
         contentType: 'text',
@@ -180,7 +176,6 @@ describe('send_message route', () => {
       throw new Error('foo');
     });
     const result = (await sendMessageRequest({
-      rootAgentId: 'foo',
       input: {
         content: '1',
         contentType: 'text',

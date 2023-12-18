@@ -38,7 +38,6 @@ export const useChatActions = (): AssistantActions => {
         // do not send abort signal to http client to allow LLM call run in background
         body: JSON.stringify({
           sessionId: chatContext.sessionId,
-          rootAgentId: chatContext.rootAgentId,
           ...(!chatContext.sessionId && { messages: chatState.messages }), // include all previous messages for new chats
           input,
         }),
@@ -168,7 +167,6 @@ export const useChatActions = (): AssistantActions => {
         const response = await core.services.http.put(`${ASSISTANT_API.REGENERATE}`, {
           body: JSON.stringify({
             sessionId: chatContext.sessionId,
-            rootAgentId: chatContext.rootAgentId,
             interactionId,
           }),
         });

@@ -17,6 +17,7 @@ const assistantConfig = {
   schema: schema.object({
     chat: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
+      rootAgentId: schema.maybe(schema.string()),
     }),
   }),
 };
