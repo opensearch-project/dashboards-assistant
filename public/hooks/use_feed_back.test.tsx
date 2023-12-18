@@ -119,4 +119,31 @@ describe('useFeedback hook', () => {
     waitForNextUpdate();
     expect(result.current.feedbackResult).toBe(undefined);
   });
+
+  it('should not call API to feedback if there is no input message before passed output message', async () => {
+    const mockOutputMessage = {
+      type: 'output',
+      traceId: 'traceId',
+    } as IOutput;
+    const mockMessages = [mockOutputMessage];
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages: mockMessages, interactions: [], llmResponding: false },
+      chatStateDispatch: chatStateDispatchMock,
+    });
+    const { result } = renderHook(() => useFeedback());
+    expect(result.current.feedbackResult).toBe(undefined);
+
+    const sendFeedback = result.current.sendFeedback;
+
+    await sendFeedback(mockOutputMessage as IOutput, true);
+
+    expect(httpMock.put).not.toHaveBeenCalledWith(
+      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.traceId}`,
+      {
+        body: JSON.stringify({
+          satisfaction: true,
+        }),
+      }
+    );
+  });
 });
