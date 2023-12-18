@@ -45,8 +45,8 @@ describe('useDeleteSession', () => {
       Promise.resolve('deleted')
     );
 
-    await act(async () => {
-      await result.current.deleteSession('foo');
+    act(() => {
+      result.current.deleteSession('foo');
     });
 
     await waitFor(() => {
@@ -132,8 +132,8 @@ describe('usePatchSession', () => {
       })
     );
 
-    await act(async () => {
-      await result.current.patchSession('foo', 'new-title');
+    act(() => {
+      result.current.patchSession('foo', 'new-title');
     });
 
     await waitFor(() => {
