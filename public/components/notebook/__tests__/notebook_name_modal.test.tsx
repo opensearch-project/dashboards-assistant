@@ -46,9 +46,7 @@ describe('<NotebookNameModal />', () => {
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('cancelSaveToNotebookButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('cancelSaveToNotebookButton'));
 
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenCalled();
@@ -63,19 +61,15 @@ describe('<NotebookNameModal />', () => {
       saveChat: saveChatMock,
     });
 
-    act(() => {
-      fireEvent.change(renderResult.getByLabelText('Notebook name input'), {
-        target: {
-          value: 'notebook-name',
-        },
-      });
+    fireEvent.change(renderResult.getByLabelText('Notebook name input'), {
+      target: {
+        value: 'notebook-name',
+      },
     });
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
 
     await waitFor(() => {
       expect(useCoreMock.services.notifications.toasts.addSuccess).toHaveBeenCalled();
@@ -93,19 +87,15 @@ describe('<NotebookNameModal />', () => {
       saveChat: saveChatMock,
     });
 
-    act(() => {
-      fireEvent.change(renderResult.getByLabelText('Notebook name input'), {
-        target: {
-          value: 'notebook-name',
-        },
-      });
+    fireEvent.change(renderResult.getByLabelText('Notebook name input'), {
+      target: {
+        value: 'notebook-name',
+      },
     });
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
 
     await waitFor(() => {
       expect(useCoreMock.services.notifications.toasts.addDanger).toHaveBeenCalled();
@@ -123,19 +113,15 @@ describe('<NotebookNameModal />', () => {
       saveChat: saveChatMock,
     });
 
-    act(() => {
-      fireEvent.change(renderResult.getByLabelText('Notebook name input'), {
-        target: {
-          value: 'notebook-name',
-        },
-      });
+    fireEvent.change(renderResult.getByLabelText('Notebook name input'), {
+      target: {
+        value: 'notebook-name',
+      },
     });
 
     expect(onCloseMock).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('confirmSaveToNotebookButton'));
 
     await waitFor(() => {
       expect(useCoreMock.services.notifications.toasts.addDanger).toHaveBeenCalledWith(

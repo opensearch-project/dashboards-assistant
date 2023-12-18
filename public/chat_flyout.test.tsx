@@ -38,7 +38,7 @@ describe('<ChatFlyout />', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should only display chat panel when current tab is TAB_ID.CHAT under non-fullscreen mode', () => {

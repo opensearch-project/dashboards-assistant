@@ -71,7 +71,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
         <ChatExperimentalBadge onClick={closePopover} />
       </EuiFlexItem>
       <EuiFlexItem onClick={onButtonClick} grow={false}>
-        <EuiButtonIcon color="text" iconType="arrowDown" />
+        <EuiButtonIcon aria-label="toggle chat context menu" color="text" iconType="arrowDown" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

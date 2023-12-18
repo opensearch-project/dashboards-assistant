@@ -25,9 +25,7 @@ describe('<AgentFrameworkTracesFlyout/> spec', () => {
     });
     render(<AgentFrameworkTracesFlyoutBody />);
     expect(screen.queryAllByLabelText('back')).toHaveLength(1);
-    act(() => {
-      fireEvent.click(screen.getByText('Back'));
-    });
+    fireEvent.click(screen.getByText('Back'));
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenCalledWith(TAB_ID.CHAT);
     });
@@ -51,9 +49,7 @@ describe('<AgentFrameworkTracesFlyout/> spec', () => {
     });
     render(<AgentFrameworkTracesFlyoutBody />);
     expect(screen.queryAllByLabelText('close')).toHaveLength(1);
-    act(() => {
-      fireEvent.click(screen.queryAllByLabelText('close')[0]);
-    });
+    fireEvent.click(screen.queryAllByLabelText('close')[0]);
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenCalledWith(TAB_ID.CHAT);
     });
@@ -69,9 +65,7 @@ describe('<AgentFrameworkTracesFlyout/> spec', () => {
     });
     render(<AgentFrameworkTracesFlyoutBody />);
     expect(screen.queryAllByLabelText('back')).toHaveLength(1);
-    act(() => {
-      fireEvent.click(screen.getByText('Back'));
-    });
+    fireEvent.click(screen.getByText('Back'));
     await waitFor(() => {
       expect(onCloseMock).toHaveBeenCalledWith(TAB_ID.HISTORY);
     });

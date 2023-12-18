@@ -26,7 +26,7 @@ describe('<CoreVisualization />', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should display visualization of last 15 minutes by default', () => {

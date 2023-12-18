@@ -24,7 +24,7 @@ describe('<MessageContent />', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should display message(text)', () => {

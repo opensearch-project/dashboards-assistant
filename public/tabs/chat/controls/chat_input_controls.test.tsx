@@ -23,7 +23,7 @@ describe('<ChatInputControls />', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should display submit button and text box in different state accordingly', () => {
