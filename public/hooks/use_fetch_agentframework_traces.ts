@@ -23,17 +23,22 @@ export const useFetchAgentFrameworkTraces = (traceId: string) => {
     }
 
     core.services.http
-      .get<AgentFrameworkTrace[]>(`${ASSISTANT_API.TRACE}/${traceId}`)
+      .get<AgentFrameworkTrace[]>(`${ASSISTANT_API.TRACE}/${traceId}`, {
+        signal: abortController.signal,
+      })
       .then((payload) =>
         dispatch({
           type: 'success',
           payload,
         })
       )
-      .catch((error) => dispatch({ type: 'failure', error }));
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        dispatch({ type: 'failure', error });
+      });
 
     return () => abortController.abort();
-  }, [traceId]);
+  }, [core.services.http, traceId]);
 
   return { ...state };
 };
