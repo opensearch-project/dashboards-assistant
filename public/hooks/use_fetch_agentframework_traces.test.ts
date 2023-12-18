@@ -8,6 +8,7 @@ import { useFetchAgentFrameworkTraces } from './use_fetch_agentframework_traces'
 import { createOpenSearchDashboardsReactContext } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpHandler } from '../../../../src/core/public';
+import { AbortError } from '../../../../src/plugins/data/common';
 
 describe('useFetchAgentFrameworkTraces hook', () => {
   const traceId = 'foo';
@@ -80,7 +81,15 @@ describe('useFetchAgentFrameworkTraces hook', () => {
   });
 
   it('abort the request when unmount', async () => {
-    const abortError = new Error('abort');
+    const abortError = new AbortError();
+
+    const abortFn = jest.fn();
+
+    // @ts-ignore
+    global.AbortController = jest.fn(() => ({
+      abort: abortFn,
+      signal: new Object(),
+    }));
 
     services.http.get.mockImplementation(((_path, options) => {
       return new Promise((_resolve, reject) => {
@@ -92,10 +101,7 @@ describe('useFetchAgentFrameworkTraces hook', () => {
       });
     }) as HttpHandler);
 
-    const { result, unmount, waitFor } = renderHook(
-      () => useFetchAgentFrameworkTraces(traceId),
-      wrapper
-    );
+    const { unmount } = renderHook(() => useFetchAgentFrameworkTraces(traceId), wrapper);
 
     act(() => {
       unmount();
@@ -108,12 +114,7 @@ describe('useFetchAgentFrameworkTraces hook', () => {
       })
     );
 
-    waitFor(() => {
-      expect(result.current).toEqual({
-        data: undefined,
-        loading: false,
-        error: abortError,
-      });
-    });
+    // expect the mock to be called
+    expect(abortFn).toBeCalledTimes(1);
   });
 });
