@@ -55,12 +55,12 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         </EuiPage>
       </EuiFlyoutBody>
       <EuiFlyoutFooter className={props.className}>
-        <EuiSpacer />
+        <EuiSpacer size="xs" />
         <ChatInputControls
           loading={chatState.llmResponding}
           disabled={messagesLoading || chatState.llmResponding || !chatContext.userHasAccess}
         />
-        <EuiSpacer />
+        <EuiSpacer size="s" />
       </EuiFlyoutFooter>
     </>
   );

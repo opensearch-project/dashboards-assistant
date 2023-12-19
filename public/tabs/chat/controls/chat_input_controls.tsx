@@ -48,7 +48,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
 
   return (
     <EuiFlexGroup
-      gutterSize="m"
+      gutterSize="s"
       alignItems="flexEnd"
       justifyContent="spaceEvenly"
       responsive={false}
