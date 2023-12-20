@@ -12,35 +12,10 @@ import { httpServerMock } from '../../../../src/core/server/http/http_server.moc
 import { mockAgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service.mock';
 import { mockOllyChatService } from '../services/chat/olly_chat_service.mock';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
-import { registerChatRoutes, GetSessionsSchema } from './chat_routes';
+import { registerChatRoutes } from './chat_routes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
 const mockedLogger = loggerMock.create();
-
-const mockStorageGetSession = () => {
-  const getSessionResultMock = {
-    messages: [{ type: 'input' as const, contentType: 'text' as const, content: 'foo' }],
-    title: 'foo',
-    interactions: [
-      {
-        input: 'foo',
-        response: 'bar',
-        conversation_id: 'conversation-1',
-        interaction_id: 'interaction-1',
-        create_time: '',
-      },
-    ],
-    createdTimeMs: 0,
-    updatedTimeMs: 0,
-  };
-  const getSession = mockAgentFrameworkStorageService.getSession.mockReturnValueOnce(
-    Promise.resolve(getSessionResultMock)
-  );
-  return {
-    getSession,
-    getSessionResultMock,
-  };
-};
 
 const router = new Router(
   '',
@@ -55,18 +30,6 @@ registerChatRoutes(router, {
   messageParsers: [],
 });
 
-const triggerGetSession = (sessionId: string) =>
-  triggerHandler(router, {
-    method: 'get',
-    path: `${ASSISTANT_API.SESSION}/{sessionId}`,
-    req: httpServerMock.createRawRequest({ params: { sessionId } }),
-  });
-const triggerGetSessions = (query: GetSessionsSchema) =>
-  triggerHandler(router, {
-    method: 'get',
-    path: ASSISTANT_API.SESSIONS,
-    req: httpServerMock.createRawRequest({ query }),
-  });
 const triggerDeleteSession = (sessionId: string) =>
   triggerHandler(router, {
     method: 'delete',
@@ -104,84 +67,6 @@ describe('chat routes', () => {
   });
   afterEach(() => {
     jest.resetAllMocks();
-  });
-  describe('get session', () => {
-    it('should call getSession with session id and return specific session data', async () => {
-      const { getSession } = mockStorageGetSession();
-
-      expect(getSession).not.toHaveBeenCalled();
-      const result = await triggerGetSession('foo');
-      expect(getSession).toHaveBeenCalledWith('foo');
-      expect((result as ResponseObject).source).toMatchInlineSnapshot(`
-        Object {
-          "createdTimeMs": 0,
-          "interactions": Array [
-            Object {
-              "conversation_id": "conversation-1",
-              "create_time": "",
-              "input": "foo",
-              "interaction_id": "interaction-1",
-              "response": "bar",
-            },
-          ],
-          "messages": Array [
-            Object {
-              "content": "foo",
-              "contentType": "text",
-              "type": "input",
-            },
-          ],
-          "title": "foo",
-          "updatedTimeMs": 0,
-        }
-      `);
-    });
-
-    it('should call log error and return 500 error when failed to get session', async () => {
-      mockAgentFrameworkStorageService.getSession.mockRejectedValueOnce(new Error());
-
-      const result = (await triggerGetSession('foo')) as Boom;
-
-      expect(mockedLogger.error).toHaveBeenCalledWith(expect.any(Error));
-      expect(result.output.statusCode).toBe(500);
-    });
-  });
-
-  describe('get sessions', () => {
-    it('should call get sessions with passed params and return sessions data', async () => {
-      mockAgentFrameworkStorageService.getSessions.mockResolvedValueOnce({
-        objects: [],
-        total: 0,
-      });
-
-      expect(mockAgentFrameworkStorageService.getSessions).not.toHaveBeenCalled();
-      const result = (await triggerGetSessions({
-        page: 1,
-        perPage: 50,
-      })) as ResponseObject;
-      expect(mockAgentFrameworkStorageService.getSessions).toHaveBeenCalledWith({
-        page: 1,
-        perPage: 50,
-      });
-      expect(result.source).toMatchInlineSnapshot(`
-        Object {
-          "objects": Array [],
-          "total": 0,
-        }
-      `);
-    });
-
-    it('should log error and return 500 error', async () => {
-      mockAgentFrameworkStorageService.getSessions.mockRejectedValueOnce(new Error());
-
-      const result = (await triggerGetSessions({
-        page: 1,
-        perPage: 50,
-      })) as Boom;
-
-      expect(mockedLogger.error).toHaveBeenCalledWith(expect.any(Error));
-      expect(result.output.statusCode).toBe(500);
-    });
   });
 
   describe('delete session', () => {
