@@ -40,7 +40,7 @@ export const useFeedback = (interaction?: Interaction | null) => {
       });
       setFeedbackResult(correct);
     } catch (error) {
-      console.error('send feedback error');
+      console.log('send feedback error');
     }
   };
 
