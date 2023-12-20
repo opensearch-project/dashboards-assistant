@@ -28,7 +28,7 @@ interface HeaderChatButtonProps {
 
 let flyoutLoaded = false;
 
-export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
+export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [appId, setAppId] = useState<string>();
   const [sessionId, setSessionId] = useState<string>();
   const [title, setTitle] = useState<string>();
@@ -144,6 +144,7 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
     <>
       <div className={classNames('llm-chat-header-icon-wrapper')}>
         <EuiFieldText
+          aria-label="chat input"
           inputRef={inputRef}
           compressed
           value={query}
@@ -154,16 +155,29 @@ export const HeaderChatButton: React.FC<HeaderChatButtonProps> = (props) => {
           onKeyPress={onKeyPress}
           onKeyUp={onKeyUp}
           prepend={
-            <EuiIcon type={chatIcon} size="l" onClick={() => setFlyoutVisible(!flyoutVisible)} />
+            <EuiIcon
+              aria-label="toggle chat flyout icon"
+              type={chatIcon}
+              size="l"
+              onClick={() => setFlyoutVisible(!flyoutVisible)}
+            />
           }
           append={
             <span className="llm-chat-header-shortcut">
               {inputFocus ? (
-                <EuiBadge className="llm-chat-header-shortcut-enter" color="hollow">
+                <EuiBadge
+                  title="press enter to chat"
+                  className="llm-chat-header-shortcut-enter"
+                  color="hollow"
+                >
                   ⏎
                 </EuiBadge>
               ) : (
-                <EuiBadge className="llm-chat-header-shortcut-cmd" color="hollow">
+                <EuiBadge
+                  title="press ⌘ + / to start typing"
+                  className="llm-chat-header-shortcut-cmd"
+                  color="hollow"
+                >
                   ⌘ + /
                 </EuiBadge>
               )}

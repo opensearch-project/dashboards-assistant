@@ -12,7 +12,7 @@ interface SetContextProps {
 }
 
 // TODO needs a better solution to expose hook
-export const SetContext: React.FC<SetContextProps> = (props) => {
+export const SetContext = (props: SetContextProps) => {
   Object.assign(props.assistantActions, useChatActions());
   return null;
 };

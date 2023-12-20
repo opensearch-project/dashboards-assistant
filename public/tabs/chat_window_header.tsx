@@ -15,7 +15,7 @@ export interface ChatWindowHeaderProps {
   toggleFlyoutFullScreen: () => void;
 }
 
-export const ChatWindowHeader: React.FC<ChatWindowHeaderProps> = React.memo((props) => {
+export const ChatWindowHeader = React.memo((props: ChatWindowHeaderProps) => {
   const chatContext = useChatContext();
 
   const dockBottom = () => (

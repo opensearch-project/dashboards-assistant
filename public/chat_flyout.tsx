@@ -21,7 +21,7 @@ interface ChatFlyoutProps {
   toggleFlyoutFullScreen: () => void;
 }
 
-export const ChatFlyout: React.FC<ChatFlyoutProps> = (props) => {
+export const ChatFlyout = (props: ChatFlyoutProps) => {
   const chatContext = useChatContext();
   const chatHistoryPageLoadedRef = useRef(false);
 

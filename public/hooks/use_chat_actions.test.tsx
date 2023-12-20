@@ -13,13 +13,10 @@ import { SessionLoadService } from '../services/session_load_service';
 import * as chatStateHookExports from './use_chat_state';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
-const mockSessionsLoad = jest.fn();
-const mockSessionLoad = jest.fn().mockReturnValue({ messages: [], interactions: [] });
-
 jest.mock('../services/sessions_service', () => {
   return {
     SessionsService: jest.fn().mockImplementation(() => {
-      return { reload: mockSessionsLoad };
+      return { reload: jest.fn() };
     }),
   };
 });
@@ -27,7 +24,7 @@ jest.mock('../services/sessions_service', () => {
 jest.mock('../services/session_load_service', () => {
   return {
     SessionLoadService: jest.fn().mockImplementation(() => {
-      return { load: mockSessionLoad };
+      return { load: jest.fn().mockReturnValue({ messages: [], interactions: [] }) };
     }),
   };
 });
