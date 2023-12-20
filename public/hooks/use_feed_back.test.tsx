@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useFeedback } from './use_feed_back';
 import * as chatStateHookExports from './use_chat_state';
@@ -69,11 +69,13 @@ describe('useFeedback hook', () => {
       chatState: { messages: mockMessages, interactions: [], llmResponding: false },
       chatStateDispatch: chatStateDispatchMock,
     });
-    const { result, waitForNextUpdate } = renderHook(() => useFeedback());
+    const { result } = renderHook(() => useFeedback());
     expect(result.current.feedbackResult).toBe(undefined);
 
     const sendFeedback = result.current.sendFeedback;
-    await sendFeedback(mockOutputMessage as IOutput, true);
+    await act(async () => {
+      await sendFeedback(mockOutputMessage, true);
+    });
     expect(httpMock.put).toHaveBeenCalledWith(
       `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.traceId}`,
       {
@@ -82,7 +84,6 @@ describe('useFeedback hook', () => {
         }),
       }
     );
-    waitForNextUpdate();
     expect(result.current.feedbackResult).toBe(true);
   });
 
@@ -101,12 +102,13 @@ describe('useFeedback hook', () => {
       chatState: { messages: mockMessages, interactions: [], llmResponding: false },
       chatStateDispatch: chatStateDispatchMock,
     });
-    const { result, waitForNextUpdate } = renderHook(() => useFeedback());
+    const { result } = renderHook(() => useFeedback());
     expect(result.current.feedbackResult).toBe(undefined);
 
     const sendFeedback = result.current.sendFeedback;
-
-    await sendFeedback(mockOutputMessage as IOutput, true);
+    await act(async () => {
+      await sendFeedback(mockOutputMessage, true);
+    });
 
     expect(httpMock.put).toHaveBeenCalledWith(
       `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.traceId}`,
@@ -116,7 +118,6 @@ describe('useFeedback hook', () => {
         }),
       }
     );
-    waitForNextUpdate();
     expect(result.current.feedbackResult).toBe(undefined);
   });
 
@@ -134,8 +135,9 @@ describe('useFeedback hook', () => {
     expect(result.current.feedbackResult).toBe(undefined);
 
     const sendFeedback = result.current.sendFeedback;
-
-    await sendFeedback(mockOutputMessage as IOutput, true);
+    await act(async () => {
+      await sendFeedback(mockOutputMessage, true);
+    });
 
     expect(httpMock.put).not.toHaveBeenCalledWith(
       `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.traceId}`,

@@ -47,14 +47,16 @@ describe('useSaveChat hook', () => {
     httpMock.post.mockResolvedValueOnce(null);
     const { result } = renderHook(() => useSaveChat());
     const saveChat = result.current.saveChat;
+    let saveChatError;
     try {
       await saveChat(chatName);
     } catch (e) {
-      expect(httpMock.post).toHaveBeenCalledWith(NOTEBOOK_API.CREATE_NOTEBOOK, {
-        body: JSON.stringify({ name: chatName }),
-      });
-      expect(e.message).toBe('create notebook error');
+      saveChatError = e;
     }
+    expect(httpMock.post).toHaveBeenCalledWith(NOTEBOOK_API.CREATE_NOTEBOOK, {
+      body: JSON.stringify({ name: chatName }),
+    });
+    expect(saveChatError?.message).toBe('create notebook error');
   });
 
   it('should use the id which createNotebook returned to pass to setParagraphs function and throw error if set paragraphs function does not return object id', async () => {
@@ -72,17 +74,19 @@ describe('useSaveChat hook', () => {
 
     const { result } = renderHook(() => useSaveChat());
     const saveChat = result.current.saveChat;
+    let saveChatError;
     try {
       await saveChat(chatName);
     } catch (e) {
-      expect(httpMock.post).toHaveBeenCalledWith(NOTEBOOK_API.CREATE_NOTEBOOK, {
-        body: JSON.stringify({ name: chatName }),
-      });
-      expect(httpMock.post).toHaveBeenCalledWith(NOTEBOOK_API.SET_PARAGRAPH, {
-        body: JSON.stringify({ noteId: mockId, paragraphs: [] }),
-      });
-      expect(e.message).toBe('set paragraphs error');
+      saveChatError = e;
     }
+    expect(httpMock.post).toHaveBeenCalledWith(NOTEBOOK_API.CREATE_NOTEBOOK, {
+      body: JSON.stringify({ name: chatName }),
+    });
+    expect(httpMock.post).toHaveBeenCalledWith(NOTEBOOK_API.SET_PARAGRAPH, {
+      body: JSON.stringify({ noteId: mockId, paragraphs: [] }),
+    });
+    expect(saveChatError.message).toBe('set paragraphs error');
   });
 
   it('should use the id which createNotebook returned to pass to setParagraphs function and run regularly ', async () => {
