@@ -41,7 +41,7 @@ describe('regenerate route when rootAgentId is provided', () => {
   beforeEach(() => {
     loggerMock.clear(mockedLogger);
   });
-  it('return back successfully when requestLLM returns momery back', async () => {
+  it('return back successfully when regenerate returns momery back', async () => {
     mockOllyChatService.regenerate.mockImplementationOnce(async () => {
       return {
         messages: [],
@@ -73,7 +73,7 @@ describe('regenerate route when rootAgentId is provided', () => {
     `);
   });
 
-  it('log error when requestLLM throws an error', async () => {
+  it('log error when regenerate throws an error', async () => {
     mockOllyChatService.regenerate.mockImplementationOnce(() => {
       throw new Error('something went wrong');
     });
