@@ -11,12 +11,12 @@ import { mockOllyChatService } from '../services/chat/olly_chat_service.mock';
 import { mockAgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service.mock';
 import { httpServerMock } from '../../../../src/core/server/http/http_server.mocks';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
-import { registerChatRoutes, LLMRequestSchema, AgentIdNotFoundError } from './chat_routes';
+import { registerChatRoutes, RegenerateSchema, AgentIdNotFoundError } from './chat_routes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
 const mockedLogger = loggerMock.create();
 
-describe('send_message route when rootAgentId is provided', () => {
+describe('regenerate route when rootAgentId is provided', () => {
   const router = new Router(
     '',
     mockedLogger,
@@ -30,10 +30,10 @@ describe('send_message route when rootAgentId is provided', () => {
     messageParsers: [],
     rootAgentId: 'foo',
   });
-  const sendMessageRequest = (payload: LLMRequestSchema) =>
+  const regenerateRequest = (payload: RegenerateSchema) =>
     triggerHandler(router, {
-      method: 'post',
-      path: ASSISTANT_API.SEND_MESSAGE,
+      method: 'put',
+      path: ASSISTANT_API.REGENERATE,
       req: httpServerMock.createRawRequest({
         payload: JSON.stringify(payload),
       }),
@@ -41,8 +41,8 @@ describe('send_message route when rootAgentId is provided', () => {
   beforeEach(() => {
     loggerMock.clear(mockedLogger);
   });
-  it('return back successfully when requestLLM returns momery back', async () => {
-    mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
+  it('return back successfully when regenerate returns momery back', async () => {
+    mockOllyChatService.regenerate.mockImplementationOnce(async () => {
       return {
         messages: [],
         memoryId: 'foo',
@@ -57,81 +57,24 @@ describe('send_message route when rootAgentId is provided', () => {
         updatedTimeMs: 0,
       };
     });
-    const result = (await sendMessageRequest({
-      input: {
-        content: '1',
-        contentType: 'text',
-        type: 'input',
-        context: {},
-      },
+    const result = (await regenerateRequest({
+      sessionId: 'foo',
+      interactionId: 'bar',
     })) as ResponseObject;
     expect(result.source).toMatchInlineSnapshot(`
       Object {
+        "createdTimeMs": 0,
         "interactions": Array [],
         "messages": Array [],
         "sessionId": "foo",
         "title": "foo",
+        "updatedTimeMs": 0,
       }
     `);
   });
 
-  it('return 500 when requestLLM throws an error and no conversation id provided', async () => {
-    mockOllyChatService.requestLLM.mockImplementationOnce(() => {
-      throw new Error('something went wrong');
-    });
-    const result = (await sendMessageRequest({
-      input: {
-        content: '1',
-        contentType: 'text',
-        type: 'input',
-        context: {},
-      },
-    })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
-    expect(result.output).toMatchInlineSnapshot(`
-      Object {
-        "headers": Object {},
-        "payload": Object {
-          "error": "Internal Server Error",
-          "message": "something went wrong",
-          "statusCode": 500,
-        },
-        "statusCode": 500,
-      }
-    `);
-  });
-
-  it('return 500 when requestLLM return without memoryId and no conversation id provided', async () => {
-    mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
-      return {
-        messages: [],
-        memoryId: '',
-      };
-    });
-    const result = (await sendMessageRequest({
-      input: {
-        content: '1',
-        contentType: 'text',
-        type: 'input',
-        context: {},
-      },
-    })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
-    expect(result.output).toMatchInlineSnapshot(`
-      Object {
-        "headers": Object {},
-        "payload": Object {
-          "error": "Internal Server Error",
-          "message": "Not a valid conversation",
-          "statusCode": 500,
-        },
-        "statusCode": 500,
-      }
-    `);
-  });
-
-  it('return successfully when requestLLM throws an error but conversation id provided', async () => {
-    mockOllyChatService.requestLLM.mockImplementationOnce(() => {
+  it('log error when regenerate throws an error', async () => {
+    mockOllyChatService.regenerate.mockImplementationOnce(() => {
       throw new Error('something went wrong');
     });
     mockAgentFrameworkStorageService.getSession.mockImplementationOnce(async () => {
@@ -143,30 +86,25 @@ describe('send_message route when rootAgentId is provided', () => {
         updatedTimeMs: 0,
       };
     });
-    const result = (await sendMessageRequest({
-      input: {
-        content: '1',
-        contentType: 'text',
-        type: 'input',
-        context: {
-          appId: '',
-        },
-      },
+    const result = (await regenerateRequest({
       sessionId: 'foo',
+      interactionId: 'bar',
     })) as ResponseObject;
-    expect(mockedLogger.error).toBeCalledWith(new Error('something went wrong'));
+    expect(mockedLogger.error).toBeCalledTimes(1);
     expect(result.source).toMatchInlineSnapshot(`
-        Object {
-          "interactions": Array [],
-          "messages": Array [],
-          "sessionId": "foo",
-          "title": "foo",
-        }
-      `);
+      Object {
+        "createdTimeMs": 0,
+        "interactions": Array [],
+        "messages": Array [],
+        "sessionId": "foo",
+        "title": "foo",
+        "updatedTimeMs": 0,
+      }
+    `);
   });
 
   it('return 500 when get session throws an error', async () => {
-    mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
+    mockOllyChatService.regenerate.mockImplementationOnce(async () => {
       return {
         messages: [],
         memoryId: 'foo',
@@ -175,16 +113,9 @@ describe('send_message route when rootAgentId is provided', () => {
     mockAgentFrameworkStorageService.getSession.mockImplementationOnce(() => {
       throw new Error('foo');
     });
-    const result = (await sendMessageRequest({
-      input: {
-        content: '1',
-        contentType: 'text',
-        type: 'input',
-        context: {
-          appId: '',
-        },
-      },
+    const result = (await regenerateRequest({
       sessionId: 'foo',
+      interactionId: 'bar',
     })) as Boom;
     expect(mockedLogger.error).toBeCalledTimes(1);
     expect(mockedLogger.error).toBeCalledWith(new Error('foo'));
@@ -202,7 +133,7 @@ describe('send_message route when rootAgentId is provided', () => {
   });
 });
 
-describe('send_message route when rootAgentId is not provided', () => {
+describe('regenerate route when rootAgentId is not provided', () => {
   const router = new Router(
     '',
     mockedLogger,
@@ -215,10 +146,10 @@ describe('send_message route when rootAgentId is not provided', () => {
   registerChatRoutes(router, {
     messageParsers: [],
   });
-  const sendMessageRequest = (payload: LLMRequestSchema) =>
+  const regenerateRequest = (payload: RegenerateSchema) =>
     triggerHandler(router, {
-      method: 'post',
-      path: ASSISTANT_API.SEND_MESSAGE,
+      method: 'put',
+      path: ASSISTANT_API.REGENERATE,
       req: httpServerMock.createRawRequest({
         payload: JSON.stringify(payload),
       }),
@@ -228,15 +159,8 @@ describe('send_message route when rootAgentId is not provided', () => {
   });
 
   it('return 400', async () => {
-    const result = (await sendMessageRequest({
-      input: {
-        content: '1',
-        contentType: 'text',
-        type: 'input',
-        context: {
-          appId: '',
-        },
-      },
+    const result = (await regenerateRequest({
+      interactionId: 'bar',
       sessionId: 'foo',
     })) as Boom;
     expect(mockedLogger.error).toBeCalledTimes(1);

@@ -20,10 +20,12 @@ import { httpServerMock } from '../../../../src/core/server/http/http_server.moc
 import {
   OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponseFactory,
+  RouteMethod,
   Router,
 } from '../../../../src/core/server/http/router';
 import { CoreRouteHandlerContext } from '../../../../src/core/server/core_route_handler_context';
 import { coreMock } from '../../../../src/core/server/mocks';
+import { ContextEnhancer } from '../../../../src/core/server/http/router/router';
 
 /**
  * For hapi, ResponseToolkit is an internal implementation
@@ -91,7 +93,7 @@ export class MockResponseToolkit implements ResponseToolkit {
   }
 }
 
-const enhanceWithContext = (otherContext?: object) => (fn: (...args: unknown[]) => unknown) => (
+const enhanceWithContext = (((otherContext?: object) => (fn: (...args: unknown[]) => unknown) => (
   req: OpenSearchDashboardsRequest,
   res: OpenSearchDashboardsResponseFactory
 ) => {
@@ -105,7 +107,9 @@ const enhanceWithContext = (otherContext?: object) => (fn: (...args: unknown[]) 
     req,
     res
   );
-};
+}) as unknown) as (
+  otherContext?: object
+) => ContextEnhancer<unknown, unknown, unknown, RouteMethod>;
 
 const triggerHandler = async (
   router: Router,

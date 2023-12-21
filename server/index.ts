@@ -11,12 +11,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AssistantPlugin(initializerContext);
 }
 
-export { AssistantPluginSetup, AssistantPluginStart } from './types';
+export { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
 
 const assistantConfig = {
   schema: schema.object({
     chat: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
+      rootAgentId: schema.maybe(schema.string()),
     }),
   }),
 };

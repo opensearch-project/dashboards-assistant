@@ -23,7 +23,6 @@ const llmRequestRoute = {
     body: schema.object({
       sessionId: schema.maybe(schema.string()),
       messages: schema.maybe(schema.arrayOf(schema.any())),
-      rootAgentId: schema.string(),
       input: schema.object({
         type: schema.literal('input'),
         context: schema.object({
@@ -36,6 +35,9 @@ const llmRequestRoute = {
   },
 };
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
+
+export const AgentIdNotFoundError =
+  'rootAgentId is required, please specify one in opensearch_dashboards.yml';
 
 const getSessionRoute = {
   path: `${ASSISTANT_API.SESSION}/{sessionId}`,
@@ -62,7 +64,6 @@ const regenerateRoute = {
   validate: {
     body: schema.object({
       sessionId: schema.string(),
-      rootAgentId: schema.string(),
       interactionId: schema.string(),
     }),
   },
@@ -142,7 +143,11 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { messages = [], input, sessionId: sessionIdInRequestBody, rootAgentId } = request.body;
+      if (!routeOptions.rootAgentId) {
+        context.assistant_plugin.logger.error(AgentIdNotFoundError);
+        return response.custom({ statusCode: 400, body: AgentIdNotFoundError });
+      }
+      const { messages = [], input, sessionId: sessionIdInRequestBody } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService();
 
@@ -153,7 +158,12 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        */
       try {
         outputs = await chatService.requestLLM(
-          { messages, input, sessionId: sessionIdInRequestBody, rootAgentId },
+          {
+            messages,
+            input,
+            sessionId: sessionIdInRequestBody,
+            rootAgentId: routeOptions.rootAgentId,
+          },
           context
         );
       } catch (error) {
@@ -314,7 +324,11 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const { sessionId, rootAgentId, interactionId } = request.body;
+      if (!routeOptions.rootAgentId) {
+        context.assistant_plugin.logger.error(AgentIdNotFoundError);
+        return response.custom({ statusCode: 400, body: AgentIdNotFoundError });
+      }
+      const { sessionId, interactionId } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService();
 
@@ -324,7 +338,10 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Get final answer from Agent framework
        */
       try {
-        outputs = await chatService.regenerate({ sessionId, rootAgentId, interactionId }, context);
+        outputs = await chatService.regenerate(
+          { sessionId, rootAgentId: routeOptions.rootAgentId, interactionId },
+          context
+        );
       } catch (error) {
         context.assistant_plugin.logger.error(error);
       }

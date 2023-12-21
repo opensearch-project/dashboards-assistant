@@ -6,8 +6,10 @@
 import { IMessage, Interaction } from '../common/types/chat_saved_object_attributes';
 import { Logger } from '../../../src/core/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AssistantPluginSetup {}
+export interface AssistantPluginSetup {
+  registerMessageParser: (message: MessageParser) => void;
+  removeMessageParser: (parserId: MessageParser['id']) => void;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantPluginStart {}
 
@@ -35,6 +37,7 @@ export interface MessageParser {
 
 export interface RoutesOptions {
   messageParsers: MessageParser[];
+  rootAgentId?: string;
 }
 
 declare module '../../../src/core/server' {

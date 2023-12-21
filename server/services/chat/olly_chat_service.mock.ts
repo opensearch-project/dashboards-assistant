@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { PublicContract } from '@osd/utility-types';
 import { OllyChatService } from './olly_chat_service';
 
-const mockOllyChatService: jest.Mocked<OllyChatService> = {
+const mockOllyChatService: jest.Mocked<PublicContract<OllyChatService>> = {
   requestLLM: jest.fn(),
+  regenerate: jest.fn(),
   abortAgentExecution: jest.fn(),
 };
 
