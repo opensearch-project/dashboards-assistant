@@ -167,7 +167,7 @@ export class AgentFrameworkStorageService implements StorageService {
         };
       }
     } catch (error) {
-      throw new Error('delete converstaion failed, reason:' + JSON.stringify(error.meta?.body));
+      throw new Error('delete conversation failed, reason:' + JSON.stringify(error.meta?.body));
     }
   }
 
@@ -192,7 +192,7 @@ export class AgentFrameworkStorageService implements StorageService {
         };
       }
     } catch (error) {
-      throw new Error('update converstaion failed, reason:' + JSON.stringify(error.meta?.body));
+      throw new Error('update conversation failed, reason:' + JSON.stringify(error.meta?.body));
     }
   }
 
