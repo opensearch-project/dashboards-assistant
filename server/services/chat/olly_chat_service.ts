@@ -17,6 +17,7 @@ interface AgentRunPayload {
 }
 
 const MEMORY_ID_FIELD = 'memory_id';
+const INTERACTION_ID_FIELD = 'parent_interaction_id';
 
 export class OllyChatService implements ChatService {
   static abortControllers: Map<string, AbortController> = new Map();
@@ -58,6 +59,7 @@ export class OllyChatService implements ChatService {
       }>;
       const outputBody = agentFrameworkResponse.body.inference_results?.[0]?.output;
       const memoryIdItem = outputBody?.find((item) => item.name === MEMORY_ID_FIELD);
+      const interactionIdItem = outputBody?.find((item) => item.name === INTERACTION_ID_FIELD);
       return {
         /**
          * Interactions will be stored in Agent framework,
@@ -65,6 +67,7 @@ export class OllyChatService implements ChatService {
          */
         messages: [],
         memoryId: memoryIdItem?.result || '',
+        interactionId: interactionIdItem?.result || '',
       };
     } catch (error) {
       throw error;
@@ -81,6 +84,7 @@ export class OllyChatService implements ChatService {
   ): Promise<{
     messages: IMessage[];
     memoryId: string;
+    interactionId: string;
   }> {
     const { input, sessionId, rootAgentId } = payload;
 
@@ -99,7 +103,7 @@ export class OllyChatService implements ChatService {
   async regenerate(
     payload: { sessionId: string; interactionId: string; rootAgentId: string },
     context: RequestHandlerContext
-  ): Promise<{ messages: IMessage[]; memoryId: string }> {
+  ): Promise<{ messages: IMessage[]; memoryId: string; interactionId: string }> {
     const { sessionId, interactionId, rootAgentId } = payload;
     const parametersPayload: Pick<
       AgentRunPayload,

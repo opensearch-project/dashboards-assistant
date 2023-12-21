@@ -7,7 +7,7 @@ import { produce } from 'immer';
 import React, { useContext, useMemo, useReducer } from 'react';
 import { IMessage, Interaction } from '../../common/types/chat_saved_object_attributes';
 
-interface ChatState {
+export interface ChatState {
   messages: IMessage[];
   interactions: Interaction[];
   llmResponding: boolean;
@@ -29,6 +29,13 @@ type ChatStateAction =
   | {
       type: 'error';
       payload: NonNullable<ChatState['llmError']> | { body: NonNullable<ChatState['llmError']> };
+    }
+  | {
+      type: 'patch';
+      payload: {
+        messages: ChatState['messages'];
+        interactions: ChatState['interactions'];
+      };
     };
 
 interface IChatStateContext {
@@ -42,6 +49,33 @@ const initialState: ChatState = {
   messages: [],
   llmResponding: false,
 };
+
+/**
+ * This function will try to patch the matched item from patchArray into arrayWaitForPatch,
+ * and append all the items that not matched into arrayWaitForPatch.
+ * @param arrayWaitForPatch T[] the array wait for patch
+ * @param patchArray T[] the array contains patch
+ * @param primaryKey the field used to find match item_from_arrayWaitForPatch[primaryKey] === patchArray[primaryKey]
+ */
+export function addPatchInArray<T>(arrayWaitForPatch: T[], patchArray: T[], primaryKey: keyof T) {
+  const notMatchArray: T[] = [];
+  const copiedArrayWaitForPatch = [...arrayWaitForPatch];
+  patchArray.forEach((patchItem) => {
+    const findIndex = copiedArrayWaitForPatch.findIndex(
+      (itemInWaitForPatch) => itemInWaitForPatch[primaryKey] === patchItem[primaryKey]
+    );
+    if (findIndex > -1) {
+      copiedArrayWaitForPatch[findIndex] = {
+        ...copiedArrayWaitForPatch[findIndex],
+        ...patchItem,
+      };
+    } else {
+      notMatchArray.push(patchItem);
+    }
+  });
+
+  return [...copiedArrayWaitForPatch, ...notMatchArray];
+}
 
 const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, action) =>
   produce(state, (draft) => {
@@ -74,6 +108,20 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
         // Exclude the last outputs
         draft.messages = draft.messages.slice(0, lastInputIndex + 1);
         draft.llmResponding = true;
+        draft.llmError = undefined;
+        break;
+      /**
+       * As in Olly, regenerate and send_message API will only response with the latest one interaction and messages to improve performance.
+       * So we need to use patch to hanlde with the response.
+       */
+      case 'patch':
+        draft.messages = addPatchInArray(state.messages, action.payload.messages, 'messageId');
+        draft.interactions = addPatchInArray(
+          state.interactions,
+          action.payload.interactions,
+          'interaction_id'
+        );
+        draft.llmResponding = false;
         draft.llmError = undefined;
         break;
     }

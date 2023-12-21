@@ -37,6 +37,7 @@ export interface IInput {
   context?: {
     appId?: string;
   };
+  messageId?: string;
 }
 export interface IOutput {
   type: 'output';
@@ -45,6 +46,7 @@ export interface IOutput {
   contentType: 'error' | 'markdown' | 'visualization' | 'ppl_visualization';
   content: string;
   suggestedActions?: ISuggestedAction[];
+  messageId?: string;
 }
 export type IMessage = IInput | IOutput;
 
@@ -66,4 +68,11 @@ export type ISuggestedAction = ISuggestedActionBase &
   );
 export interface SendFeedbackBody {
   satisfaction: boolean;
+}
+
+export interface SendResponse {
+  sessionId: string;
+  title?: string;
+  messages: IMessage[];
+  interactions: Interaction[];
 }

@@ -5,6 +5,7 @@
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema, TypeOf } from '@osd/config-schema';
+import { SendResponse } from 'common/types/chat_saved_object_attributes';
 import {
   HttpResponsePayload,
   IOpenSearchDashboardsResponse,
@@ -178,19 +179,41 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Retrieve latest interactions from memory
        */
       const sessionId = outputs?.memoryId || (sessionIdInRequestBody as string);
+      const interactionId = outputs?.interactionId || '';
       try {
         if (!sessionId) {
           throw new Error('Not a valid conversation');
         }
-        const conversation = await storageService.getSession(sessionId);
+
+        const resultPayload: SendResponse = {
+          messages: [],
+          interactions: [],
+          sessionId,
+        };
+
+        if (!sessionIdInRequestBody) {
+          /**
+           * If no sessionId is provided in request payload,
+           * it means it is a brand new conversation,
+           * need to fetch all the details including title.
+           */
+          const conversation = await storageService.getSession(sessionId);
+          resultPayload.interactions = conversation.interactions;
+          resultPayload.messages = conversation.messages;
+          resultPayload.title = conversation.title;
+        } else {
+          /**
+           * Only response with the latest interaction.
+           * It may have some issues in Concurrent case like a user may use two tabs to chat with Chatbot in one conversation.
+           * But for now we will ignore this case, can be optimized by always fetching conversation if we need to take this case into consideration.
+           */
+          const interaction = await storageService.getInteraction(sessionId, interactionId);
+          resultPayload.interactions = [interaction];
+          resultPayload.messages = await storageService.getMessagesFromInteractions([interaction]);
+        }
 
         return response.ok({
-          body: {
-            messages: conversation.messages,
-            sessionId,
-            title: conversation.title,
-            interactions: conversation.interactions,
-          },
+          body: resultPayload,
         });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -350,11 +373,16 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Retrieve latest interactions from memory
        */
       try {
-        const conversation = await storageService.getSession(sessionId);
+        const interaction = await storageService.getInteraction(
+          sessionId,
+          outputs?.interactionId || ''
+        );
+        const messages = await storageService.getMessagesFromInteractions([interaction]);
 
         return response.ok({
           body: {
-            ...conversation,
+            interactions: [interaction],
+            messages,
             sessionId,
           },
         });

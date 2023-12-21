@@ -32,7 +32,10 @@ export interface MessageParser {
   /**
    * parserProvider is the callback that will be triggered in each message
    */
-  parserProvider: (interaction: Interaction, options: ProviderOptions) => Promise<IMessage[]>;
+  parserProvider: (
+    interaction: Interaction,
+    options: ProviderOptions
+  ) => Promise<Array<Omit<IMessage, 'messageId'>>>;
 }
 
 export interface RoutesOptions {
