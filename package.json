@@ -4,13 +4,15 @@
   "main": "index.ts",
   "license": "Apache-2.0",
   "scripts": {
-    "osd": "node ../../scripts/osd",
+    "osd": "../../scripts/use_node ../../scripts/osd",
     "build": "yarn plugin-helpers build",
     "test:jest": "../../node_modules/.bin/jest --config ./test/jest.config.js",
-    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "plugin-helpers": "../../scripts/use_node ../../scripts/plugin_helpers",
     "prepare": "husky install",
-    "lint:es": "node ../../scripts/eslint",
-    "lint": "yarn lint:es"
+    "lint:es": "../../scripts/use_node ../../scripts/eslint",
+    "lint": "yarn lint:es",
+    "setup": "scripts/pre_install.sh",
+    "osd-version": "../../scripts/use_node -e \"console.log(require('./opensearch_dashboards.json').opensearchDashboardsVersion)\""
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
