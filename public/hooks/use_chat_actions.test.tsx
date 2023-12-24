@@ -12,6 +12,7 @@ import { SessionsService } from '../services/sessions_service';
 import { SessionLoadService } from '../services/session_load_service';
 import * as chatStateHookExports from './use_chat_state';
 import { ASSISTANT_API } from '../../common/constants/llm';
+import { IMessage } from 'common/types/chat_saved_object_attributes';
 
 const mockSessionsLoad = jest.fn();
 const mockSessionLoad = jest.fn().mockReturnValue({ messages: [], interactions: [] });
@@ -47,7 +48,7 @@ const SEND_MESSAGE_RESPONSE = {
   interactions: [
     {
       input: 'what indices are in my cluster?',
-      output: 'here are the indices: .alert',
+      response: 'here are the indices: .alert',
       conversation_id: 'conversation_id_mock',
       interaction_id: 'interaction_id_mock',
       create_time: '2023-01-01',
@@ -63,7 +64,7 @@ describe('useChatActions hook', () => {
   const pplVisualizationRenderMock = jest.fn();
   const setTraceIdMock = jest.fn();
 
-  const chatContextMock = {
+  const chatContextMock: chatContextHookExports.IChatContext = {
     selectedTabId: 'chat',
     setSessionId: jest.fn(),
     setTitle: jest.fn(),
@@ -74,6 +75,14 @@ describe('useChatActions hook', () => {
       view_ppl_visualization: pplVisualizationRenderMock,
     },
     setTraceId: setTraceIdMock,
+    flyoutVisible: false,
+    flyoutFullScreen: false,
+    userHasAccess: false,
+    contentRenderers: {},
+    currentAccount: {
+      username: '',
+      tenant: '',
+    },
   };
 
   beforeEach(() => {
@@ -99,6 +108,14 @@ describe('useChatActions hook', () => {
 
   it('should send message correctly', async () => {
     httpMock.post.mockResolvedValueOnce(SEND_MESSAGE_RESPONSE);
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: {
+        messages: [SEND_MESSAGE_RESPONSE.messages[0] as IMessage],
+        interactions: [],
+        llmResponding: false,
+      },
+      chatStateDispatch: chatStateDispatchMock,
+    });
     const { result } = renderHook(() => useChatActions());
     await result.current.send(INPUT_MESSAGE);
 
@@ -108,14 +125,25 @@ describe('useChatActions hook', () => {
     // it should call send message api
     expect(httpMock.post).toHaveBeenCalledWith(ASSISTANT_API.SEND_MESSAGE, {
       body: JSON.stringify({
-        messages: [],
+        messages: [SEND_MESSAGE_RESPONSE.messages[0]],
         input: INPUT_MESSAGE,
       }),
     });
 
-    // it should send dispatch `receive` action
+    // it should send dispatch `receive` action to remove the message without messageId
     expect(chatStateDispatchMock).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'receive' })
+      expect.objectContaining({ type: 'receive', payload: { messages: [], interactions: [] } })
+    );
+
+    // it should send dispatch `patch` action
+    expect(chatStateDispatchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'patch',
+        payload: {
+          messages: SEND_MESSAGE_RESPONSE.messages,
+          interactions: SEND_MESSAGE_RESPONSE.interactions,
+        },
+      })
     );
   });
 
@@ -245,6 +273,15 @@ describe('useChatActions hook', () => {
       .spyOn(chatContextHookExports, 'useChatContext')
       .mockReturnValue({ ...chatContextMock, sessionId: 'session_id_mock' });
 
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: {
+        messages: SEND_MESSAGE_RESPONSE.messages as IMessage[],
+        interactions: SEND_MESSAGE_RESPONSE.interactions,
+        llmResponding: false,
+      },
+      chatStateDispatch: chatStateDispatchMock,
+    });
+
     const { result } = renderHook(() => useChatActions());
     await result.current.regenerate('interaction_id_mock');
 
@@ -256,7 +293,17 @@ describe('useChatActions hook', () => {
       }),
     });
     expect(chatStateDispatchMock).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'receive' })
+      expect.objectContaining({ type: 'receive', payload: { messages: [], interactions: [] } })
+    );
+
+    expect(chatStateDispatchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'patch',
+        payload: {
+          messages: SEND_MESSAGE_RESPONSE.messages,
+          interactions: SEND_MESSAGE_RESPONSE.interactions,
+        },
+      })
     );
   });
 
