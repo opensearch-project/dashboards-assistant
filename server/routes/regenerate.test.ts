@@ -8,7 +8,10 @@ import { Boom } from '@hapi/boom';
 import { Router } from '../../../../src/core/server/http/router';
 import { enhanceWithContext, triggerHandler } from './router.mock';
 import { mockOllyChatService } from '../services/chat/olly_chat_service.mock';
-import { mockAgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service.mock';
+import {
+  mockAgentFrameworkStorageService,
+  resetMocks,
+} from '../services/storage/agent_framework_storage_service.mock';
 import { httpServerMock } from '../../../../src/core/server/http/http_server.mocks';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
 import { registerChatRoutes, RegenerateSchema, AgentIdNotFoundError } from './chat_routes';
@@ -40,35 +43,59 @@ describe('regenerate route when rootAgentId is provided', () => {
     });
   beforeEach(() => {
     loggerMock.clear(mockedLogger);
+    resetMocks();
   });
   it('return back successfully when regenerate returns momery back', async () => {
     mockOllyChatService.regenerate.mockImplementationOnce(async () => {
       return {
         messages: [],
         memoryId: 'foo',
+        interactionId: 'interaction_id',
       };
     });
-    mockAgentFrameworkStorageService.getSession.mockImplementationOnce(async () => {
+    mockAgentFrameworkStorageService.getInteraction.mockImplementationOnce(async () => {
       return {
-        messages: [],
-        title: 'foo',
-        interactions: [],
-        createdTimeMs: 0,
-        updatedTimeMs: 0,
+        input: 'foo',
+        response: 'bar',
+        conversation_id: 'foo',
+        interaction_id: 'interaction_id',
+        create_time: 'create_time',
       };
     });
+    mockAgentFrameworkStorageService.getMessagesFromInteractions.mockImplementationOnce(
+      async () => {
+        return [
+          {
+            contentType: 'markdown',
+            type: 'output',
+            content: 'output',
+          },
+        ];
+      }
+    );
     const result = (await regenerateRequest({
       sessionId: 'foo',
       interactionId: 'bar',
     })) as ResponseObject;
     expect(result.source).toMatchInlineSnapshot(`
       Object {
-        "createdTimeMs": 0,
-        "interactions": Array [],
-        "messages": Array [],
+        "interactions": Array [
+          Object {
+            "conversation_id": "foo",
+            "create_time": "create_time",
+            "input": "foo",
+            "interaction_id": "interaction_id",
+            "response": "bar",
+          },
+        ],
+        "messages": Array [
+          Object {
+            "content": "output",
+            "contentType": "markdown",
+            "type": "output",
+          },
+        ],
         "sessionId": "foo",
-        "title": "foo",
-        "updatedTimeMs": 0,
       }
     `);
   });
@@ -93,12 +120,11 @@ describe('regenerate route when rootAgentId is provided', () => {
     expect(mockedLogger.error).toBeCalledTimes(1);
     expect(result.source).toMatchInlineSnapshot(`
       Object {
-        "createdTimeMs": 0,
-        "interactions": Array [],
-        "messages": Array [],
+        "interactions": Array [
+          undefined,
+        ],
+        "messages": undefined,
         "sessionId": "foo",
-        "title": "foo",
-        "updatedTimeMs": 0,
       }
     `);
   });
@@ -108,9 +134,10 @@ describe('regenerate route when rootAgentId is provided', () => {
       return {
         messages: [],
         memoryId: 'foo',
+        interactionId: 'interaction_id',
       };
     });
-    mockAgentFrameworkStorageService.getSession.mockImplementationOnce(() => {
+    mockAgentFrameworkStorageService.getInteraction.mockImplementationOnce(() => {
       throw new Error('foo');
     });
     const result = (await regenerateRequest({
