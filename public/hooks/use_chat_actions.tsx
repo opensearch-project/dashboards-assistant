@@ -194,7 +194,9 @@ export const useChatActions = (): AssistantActions => {
           chatStateDispatch({
             type: 'receive',
             payload: {
-              messages: chatState.messages.slice(0, findRegeratedMessageIndex),
+              messages: chatState.messages
+                .slice(0, findRegeratedMessageIndex)
+                .filter((item) => item.messageId),
               interactions: chatState.interactions.filter(
                 (interaction) => interaction.interaction_id !== interactionId
               ),
