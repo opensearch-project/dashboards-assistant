@@ -79,6 +79,265 @@ describe('AgentFrameworkStorageService', () => {
     `);
   });
 
+  it('getSessions', async () => {
+    mockedTransport.mockImplementation(async (params) => {
+      return {
+        body: {
+          hits: {
+            hits: [
+              {
+                _id: 'foo',
+                _source: {
+                  name: 'foo',
+                  create_time: 1,
+                  updated_time: 1,
+                },
+              },
+            ],
+            total: 10,
+          },
+        },
+      };
+    });
+
+    expect(
+      await agentFrameworkService.getSessions({
+        sortField: 'createTimeMs',
+        searchFields: ['title'],
+        search: 'foo',
+        page: 1,
+        perPage: 10,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "objects": Array [
+          Object {
+            "createdTimeMs": 978307200000,
+            "id": "foo",
+            "messages": Array [],
+            "title": "foo",
+            "updatedTimeMs": 978307200000,
+            "version": 1,
+          },
+        ],
+        "total": 10,
+      }
+    `);
+    expect(
+      await agentFrameworkService.getSessions({
+        sortField: 'updatedTimeMs',
+        searchFields: 'title',
+        search: 'foo',
+        page: 1,
+        perPage: 10,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "objects": Array [
+          Object {
+            "createdTimeMs": 978307200000,
+            "id": "foo",
+            "messages": Array [],
+            "title": "foo",
+            "updatedTimeMs": 978307200000,
+            "version": 1,
+          },
+        ],
+        "total": 10,
+      }
+    `);
+    expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "body": Object {
+              "from": 0,
+              "query": Object {
+                "multi_match": Object {
+                  "fields": Array [
+                    "name",
+                  ],
+                  "query": "foo",
+                },
+              },
+              "size": 10,
+            },
+            "method": "GET",
+            "path": "/_plugins/_ml/memory/conversation/_search",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "from": 0,
+              "query": Object {
+                "multi_match": Object {
+                  "fields": Array [
+                    "name",
+                  ],
+                  "query": "foo",
+                },
+              },
+              "size": 10,
+            },
+            "method": "GET",
+            "path": "/_plugins/_ml/memory/conversation/_search",
+          },
+        ],
+      ]
+    `);
+  });
+
+  it('saveMessages should send error', async () => {
+    expect(agentFrameworkService.saveMessages('', '', [])).rejects.toMatchInlineSnapshot(
+      `[Error: Method is not needed]`
+    );
+  });
+
+  it('deleteSession', async () => {
+    mockedTransport.mockImplementationOnce(async (params) => ({
+      statusCode: 200,
+    }));
+    expect(agentFrameworkService.deleteSession('foo')).resolves.toMatchInlineSnapshot(`
+      Object {
+        "success": true,
+      }
+    `);
+    mockedTransport.mockImplementationOnce(async (params) => ({
+      statusCode: 404,
+      body: {
+        message: 'can not find conversation',
+      },
+    }));
+    expect(agentFrameworkService.deleteSession('foo')).resolves.toMatchInlineSnapshot(`
+      Object {
+        "message": "{\\"message\\":\\"can not find conversation\\"}",
+        "statusCode": 404,
+        "success": false,
+      }
+    `);
+    mockedTransport.mockImplementationOnce(async (params) => {
+      return Promise.reject({ meta: { body: 'error' } });
+    });
+    expect(agentFrameworkService.deleteSession('foo')).rejects.toMatchInlineSnapshot(
+      `[Error: delete converstaion failed, reason:"error"]`
+    );
+  });
+
+  it('updateSession', async () => {
+    mockedTransport.mockImplementationOnce(async (params) => ({
+      statusCode: 200,
+    }));
+    expect(agentFrameworkService.updateSession('foo', 'title')).resolves.toMatchInlineSnapshot(`
+      Object {
+        "success": true,
+      }
+    `);
+    mockedTransport.mockImplementationOnce(async (params) => ({
+      statusCode: 404,
+      body: {
+        message: 'can not find conversation',
+      },
+    }));
+    expect(agentFrameworkService.updateSession('foo', 'title')).resolves.toMatchInlineSnapshot(`
+      Object {
+        "message": "{\\"message\\":\\"can not find conversation\\"}",
+        "statusCode": 404,
+        "success": false,
+      }
+    `);
+    mockedTransport.mockImplementationOnce(async (params) => {
+      return Promise.reject({ meta: { body: 'error' } });
+    });
+    expect(agentFrameworkService.updateSession('foo', 'title')).rejects.toMatchInlineSnapshot(
+      `[Error: update converstaion failed, reason:"error"]`
+    );
+  });
+
+  it('getTraces', async () => {
+    mockedTransport.mockImplementationOnce(async (params) => ({
+      body: {
+        traces: [
+          {
+            conversation_id: 'conversation_id',
+            interaction_id: 'interaction_id',
+            create_time: 'create_time',
+            input: 'input',
+            response: 'response',
+            origin: 'origin',
+            parent_interaction_id: 'parent_interaction_id',
+            trace_number: 1,
+          },
+        ],
+      },
+    }));
+    expect(agentFrameworkService.getTraces('foo')).resolves.toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "createTime": "create_time",
+          "input": "input",
+          "interactionId": "interaction_id",
+          "origin": "origin",
+          "output": "response",
+          "parentInteractionId": "parent_interaction_id",
+          "traceNumber": 1,
+        },
+      ]
+    `);
+    mockedTransport.mockImplementationOnce(async (params) => {
+      return Promise.reject({ meta: { body: 'error' } });
+    });
+    expect(agentFrameworkService.getTraces('foo')).rejects.toMatchInlineSnapshot(
+      `[Error: get traces failed, reason:"error"]`
+    );
+  });
+
+  it('updateInteraction', async () => {
+    mockedTransport.mockImplementationOnce(async (params) => ({
+      statusCode: 200,
+    }));
+    expect(
+      agentFrameworkService.updateInteraction('foo', {
+        foo: {
+          bar: 'foo',
+        },
+      })
+    ).resolves.toMatchInlineSnapshot(`
+      Object {
+        "success": true,
+      }
+    `);
+    mockedTransport.mockImplementationOnce(async (params) => ({
+      statusCode: 404,
+      body: {
+        message: 'can not find conversation',
+      },
+    }));
+    expect(
+      agentFrameworkService.updateInteraction('foo', {
+        foo: {
+          bar: 'foo',
+        },
+      })
+    ).resolves.toMatchInlineSnapshot(`
+      Object {
+        "message": "{\\"message\\":\\"can not find conversation\\"}",
+        "statusCode": 404,
+        "success": false,
+      }
+    `);
+    mockedTransport.mockImplementationOnce(async (params) => {
+      return Promise.reject({ meta: { body: 'error' } });
+    });
+    expect(
+      agentFrameworkService.updateInteraction('foo', {
+        foo: {
+          bar: 'foo',
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: update interaction failed, reason:"error"]`);
+  });
+
   it('getInteraction', async () => {
     mockedTransport.mockImplementation(async (params) => ({
       body: {
