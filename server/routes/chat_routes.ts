@@ -208,8 +208,9 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
            * But for now we will ignore this case, can be optimized by always fetching conversation if we need to take this case into consideration.
            */
           const interaction = await storageService.getInteraction(sessionId, interactionId);
-          resultPayload.interactions = [interaction];
-          resultPayload.messages = await storageService.getMessagesFromInteractions([interaction]);
+          resultPayload.interactions = [interaction].filter((item) => item);
+          resultPayload.messages =
+            (await storageService.getMessagesFromInteractions(resultPayload.interactions)) || [];
         }
 
         return response.ok({
@@ -377,7 +378,9 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
           sessionId,
           outputs?.interactionId || ''
         );
-        const messages = await storageService.getMessagesFromInteractions([interaction]);
+        const finalInteractions = [interaction].filter((item) => item);
+        const messages =
+          (await storageService.getMessagesFromInteractions(finalInteractions)) || [];
 
         return response.ok({
           body: {

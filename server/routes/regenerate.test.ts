@@ -104,13 +104,13 @@ describe('regenerate route when rootAgentId is provided', () => {
     mockOllyChatService.regenerate.mockImplementationOnce(() => {
       throw new Error('something went wrong');
     });
-    mockAgentFrameworkStorageService.getSession.mockImplementationOnce(async () => {
+    mockAgentFrameworkStorageService.getInteraction.mockImplementationOnce(async () => {
       return {
-        messages: [],
-        title: 'foo',
-        interactions: [],
-        createdTimeMs: 0,
-        updatedTimeMs: 0,
+        input: 'foo',
+        response: 'bar',
+        conversation_id: 'foo',
+        interaction_id: 'interaction_id',
+        create_time: 'create_time',
       };
     });
     const result = (await regenerateRequest({
@@ -121,9 +121,15 @@ describe('regenerate route when rootAgentId is provided', () => {
     expect(result.source).toMatchInlineSnapshot(`
       Object {
         "interactions": Array [
-          undefined,
+          Object {
+            "conversation_id": "foo",
+            "create_time": "create_time",
+            "input": "foo",
+            "interaction_id": "interaction_id",
+            "response": "bar",
+          },
         ],
-        "messages": undefined,
+        "messages": Array [],
         "sessionId": "foo",
       }
     `);
