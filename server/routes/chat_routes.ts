@@ -384,7 +384,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
 
         return response.ok({
           body: {
-            interactions: [interaction],
+            interactions: finalInteractions,
             messages,
             sessionId,
           },
