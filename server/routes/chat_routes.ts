@@ -209,8 +209,9 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
            */
           const interaction = await storageService.getInteraction(sessionId, interactionId);
           resultPayload.interactions = [interaction].filter((item) => item);
-          resultPayload.messages =
-            (await storageService.getMessagesFromInteractions(resultPayload.interactions)) || [];
+          resultPayload.messages = resultPayload.interactions.length
+            ? await storageService.getMessagesFromInteractions(resultPayload.interactions)
+            : [];
         }
 
         return response.ok({

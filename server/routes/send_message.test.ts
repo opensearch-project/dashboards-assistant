@@ -98,6 +98,9 @@ describe('send_message route when rootAgentId is provided', () => {
         create_time: 'create_time',
       };
     });
+    mockAgentFrameworkStorageService.getMessagesFromInteractions.mockImplementationOnce(
+      async () => []
+    );
     const result = (await sendMessageRequest({
       input: {
         content: '1',
@@ -193,6 +196,9 @@ describe('send_message route when rootAgentId is provided', () => {
         create_time: 'create_time',
       };
     });
+    mockAgentFrameworkStorageService.getMessagesFromInteractions.mockImplementationOnce(
+      async () => []
+    );
     const result = (await sendMessageRequest({
       input: {
         content: '1',

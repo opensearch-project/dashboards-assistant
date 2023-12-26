@@ -113,6 +113,9 @@ describe('regenerate route when rootAgentId is provided', () => {
         create_time: 'create_time',
       };
     });
+    mockAgentFrameworkStorageService.getMessagesFromInteractions.mockImplementationOnce(
+      async () => []
+    );
     const result = (await regenerateRequest({
       sessionId: 'foo',
       interactionId: 'bar',
