@@ -41,14 +41,14 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
       const notebookLink = `./observability-notebooks#/${notebookId}?view=view_both`;
 
       toasts.addSuccess({
-        text: toMountPoint(
-          <p>
+        title: toMountPoint(
+          <>
             This conversation was saved as{' '}
             <EuiLink href={notebookLink} target="_blank">
               {name}
             </EuiLink>
             .
-          </p>
+          </>
         ),
       });
     } catch (error) {
