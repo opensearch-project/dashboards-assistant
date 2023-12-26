@@ -379,8 +379,9 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
           outputs?.interactionId || ''
         );
         const finalInteractions = [interaction].filter((item) => item);
-        const messages =
-          (await storageService.getMessagesFromInteractions(finalInteractions)) || [];
+        const messages = finalInteractions.length
+          ? await storageService.getMessagesFromInteractions(finalInteractions)
+          : [];
 
         return response.ok({
           body: {
