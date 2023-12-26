@@ -79,7 +79,7 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
     }
   });
 
-export const ChatStateProvider: React.FC = (props) => {
+export const ChatStateProvider = (props: { children?: React.ReactNode }) => {
   const [chatState, chatStateDispatch] = useReducer(chatStateReducer, initialState);
   const contextValue: IChatStateContext = useMemo(() => ({ chatState, chatStateDispatch }), [
     chatState,
