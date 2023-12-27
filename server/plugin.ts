@@ -34,7 +34,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
       .toPromise();
 
     /**
-     * Check if user enable the chat without specifying a root agent id.
+     * Check if user enable the chat without specifying a root agent name.
      * If so, gives a warning for guidance.
      */
     if (config.chat.enabled && !config.chat.rootAgentName) {
