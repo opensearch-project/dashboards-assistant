@@ -30,7 +30,7 @@ export class OllyChatService implements ChatService {
   constructor(
     private readonly context: RequestHandlerContext,
     private readonly rootAgentName: string
-  ) { }
+  ) {}
 
   private async initRootAgent() {
     OllyChatService.rootAgentId = await this.searchRootAgent(this.rootAgentName);
@@ -61,10 +61,7 @@ export class OllyChatService implements ChatService {
       }
       return response.body.hits.hits[0]._id;
     } catch (error) {
-      let errorMessage = JSON.stringify(error.meta?.body);
-      if (!errorMessage) {
-        errorMessage = error.toString();
-      }
+      const errorMessage = JSON.stringify(error.meta?.body) || error;
       throw new Error('search root agent failed, reason: ' + errorMessage);
     }
   }
@@ -149,7 +146,7 @@ export class OllyChatService implements ChatService {
     }
   }
 
-  public async requestLLM(payload: {
+  async requestLLM(payload: {
     messages: IMessage[];
     input: IInput;
     sessionId?: string;
@@ -172,9 +169,10 @@ export class OllyChatService implements ChatService {
     return await this.requestAgentRun(parametersPayload);
   }
 
-  async regenerate(
-    payload: { sessionId: string; interactionId: string; },
-  ): Promise<{ messages: IMessage[]; memoryId: string; interactionId: string }> {
+  async regenerate(payload: {
+    sessionId: string;
+    interactionId: string;
+  }): Promise<{ messages: IMessage[]; memoryId: string; interactionId: string }> {
     const { sessionId, interactionId } = payload;
     const parametersPayload: Pick<
       AgentRunPayload,
@@ -195,7 +193,7 @@ export class OllyChatService implements ChatService {
   }
 
   // only used for test
-  public resetRootAgentId() {
+  resetRootAgentId() {
     OllyChatService.rootAgentId = undefined;
   }
 }

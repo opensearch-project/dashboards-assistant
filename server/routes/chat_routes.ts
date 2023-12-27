@@ -135,8 +135,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       context.core.opensearch.client.asCurrentUser,
       routeOptions.messageParsers
     );
-  const createChatService = (context: RequestHandlerContext) =>
-    new OllyChatService(context, routeOptions.rootAgentName!);
+  const createChatService = (context: RequestHandlerContext, rootAgentName: string) =>
+    new OllyChatService(context, rootAgentName);
 
   router.post(
     llmRequestRoute,
@@ -151,7 +151,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       }
       const { messages = [], input, sessionId: sessionIdInRequestBody } = request.body;
       const storageService = createStorageService(context);
-      const chatService = createChatService(context);
+      const chatService = createChatService(context, routeOptions.rootAgentName);
 
       let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
 
@@ -326,8 +326,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const chatService = createChatService(context);
-
+      const chatService = createChatService(context, '');
       try {
         chatService.abortAgentExecution(request.body.sessionId);
         context.assistant_plugin.logger.info(`Abort agent execution: ${request.body.sessionId}`);
@@ -352,7 +351,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       }
       const { sessionId, interactionId } = request.body;
       const storageService = createStorageService(context);
-      const chatService = createChatService(context);
+      const chatService = createChatService(context, routeOptions.rootAgentName);
 
       let outputs: Awaited<ReturnType<ChatService['regenerate']>> | undefined;
 
