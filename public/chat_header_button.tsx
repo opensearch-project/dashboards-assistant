@@ -125,7 +125,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
   useEffect(() => {
     const onGlobalMouseUp = (e: KeyboardEvent) => {
-      if (e.metaKey && e.key === '/') {
+      if (e.ctrlKey && e.key === '/') {
         inputRef.current?.focus();
       }
     };
@@ -170,11 +170,11 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
                 </EuiBadge>
               ) : (
                 <EuiBadge
-                  title="press ⌘ + / to start typing"
+                  title="press Ctrl + / to start typing"
                   className="llm-chat-header-shortcut-cmd"
                   color="hollow"
                 >
-                  ⌘ + /
+                  Ctrl + /
                 </EuiBadge>
               )}
             </span>
