@@ -159,4 +159,39 @@ describe('<HeaderChatButton />', () => {
     });
     expect(screen.getByLabelText('chat input')).toHaveFocus();
   });
+
+  it('should disable chat input when no access', () => {
+    render(
+      <HeaderChatButton
+        application={applicationServiceMock.createStartContract()}
+        userHasAccess={false}
+        contentRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={{} as AssistantActions}
+        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+      />
+    );
+    expect(screen.getByLabelText('chat input')).toBeDisabled();
+  });
+
+  it('should not focus on chat input when no access and pressing global shortcut', () => {
+    render(
+      <HeaderChatButton
+        application={applicationServiceMock.createStartContract()}
+        userHasAccess={false}
+        contentRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={{} as AssistantActions}
+        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+      />
+    );
+    expect(screen.getByLabelText('chat input')).not.toHaveFocus();
+    fireEvent.keyDown(document.body, {
+      key: '/',
+      code: 'NumpadDivide',
+      charCode: 111,
+      metaKey: true,
+    });
+    expect(screen.getByLabelText('chat input')).not.toHaveFocus();
+  });
 });

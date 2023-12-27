@@ -124,6 +124,9 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   };
 
   useEffect(() => {
+    if (!props.userHasAccess) {
+      return;
+    }
     const onGlobalMouseUp = (e: KeyboardEvent) => {
       if (e.metaKey && e.key === '/') {
         inputRef.current?.focus();
@@ -134,7 +137,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     return () => {
       document.removeEventListener('keydown', onGlobalMouseUp);
     };
-  }, []);
+  }, [props.userHasAccess]);
 
   return (
     <>
@@ -179,6 +182,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
               )}
             </span>
           }
+          disabled={!props.userHasAccess}
         />
       </div>
       <ChatContext.Provider value={chatContextValue}>
