@@ -16,7 +16,7 @@ import { setupRoutes } from './routes/index';
 import { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
 import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
 import { VisualizationCardParser } from './parsers/visualization_card_parser';
-import { AgentIdNotFoundError } from './routes/chat_routes';
+import { AgentNameNotFoundError } from './routes/chat_routes';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
@@ -37,8 +37,8 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
      * Check if user enable the chat without specifying a root agent id.
      * If so, gives a warning for guidance.
      */
-    if (config.chat.enabled && !config.chat.rootAgentId) {
-      this.logger.warn(AgentIdNotFoundError);
+    if (config.chat.enabled && !config.chat.rootAgentName) {
+      this.logger.warn(AgentNameNotFoundError);
     }
 
     const router = core.http.createRouter();
@@ -53,7 +53,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     // Register server side APIs
     setupRoutes(router, {
       messageParsers: this.messageParsers,
-      rootAgentId: config.chat.rootAgentId,
+      rootAgentName: config.chat.rootAgentName,
     });
 
     core.capabilities.registerProvider(() => ({
