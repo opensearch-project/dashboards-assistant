@@ -14,6 +14,7 @@ export interface ChatService {
   ): Promise<{
     messages: IMessage[];
     memoryId: string;
+    interactionId: string;
   }>;
 
   regenerate(
@@ -22,6 +23,7 @@ export interface ChatService {
   ): Promise<{
     messages: IMessage[];
     memoryId: string;
+    interactionId: string;
   }>;
 
   abortAgentExecution(sessionId: string): void;

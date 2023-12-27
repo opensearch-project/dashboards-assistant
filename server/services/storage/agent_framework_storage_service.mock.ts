@@ -16,6 +16,8 @@ const mockAgentFrameworkStorageService: jest.Mocked<PublicContract<
   updateSession: jest.fn(),
   getTraces: jest.fn(),
   updateInteraction: jest.fn(),
+  getInteraction: jest.fn(),
+  getMessagesFromInteractions: jest.fn(),
 };
 
 jest.mock('./agent_framework_storage_service', () => {
@@ -24,4 +26,8 @@ jest.mock('./agent_framework_storage_service', () => {
   };
 });
 
-export { mockAgentFrameworkStorageService };
+const resetMocks = () => {
+  Object.values(mockAgentFrameworkStorageService).forEach((item) => item.mockReset());
+};
+
+export { mockAgentFrameworkStorageService, resetMocks };

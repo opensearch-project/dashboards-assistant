@@ -5,7 +5,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useChatState, ChatStateProvider } from './use_chat_state';
+import { useChatState, ChatStateProvider, addPatchInArray } from './use_chat_state';
 
 describe('useChatState hook', () => {
   it('should have initial chat state', () => {
@@ -187,6 +187,124 @@ describe('useChatState hook', () => {
     expect(result.current.chatState.llmResponding).toBe(true);
     expect(result.current.chatState.messages).toEqual([
       { type: 'input', contentType: 'text', content: 'question mock' },
+    ]);
+  });
+
+  it('should update state after `patch`', () => {
+    const { result } = renderHook(() => useChatState(), { wrapper: ChatStateProvider });
+    act(() =>
+      result.current.chatStateDispatch({
+        type: 'receive',
+        payload: {
+          messages: [
+            { type: 'input', contentType: 'text', content: 'question mock', messageId: 'foo' },
+            { type: 'output', contentType: 'markdown', content: 'output mock', messageId: 'bar' },
+          ],
+          interactions: [
+            {
+              input: 'question mock',
+              response: 'output mock',
+              conversation_id: 'conversation_id_mock',
+              interaction_id: 'interaction_id_mock',
+              create_time: new Date().toLocaleString(),
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result.current.chatState.llmResponding).toBe(false);
+    expect(result.current.chatState.messages).toEqual([
+      { type: 'input', contentType: 'text', content: 'question mock', messageId: 'foo' },
+      { type: 'output', contentType: 'markdown', content: 'output mock', messageId: 'bar' },
+    ]);
+
+    const newDateString = new Date().toLocaleString();
+
+    act(() =>
+      result.current.chatStateDispatch({
+        type: 'patch',
+        payload: {
+          messages: [
+            {
+              type: 'output',
+              contentType: 'markdown',
+              content: 'output mock patched',
+              messageId: 'bar',
+            },
+          ],
+          interactions: [
+            {
+              input: 'question mock',
+              response: 'output mock patched',
+              conversation_id: 'conversation_id_mock',
+              interaction_id: 'interaction_id_mock',
+              create_time: newDateString,
+            },
+          ],
+        },
+      })
+    );
+    expect(result.current.chatState.llmResponding).toBe(false);
+    expect(result.current.chatState.messages).toEqual([
+      { type: 'input', contentType: 'text', content: 'question mock', messageId: 'foo' },
+      { type: 'output', contentType: 'markdown', content: 'output mock patched', messageId: 'bar' },
+    ]);
+    expect(result.current.chatState.interactions).toEqual([
+      {
+        input: 'question mock',
+        response: 'output mock patched',
+        conversation_id: 'conversation_id_mock',
+        interaction_id: 'interaction_id_mock',
+        create_time: newDateString,
+      },
+    ]);
+  });
+});
+
+describe('addPatchInArray', () => {
+  it('should patch matched item', () => {
+    expect(
+      addPatchInArray(
+        [
+          {
+            id: 'foo',
+            value: 'foo',
+            otherProperty: 'foo',
+          },
+        ],
+        [
+          {
+            id: 'foo',
+            value: 'bar',
+          },
+        ],
+        'id'
+      )
+    ).toEqual([{ id: 'foo', value: 'bar', otherProperty: 'foo' }]);
+  });
+
+  it('should append items not matched', () => {
+    expect(
+      addPatchInArray(
+        [
+          {
+            id: 'foo',
+            value: 'foo',
+            otherProperty: 'foo',
+          },
+        ],
+        [
+          {
+            id: 'bar',
+            value: 'bar',
+          },
+        ],
+        'id'
+      )
+    ).toEqual([
+      { id: 'foo', value: 'foo', otherProperty: 'foo' },
+      { id: 'bar', value: 'bar' },
     ]);
   });
 });

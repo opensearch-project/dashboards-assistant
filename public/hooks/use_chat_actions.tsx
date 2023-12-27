@@ -8,19 +8,12 @@ import { ASSISTANT_API } from '../../common/constants/llm';
 import {
   IMessage,
   ISuggestedAction,
-  Interaction,
+  SendResponse,
 } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { AssistantActions } from '../types';
 import { useChatState } from './use_chat_state';
-
-interface SendResponse {
-  sessionId: string;
-  title: string;
-  messages: IMessage[];
-  interactions: Interaction[];
-}
 
 let abortControllerRef: AbortController;
 
@@ -54,11 +47,26 @@ export const useChatActions = (): AssistantActions => {
       }
       chatContext.setSessionId(response.sessionId);
       // set title for first time
-      if (!chatContext.title) {
+      if (response.title && !chatContext.title) {
         chatContext.setTitle(response.title);
       }
+      /**
+       * Remove messages that do not have messageId
+       * because they are used for displaying loading state
+       */
       chatStateDispatch({
         type: 'receive',
+        payload: {
+          messages: chatState.messages.filter((item) => item.messageId),
+          interactions: chatState.interactions,
+        },
+      });
+
+      /**
+       * Patch messages and interactions based on backend response
+       */
+      chatStateDispatch({
+        type: 'patch',
         payload: {
           messages: response.messages,
           interactions: response.interactions,
@@ -174,8 +182,30 @@ export const useChatActions = (): AssistantActions => {
         if (abortController.signal.aborted) {
           return;
         }
+        /**
+         * Remove the regenerated interaction & message.
+         * In implementation of Agent framework, it will generate a new interactionId
+         * so need to remove the staled interaction in Frontend manually.
+         */
+        const findRegeratedMessageIndex = chatState.messages.findLastIndex(
+          (message) => message.type === 'input'
+        );
+        if (findRegeratedMessageIndex > -1) {
+          chatStateDispatch({
+            type: 'receive',
+            payload: {
+              messages: chatState.messages
+                .slice(0, findRegeratedMessageIndex)
+                .filter((item) => item.messageId),
+              interactions: chatState.interactions.filter(
+                (interaction) => interaction.interaction_id !== interactionId
+              ),
+            },
+          });
+        }
+
         chatStateDispatch({
-          type: 'receive',
+          type: 'patch',
           payload: {
             messages: response.messages,
             interactions: response.interactions,

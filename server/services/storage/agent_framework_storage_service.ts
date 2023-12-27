@@ -51,23 +51,13 @@ export class AgentFrameworkStorageService implements StorageService {
         }>
       >,
     ]);
-    const messageParserRunner = new MessageParserRunner(this.messageParsers);
     const finalInteractions = interactionsResp.body.interactions;
 
-    let finalMessages: IMessage[] = [];
-    for (const interaction of finalInteractions) {
-      finalMessages = [
-        ...finalMessages,
-        ...(await messageParserRunner.run(interaction, {
-          interactions: [...(finalInteractions || [])],
-        })),
-      ];
-    }
     return {
       title: conversation.body.name,
       createdTimeMs: +new Date(conversation.body.create_time),
       updatedTimeMs: +new Date(conversation.body.updated_time),
-      messages: finalMessages,
+      messages: await this.getMessagesFromInteractions(finalInteractions),
       interactions: finalInteractions,
     };
   }
@@ -254,5 +244,36 @@ export class AgentFrameworkStorageService implements StorageService {
     } catch (error) {
       throw new Error('update interaction failed, reason:' + JSON.stringify(error.meta?.body));
     }
+  }
+
+  public async getMessagesFromInteractions(interactions: Interaction[]): Promise<IMessage[]> {
+    const messageParserRunner = new MessageParserRunner(this.messageParsers);
+    const finalInteractions = [...interactions];
+
+    let finalMessages: IMessage[] = [];
+    for (const interaction of finalInteractions) {
+      finalMessages = [
+        ...finalMessages,
+        ...(await messageParserRunner.run(interaction, {
+          interactions: [...(finalInteractions || [])],
+        })),
+      ];
+    }
+
+    return finalMessages;
+  }
+
+  async getInteraction(sessionId: string, interactionId: string): Promise<Interaction> {
+    if (!sessionId) {
+      throw new Error('sessionId is required');
+    }
+    if (!interactionId) {
+      throw new Error('interactionId is required');
+    }
+    const interactionsResp = (await this.client.transport.request({
+      method: 'GET',
+      path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/${interactionId}`,
+    })) as ApiResponse<Interaction>;
+    return interactionsResp.body;
   }
 }

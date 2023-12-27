@@ -7,10 +7,12 @@ import {
   IMessage,
   ISession,
   ISessionFindResponse,
+  Interaction,
 } from '../../../common/types/chat_saved_object_attributes';
 import { GetSessionsSchema } from '../../routes/chat_routes';
 
 export interface StorageService {
+  getInteraction(sessionId: string, interactionId: string): Promise<Interaction>;
   getSession(sessionId: string): Promise<ISession>;
   getSessions(query: GetSessionsSchema): Promise<ISessionFindResponse>;
   saveMessages(

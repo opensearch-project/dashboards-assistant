@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IMessage } from 'common/types/chat_saved_object_attributes';
 import { MessageParserRunner } from './message_parser_runner';
 
 describe('MessageParserRunner', () => {
@@ -23,20 +24,36 @@ describe('MessageParserRunner', () => {
     ]);
 
     expect(
-      await messageParserRunner.run({
-        response: 'output',
-        input: 'input',
-        conversation_id: '',
-        interaction_id: '',
-        create_time: '',
-        additional_info: {},
-        parent_interaction_id: '',
-      })
+      await messageParserRunner.run(
+        {
+          response: 'output',
+          input: 'input',
+          conversation_id: '',
+          interaction_id: '',
+          create_time: '',
+          additional_info: {},
+          parent_interaction_id: '',
+        },
+        {
+          interactions: [
+            {
+              response: 'output',
+              input: 'input',
+              conversation_id: '',
+              interaction_id: '',
+              create_time: '',
+              additional_info: {},
+              parent_interaction_id: '',
+            },
+          ],
+        }
+      )
     ).toEqual([
       {
         type: 'output',
         contentType: 'markdown',
         content: 'output',
+        messageId: '_0',
       },
     ]);
   });
@@ -97,35 +114,54 @@ describe('MessageParserRunner', () => {
     ]);
 
     expect(
-      await messageParserRunner.run({
-        response: 'output',
-        input: 'input',
-        conversation_id: '',
-        interaction_id: '',
-        create_time: '',
-        additional_info: {},
-        parent_interaction_id: '',
-      })
+      await messageParserRunner.run(
+        {
+          response: 'output',
+          input: 'input',
+          conversation_id: '',
+          interaction_id: '',
+          create_time: '',
+          additional_info: {},
+          parent_interaction_id: '',
+        },
+        {
+          interactions: [
+            {
+              response: 'output',
+              input: 'input',
+              conversation_id: '',
+              interaction_id: '',
+              create_time: '',
+              additional_info: {},
+              parent_interaction_id: '',
+            },
+          ],
+        }
+      )
     ).toEqual([
       {
         type: 'output',
         contentType: 'markdown',
         content: 'B',
+        messageId: '_0',
       },
       {
         type: 'output',
         contentType: 'markdown',
         content: 'A',
+        messageId: '_1',
       },
       {
         type: 'output',
         contentType: 'markdown',
         content: 'NoOrder',
+        messageId: '_2',
       },
       {
         type: 'output',
         contentType: 'markdown',
         content: 'order1000',
+        messageId: '_3',
       },
     ]);
   });
@@ -141,25 +177,44 @@ describe('MessageParserRunner', () => {
       {
         id: 'test_with_incorrect_format_of_return',
         parserProvider() {
-          return Promise.resolve({
+          /**
+           * The type casting is intended to test that non-array response
+           * should not be parsed into final result.
+           */
+          return Promise.resolve(({
             type: 'output',
             contentType: 'markdown',
             content: 'order1000',
-          });
+          } as unknown) as IMessage[]);
         },
       },
     ]);
 
     expect(
-      await messageParserRunner.run({
-        response: 'output',
-        input: 'input',
-        conversation_id: '',
-        interaction_id: '',
-        create_time: '',
-        additional_info: {},
-        parent_interaction_id: '',
-      })
+      await messageParserRunner.run(
+        {
+          response: 'output',
+          input: 'input',
+          conversation_id: '',
+          interaction_id: '',
+          create_time: '',
+          additional_info: {},
+          parent_interaction_id: '',
+        },
+        {
+          interactions: [
+            {
+              response: 'output',
+              input: 'input',
+              conversation_id: '',
+              interaction_id: '',
+              create_time: '',
+              additional_info: {},
+              parent_interaction_id: '',
+            },
+          ],
+        }
+      )
     ).toEqual([]);
   });
 });

@@ -16,10 +16,14 @@ export class MessageParserRunner {
       return orderA - orderB;
     });
     let results: IMessage[] = [];
+    /**
+     * Use a variable to record the index.
+     */
+    let messageIndex = -1;
     for (const messageParser of sortedParsers) {
       let tempResult: IMessage[] = [];
       try {
-        tempResult = await messageParser.parserProvider(interaction, options);
+        tempResult = (await messageParser.parserProvider(interaction, options)) as IMessage[];
         /**
          * Make sure the tempResult is an array.
          */
@@ -29,7 +33,17 @@ export class MessageParserRunner {
       } catch (e) {
         tempResult = [];
       }
-      results = [...results, ...tempResult];
+
+      results = [
+        ...results,
+        ...tempResult.map((item) => {
+          messageIndex++;
+          return {
+            ...item,
+            messageId: `${interaction.interaction_id}_${messageIndex}`,
+          };
+        }),
+      ];
     }
     return results;
   }

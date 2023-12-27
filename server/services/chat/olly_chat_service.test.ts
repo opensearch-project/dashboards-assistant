@@ -50,7 +50,7 @@ describe('OllyChatService', () => {
           contentType: 'text',
           content: 'content',
         },
-        sessionId: '',
+        sessionId: 'sessionId',
         rootAgentId: 'rootAgentId',
       },
       contextMock
@@ -61,6 +61,7 @@ describe('OllyChatService', () => {
           Object {
             "body": Object {
               "parameters": Object {
+                "memory_id": "sessionId",
                 "question": "content",
                 "verbose": true,
               },
@@ -77,6 +78,7 @@ describe('OllyChatService', () => {
     `);
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "interactionId": "",
         "memoryId": "foo",
         "messages": Array [],
       }
@@ -152,6 +154,7 @@ describe('OllyChatService', () => {
     `);
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "interactionId": "",
         "memoryId": "foo",
         "messages": Array [],
       }
