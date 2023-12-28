@@ -37,8 +37,8 @@ const llmRequestRoute = {
 };
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
 
-export const AgentIdNotFoundError =
-  'rootAgentId is required, please specify one in opensearch_dashboards.yml';
+export const AgentNameNotFoundError =
+  'rootAgentName is required, please specify one in opensearch_dashboards.yml';
 
 const getSessionRoute = {
   path: `${ASSISTANT_API.SESSION}/{sessionId}`,
@@ -135,7 +135,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       context.core.opensearch.client.asCurrentUser,
       routeOptions.messageParsers
     );
-  const createChatService = () => new OllyChatService();
+  const createChatService = (context: RequestHandlerContext, rootAgentName: string) =>
+    new OllyChatService(context, rootAgentName);
 
   router.post(
     llmRequestRoute,
@@ -144,13 +145,13 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      if (!routeOptions.rootAgentId) {
-        context.assistant_plugin.logger.error(AgentIdNotFoundError);
-        return response.custom({ statusCode: 400, body: AgentIdNotFoundError });
+      if (!routeOptions.rootAgentName) {
+        context.assistant_plugin.logger.error(AgentNameNotFoundError);
+        return response.custom({ statusCode: 400, body: AgentNameNotFoundError });
       }
       const { messages = [], input, sessionId: sessionIdInRequestBody } = request.body;
       const storageService = createStorageService(context);
-      const chatService = createChatService();
+      const chatService = createChatService(context, routeOptions.rootAgentName);
 
       let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
 
@@ -158,15 +159,11 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Get final answer from Agent framework
        */
       try {
-        outputs = await chatService.requestLLM(
-          {
-            messages,
-            input,
-            sessionId: sessionIdInRequestBody,
-            rootAgentId: routeOptions.rootAgentId,
-          },
-          context
-        );
+        outputs = await chatService.requestLLM({
+          messages,
+          input,
+          sessionId: sessionIdInRequestBody,
+        });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
         const sessionId = outputs?.memoryId || sessionIdInRequestBody;
@@ -329,8 +326,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const chatService = createChatService();
-
+      const chatService = createChatService(context, '');
       try {
         chatService.abortAgentExecution(request.body.sessionId);
         context.assistant_plugin.logger.info(`Abort agent execution: ${request.body.sessionId}`);
@@ -349,13 +345,13 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      if (!routeOptions.rootAgentId) {
-        context.assistant_plugin.logger.error(AgentIdNotFoundError);
-        return response.custom({ statusCode: 400, body: AgentIdNotFoundError });
+      if (!routeOptions.rootAgentName) {
+        context.assistant_plugin.logger.error(AgentNameNotFoundError);
+        return response.custom({ statusCode: 400, body: AgentNameNotFoundError });
       }
       const { sessionId, interactionId } = request.body;
       const storageService = createStorageService(context);
-      const chatService = createChatService();
+      const chatService = createChatService(context, routeOptions.rootAgentName);
 
       let outputs: Awaited<ReturnType<ChatService['regenerate']>> | undefined;
 
@@ -363,10 +359,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Get final answer from Agent framework
        */
       try {
-        outputs = await chatService.regenerate(
-          { sessionId, rootAgentId: routeOptions.rootAgentId, interactionId },
-          context
-        );
+        outputs = await chatService.regenerate({ sessionId, interactionId });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
       }

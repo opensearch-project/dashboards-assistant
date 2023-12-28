@@ -7,7 +7,11 @@ import { ApiResponse } from '@opensearch-project/opensearch';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
-import { ML_COMMONS_BASE_API } from '../../utils/constants';
+import {
+  ML_COMMONS_BASE_API,
+  RESOURCE_NOT_FOUND_STATUS_CODE,
+  RESOURCE_NOT_FOUND_ERROR,
+} from '../../utils/constants';
 
 interface AgentRunPayload {
   question?: string;
@@ -21,22 +25,86 @@ const INTERACTION_ID_FIELD = 'parent_interaction_id';
 
 export class OllyChatService implements ChatService {
   static abortControllers: Map<string, AbortController> = new Map();
+  private static rootAgentId: string | undefined;
 
-  private async requestAgentRun(
-    rootAgentId: string,
-    payload: AgentRunPayload,
-    context: RequestHandlerContext
-  ) {
+  constructor(
+    private readonly context: RequestHandlerContext,
+    private readonly rootAgentName: string
+  ) {}
+
+  private async initRootAgent() {
+    OllyChatService.rootAgentId = await this.searchRootAgent(this.rootAgentName);
+  }
+
+  private async searchRootAgent(rootAgentName: string): Promise<string> {
+    try {
+      const requestParams = {
+        query: {
+          term: {
+            'name.keyword': rootAgentName,
+          },
+        },
+        sort: {
+          created_time: 'desc',
+        },
+      };
+
+      const opensearchClient = this.context.core.opensearch.client.asCurrentUser;
+      const response = await opensearchClient.transport.request({
+        method: 'GET',
+        path: `${ML_COMMONS_BASE_API}/agents/_search`,
+        body: requestParams,
+      });
+
+      if (!response || response.body.hits.total.value === 0) {
+        throw new Error('cannot find any root agent by name: ' + rootAgentName);
+      }
+      return response.body.hits.hits[0]._id;
+    } catch (error) {
+      const errorMessage = JSON.stringify(error.meta?.body) || error;
+      throw new Error('search root agent failed, reason: ' + errorMessage);
+    }
+  }
+
+  private async requestAgentRun(payload: AgentRunPayload) {
     if (payload.memory_id) {
       OllyChatService.abortControllers.set(payload.memory_id, new AbortController());
     }
-    const opensearchClient = context.core.opensearch.client.asCurrentUser;
 
+    // if rootAgentId has not been initialized yet, init rootAgentId firstly
+    if (!OllyChatService.rootAgentId) {
+      await this.initRootAgent();
+      this.context.assistant_plugin.logger.info(
+        `root agent id has not been initialized yet, init it at the first time, current root agent id is:${OllyChatService.rootAgentId}`
+      );
+    }
+
+    try {
+      return await this.callExecuteAgentAPI(payload);
+    } catch (error) {
+      if (
+        error.meta?.statusCode === RESOURCE_NOT_FOUND_STATUS_CODE &&
+        error.body.error.type === RESOURCE_NOT_FOUND_ERROR
+      ) {
+        const oldRootAgentId = OllyChatService.rootAgentId;
+        await this.initRootAgent();
+        this.context.assistant_plugin.logger.info(
+          `cannot find the root agent id: ${oldRootAgentId}, try to fetch the new root agent id, now it is:${OllyChatService.rootAgentId}`
+        );
+        return await this.callExecuteAgentAPI(payload);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private async callExecuteAgentAPI(payload: AgentRunPayload) {
+    const opensearchClient = this.context.core.opensearch.client.asCurrentUser;
     try {
       const agentFrameworkResponse = (await opensearchClient.transport.request(
         {
           method: 'POST',
-          path: `${ML_COMMONS_BASE_API}/agents/${rootAgentId}/_execute`,
+          path: `${ML_COMMONS_BASE_API}/agents/${OllyChatService.rootAgentId}/_execute`,
           body: {
             parameters: payload,
           },
@@ -78,15 +146,16 @@ export class OllyChatService implements ChatService {
     }
   }
 
-  public async requestLLM(
-    payload: { messages: IMessage[]; input: IInput; sessionId?: string; rootAgentId: string },
-    context: RequestHandlerContext
-  ): Promise<{
+  async requestLLM(payload: {
+    messages: IMessage[];
+    input: IInput;
+    sessionId?: string;
+  }): Promise<{
     messages: IMessage[];
     memoryId: string;
     interactionId: string;
   }> {
-    const { input, sessionId, rootAgentId } = payload;
+    const { input, sessionId } = payload;
 
     const parametersPayload: Pick<AgentRunPayload, 'question' | 'verbose' | 'memory_id'> = {
       question: input.content,
@@ -97,14 +166,14 @@ export class OllyChatService implements ChatService {
       parametersPayload.memory_id = sessionId;
     }
 
-    return await this.requestAgentRun(rootAgentId, parametersPayload, context);
+    return await this.requestAgentRun(parametersPayload);
   }
 
-  async regenerate(
-    payload: { sessionId: string; interactionId: string; rootAgentId: string },
-    context: RequestHandlerContext
-  ): Promise<{ messages: IMessage[]; memoryId: string; interactionId: string }> {
-    const { sessionId, interactionId, rootAgentId } = payload;
+  async regenerate(payload: {
+    sessionId: string;
+    interactionId: string;
+  }): Promise<{ messages: IMessage[]; memoryId: string; interactionId: string }> {
+    const { sessionId, interactionId } = payload;
     const parametersPayload: Pick<
       AgentRunPayload,
       'regenerate_interaction_id' | 'verbose' | 'memory_id'
@@ -114,12 +183,17 @@ export class OllyChatService implements ChatService {
       verbose: true,
     };
 
-    return await this.requestAgentRun(rootAgentId, parametersPayload, context);
+    return await this.requestAgentRun(parametersPayload);
   }
 
   abortAgentExecution(sessionId: string) {
     if (OllyChatService.abortControllers.has(sessionId)) {
       OllyChatService.abortControllers.get(sessionId)?.abort();
     }
+  }
+
+  // only used for test
+  resetRootAgentId() {
+    OllyChatService.rootAgentId = undefined;
   }
 }

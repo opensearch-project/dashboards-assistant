@@ -7,9 +7,10 @@ import { OllyChatService } from './olly_chat_service';
 import { CoreRouteHandlerContext } from '../../../../../src/core/server/core_route_handler_context';
 import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { loggerMock } from '../../../../../src/core/server/logging/logger.mock';
+import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
+import { ApiResponse } from '@opensearch-project/opensearch';
 
 describe('OllyChatService', () => {
-  const ollyChatService = new OllyChatService();
   const coreContext = new CoreRouteHandlerContext(
     coreMock.createInternalStart(),
     httpServerMock.createOpenSearchDashboardsRequest()
@@ -22,41 +23,74 @@ describe('OllyChatService', () => {
       logger: loggerMock.create(),
     },
   };
-  beforeEach(() => {
+  const ollyChatService: OllyChatService = new OllyChatService(contextMock, 'test');
+  beforeEach(async () => {
     mockedTransport.mockClear();
+    ollyChatService.resetRootAgentId();
   });
+
   it('requestLLM should invoke client call with correct params', async () => {
-    mockedTransport.mockImplementationOnce(() => {
-      return {
-        body: {
-          inference_results: [
-            {
-              output: [
+    mockedTransport.mockImplementation((args) => {
+      if (args.path === '/_plugins/_ml/agents/_search') {
+        return {
+          body: {
+            hits: {
+              total: {
+                value: 1,
+              },
+              hits: [
                 {
-                  name: 'memory_id',
-                  result: 'foo',
+                  _index: '.plugins-ml-agent',
+                  _id: 'rootAgentId',
                 },
               ],
             },
-          ],
-        },
-      };
+          },
+        };
+      } else {
+        return {
+          body: {
+            inference_results: [
+              {
+                output: [
+                  {
+                    name: 'memory_id',
+                    result: 'foo',
+                  },
+                ],
+              },
+            ],
+          },
+        };
+      }
     });
-    const result = await ollyChatService.requestLLM(
-      {
-        messages: [],
-        input: {
-          type: 'input',
-          contentType: 'text',
-          content: 'content',
-        },
-        sessionId: 'sessionId',
-        rootAgentId: 'rootAgentId',
+    const result = await ollyChatService.requestLLM({
+      messages: [],
+      input: {
+        type: 'input',
+        contentType: 'text',
+        content: 'content',
       },
-      contextMock
-    );
+      sessionId: 'sessionId',
+    });
     expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
       Array [
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "term": Object {
+                  "name.keyword": "test",
+                },
+              },
+              "sort": Object {
+                "created_time": "desc",
+              },
+            },
+            "method": "GET",
+            "path": "/_plugins/_ml/agents/_search",
+          },
+        ],
         Array [
           Object {
             "body": Object {
@@ -86,53 +120,97 @@ describe('OllyChatService', () => {
   });
 
   it('requestLLM should throw error when transport.request throws error', async () => {
-    mockedTransport.mockImplementationOnce(() => {
-      throw new Error('error');
-    });
-    expect(
-      ollyChatService.requestLLM(
-        {
-          messages: [],
-          input: {
-            type: 'input',
-            contentType: 'text',
-            content: 'content',
+    mockedTransport
+      .mockImplementationOnce(() => {
+        return {
+          body: {
+            hits: {
+              total: {
+                value: 1,
+              },
+              hits: [
+                {
+                  _index: '.plugins-ml-agent',
+                  _id: 'rootAgentId',
+                },
+              ],
+            },
           },
-          sessionId: '',
-          rootAgentId: 'rootAgentId',
+        };
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('error');
+      });
+    expect(
+      ollyChatService.requestLLM({
+        messages: [],
+        input: {
+          type: 'input',
+          contentType: 'text',
+          content: 'content',
         },
-        contextMock
-      )
+        sessionId: '',
+      })
     ).rejects.toMatchInlineSnapshot(`[Error: error]`);
   });
 
   it('regenerate should invoke client call with correct params', async () => {
-    mockedTransport.mockImplementationOnce(() => {
-      return {
-        body: {
-          inference_results: [
-            {
-              output: [
+    mockedTransport.mockImplementation((args) => {
+      if (args.path === '/_plugins/_ml/agents/_search') {
+        return {
+          body: {
+            hits: {
+              total: {
+                value: 1,
+              },
+              hits: [
                 {
-                  name: 'memory_id',
-                  result: 'foo',
+                  _index: '.plugins-ml-agent',
+                  _id: 'rootAgentId',
                 },
               ],
             },
-          ],
-        },
-      };
+          },
+        };
+      } else {
+        return {
+          body: {
+            inference_results: [
+              {
+                output: [
+                  {
+                    name: 'memory_id',
+                    result: 'foo',
+                  },
+                ],
+              },
+            ],
+          },
+        };
+      }
     });
-    const result = await ollyChatService.regenerate(
-      {
-        sessionId: 'sessionId',
-        rootAgentId: 'rootAgentId',
-        interactionId: 'interactionId',
-      },
-      contextMock
-    );
+    const result = await ollyChatService.regenerate({
+      sessionId: 'sessionId',
+      interactionId: 'interactionId',
+    });
     expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
       Array [
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "term": Object {
+                  "name.keyword": "test",
+                },
+              },
+              "sort": Object {
+                "created_time": "desc",
+              },
+            },
+            "method": "GET",
+            "path": "/_plugins/_ml/agents/_search",
+          },
+        ],
         Array [
           Object {
             "body": Object {
@@ -162,18 +240,206 @@ describe('OllyChatService', () => {
   });
 
   it('regenerate should throw error when transport.request throws error', async () => {
+    mockedTransport
+      .mockImplementationOnce(() => {
+        return {
+          body: {
+            hits: {
+              total: {
+                value: 1,
+              },
+              hits: [
+                {
+                  _index: '.plugins-ml-agent',
+                  _id: 'rootAgentId',
+                },
+              ],
+            },
+          },
+        };
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('error');
+      });
+    expect(
+      ollyChatService.regenerate({
+        sessionId: 'sessionId',
+        interactionId: 'interactionId',
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: error]`);
+  });
+
+  it('refetch the root agent id when executing agent throws 404 error', async () => {
+    mockedTransport
+      .mockImplementationOnce(() => {
+        return {
+          body: {
+            hits: {
+              total: {
+                value: 1,
+              },
+              hits: [
+                {
+                  _index: '.plugins-ml-agent',
+                  _id: 'rootAgentId',
+                },
+              ],
+            },
+          },
+        };
+      })
+      .mockImplementationOnce(() => {
+        const meta: ApiResponse = {
+          body: {
+            error: {
+              type: 'resource_not_found_exception',
+              reason: 'Agent not found',
+            },
+            status: 404,
+          },
+          statusCode: 404,
+        };
+        throw new ResponseError(meta);
+      })
+      .mockImplementationOnce(() => {
+        return {
+          body: {
+            hits: {
+              total: {
+                value: 1,
+              },
+              hits: [
+                {
+                  _index: '.plugins-ml-agent',
+                  _id: 'rootAgentId',
+                },
+              ],
+            },
+          },
+        };
+      })
+      .mockImplementationOnce(() => {
+        return {
+          body: {
+            inference_results: [
+              {
+                output: [
+                  {
+                    name: 'memory_id',
+                    result: 'foo',
+                  },
+                ],
+              },
+            ],
+          },
+        };
+      });
+    const result = await ollyChatService.requestLLM({
+      messages: [],
+      input: {
+        type: 'input',
+        contentType: 'text',
+        content: 'content',
+      },
+      sessionId: '',
+    });
+    expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "term": Object {
+                  "name.keyword": "test",
+                },
+              },
+              "sort": Object {
+                "created_time": "desc",
+              },
+            },
+            "method": "GET",
+            "path": "/_plugins/_ml/agents/_search",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "parameters": Object {
+                "question": "content",
+                "verbose": true,
+              },
+            },
+            "method": "POST",
+            "path": "/_plugins/_ml/agents/rootAgentId/_execute",
+          },
+          Object {
+            "maxRetries": 0,
+            "requestTimeout": 300000,
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "term": Object {
+                  "name.keyword": "test",
+                },
+              },
+              "sort": Object {
+                "created_time": "desc",
+              },
+            },
+            "method": "GET",
+            "path": "/_plugins/_ml/agents/_search",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "parameters": Object {
+                "question": "content",
+                "verbose": true,
+              },
+            },
+            "method": "POST",
+            "path": "/_plugins/_ml/agents/rootAgentId/_execute",
+          },
+          Object {
+            "maxRetries": 0,
+            "requestTimeout": 300000,
+          },
+        ],
+      ]
+    `);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "interactionId": "",
+        "memoryId": "foo",
+        "messages": Array [],
+      }
+    `);
+  });
+
+  it('fetching root agent id throws error', async () => {
     mockedTransport.mockImplementationOnce(() => {
-      throw new Error('error');
+      return {
+        body: {
+          hits: {
+            total: {
+              value: 0,
+            },
+            hits: [],
+          },
+        },
+      };
     });
     expect(
-      ollyChatService.regenerate(
-        {
-          sessionId: 'sessionId',
-          rootAgentId: 'rootAgentId',
-          interactionId: 'interactionId',
-        },
-        contextMock
-      )
-    ).rejects.toMatchInlineSnapshot(`[Error: error]`);
+      ollyChatService.regenerate({
+        sessionId: 'sessionId',
+        interactionId: 'interactionId',
+      })
+    ).rejects.toMatchInlineSnapshot(
+      `[Error: search root agent failed, reason: Error: cannot find any root agent by name: test]`
+    );
   });
 });

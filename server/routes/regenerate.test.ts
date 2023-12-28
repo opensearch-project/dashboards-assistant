@@ -14,12 +14,12 @@ import {
 } from '../services/storage/agent_framework_storage_service.mock';
 import { httpServerMock } from '../../../../src/core/server/http/http_server.mocks';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
-import { registerChatRoutes, RegenerateSchema, AgentIdNotFoundError } from './chat_routes';
+import { registerChatRoutes, RegenerateSchema, AgentNameNotFoundError } from './chat_routes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
 const mockedLogger = loggerMock.create();
 
-describe('regenerate route when rootAgentId is provided', () => {
+describe('regenerate route when rootAgentName is provided', () => {
   const router = new Router(
     '',
     mockedLogger,
@@ -31,7 +31,7 @@ describe('regenerate route when rootAgentId is provided', () => {
   );
   registerChatRoutes(router, {
     messageParsers: [],
-    rootAgentId: 'foo',
+    rootAgentName: 'foo',
   });
   const regenerateRequest = (payload: RegenerateSchema) =>
     triggerHandler(router, {
@@ -169,7 +169,7 @@ describe('regenerate route when rootAgentId is provided', () => {
   });
 });
 
-describe('regenerate route when rootAgentId is not provided', () => {
+describe('regenerate route when rootAgentName is not provided', () => {
   const router = new Router(
     '',
     mockedLogger,
@@ -200,13 +200,13 @@ describe('regenerate route when rootAgentId is not provided', () => {
       sessionId: 'foo',
     })) as Boom;
     expect(mockedLogger.error).toBeCalledTimes(1);
-    expect(mockedLogger.error).toBeCalledWith(AgentIdNotFoundError);
+    expect(mockedLogger.error).toBeCalledWith(AgentNameNotFoundError);
     expect(result.output).toMatchInlineSnapshot(`
       Object {
         "headers": Object {},
         "payload": Object {
           "error": "Bad Request",
-          "message": "rootAgentId is required, please specify one in opensearch_dashboards.yml",
+          "message": "rootAgentName is required, please specify one in opensearch_dashboards.yml",
           "statusCode": 400,
         },
         "statusCode": 400,
