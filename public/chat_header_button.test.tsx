@@ -136,7 +136,7 @@ describe('<HeaderChatButton />', () => {
       charCode: 27,
     });
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
-    expect(screen.getByTitle('press ⌘ + / to start typing')).toBeInTheDocument();
+    expect(screen.getByTitle('press Ctrl + / to start typing')).toBeInTheDocument();
   });
 
   it('should focus on chat input when pressing global shortcut', () => {
@@ -155,7 +155,7 @@ describe('<HeaderChatButton />', () => {
       key: '/',
       code: 'NumpadDivide',
       charCode: 111,
-      metaKey: true,
+      ctrlKey: true,
     });
     expect(screen.getByLabelText('chat input')).toHaveFocus();
   });
