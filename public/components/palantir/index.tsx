@@ -100,7 +100,9 @@ export const Palantir = ({
         </EuiText>
       ) : null}
       <EuiPopoverFooter>
-        <EuiText size="xs">Available suggestions</EuiText>
+        <EuiText size="xs" color="subdued">
+          Available suggestions
+        </EuiText>
         <EuiBadge
           color="hollow"
           iconType="chatRight"
