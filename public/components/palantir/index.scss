@@ -31,6 +31,7 @@
 
 .palantirAnchorContent {
   text-decoration: underline dashed 1.5px;
+  text-underline-offset: 2px;
 }
 
 .palantirPopoverTitle {
@@ -41,5 +42,14 @@
   .euiBadge__text {
     text-transform: none;
     font-weight: bold;
-  }  
+  }
+
+  .euiBadge__icon {
+    margin: 2px 0 2px 0;
+  }
+
+  .euiIcon--small {
+    height: 100%;
+    width: auto;
+  }
 }
