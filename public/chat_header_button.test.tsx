@@ -10,6 +10,7 @@ import { HeaderChatButton } from './chat_header_button';
 import { applicationServiceMock } from '../../../src/core/public/mocks';
 import { AssistantActions } from './types';
 import { BehaviorSubject } from 'rxjs';
+import EventEmitter from 'events';
 
 let mockSend: jest.Mock;
 let mockLoadChat: jest.Mock;
@@ -45,6 +46,10 @@ jest.mock('./chat_flyout', () => {
     ),
   };
 });
+
+jest.mock('./services', () => ({
+  getPalantirRegistry: new EventEmitter(),
+}));
 
 describe('<HeaderChatButton />', () => {
   afterEach(() => {
