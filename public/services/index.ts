@@ -4,7 +4,7 @@
  */
 
 import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/public';
-import { ChromeStart } from '../../../../src/core/public';
+import { ChromeStart, NotificationsStart } from '../../../../src/core/public';
 import { PalantirRegistry } from './palantir';
 
 export * from './palantir';
@@ -16,3 +16,7 @@ export const [getPalantirRegistry, setPalantirRegistry] = createGetterSetter<Pal
 );
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);

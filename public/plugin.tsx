@@ -27,6 +27,7 @@ import {
   SessionLoadService,
   SessionsService,
   setChrome,
+  setNotifications,
   setPalantirRegistry,
 } from './services';
 
@@ -156,6 +157,7 @@ export class AssistantPlugin
   public start(core: CoreStart): AssistantStart {
     setCoreStart(core);
     setChrome(core.chrome);
+    setNotifications(core.notifications);
 
     return {};
   }

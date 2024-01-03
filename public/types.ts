@@ -61,8 +61,18 @@ export type Palantiri = Map<string, Palantir>;
 
 export interface Palantir {
   key: string;
-  suggestion: string;
-  description?: string;
+  type: PalantirType;
+  summary?: string;
+  suggestion?: string;
 }
+
+export type PalantirType =
+  | 'suggestions'
+  | 'generate'
+  | 'summary'
+  | 'summaryWithSuggestions'
+  | 'chat'
+  | 'chatWithSuggestions'
+  | 'error';
 
 export type TabId = 'chat' | 'compose' | 'insights' | 'history' | 'trace';

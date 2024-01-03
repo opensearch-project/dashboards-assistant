@@ -7,7 +7,12 @@ import './index.scss';
 
 import {
   EuiPopover,
+  EuiButton,
   EuiButtonEmpty,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
   EuiPopoverTitle,
   EuiText,
   EuiPopoverFooter,
@@ -15,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { Children, isValidElement, useState } from 'react';
 import { Palantir as PalantirInput } from '../../types';
-import { getPalantirRegistry, getChrome } from '../../services';
+import { getPalantirRegistry, getChrome, getNotifications } from '../../services';
 
 // TODO: type content
 // ?? what is the content going to be? does it change from anchor to anchor
@@ -33,6 +38,7 @@ export const Palantir = ({
 }) => {
   const registry = getPalantirRegistry();
   const logos = getChrome().logos;
+  const toasts = getNotifications().toasts;
 
   const [isVisible, setIsVisible] = useState(false);
 
@@ -79,6 +85,92 @@ export const Palantir = ({
   };
 
   const palantirInput = input ?? getPalantirInputByChildKey();
+
+  const suggestionsPopoverFooter: React.ReactNode = (
+    <EuiPopoverFooter>
+      <EuiText size="xs" color="subdued">
+        Available suggestions
+      </EuiText>
+      <EuiBadge
+        color="hollow"
+        iconType="chatRight"
+        iconSide="left"
+        onClick={() => onSubmitClick(palantirInput)}
+        onClickAriaLabel="Click for suggestion"
+      >
+        {palantirInput.suggestion}
+      </EuiBadge>
+    </EuiPopoverFooter>
+  );
+
+  const generatePopoverBody: React.ReactNode = (
+    <EuiButton onClick={() => toasts.addDanger('To be implemented...')}>Generate summary</EuiButton>
+  );
+
+  const summaryPopoverBody: React.ReactNode = (
+    <EuiText size="s">
+      <>{palantirInput.summary}</>
+    </EuiText>
+  );
+
+  const summaryWithSuggestionsPopoverBody: React.ReactNode = (
+    <>
+      {summaryPopoverBody}
+      {suggestionsPopoverFooter}
+    </>
+  );
+
+  const [chatValue, setChatValue] = useState('');
+  const chatPopoverBody: React.ReactNode = (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={6}>
+        <EuiFormRow>
+          <EuiFieldText
+            placeholder="Ask a question"
+            value={chatValue}
+            onChange={(e) => setChatValue(e.target.value)}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill
+          iconType="returnKey"
+          iconSide="right"
+          onClick={() => toasts.addDanger(`To be implemented... received ${chatValue}`)}
+        >
+          Go
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const chatWithSuggestionsPopoverBody: React.ReactNode = (
+    <>
+      {chatPopoverBody}
+      {suggestionsPopoverFooter}
+    </>
+  );
+
+  const getPopoverBody = () => {
+    switch (palantirInput.type) {
+      case 'suggestions':
+        return suggestionsPopoverFooter;
+      case 'generate':
+        return generatePopoverBody;
+      case 'summary':
+        return summaryPopoverBody;
+      case 'summaryWithSuggestions':
+        return summaryWithSuggestionsPopoverBody;
+      case 'chat':
+        return chatPopoverBody;
+      case 'chatWithSuggestions':
+        return chatWithSuggestionsPopoverBody;
+      default:
+        throw new Error('Unreachable case');
+    }
+  };
+
   const assistantPopover: React.ReactNode = (
     <EuiPopover
       key={key ?? palantirInput.key}
@@ -94,25 +186,7 @@ export const Palantir = ({
           OpenSearch Assistant
         </EuiBadge>
       </EuiPopoverTitle>
-      {palantirInput.description ? (
-        <EuiText size="s">
-          <>{palantirInput.description}</>
-        </EuiText>
-      ) : null}
-      <EuiPopoverFooter>
-        <EuiText size="xs" color="subdued">
-          Available suggestions
-        </EuiText>
-        <EuiBadge
-          color="hollow"
-          iconType="chatRight"
-          iconSide="left"
-          onClick={() => onSubmitClick(palantirInput)}
-          onClickAriaLabel="Click for suggestion"
-        >
-          {palantirInput.suggestion}
-        </EuiBadge>
-      </EuiPopoverFooter>
+      {getPopoverBody()}
     </EuiPopover>
   );
 

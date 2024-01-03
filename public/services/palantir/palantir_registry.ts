@@ -10,13 +10,15 @@ export class PalantirRegistry extends EventEmitter {
   private registry: Palantiri = new Map();
   private errorOutput: Palantir = {
     key: 'error',
+    type: 'error',
     suggestion: 'Error',
   };
 
   private mapper = (palantir: Palantir) => {
     return {
       key: palantir.key,
-      description: palantir.description,
+      type: palantir.type,
+      summary: palantir.summary,
       suggestion: palantir.suggestion,
     };
   };
@@ -47,12 +49,12 @@ export class PalantirRegistry extends EventEmitter {
     return Array.from(this.registry.values());
   }
 
-  public getSuggestion(key: string) {
-    return this.get(key).suggestion;
+  public getSummary(key: string) {
+    return this.get(key).summary;
   }
 
-  public getDescription(key: string) {
-    return this.get(key).description;
+  public getSuggestion(key: string) {
+    return this.get(key).suggestion;
   }
 
   // TODO: two way service pltr component to chat bot
