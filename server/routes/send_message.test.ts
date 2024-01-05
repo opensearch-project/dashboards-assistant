@@ -183,7 +183,7 @@ describe('send_message route when rootAgentName is provided', () => {
     `);
   });
 
-  it('throw error when requestLLM throws an error and interaction id is not provided', async () => {
+  it('throw error when requestLLM throws an error', async () => {
     mockOllyChatService.requestLLM.mockImplementationOnce(() => {
       throw new Error('something went wrong');
     });
