@@ -166,10 +166,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
-        const sessionId = outputs?.memoryId || sessionIdInRequestBody;
-        if (!sessionId) {
-          return response.custom({ statusCode: error.statusCode || 500, body: error.message });
-        }
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
 
       /**

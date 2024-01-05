@@ -183,7 +183,7 @@ describe('send_message route when rootAgentName is provided', () => {
     `);
   });
 
-  it('return successfully when requestLLM throws an error but conversation id provided', async () => {
+  it('throw error when requestLLM throws an error', async () => {
     mockOllyChatService.requestLLM.mockImplementationOnce(() => {
       throw new Error('something went wrong');
     });
@@ -209,21 +209,17 @@ describe('send_message route when rootAgentName is provided', () => {
         },
       },
       sessionId: 'foo',
-    })) as ResponseObject;
+    })) as Boom;
     expect(mockedLogger.error).toBeCalledWith(new Error('something went wrong'));
-    expect(result.source).toMatchInlineSnapshot(`
+    expect(result.output).toMatchInlineSnapshot(`
       Object {
-        "interactions": Array [
-          Object {
-            "conversation_id": "foo",
-            "create_time": "create_time",
-            "input": "foo",
-            "interaction_id": "interaction_id",
-            "response": "bar",
-          },
-        ],
-        "messages": Array [],
-        "sessionId": "foo",
+        "headers": Object {},
+        "payload": Object {
+          "error": "Internal Server Error",
+          "message": "something went wrong",
+          "statusCode": 500,
+        },
+        "statusCode": 500,
       }
     `);
   });
