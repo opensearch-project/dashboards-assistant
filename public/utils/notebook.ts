@@ -92,6 +92,20 @@ export const convertMessagesToParagraphs = (messages: IMessage[], username: stri
         });
         break;
 
+      case 'ppl_data_grid':
+        const queryText = message.content;
+        Object.assign(paragraph, {
+          input: { inputText: `%ppl\n${queryText}`, inputType: 'MARKDOWN' },
+          output: [
+            {
+              result: `\n${queryText}`,
+              outputType: 'QUERY',
+              execution_time: '0 ms',
+            },
+          ],
+        });
+        break;
+
       case 'visualization':
         const visualizationObjectId = message.content;
         const inputText = JSON.stringify(createDashboardVizObject(visualizationObjectId));
