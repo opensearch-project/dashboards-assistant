@@ -201,7 +201,10 @@ describe('<ChatPageContent />', () => {
     expect(onRefreshMock).toHaveBeenCalled();
   });
 
-  it('should display `Stop generating response` when llm is responding', () => {
+  /**
+   * Skip the Stop generating response for now as for 2.12 we won't implement stop geenration feature.
+   */
+  it.skip('should display `Stop generating response` when llm is responding', () => {
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
       chatState: { messages: [], llmResponding: true, interactions: [] },
       chatStateDispatch: jest.fn(),
