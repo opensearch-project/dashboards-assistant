@@ -82,9 +82,39 @@ describe('<MessageContent />', () => {
           type: 'output',
           contentType: 'ppl_visualization',
           content: 'mock ppl query',
+          isVisualization: true,
         }}
       />
     );
-    expect(pplVisualizationRenderMock).toHaveBeenCalledWith({ query: 'mock ppl query' });
+    expect(pplVisualizationRenderMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "mock ppl query",
+        Object {
+          "chatContext": Object {
+            "contentRenderers": Object {
+              "ppl_visualization": [MockFunction] {
+                "calls": Array [
+                  [Circular],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+            },
+          },
+          "props": Object {
+            "message": Object {
+              "content": "mock ppl query",
+              "contentType": "ppl_visualization",
+              "isVisualization": true,
+              "type": "output",
+            },
+          },
+        },
+      ]
+    `);
   });
 });

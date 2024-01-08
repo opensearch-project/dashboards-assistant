@@ -102,6 +102,7 @@ describe('<MessageBubble />', () => {
           type: 'output',
           contentType: 'visualization',
           content: 'vis_id_mock',
+          isVisualization: true,
         }}
       />
     );
