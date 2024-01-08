@@ -133,13 +133,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
       );
     }
 
-    // if (['visualization', 'ppl_visualization'].includes(props.contentType)) {
-    //   return <>{props.children}</>;
-    // }
-
-    const isVisualization = ['visualization', 'ppl_visualization'].includes(
-      props.message.contentType
-    );
+    const isVisualization = props.message.isVisualization;
 
     return (
       <EuiFlexGroup
@@ -154,7 +148,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
         </EuiFlexItem>
         <EuiFlexItem className="llm-chat-bubble-wrapper">
           <EuiPanel
-            style={isVisualization ? { minWidth: '100%' } : {}}
+            style={isVisualization ? { width: '100%' } : {}}
             hasShadow={false}
             hasBorder={false}
             paddingSize="l"

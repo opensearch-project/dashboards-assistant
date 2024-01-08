@@ -12,4 +12,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AssistantPlugin(initializerContext);
 }
 
-export { AssistantSetup } from './types';
+export { AssistantSetup, RenderProps } from './types';
