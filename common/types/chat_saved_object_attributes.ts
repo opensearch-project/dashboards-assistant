@@ -43,7 +43,8 @@ export interface IOutput {
   type: 'output';
   traceId?: string; // used for tracing agent calls
   toolsUsed?: string[];
-  contentType: 'error' | 'markdown' | 'visualization' | 'ppl_visualization';
+  // TODO: ppl_visualization type may need to be removed in the PR which replaces ppl query render from visualization to data grid. @suzhou
+  contentType: 'error' | 'markdown' | 'visualization' | 'ppl_visualization' | 'ppl_data_grid';
   content: string;
   suggestedActions?: ISuggestedAction[];
   messageId?: string;
