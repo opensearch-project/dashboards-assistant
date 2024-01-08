@@ -12,4 +12,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AssistantPlugin(initializerContext);
 }
 
-export { AssistantSetup } from './types';
+export { AssistantSetup, RenderProps } from './types';
+export { IMessage } from '../common/types/chat_saved_object_attributes';
