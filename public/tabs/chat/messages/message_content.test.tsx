@@ -92,7 +92,12 @@ describe('<MessageContent />', () => {
     );
     expect(pplVisualizationRenderMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "mock ppl query",
+        Object {
+          "content": "mock ppl query",
+          "contentType": "ppl_visualization",
+          "isVisualization": true,
+          "type": "output",
+        },
         Object {
           "chatContext": Object {
             "contentRenderers": Object {
