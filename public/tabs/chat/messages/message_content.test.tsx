@@ -101,6 +101,7 @@ describe('<MessageContent />', () => {
         Object {
           "chatContext": Object {
             "contentRenderers": Object {
+              "customized_content_type": [MockFunction],
               "ppl_visualization": [MockFunction] {
                 "calls": Array [
                   [Circular],
