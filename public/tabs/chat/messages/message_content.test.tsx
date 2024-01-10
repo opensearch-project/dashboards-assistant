@@ -16,10 +16,14 @@ jest.mock('../../../components/core_visualization', () => {
 
 describe('<MessageContent />', () => {
   const pplVisualizationRenderMock = jest.fn();
+  const customizedRenderMock = jest.fn();
 
   beforeEach(() => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      contentRenderers: { ppl_visualization: pplVisualizationRenderMock },
+      contentRenderers: {
+        ppl_visualization: pplVisualizationRenderMock,
+        customized_content_type: customizedRenderMock,
+      },
     });
   });
 
@@ -86,5 +90,18 @@ describe('<MessageContent />', () => {
       />
     );
     expect(pplVisualizationRenderMock).toHaveBeenCalledWith({ query: 'mock ppl query' });
+  });
+
+  it('should render customized render content', () => {
+    render(
+      <MessageContent
+        message={{
+          type: 'output',
+          contentType: 'customized_content_type',
+          content: 'mock customized content',
+        }}
+      />
+    );
+    expect(customizedRenderMock).toHaveBeenCalledWith('mock customized content');
   });
 });
