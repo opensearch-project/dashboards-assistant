@@ -148,6 +148,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
         </EuiFlexItem>
         <EuiFlexItem className="llm-chat-bubble-wrapper">
           <EuiPanel
+            /**
+             * When using minWidth the content width inside may be larger than the container itself,
+             * especially in data grid case that the content will change its size according to if fullScreen or not.
+             */
             style={isVisualization ? { width: '100%' } : {}}
             hasShadow={false}
             hasBorder={false}
