@@ -92,6 +92,9 @@ export const convertMessagesToParagraphs = (messages: IMessage[], username: stri
         });
         break;
 
+      /**
+       * TODO migrate ppl_data_grid logic to dashboards-observerability
+       */
       case 'ppl_data_grid':
         const queryText = message.content;
         Object.assign(paragraph, {
@@ -121,7 +124,7 @@ export const convertMessagesToParagraphs = (messages: IMessage[], username: stri
         });
         break;
 
-      // error and ppl_visualization contentType will not be handled currently.
+      // error will not be handled currently.
       default:
         break;
     }

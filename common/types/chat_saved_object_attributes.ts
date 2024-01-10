@@ -43,7 +43,7 @@ export interface IOutput {
   type: 'output';
   traceId?: string; // used for tracing agent calls
   toolsUsed?: string[];
-  contentType: 'error' | 'markdown' | 'visualization' | 'ppl_data_grid' | string;
+  contentType: 'error' | 'markdown' | 'visualization' | string;
   content: string;
   suggestedActions?: ISuggestedAction[];
   messageId?: string;
