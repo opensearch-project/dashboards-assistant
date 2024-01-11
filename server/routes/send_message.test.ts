@@ -53,7 +53,7 @@ describe('send_message route when rootAgentName is provided', () => {
         interactionId: 'interaction_id',
       };
     });
-    mockAgentFrameworkStorageService.getSession.mockImplementationOnce(async () => {
+    mockAgentFrameworkStorageService.getConversation.mockImplementationOnce(async () => {
       return {
         messages: [],
         title: 'foo',
@@ -74,14 +74,14 @@ describe('send_message route when rootAgentName is provided', () => {
       Object {
         "interactions": Array [],
         "messages": Array [],
-        "sessionId": "foo",
+        "conversationId": "foo",
         "title": "foo",
       }
     `);
-    expect(mockAgentFrameworkStorageService.getSession).toBeCalledTimes(1);
+    expect(mockAgentFrameworkStorageService.getConversation).toBeCalledTimes(1);
   });
 
-  it('should call getInteraction when sessionId is provided in request payload', async () => {
+  it('should call getInteraction when conversationId is provided in request payload', async () => {
     mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
       return {
         messages: [],
@@ -108,7 +108,7 @@ describe('send_message route when rootAgentName is provided', () => {
         type: 'input',
         context: {},
       },
-      sessionId: 'foo',
+      conversationId: 'foo',
     })) as ResponseObject;
     expect(result.source).toMatchInlineSnapshot(`
       Object {
@@ -122,7 +122,7 @@ describe('send_message route when rootAgentName is provided', () => {
           },
         ],
         "messages": Array [],
-        "sessionId": "foo",
+        "conversationId": "foo",
       }
     `);
   });
@@ -208,7 +208,7 @@ describe('send_message route when rootAgentName is provided', () => {
           appId: '',
         },
       },
-      sessionId: 'foo',
+      conversationId: 'foo',
     })) as Boom;
     expect(mockedLogger.error).toBeCalledWith(new Error('something went wrong'));
     expect(result.output).toMatchInlineSnapshot(`
@@ -224,7 +224,7 @@ describe('send_message route when rootAgentName is provided', () => {
     `);
   });
 
-  it('return 500 when get session throws an error', async () => {
+  it('return 500 when get conversation throws an error', async () => {
     mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
       return {
         messages: [],
@@ -232,7 +232,7 @@ describe('send_message route when rootAgentName is provided', () => {
         interactionId: 'interaction_id',
       };
     });
-    mockAgentFrameworkStorageService.getSession.mockImplementationOnce(() => {
+    mockAgentFrameworkStorageService.getConversation.mockImplementationOnce(() => {
       throw new Error('foo');
     });
     const result = (await sendMessageRequest({
@@ -296,7 +296,7 @@ describe('send_message route when rootAgentName is not provided', () => {
           appId: '',
         },
       },
-      sessionId: 'foo',
+      conversationId: 'foo',
     })) as Boom;
     expect(mockedLogger.error).toBeCalledTimes(1);
     expect(mockedLogger.error).toBeCalledWith(AgentNameNotFoundError);

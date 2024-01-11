@@ -37,8 +37,8 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
   const {
     setSelectedTabId,
     flyoutFullScreen,
-    sessionId,
-    setSessionId,
+    conversationId,
+    setConversationId,
     setTitle,
   } = useChatContext();
   const [pageIndex, setPageIndex] = useState(0);
@@ -56,10 +56,11 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     }),
     [pageIndex, pageSize, debouncedSearchName]
   );
-  const sessions = useObservable(services.sessions.sessions$);
-  const loading = useObservable(services.sessions.status$) === 'loading';
-  const chatHistories = useMemo(() => sessions?.objects || [], [sessions]);
-  const hasNoConversations = !debouncedSearchName && !!sessions && sessions.total === 0 && !loading;
+  const conversations = useObservable(services.conversations.conversations$);
+  const loading = useObservable(services.conversations.status$) === 'loading';
+  const chatHistories = useMemo(() => conversations?.objects || [], [conversations]);
+  const hasNoConversations =
+    !debouncedSearchName && !!conversations && conversations.total === 0 && !loading;
 
   const handleSearchChange = useCallback((e) => {
     setSearchName(e.target.value);
@@ -76,14 +77,14 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
 
   const handleHistoryDeleted = useCallback(
     (id: string) => {
-      if (sessionId === id) {
-        // Clear old session chat states
+      if (conversationId === id) {
+        // Clear old conversation chat states
         setTitle(undefined);
-        setSessionId(undefined);
+        setConversationId(undefined);
         chatStateDispatch({ type: 'reset' });
       }
     },
-    [sessionId, setSessionId, setTitle, chatStateDispatch]
+    [conversationId, setConversationId, setTitle, chatStateDispatch]
   );
 
   useDebounce(
@@ -96,15 +97,15 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
   );
 
   useEffect(() => {
-    if (props.shouldRefresh) services.sessions.reload();
-  }, [props.shouldRefresh, services.sessions]);
+    if (props.shouldRefresh) services.conversations.reload();
+  }, [props.shouldRefresh, services.conversations]);
 
   useEffect(() => {
-    services.sessions.load(bulkGetOptions);
+    services.conversations.load(bulkGetOptions);
     return () => {
-      services.sessions.abortController?.abort();
+      services.conversations.abortController?.abort();
     };
-  }, [services.sessions, bulkGetOptions]);
+  }, [services.conversations, bulkGetOptions]);
 
   return (
     <EuiFlyoutBody className={cs(props.className, 'llm-chat-flyout-body')}>
@@ -147,13 +148,13 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
               loading={loading}
               onSearchChange={handleSearchChange}
               onLoadChat={loadChat}
-              onRefresh={services.sessions.reload}
+              onRefresh={services.conversations.reload}
               histories={chatHistories}
               activePage={pageIndex}
               itemsPerPage={pageSize}
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={setPageIndex}
-              {...(sessions ? { pageCount: Math.ceil(sessions.total / pageSize) } : {})}
+              {...(conversations ? { pageCount: Math.ceil(conversations.total / pageSize) } : {})}
               onHistoryDeleted={handleHistoryDeleted}
             />
           )}

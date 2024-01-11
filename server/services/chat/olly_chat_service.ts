@@ -149,36 +149,36 @@ export class OllyChatService implements ChatService {
   async requestLLM(payload: {
     messages: IMessage[];
     input: IInput;
-    sessionId?: string;
+    conversationId?: string;
   }): Promise<{
     messages: IMessage[];
     memoryId: string;
     interactionId: string;
   }> {
-    const { input, sessionId } = payload;
+    const { input, conversationId } = payload;
 
     const parametersPayload: Pick<AgentRunPayload, 'question' | 'verbose' | 'memory_id'> = {
       question: input.content,
       verbose: true,
     };
 
-    if (sessionId) {
-      parametersPayload.memory_id = sessionId;
+    if (conversationId) {
+      parametersPayload.memory_id = conversationId;
     }
 
     return await this.requestAgentRun(parametersPayload);
   }
 
   async regenerate(payload: {
-    sessionId: string;
+    conversationId: string;
     interactionId: string;
   }): Promise<{ messages: IMessage[]; memoryId: string; interactionId: string }> {
-    const { sessionId, interactionId } = payload;
+    const { conversationId, interactionId } = payload;
     const parametersPayload: Pick<
       AgentRunPayload,
       'regenerate_interaction_id' | 'verbose' | 'memory_id'
     > = {
-      memory_id: sessionId,
+      memory_id: conversationId,
       regenerate_interaction_id: interactionId,
       verbose: true,
     };
@@ -186,9 +186,9 @@ export class OllyChatService implements ChatService {
     return await this.requestAgentRun(parametersPayload);
   }
 
-  abortAgentExecution(sessionId: string) {
-    if (OllyChatService.abortControllers.has(sessionId)) {
-      OllyChatService.abortControllers.get(sessionId)?.abort();
+  abortAgentExecution(conversationId: string) {
+    if (OllyChatService.abortControllers.has(conversationId)) {
+      OllyChatService.abortControllers.get(conversationId)?.abort();
     }
   }
 

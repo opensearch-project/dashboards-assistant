@@ -22,7 +22,7 @@ const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
   validate: {
     body: schema.object({
-      sessionId: schema.maybe(schema.string()),
+      conversationId: schema.maybe(schema.string()),
       messages: schema.maybe(schema.arrayOf(schema.any())),
       input: schema.object({
         type: schema.literal('input'),
@@ -40,21 +40,21 @@ export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
 export const AgentNameNotFoundError =
   'rootAgentName is required, please specify one in opensearch_dashboards.yml';
 
-const getSessionRoute = {
-  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+const getConversationRoute = {
+  path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
   validate: {
     params: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
     }),
   },
 };
-export type GetSessionSchema = TypeOf<typeof getSessionRoute.validate.params>;
+export type GetConversationSchema = TypeOf<typeof getConversationRoute.validate.params>;
 
 const abortAgentExecutionRoute = {
   path: `${ASSISTANT_API.ABORT_AGENT_EXECUTION}`,
   validate: {
     body: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
     }),
   },
 };
@@ -64,15 +64,15 @@ const regenerateRoute = {
   path: `${ASSISTANT_API.REGENERATE}`,
   validate: {
     body: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
       interactionId: schema.string(),
     }),
   },
 };
 export type RegenerateSchema = TypeOf<typeof regenerateRoute.validate.body>;
 
-const getSessionsRoute = {
-  path: ASSISTANT_API.SESSIONS,
+const getConversationsRoute = {
+  path: ASSISTANT_API.CONVERSATIONS,
   validate: {
     query: schema.object({
       perPage: schema.number({ min: 0, defaultValue: 20 }),
@@ -85,22 +85,22 @@ const getSessionsRoute = {
     }),
   },
 };
-export type GetSessionsSchema = TypeOf<typeof getSessionsRoute.validate.query>;
+export type GetConversationsSchema = TypeOf<typeof getConversationsRoute.validate.query>;
 
-const deleteSessionRoute = {
-  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+const deleteConversationRoute = {
+  path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
   validate: {
     params: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
     }),
   },
 };
 
-const updateSessionRoute = {
-  path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+const updateConversationRoute = {
+  path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
   validate: {
     params: schema.object({
-      sessionId: schema.string(),
+      conversationId: schema.string(),
     }),
     body: schema.object({
       title: schema.string(),
@@ -149,7 +149,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         context.assistant_plugin.logger.error(AgentNameNotFoundError);
         return response.custom({ statusCode: 400, body: AgentNameNotFoundError });
       }
-      const { messages = [], input, sessionId: sessionIdInRequestBody } = request.body;
+      const { messages = [], input, conversationId: conversationIdInRequestBody } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService(context, routeOptions.rootAgentName);
 
@@ -162,7 +162,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         outputs = await chatService.requestLLM({
           messages,
           input,
-          sessionId: sessionIdInRequestBody,
+          conversationId: conversationIdInRequestBody,
         });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -172,26 +172,26 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       /**
        * Retrieve latest interactions from memory
        */
-      const sessionId = outputs?.memoryId || (sessionIdInRequestBody as string);
+      const conversationId = outputs?.memoryId || (conversationIdInRequestBody as string);
       const interactionId = outputs?.interactionId || '';
       try {
-        if (!sessionId) {
+        if (!conversationId) {
           throw new Error('Not a valid conversation');
         }
 
         const resultPayload: SendResponse = {
           messages: [],
           interactions: [],
-          sessionId,
+          conversationId,
         };
 
-        if (!sessionIdInRequestBody) {
+        if (!conversationIdInRequestBody) {
           /**
-           * If no sessionId is provided in request payload,
+           * If no conversationId is provided in request payload,
            * it means it is a brand new conversation,
            * need to fetch all the details including title.
            */
-          const conversation = await storageService.getSession(sessionId);
+          const conversation = await storageService.getConversation(conversationId);
           resultPayload.interactions = conversation.interactions;
           resultPayload.messages = conversation.messages;
           resultPayload.title = conversation.title;
@@ -201,7 +201,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
            * It may have some issues in Concurrent case like a user may use two tabs to chat with Chatbot in one conversation.
            * But for now we will ignore this case, can be optimized by always fetching conversation if we need to take this case into consideration.
            */
-          const interaction = await storageService.getInteraction(sessionId, interactionId);
+          const interaction = await storageService.getInteraction(conversationId, interactionId);
           resultPayload.interactions = [interaction].filter((item) => item);
           resultPayload.messages = resultPayload.interactions.length
             ? await storageService.getMessagesFromInteractions(resultPayload.interactions)
@@ -219,7 +219,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   );
 
   router.get(
-    getSessionRoute,
+    getConversationRoute,
     async (
       context,
       request,
@@ -228,7 +228,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.getSession(request.params.sessionId);
+        const getResponse = await storageService.getConversation(request.params.conversationId);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -238,7 +238,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   );
 
   router.get(
-    getSessionsRoute,
+    getConversationsRoute,
     async (
       context,
       request,
@@ -247,7 +247,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.getSessions(request.query);
+        const getResponse = await storageService.getConversations(request.query);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -257,7 +257,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   );
 
   router.delete(
-    deleteSessionRoute,
+    deleteConversationRoute,
     async (
       context,
       request,
@@ -266,7 +266,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.deleteSession(request.params.sessionId);
+        const getResponse = await storageService.deleteConversation(request.params.conversationId);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -276,7 +276,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   );
 
   router.put(
-    updateSessionRoute,
+    updateConversationRoute,
     async (
       context,
       request,
@@ -285,8 +285,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.updateSession(
-          request.params.sessionId,
+        const getResponse = await storageService.updateConversation(
+          request.params.conversationId,
           request.body.title
         );
         return response.ok({ body: getResponse });
@@ -325,8 +325,10 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const chatService = createChatService(context, '');
       try {
-        chatService.abortAgentExecution(request.body.sessionId);
-        context.assistant_plugin.logger.info(`Abort agent execution: ${request.body.sessionId}`);
+        chatService.abortAgentExecution(request.body.conversationId);
+        context.assistant_plugin.logger.info(
+          `Abort agent execution: ${request.body.conversationId}`
+        );
         return response.ok();
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -346,7 +348,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         context.assistant_plugin.logger.error(AgentNameNotFoundError);
         return response.custom({ statusCode: 400, body: AgentNameNotFoundError });
       }
-      const { sessionId, interactionId } = request.body;
+      const { conversationId, interactionId } = request.body;
       const storageService = createStorageService(context);
       const chatService = createChatService(context, routeOptions.rootAgentName);
 
@@ -356,7 +358,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Get final answer from Agent framework
        */
       try {
-        outputs = await chatService.regenerate({ sessionId, interactionId });
+        outputs = await chatService.regenerate({ conversationId, interactionId });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
       }
@@ -366,7 +368,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        */
       try {
         const interaction = await storageService.getInteraction(
-          sessionId,
+          conversationId,
           outputs?.interactionId || ''
         );
         const finalInteractions = [interaction].filter((item) => item);
@@ -378,7 +380,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
           body: {
             interactions: finalInteractions,
             messages,
-            sessionId,
+            conversationId,
           },
         });
       } catch (error) {

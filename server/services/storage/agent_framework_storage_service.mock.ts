@@ -9,11 +9,11 @@ import { AgentFrameworkStorageService } from './agent_framework_storage_service'
 const mockAgentFrameworkStorageService: jest.Mocked<PublicContract<
   AgentFrameworkStorageService
 >> = {
-  getSession: jest.fn(),
-  getSessions: jest.fn(),
+  getConversation: jest.fn(),
+  getConversations: jest.fn(),
   saveMessages: jest.fn(),
-  deleteSession: jest.fn(),
-  updateSession: jest.fn(),
+  deleteConversation: jest.fn(),
+  updateConversation: jest.fn(),
   getTraces: jest.fn(),
   updateInteraction: jest.fn(),
   getInteraction: jest.fn(),

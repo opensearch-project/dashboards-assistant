@@ -17,7 +17,7 @@ const setup = () => {
   };
 };
 
-describe('SessionsService', () => {
+describe('ConversationsService', () => {
   it('should emit loading status and call get with conversations API path', () => {
     const { conversations, http } = setup();
 

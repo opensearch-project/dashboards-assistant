@@ -7,24 +7,24 @@ import React, { useCallback } from 'react';
 
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
 
-import { useDeleteSession } from '../../hooks';
+import { useDeleteConversation } from '../../hooks';
 import { useCore } from '../../contexts/core_context';
 
 export interface DeleteConversationConfirmModalProps {
   onClose?: (status: 'cancelled' | 'errored' | 'deleted') => void;
-  sessionId: string;
+  conversationId: string;
 }
 
 export const DeleteConversationConfirmModal = ({
   onClose,
-  sessionId,
+  conversationId,
 }: DeleteConversationConfirmModalProps) => {
   const {
     services: {
       notifications: { toasts },
     },
   } = useCore();
-  const { loading, deleteSession, abort, isAborted } = useDeleteSession();
+  const { loading, deleteConversation, abort, isAborted } = useDeleteConversation();
 
   const handleCancel = useCallback(() => {
     abort();
@@ -32,7 +32,7 @@ export const DeleteConversationConfirmModal = ({
   }, [onClose, abort]);
   const handleConfirm = useCallback(async () => {
     try {
-      await deleteSession(sessionId);
+      await deleteConversation(conversationId);
       toasts.addSuccess('The conversation was successfully deleted.');
     } catch (_e) {
       if (isAborted()) {
@@ -43,7 +43,7 @@ export const DeleteConversationConfirmModal = ({
       return;
     }
     onClose?.('deleted');
-  }, [onClose, deleteSession, sessionId, toasts.addSuccess, toasts.addDanger, isAborted]);
+  }, [onClose, deleteConversation, conversationId, toasts.addSuccess, toasts.addDanger, isAborted]);
 
   return (
     <EuiConfirmModal

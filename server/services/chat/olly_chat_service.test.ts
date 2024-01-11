@@ -71,7 +71,7 @@ describe('OllyChatService', () => {
         contentType: 'text',
         content: 'content',
       },
-      sessionId: 'sessionId',
+      conversationId: 'conversationId',
     });
     expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -95,7 +95,7 @@ describe('OllyChatService', () => {
           Object {
             "body": Object {
               "parameters": Object {
-                "memory_id": "sessionId",
+                "memory_id": "conversationId",
                 "question": "content",
                 "verbose": true,
               },
@@ -149,7 +149,7 @@ describe('OllyChatService', () => {
           contentType: 'text',
           content: 'content',
         },
-        sessionId: '',
+        conversationId: '',
       })
     ).rejects.toMatchInlineSnapshot(`[Error: error]`);
   });
@@ -190,7 +190,7 @@ describe('OllyChatService', () => {
       }
     });
     const result = await ollyChatService.regenerate({
-      sessionId: 'sessionId',
+      conversationId: 'conversationId',
       interactionId: 'interactionId',
     });
     expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
@@ -215,7 +215,7 @@ describe('OllyChatService', () => {
           Object {
             "body": Object {
               "parameters": Object {
-                "memory_id": "sessionId",
+                "memory_id": "conversationId",
                 "regenerate_interaction_id": "interactionId",
                 "verbose": true,
               },
@@ -263,7 +263,7 @@ describe('OllyChatService', () => {
       });
     expect(
       ollyChatService.regenerate({
-        sessionId: 'sessionId',
+        conversationId: 'conversationId',
         interactionId: 'interactionId',
       })
     ).rejects.toMatchInlineSnapshot(`[Error: error]`);
@@ -341,7 +341,7 @@ describe('OllyChatService', () => {
         contentType: 'text',
         content: 'content',
       },
-      sessionId: '',
+      conversationId: '',
     });
     expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -435,7 +435,7 @@ describe('OllyChatService', () => {
     });
     expect(
       ollyChatService.regenerate({
-        sessionId: 'sessionId',
+        conversationId: 'conversationId',
         interactionId: 'interactionId',
       })
     ).rejects.toMatchInlineSnapshot(

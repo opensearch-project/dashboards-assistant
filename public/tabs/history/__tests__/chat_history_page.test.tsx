@@ -13,11 +13,11 @@ import { HttpStart } from '../../../../../../src/core/public';
 import * as useChatStateExports from '../../../hooks/use_chat_state';
 import * as chatContextExports from '../../../contexts/chat_context';
 import * as coreContextExports from '../../../contexts/core_context';
-import { SessionsService } from '../../../services/conversations_service';
+import { ConversationsService } from '../../../services/conversations_service';
 
 import { ChatHistoryPage } from '../chat_history_page';
 
-const mockGetSessionsHttp = () => {
+const mockGetConversationsHttp = () => {
   const http = coreMock.createStart().http;
   http.get.mockImplementation(async () => ({
     objects: [
@@ -32,7 +32,7 @@ const mockGetSessionsHttp = () => {
 };
 
 const setup = ({
-  http = mockGetSessionsHttp(),
+  http = mockGetConversationsHttp(),
   chatContext = {},
 }: {
   http?: HttpStart;
@@ -42,16 +42,16 @@ const setup = ({
     services: {
       ...coreMock.createStart(),
       http,
-      sessions: new SessionsService(http),
-      sessionLoad: {},
+      conversations: new ConversationsService(http),
+      conversationLoad: {},
     },
   };
   const useChatStateMock = {
     chatStateDispatch: jest.fn(),
   };
   const useChatContextMock = {
-    sessionId: '1',
-    setSessionId: jest.fn(),
+    conversationId: '1',
+    setConversationId: jest.fn(),
     setTitle: jest.fn(),
     setSelectedTabId: jest.fn(),
     ...chatContext,
@@ -75,9 +75,9 @@ const setup = ({
 };
 
 describe('<ChatHistoryPage />', () => {
-  it('should clear old session data after current session deleted', async () => {
+  it('should clear old conversation data after current conversation deleted', async () => {
     const { renderResult, useChatStateMock, useChatContextMock } = setup({
-      http: mockGetSessionsHttp(),
+      http: mockGetConversationsHttp(),
     });
 
     await waitFor(() => {
@@ -86,13 +86,13 @@ describe('<ChatHistoryPage />', () => {
 
     fireEvent.click(renderResult.getByLabelText('Delete conversation'));
 
-    expect(useChatContextMock.setSessionId).not.toHaveBeenCalled();
+    expect(useChatContextMock.setConversationId).not.toHaveBeenCalled();
     expect(useChatContextMock.setTitle).not.toHaveBeenCalled();
     expect(useChatStateMock.chatStateDispatch).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
 
-    expect(useChatContextMock.setSessionId).toHaveBeenLastCalledWith(undefined);
+    expect(useChatContextMock.setConversationId).toHaveBeenLastCalledWith(undefined);
     expect(useChatContextMock.setTitle).toHaveBeenLastCalledWith(undefined);
     expect(useChatStateMock.chatStateDispatch).toHaveBeenLastCalledWith({ type: 'reset' });
   });
@@ -138,7 +138,7 @@ describe('<ChatHistoryPage />', () => {
     });
   });
 
-  it('should call get sessions with search text', async () => {
+  it('should call get conversations with search text', async () => {
     const { renderResult, useCoreMock } = setup();
     await waitFor(async () => {
       expect(renderResult.getByPlaceholderText('Search by conversation name')).toBeTruthy();
@@ -161,7 +161,7 @@ describe('<ChatHistoryPage />', () => {
     });
   });
 
-  it('should call get sessions with new page size', async () => {
+  it('should call get conversations with new page size', async () => {
     const { renderResult, useCoreMock } = setup();
     fireEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
     fireEvent.click(renderResult.getByTestId('tablePagination-50-rows'));
@@ -202,12 +202,12 @@ describe('<ChatHistoryPage />', () => {
     });
   });
 
-  it('should call sessions.reload after shouldRefresh change', async () => {
+  it('should call conversations.reload after shouldRefresh change', async () => {
     const { renderResult, useCoreMock } = setup();
 
-    jest.spyOn(useCoreMock.services.sessions, 'reload');
+    jest.spyOn(useCoreMock.services.conversations, 'reload');
 
-    expect(useCoreMock.services.sessions.reload).not.toHaveBeenCalled();
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
 
     renderResult.rerender(
       <I18nProvider>
@@ -216,17 +216,17 @@ describe('<ChatHistoryPage />', () => {
     );
 
     await waitFor(() => {
-      expect(useCoreMock.services.sessions.reload).toHaveBeenCalled();
+      expect(useCoreMock.services.conversations.reload).toHaveBeenCalled();
     });
   });
 
-  it('should call sessions.abortController.abort after unmount', async () => {
+  it('should call conversations.abortController.abort after unmount', async () => {
     const { renderResult, useCoreMock } = setup();
 
     await waitFor(() => {
-      expect(useCoreMock.services.sessions.abortController).toBeTruthy();
+      expect(useCoreMock.services.conversations.abortController).toBeTruthy();
     });
-    const abortMock = jest.spyOn(useCoreMock.services.sessions.abortController!, 'abort');
+    const abortMock = jest.spyOn(useCoreMock.services.conversations.abortController!, 'abort');
 
     expect(abortMock).not.toHaveBeenCalled();
 

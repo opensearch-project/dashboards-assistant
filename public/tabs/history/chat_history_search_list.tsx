@@ -27,7 +27,7 @@ export interface ChatHistorySearchListProps
   loading: boolean;
   histories: ChatHistoryListProps['chatHistories'];
   onSearchChange: EuiFieldSearchProps['onChange'];
-  onLoadChat: (sessionId?: string | undefined, title?: string | undefined) => void;
+  onLoadChat: (conversationId?: string | undefined, title?: string | undefined) => void;
   onRefresh: () => void;
   onHistoryDeleted: (id: string) => void;
 }
@@ -46,7 +46,7 @@ export const ChatHistorySearchList = ({
   onHistoryDeleted,
   onChangeItemsPerPage,
 }: ChatHistorySearchListProps) => {
-  const { sessionId, setTitle } = useChatContext();
+  const { conversationId, setTitle } = useChatContext();
   const [editingConversation, setEditingConversation] = useState<{
     id: string;
     title: string;
@@ -57,13 +57,13 @@ export const ChatHistorySearchList = ({
     (status: 'updated' | string, newTitle?: string) => {
       if (status === 'updated') {
         onRefresh();
-        if (sessionId === editingConversation?.id) {
+        if (conversationId === editingConversation?.id) {
           setTitle(newTitle);
         }
       }
       setEditingConversation(null);
     },
-    [setEditingConversation, onRefresh, editingConversation, sessionId, setTitle]
+    [setEditingConversation, onRefresh, editingConversation, conversationId, setTitle]
   );
 
   const handleDeleteConversationConfirmModalClose = useCallback(
@@ -114,13 +114,13 @@ export const ChatHistorySearchList = ({
           {editingConversation && (
             <EditConversationNameModal
               onClose={handleEditConversationModalClose}
-              sessionId={editingConversation.id}
+              conversationId={editingConversation.id}
               defaultTitle={editingConversation.title}
             />
           )}
           {deletingConversation && (
             <DeleteConversationConfirmModal
-              sessionId={deletingConversation.id}
+              conversationId={deletingConversation.id}
               onClose={handleDeleteConversationConfirmModalClose}
             />
           )}

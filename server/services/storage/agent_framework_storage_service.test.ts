@@ -22,7 +22,7 @@ describe('AgentFrameworkStorageService', () => {
   beforeEach(() => {
     mockedTransport.mockReset();
   });
-  it('getSession', async () => {
+  it('getConversation', async () => {
     mockedTransport.mockImplementation(async (params) => {
       if (params.path.includes('/_list?max_results=1000')) {
         return {
@@ -47,7 +47,7 @@ describe('AgentFrameworkStorageService', () => {
       };
     });
 
-    expect(await agentFrameworkService.getSession('session_mock')).toMatchInlineSnapshot(`
+    expect(await agentFrameworkService.getConversation('_mock')).toMatchInlineSnapshot(`
       Object {
         "createdTimeMs": 0,
         "interactions": Array [
@@ -66,20 +66,20 @@ describe('AgentFrameworkStorageService', () => {
         Array [
           Object {
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/session_mock/_list?max_results=1000",
+            "path": "/_plugins/_ml/memory/conversation/_mock/_list?max_results=1000",
           },
         ],
         Array [
           Object {
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/session_mock",
+            "path": "/_plugins/_ml/memory/conversation/_mock",
           },
         ],
       ]
     `);
   });
 
-  it('getSessions', async () => {
+  it('getConversations', async () => {
     mockedTransport.mockImplementation(async (params) => {
       return {
         body: {
@@ -101,7 +101,7 @@ describe('AgentFrameworkStorageService', () => {
     });
 
     expect(
-      await agentFrameworkService.getSessions({
+      await agentFrameworkService.getConversations({
         sortField: 'createTimeMs',
         searchFields: ['title'],
         search: 'foo',
@@ -124,7 +124,7 @@ describe('AgentFrameworkStorageService', () => {
       }
     `);
     expect(
-      await agentFrameworkService.getSessions({
+      await agentFrameworkService.getConversations({
         sortField: 'updatedTimeMs',
         searchFields: 'title',
         search: 'foo',
@@ -194,11 +194,11 @@ describe('AgentFrameworkStorageService', () => {
     );
   });
 
-  it('deleteSession', async () => {
+  it('deleteConversation', async () => {
     mockedTransport.mockImplementationOnce(async (params) => ({
       statusCode: 200,
     }));
-    expect(agentFrameworkService.deleteSession('foo')).resolves.toMatchInlineSnapshot(`
+    expect(agentFrameworkService.deleteConversation('foo')).resolves.toMatchInlineSnapshot(`
       Object {
         "success": true,
       }
@@ -209,7 +209,7 @@ describe('AgentFrameworkStorageService', () => {
         message: 'can not find conversation',
       },
     }));
-    expect(agentFrameworkService.deleteSession('foo')).resolves.toMatchInlineSnapshot(`
+    expect(agentFrameworkService.deleteConversation('foo')).resolves.toMatchInlineSnapshot(`
       Object {
         "message": "{\\"message\\":\\"can not find conversation\\"}",
         "statusCode": 404,
@@ -219,14 +219,15 @@ describe('AgentFrameworkStorageService', () => {
     mockedTransport.mockImplementationOnce(async (params) => {
       return Promise.reject({ meta: { body: 'error' } });
     });
-    expect(agentFrameworkService.deleteSession('foo')).rejects.toBeDefined();
+    expect(agentFrameworkService.deleteConversation('foo')).rejects.toBeDefined();
   });
 
-  it('updateSession', async () => {
+  it('updateConversation', async () => {
     mockedTransport.mockImplementationOnce(async (params) => ({
       statusCode: 200,
     }));
-    expect(agentFrameworkService.updateSession('foo', 'title')).resolves.toMatchInlineSnapshot(`
+    expect(agentFrameworkService.updateConversation('foo', 'title')).resolves
+      .toMatchInlineSnapshot(`
       Object {
         "success": true,
       }
@@ -237,7 +238,8 @@ describe('AgentFrameworkStorageService', () => {
         message: 'can not find conversation',
       },
     }));
-    expect(agentFrameworkService.updateSession('foo', 'title')).resolves.toMatchInlineSnapshot(`
+    expect(agentFrameworkService.updateConversation('foo', 'title')).resolves
+      .toMatchInlineSnapshot(`
       Object {
         "message": "{\\"message\\":\\"can not find conversation\\"}",
         "statusCode": 404,
@@ -247,7 +249,7 @@ describe('AgentFrameworkStorageService', () => {
     mockedTransport.mockImplementationOnce(async (params) => {
       return Promise.reject({ meta: { body: 'error' } });
     });
-    expect(agentFrameworkService.updateSession('foo', 'title')).rejects.toBeDefined();
+    expect(agentFrameworkService.updateConversation('foo', 'title')).rejects.toBeDefined();
   });
 
   it('getTraces', async () => {
@@ -342,13 +344,13 @@ describe('AgentFrameworkStorageService', () => {
       },
     }));
     expect(agentFrameworkService.getInteraction('', '')).rejects.toMatchInlineSnapshot(
-      `[Error: sessionId is required]`
+      `[Error: Id is required]`
     );
-    expect(agentFrameworkService.getInteraction('session_id', '')).rejects.toMatchInlineSnapshot(
+    expect(agentFrameworkService.getInteraction('_id', '')).rejects.toMatchInlineSnapshot(
       `[Error: interactionId is required]`
     );
     expect(mockedTransport).toBeCalledTimes(0);
-    expect(agentFrameworkService.getInteraction('session_id', 'interaction_id')).resolves
+    expect(agentFrameworkService.getInteraction('_id', 'interaction_id')).resolves
       .toMatchInlineSnapshot(`
       Object {
         "input": "input",
