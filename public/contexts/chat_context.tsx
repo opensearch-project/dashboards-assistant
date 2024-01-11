@@ -8,8 +8,8 @@ import { ActionExecutor, UserAccount, TabId, MessageRenderer } from '../types';
 
 export interface IChatContext {
   appId?: string;
-  sessionId?: string;
-  setSessionId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  conversationId?: string;
+  setConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedTabId: TabId;
   preSelectedTabId?: TabId;
   setSelectedTabId: (tabId: TabId) => void;

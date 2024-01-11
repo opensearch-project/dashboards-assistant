@@ -16,7 +16,7 @@ import {
 } from '../edit_conversation_name_modal';
 import { HttpHandler } from '../../../../../src/core/public';
 
-const setup = ({ onClose, defaultTitle, sessionId }: EditConversationNameModalProps) => {
+const setup = ({ onClose, defaultTitle, conversationId }: EditConversationNameModalProps) => {
   const useCoreMock = {
     services: coreMock.createStart(),
   };
@@ -26,7 +26,7 @@ const setup = ({ onClose, defaultTitle, sessionId }: EditConversationNameModalPr
     <I18nProvider>
       <EditConversationNameModal
         onClose={onClose}
-        sessionId={sessionId}
+        conversationId={conversationId}
         defaultTitle={defaultTitle}
       />
     </I18nProvider>
@@ -41,7 +41,7 @@ const setup = ({ onClose, defaultTitle, sessionId }: EditConversationNameModalPr
 describe('<EditConversationNameModal />', () => {
   it('should render default title in name input', async () => {
     const { renderResult } = setup({
-      sessionId: '1',
+      conversationId: '1',
       defaultTitle: 'foo',
     });
 
@@ -55,7 +55,7 @@ describe('<EditConversationNameModal />', () => {
   it('should call onClose with "canceled" after cancel button click', async () => {
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
-      sessionId: '1',
+      conversationId: '1',
       defaultTitle: 'foo',
       onClose: onCloseMock,
     });
@@ -75,10 +75,10 @@ describe('<EditConversationNameModal />', () => {
     });
   });
 
-  it('should show success toast and call onClose with "updated" after patch session succeed', async () => {
+  it('should show success toast and call onClose with "updated" after patch conversation succeed', async () => {
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
-      sessionId: '1',
+      conversationId: '1',
       defaultTitle: 'foo',
       onClose: onCloseMock,
     });
@@ -102,10 +102,10 @@ describe('<EditConversationNameModal />', () => {
     });
   });
 
-  it('should show error toasts and call onClose with "errored" after failed patch session', async () => {
+  it('should show error toasts and call onClose with "errored" after failed patch conversation', async () => {
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
-      sessionId: '1',
+      conversationId: '1',
       defaultTitle: 'foo',
       onClose: onCloseMock,
     });
@@ -129,10 +129,10 @@ describe('<EditConversationNameModal />', () => {
     });
   });
 
-  it('should call onClose with cancelled after patch session aborted', async () => {
+  it('should call onClose with cancelled after patch conversation aborted', async () => {
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
-      sessionId: '1',
+      conversationId: '1',
       defaultTitle: 'foo',
       onClose: onCloseMock,
     });

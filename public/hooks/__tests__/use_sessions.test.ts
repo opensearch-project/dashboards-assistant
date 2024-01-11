@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useDeleteSession, usePatchSession } from '../use_sessions';
+import { useDeleteConversation, usePatchConversation } from '../use_conversations';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useCore } from '../../contexts/core_context';
 import { HttpHandler } from '../../../../../src/core/public';
@@ -11,27 +11,27 @@ import { HttpHandler } from '../../../../../src/core/public';
 jest.mock('../../contexts/core_context');
 const useCoreMocked = useCore as jest.MockedFunction<typeof useCore>;
 
-describe('useDeleteSession', () => {
+describe('useDeleteConversation', () => {
   it('should call delete with path and signal', async () => {
-    const { result } = renderHook(() => useDeleteSession());
+    const { result } = renderHook(() => useDeleteConversation());
 
     await act(async () => {
-      await result.current.deleteSession('foo');
+      await result.current.deleteConversation('foo');
     });
     expect(useCoreMocked.mock.results[0].value.services.http.delete).toHaveBeenCalledWith(
-      '/api/assistant/session/foo',
+      '/api/assistant/conversation/foo',
       expect.objectContaining({
         signal: expect.any(Object),
       })
     );
   });
 
-  it('should be loading after deleteSession called', async () => {
-    const { result, waitFor } = renderHook(() => useDeleteSession());
+  it('should be loading after deleteConversation called', async () => {
+    const { result, waitFor } = renderHook(() => useDeleteConversation());
     useCoreMocked.mock.results[0].value.services.http.delete.mockReturnValue(new Promise(() => {}));
 
     act(() => {
-      result.current.deleteSession('foo');
+      result.current.deleteConversation('foo');
     });
 
     await waitFor(() => {
@@ -40,13 +40,13 @@ describe('useDeleteSession', () => {
   });
 
   it('should return data after delete success', async () => {
-    const { result, waitFor } = renderHook(() => useDeleteSession());
+    const { result, waitFor } = renderHook(() => useDeleteConversation());
     useCoreMocked.mock.results[0].value.services.http.delete.mockReturnValue(
       Promise.resolve('deleted')
     );
 
     act(() => {
-      result.current.deleteSession('foo');
+      result.current.deleteConversation('foo');
     });
 
     await waitFor(() => {
@@ -56,7 +56,7 @@ describe('useDeleteSession', () => {
   });
 
   it('should throw error after abort', async () => {
-    const { result, waitFor } = renderHook(() => useDeleteSession());
+    const { result, waitFor } = renderHook(() => useDeleteConversation());
     const abortErrorMock = new Error('Abort');
     useCoreMocked.mock.results[0].value.services.http.delete.mockImplementation(((
       _path,
@@ -71,23 +71,23 @@ describe('useDeleteSession', () => {
       });
     }) as HttpHandler);
 
-    let deleteSessionPromise: Promise<void>;
+    let deleteConversationPromise: Promise<void>;
     act(() => {
-      deleteSessionPromise = result.current.deleteSession('foo');
+      deleteConversationPromise = result.current.deleteConversation('foo');
     });
 
-    let deleteSessionError;
+    let deleteConversationError;
     await act(async () => {
       result.current.abort();
       try {
-        await deleteSessionPromise;
+        await deleteConversationPromise;
       } catch (error) {
-        deleteSessionError = error;
+        deleteConversationError = error;
       }
     });
 
     expect(result.current.isAborted()).toBe(true);
-    expect(deleteSessionError).toBe(abortErrorMock);
+    expect(deleteConversationError).toBe(abortErrorMock);
 
     await waitFor(() => {
       expect(result.current.error).toBe(abortErrorMock);
@@ -95,15 +95,15 @@ describe('useDeleteSession', () => {
   });
 });
 
-describe('usePatchSession', () => {
+describe('usePatchConversation', () => {
   it('should call put with path, query and signal', async () => {
-    const { result } = renderHook(() => usePatchSession());
+    const { result } = renderHook(() => usePatchConversation());
 
     await act(async () => {
-      await result.current.patchSession('foo', 'new-title');
+      await result.current.patchConversation('foo', 'new-title');
     });
     expect(useCoreMocked.mock.results[0].value.services.http.put).toHaveBeenCalledWith(
-      '/api/assistant/session/foo',
+      '/api/assistant/conversation/foo',
       expect.objectContaining({
         signal: expect.any(Object),
         body: JSON.stringify({ title: 'new-title' }),
@@ -111,12 +111,12 @@ describe('usePatchSession', () => {
     );
   });
 
-  it('should be loading after patchSession called', async () => {
-    const { result, waitFor } = renderHook(() => usePatchSession());
+  it('should be loading after patchConversation called', async () => {
+    const { result, waitFor } = renderHook(() => usePatchConversation());
     useCoreMocked.mock.results[0].value.services.http.put.mockReturnValue(new Promise(() => {}));
 
     act(() => {
-      result.current.patchSession('foo', 'new-title');
+      result.current.patchConversation('foo', 'new-title');
     });
 
     await waitFor(() => {
@@ -124,8 +124,8 @@ describe('usePatchSession', () => {
     });
   });
 
-  it('should return data after patch session success', async () => {
-    const { result, waitFor } = renderHook(() => usePatchSession());
+  it('should return data after patch conversation success', async () => {
+    const { result, waitFor } = renderHook(() => usePatchConversation());
     useCoreMocked.mock.results[0].value.services.http.put.mockReturnValue(
       Promise.resolve({
         title: 'new-title',
@@ -133,7 +133,7 @@ describe('usePatchSession', () => {
     );
 
     act(() => {
-      result.current.patchSession('foo', 'new-title');
+      result.current.patchConversation('foo', 'new-title');
     });
 
     await waitFor(() => {
@@ -143,7 +143,7 @@ describe('usePatchSession', () => {
   });
 
   it('should throw error after abort', async () => {
-    const { result, waitFor } = renderHook(() => usePatchSession());
+    const { result, waitFor } = renderHook(() => usePatchConversation());
     const abortErrorMock = new Error('Abort');
     useCoreMocked.mock.results[0].value.services.http.put.mockImplementation(((_path, options) => {
       return new Promise((_resolve, reject) => {
@@ -155,23 +155,23 @@ describe('usePatchSession', () => {
       });
     }) as HttpHandler);
 
-    let patchSessionPromise: Promise<void>;
+    let patchConversationPromise: Promise<void>;
     act(() => {
-      patchSessionPromise = result.current.patchSession('foo', 'new-title');
+      patchConversationPromise = result.current.patchConversation('foo', 'new-title');
     });
 
-    let patchSessionError;
+    let patchConversationError;
     await act(async () => {
       result.current.abort();
       try {
-        await patchSessionPromise;
+        await patchConversationPromise;
       } catch (error) {
-        patchSessionError = error;
+        patchConversationError = error;
       }
     });
 
     expect(result.current.isAborted()).toBe(true);
-    expect(patchSessionError).toBe(abortErrorMock);
+    expect(patchConversationError).toBe(abortErrorMock);
 
     await waitFor(() => {
       expect(result.current.error).toBe(abortErrorMock);

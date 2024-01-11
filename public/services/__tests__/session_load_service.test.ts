@@ -5,43 +5,43 @@
 
 import { HttpHandler } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
-import { SessionLoadService } from '../session_load_service';
+import { ConversationLoadService } from '../coversation_load_service';
 
 const setup = () => {
   const http = httpServiceMock.createSetupContract();
-  const sessionLoad = new SessionLoadService(http);
+  const conversationLoad = new ConversationLoadService(http);
 
   return {
-    sessionLoad,
+    conversationLoad,
     http,
   };
 };
 
-describe('SessionLoadService', () => {
-  it('should emit loading status and call get with specific session id', () => {
-    const { sessionLoad, http } = setup();
+describe('ConversationLoadService', () => {
+  it('should emit loading status and call get with specific conversation id', () => {
+    const { conversationLoad, http } = setup();
 
-    sessionLoad.load('foo');
+    conversationLoad.load('foo');
     expect(http.get).toHaveBeenCalledWith(
-      '/api/assistant/session/foo',
+      '/api/assistant/conversation/foo',
       expect.objectContaining({
         signal: expect.anything(),
       })
     );
-    expect(sessionLoad.status$.getValue()).toBe('loading');
+    expect(conversationLoad.status$.getValue()).toBe('loading');
   });
 
   it('should resolved with response data and "idle" status', async () => {
-    const { sessionLoad, http } = setup();
+    const { conversationLoad, http } = setup();
     http.get.mockReturnValue(Promise.resolve({ id: '1', title: 'foo' }));
 
-    const result = await sessionLoad.load('foo');
+    const result = await conversationLoad.load('foo');
     expect(result).toEqual({ id: '1', title: 'foo' });
-    expect(sessionLoad.status$.getValue()).toBe('idle');
+    expect(conversationLoad.status$.getValue()).toBe('idle');
   });
 
   it('should emit error after loading aborted', async () => {
-    const { sessionLoad, http } = setup();
+    const { conversationLoad, http } = setup();
     const abortError = new Error('Aborted');
     http.get.mockImplementation(((_path, options) => {
       return new Promise((_resolve, reject) => {
@@ -52,11 +52,11 @@ describe('SessionLoadService', () => {
         }
       });
     }) as HttpHandler);
-    const loadResult = sessionLoad.load('foo');
-    sessionLoad.abortController?.abort();
+    const loadResult = conversationLoad.load('foo');
+    conversationLoad.abortController?.abort();
 
     await loadResult;
 
-    expect(sessionLoad.status$.getValue()).toEqual({ status: 'error', error: abortError });
+    expect(conversationLoad.status$.getValue()).toEqual({ status: 'error', error: abortError });
   });
 });

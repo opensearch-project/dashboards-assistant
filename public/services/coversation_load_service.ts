@@ -5,10 +5,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { HttpStart } from '../../../../src/core/public';
-import { ISession } from '../../common/types/chat_saved_object_attributes';
+import { IConversation } from '../../common/types/chat_saved_object_attributes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
-export class SessionLoadService {
+export class ConversationLoadService {
   status$: BehaviorSubject<
     'idle' | 'loading' | { status: 'error'; error: Error }
   > = new BehaviorSubject<'idle' | 'loading' | { status: 'error'; error: Error }>('idle');
@@ -16,14 +16,17 @@ export class SessionLoadService {
 
   constructor(private _http: HttpStart) {}
 
-  load = async (sessionId: string) => {
+  load = async (conversationId: string) => {
     this.abortController?.abort();
     this.status$.next('loading');
     this.abortController = new AbortController();
     try {
-      const payload = await this._http.get<ISession>(`${ASSISTANT_API.SESSION}/${sessionId}`, {
-        signal: this.abortController.signal,
-      });
+      const payload = await this._http.get<IConversation>(
+        `${ASSISTANT_API.CONVERSATION}/${conversationId}`,
+        {
+          signal: this.abortController.signal,
+        }
+      );
       this.status$.next('idle');
       return payload;
     } catch (error) {

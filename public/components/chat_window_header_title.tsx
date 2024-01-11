@@ -41,14 +41,18 @@ export const ChatWindowHeaderTitle = React.memo(() => {
     (status: 'updated' | string, newTitle?: string) => {
       if (status === 'updated') {
         chatContext.setTitle(newTitle);
-        const sessions = core.services.sessions.sessions$.getValue();
-        if (sessions?.objects.find((session) => session.id === chatContext.sessionId)) {
-          core.services.sessions.reload();
+        const conversations = core.services.conversations.conversations$.getValue();
+        if (
+          conversations?.objects.find(
+            (conversation) => conversation.id === chatContext.conversationId
+          )
+        ) {
+          core.services.conversations.reload();
         }
       }
       setRenameModalOpen(false);
     },
-    [chatContext, core.services.sessions]
+    [chatContext, core.services.conversations]
   );
 
   const handleSaveNotebookModalClose = () => {
@@ -64,7 +68,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
     >
       <EuiFlexItem onClick={onButtonClick} style={{ overflow: 'hidden' }}>
         <h3 className="eui-textTruncate">
-          {chatContext.sessionId ? chatContext.title : 'OpenSearch Assistant'}
+          {chatContext.conversationId ? chatContext.title : 'OpenSearch Assistant'}
         </h3>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -78,7 +82,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
 
   const items = [
     <EuiContextMenuItem
-      disabled={!chatContext.sessionId}
+      disabled={!chatContext.conversationId}
       key="rename-conversation"
       onClick={() => {
         closePopover();
@@ -92,8 +96,8 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       onClick={() => {
         closePopover();
         loadChat(undefined);
-        // Only show toast when previous session saved
-        if (!!chatContext.sessionId) {
+        // Only show toast when previous conversation saved
+        if (!!chatContext.conversationId) {
           core.services.notifications.toasts.addSuccess(
             'A new conversation is started and the previous one is saved.'
           );
@@ -129,7 +133,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       </EuiPopover>
       {isRenameModalOpen && (
         <EditConversationNameModal
-          sessionId={chatContext.sessionId!}
+          conversationId={chatContext.conversationId!}
           onClose={handleEditConversationClose}
           defaultTitle={chatContext.title!}
         />

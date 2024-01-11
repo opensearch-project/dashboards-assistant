@@ -13,7 +13,7 @@ import { HttpStart } from '../../../../../../src/core/public';
 import * as useChatStateExports from '../../../hooks/use_chat_state';
 import * as chatContextExports from '../../../contexts/chat_context';
 import * as coreContextExports from '../../../contexts/core_context';
-import { SessionsService } from '../../../services/sessions_service';
+import { SessionsService } from '../../../services/conversations_service';
 
 import { ChatHistoryPage } from '../chat_history_page';
 

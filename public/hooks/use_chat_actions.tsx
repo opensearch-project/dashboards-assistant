@@ -30,22 +30,22 @@ export const useChatActions = (): AssistantActions => {
       const response = await core.services.http.post<SendResponse>(ASSISTANT_API.SEND_MESSAGE, {
         // do not send abort signal to http client to allow LLM call run in background
         body: JSON.stringify({
-          sessionId: chatContext.sessionId,
-          ...(!chatContext.sessionId && { messages: chatState.messages }), // include all previous messages for new chats
+          conversationId: chatContext.conversationId,
+          ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
           input,
         }),
       });
       if (abortController.signal.aborted) return;
-      // Refresh history list after new session created if new session saved and history list page visible
+      // Refresh history list after new conversation created if new conversation saved and history list page visible
       if (
-        !chatContext.sessionId &&
-        response.sessionId &&
-        core.services.sessions.options?.page === 1 &&
+        !chatContext.conversationId &&
+        response.conversationId &&
+        core.services.conversations.options?.page === 1 &&
         chatContext.selectedTabId === TAB_ID.HISTORY
       ) {
-        core.services.sessions.reload();
+        core.services.conversations.reload();
       }
-      chatContext.setSessionId(response.sessionId);
+      chatContext.setConversationId(response.conversationId);
       // set title for first time
       if (response.title && !chatContext.title) {
         chatContext.setTitle(response.title);
@@ -78,27 +78,27 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const loadChat = async (sessionId?: string, title?: string) => {
+  const loadChat = async (conversationId?: string, title?: string) => {
     abortControllerRef?.abort();
-    core.services.sessionLoad.abortController?.abort();
-    chatContext.setSessionId(sessionId);
+    core.services.conversationLoad.abortController?.abort();
+    chatContext.setConversationId(conversationId);
     chatContext.setTitle(title);
     // Chat page will always visible in fullscreen mode, we don't need to change the tab anymore
     if (!chatContext.flyoutFullScreen) {
       chatContext.setSelectedTabId(TAB_ID.CHAT);
     }
     chatContext.setFlyoutComponent(null);
-    if (!sessionId) {
+    if (!conversationId) {
       chatStateDispatch({ type: 'reset' });
       return;
     }
-    const session = await core.services.sessionLoad.load(sessionId);
-    if (session) {
+    const conversation = await core.services.conversationLoad.load(conversationId);
+    if (conversation) {
       chatStateDispatch({
         type: 'receive',
         payload: {
-          messages: session.messages,
-          interactions: session.interactions,
+          messages: conversation.messages,
+          interactions: conversation.interactions,
         },
       });
     }
@@ -153,20 +153,20 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const abortAction = async (sessionId?: string) => {
+  const abortAction = async (conversationId?: string) => {
     abortControllerRef.abort();
     chatStateDispatch({ type: 'abort' });
 
-    if (sessionId) {
+    if (conversationId) {
       // abort agent execution
       await core.services.http.post(`${ASSISTANT_API.ABORT_AGENT_EXECUTION}`, {
-        body: JSON.stringify({ sessionId }),
+        body: JSON.stringify({ conversationId }),
       });
     }
   };
 
   const regenerate = async (interactionId: string) => {
-    if (chatContext.sessionId) {
+    if (chatContext.conversationId) {
       const abortController = new AbortController();
       abortControllerRef = abortController;
       chatStateDispatch({ type: 'regenerate' });
@@ -174,7 +174,7 @@ export const useChatActions = (): AssistantActions => {
       try {
         const response = await core.services.http.put(`${ASSISTANT_API.REGENERATE}`, {
           body: JSON.stringify({
-            sessionId: chatContext.sessionId,
+            conversationId: chatContext.conversationId,
             interactionId,
           }),
         });

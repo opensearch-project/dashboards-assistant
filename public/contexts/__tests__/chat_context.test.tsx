@@ -10,7 +10,7 @@ import { useChatContext, ChatContext } from '../chat_context';
 describe('useChatContext', () => {
   it('should return chat context after useChatContext called', () => {
     const chatContextValueMock = {
-      setSessionId: jest.fn(),
+      setConversationId: jest.fn(),
       selectedTabId: 'chat' as const,
       setSelectedTabId: jest.fn(),
       flyoutVisible: true,
