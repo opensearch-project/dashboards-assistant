@@ -18,7 +18,7 @@ describe('useChatContext', () => {
       setFlyoutVisible: jest.fn(),
       setFlyoutComponent: jest.fn(),
       userHasAccess: true,
-      contentRenderers: {},
+      messageRenderers: {},
       actionExecutors: {},
       currentAccount: { username: 'foo', tenant: '' },
       setTitle: jest.fn(),

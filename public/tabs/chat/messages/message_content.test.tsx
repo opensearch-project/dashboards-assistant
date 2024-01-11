@@ -19,7 +19,7 @@ describe('<MessageContent />', () => {
 
   beforeEach(() => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      contentRenderers: {
+      messageRenderers: {
         customized_content_type: customizedRenderMock,
       },
     });

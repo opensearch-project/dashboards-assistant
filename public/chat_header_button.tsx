@@ -14,13 +14,13 @@ import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks';
 import './index.scss';
 import chatIcon from './assets/chat.svg';
-import { ActionExecutor, AssistantActions, ContentRenderer, UserAccount, TabId } from './types';
+import { ActionExecutor, AssistantActions, MessageRenderer, UserAccount, TabId } from './types';
 import { TAB_ID } from './utils/constants';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
   userHasAccess: boolean;
-  contentRenderers: Record<string, ContentRenderer>;
+  messageRenderers: Record<string, MessageRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   assistantActions: AssistantActions;
   currentAccount: UserAccount;
@@ -70,7 +70,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       setFlyoutVisible,
       setFlyoutComponent,
       userHasAccess: props.userHasAccess,
-      contentRenderers: props.contentRenderers,
+      messageRenderers: props.messageRenderers,
       actionExecutors: props.actionExecutors,
       currentAccount: props.currentAccount,
       title,
@@ -86,7 +86,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       selectedTabId,
       preSelectedTabId,
       props.userHasAccess,
-      props.contentRenderers,
+      props.messageRenderers,
       props.actionExecutors,
       props.currentAccount,
       title,

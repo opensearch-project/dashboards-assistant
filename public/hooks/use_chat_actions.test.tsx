@@ -75,7 +75,7 @@ describe('useChatActions hook', () => {
     flyoutVisible: false,
     flyoutFullScreen: false,
     userHasAccess: false,
-    contentRenderers: {},
+    messageRenderers: {},
     currentAccount: {
       username: '',
       tenant: '',

@@ -41,7 +41,7 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
     default: {
       const message = props.message as IMessage;
       return (
-        chatContext.contentRenderers[message.contentType]?.(message, {
+        chatContext.messageRenderers[message.contentType]?.(message, {
           props,
           chatContext,
         }) ?? null
