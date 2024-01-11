@@ -79,6 +79,7 @@ describe('regenerate route when rootAgentName is provided', () => {
     })) as ResponseObject;
     expect(result.source).toMatchInlineSnapshot(`
       Object {
+        "conversationId": "foo",
         "interactions": Array [
           Object {
             "conversation_id": "foo",
@@ -95,7 +96,6 @@ describe('regenerate route when rootAgentName is provided', () => {
             "type": "output",
           },
         ],
-        "conversationId": "foo",
       }
     `);
   });
@@ -123,6 +123,7 @@ describe('regenerate route when rootAgentName is provided', () => {
     expect(mockedLogger.error).toBeCalledTimes(1);
     expect(result.source).toMatchInlineSnapshot(`
       Object {
+        "conversationId": "foo",
         "interactions": Array [
           Object {
             "conversation_id": "foo",
@@ -133,7 +134,6 @@ describe('regenerate route when rootAgentName is provided', () => {
           },
         ],
         "messages": Array [],
-        "conversationId": "foo",
       }
     `);
   });

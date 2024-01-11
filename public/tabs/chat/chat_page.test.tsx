@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { coreMock } from '../../../../../src/core/public/mocks';
-import { ConversationLoadService } from '../../services/coversation_load_service';
+import { ConversationLoadService } from '../../services/conversation_load_service';
 import { ChatPage } from './chat_page';
 import * as chatContextExports from '../../contexts/chat_context';
 import * as coreContextExports from '../../contexts/core_context';

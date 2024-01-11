@@ -72,9 +72,9 @@ describe('send_message route when rootAgentName is provided', () => {
     })) as ResponseObject;
     expect(result.source).toMatchInlineSnapshot(`
       Object {
+        "conversationId": "foo",
         "interactions": Array [],
         "messages": Array [],
-        "conversationId": "foo",
         "title": "foo",
       }
     `);
@@ -112,6 +112,7 @@ describe('send_message route when rootAgentName is provided', () => {
     })) as ResponseObject;
     expect(result.source).toMatchInlineSnapshot(`
       Object {
+        "conversationId": "foo",
         "interactions": Array [
           Object {
             "conversation_id": "",
@@ -122,7 +123,6 @@ describe('send_message route when rootAgentName is provided', () => {
           },
         ],
         "messages": Array [],
-        "conversationId": "foo",
       }
     `);
   });

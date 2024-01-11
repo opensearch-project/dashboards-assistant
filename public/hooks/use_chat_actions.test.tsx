@@ -9,7 +9,7 @@ import * as chatContextHookExports from '../contexts/chat_context';
 import * as coreHookExports from '../contexts/core_context';
 import { httpServiceMock } from '../../../../src/core/public/mocks';
 import { ConversationsService } from '../services/conversations_service';
-import { ConversationLoadService } from '../services/coversation_load_service';
+import { ConversationLoadService } from '../services/conversation_load_service';
 import * as chatStateHookExports from './use_chat_state';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { IMessage } from 'common/types/chat_saved_object_attributes';

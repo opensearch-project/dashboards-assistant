@@ -12,7 +12,7 @@ import {
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
-import { ConversationLoadService } from './services/coversation_load_service';
+import { ConversationLoadService } from './services/conversation_load_service';
 import { ConversationsService } from './services/conversations_service';
 import {
   ActionExecutor,

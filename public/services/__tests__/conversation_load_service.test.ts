@@ -5,7 +5,7 @@
 
 import { HttpHandler } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
-import { ConversationLoadService } from '../coversation_load_service';
+import { ConversationLoadService } from '../conversation_load_service';
 
 const setup = () => {
   const http = httpServiceMock.createSetupContract();

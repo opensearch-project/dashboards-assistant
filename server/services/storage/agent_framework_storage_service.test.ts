@@ -344,7 +344,7 @@ describe('AgentFrameworkStorageService', () => {
       },
     }));
     expect(agentFrameworkService.getInteraction('', '')).rejects.toMatchInlineSnapshot(
-      `[Error: Id is required]`
+      `[Error: conversationId is required]`
     );
     expect(agentFrameworkService.getInteraction('_id', '')).rejects.toMatchInlineSnapshot(
       `[Error: interactionId is required]`
