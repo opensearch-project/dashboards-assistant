@@ -29,21 +29,21 @@ describe('VisualizationCardParser', () => {
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
-        isVisualization: true,
+        fullWidth: true,
       },
       {
         content: 'id2',
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
-        isVisualization: true,
+        fullWidth: true,
       },
       {
         content: 'id3',
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
-        isVisualization: true,
+        fullWidth: true,
       },
     ]);
   });
@@ -69,14 +69,14 @@ describe('VisualizationCardParser', () => {
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
-        isVisualization: true,
+        fullWidth: true,
       },
       {
         content: 'id2',
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
-        isVisualization: true,
+        fullWidth: true,
       },
     ]);
   });
@@ -115,7 +115,7 @@ describe('VisualizationCardParser', () => {
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
-        isVisualization: true,
+        fullWidth: true,
       },
     ]);
   });
@@ -143,14 +143,14 @@ describe('VisualizationCardParser', () => {
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
-        isVisualization: true,
+        fullWidth: true,
       },
       {
         content: 'id2',
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
-        isVisualization: true,
+        fullWidth: true,
       },
     ]);
   });

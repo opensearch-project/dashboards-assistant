@@ -47,7 +47,7 @@ export interface IOutput {
   content: string;
   suggestedActions?: ISuggestedAction[];
   messageId?: string;
-  isVisualization?: boolean;
+  fullWidth?: boolean;
 }
 export type IMessage = IInput | IOutput;
 

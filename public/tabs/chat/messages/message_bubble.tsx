@@ -133,7 +133,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
       );
     }
 
-    const isVisualization = props.message.isVisualization;
+    const fullWidth = props.message.fullWidth;
 
     return (
       <EuiFlexGroup
@@ -152,7 +152,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
              * When using minWidth the content width inside may be larger than the container itself,
              * especially in data grid case that the content will change its size according to fullScreen or not.
              */
-            style={isVisualization ? { width: '100%' } : {}}
+            style={fullWidth ? { width: '100%' } : {}}
             hasShadow={false}
             hasBorder={false}
             paddingSize="l"
@@ -175,7 +175,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                 justifyContent="flexStart"
                 style={{ paddingLeft: 10 }}
               >
-                {!isVisualization && (
+                {!fullWidth && (
                   <EuiFlexItem grow={false}>
                     <EuiCopy textToCopy={props.message.content ?? ''}>
                       {(copy) => (

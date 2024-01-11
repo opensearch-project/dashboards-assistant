@@ -87,6 +87,22 @@ describe('<MessageContent />', () => {
         }}
       />
     );
-    expect(customizedRenderMock.mock.calls[0]).toMatchInlineSnapshot();
+    expect(customizedRenderMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "content": "mock customized content",
+        "contentType": "customized_content_type",
+        "type": "output",
+      }
+    `);
+    expect(customizedRenderMock.mock.calls[0][1].props).toMatchInlineSnapshot(`
+      Object {
+        "message": Object {
+          "content": "mock customized content",
+          "contentType": "customized_content_type",
+          "type": "output",
+        },
+      }
+    `);
+    expect(customizedRenderMock.mock.calls[0][1].chatContext).not.toBeUndefined();
   });
 });
