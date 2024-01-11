@@ -4,7 +4,7 @@
  */
 
 import React, { useContext } from 'react';
-import { ActionExecutor, ContentRenderer, UserAccount, TabId } from '../types';
+import { ActionExecutor, UserAccount, TabId, MessageRenderer } from '../types';
 
 export interface IChatContext {
   appId?: string;
@@ -18,7 +18,7 @@ export interface IChatContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
   userHasAccess: boolean;
-  contentRenderers: Record<string, ContentRenderer>;
+  messageRenderers: Record<string, MessageRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   currentAccount: UserAccount;
   title?: string;

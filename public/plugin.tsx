@@ -20,7 +20,7 @@ import {
   AssistantActions,
   AssistantSetup,
   AssistantStart,
-  ContentRenderer,
+  MessageRenderer,
   SetupDependencies,
 } from './types';
 
@@ -49,7 +49,7 @@ export class AssistantPlugin
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
   ): AssistantSetup {
-    const contentRenderers: Record<string, ContentRenderer> = {};
+    const messageRenderers: Record<string, MessageRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
     /**
@@ -95,7 +95,7 @@ export class AssistantPlugin
               <HeaderChatButton
                 application={coreStart.application}
                 userHasAccess={checkAccess(account)}
-                contentRenderers={contentRenderers}
+                messageRenderers={messageRenderers}
                 actionExecutors={actionExecutors}
                 assistantActions={assistantActions}
                 currentAccount={{ username, tenant }}
@@ -107,10 +107,10 @@ export class AssistantPlugin
     }
 
     return {
-      registerContentRenderer: (contentType, render) => {
-        if (contentType in contentRenderers)
+      registerMessageRenderer: (contentType, render) => {
+        if (contentType in messageRenderers)
           console.warn(`Content renderer type ${contentType} is already registered.`);
-        contentRenderers[contentType] = render;
+        messageRenderers[contentType] = render;
       },
       registerActionExecutor: (actionType, execute) => {
         if (actionType in actionExecutors)

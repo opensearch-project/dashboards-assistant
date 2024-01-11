@@ -35,6 +35,7 @@ export const VisualizationCardParser = {
         type: 'output',
         content: id,
         contentType: 'visualization',
+        fullWidth: true,
         suggestedActions: [
           {
             message: 'View in Visualize',

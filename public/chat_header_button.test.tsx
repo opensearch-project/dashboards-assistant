@@ -60,7 +60,7 @@ describe('<HeaderChatButton />', () => {
       <HeaderChatButton
         application={applicationStart}
         userHasAccess={true}
-        contentRenderers={{}}
+        messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
@@ -102,7 +102,7 @@ describe('<HeaderChatButton />', () => {
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
         userHasAccess={true}
-        contentRenderers={{}}
+        messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
@@ -120,7 +120,7 @@ describe('<HeaderChatButton />', () => {
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
         userHasAccess={true}
-        contentRenderers={{}}
+        messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
@@ -144,7 +144,7 @@ describe('<HeaderChatButton />', () => {
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
         userHasAccess={true}
-        contentRenderers={{}}
+        messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
@@ -165,7 +165,7 @@ describe('<HeaderChatButton />', () => {
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
         userHasAccess={false}
-        contentRenderers={{}}
+        messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
@@ -179,7 +179,7 @@ describe('<HeaderChatButton />', () => {
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
         userHasAccess={false}
-        contentRenderers={{}}
+        messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}

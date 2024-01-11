@@ -6,9 +6,16 @@
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { IMessage, ISuggestedAction } from '../common/types/chat_saved_object_attributes';
+import { IChatContext } from './contexts/chat_context';
+import { MessageContentProps } from './tabs/chat/messages/message_content';
+
+export interface RenderProps {
+  props: MessageContentProps;
+  chatContext: IChatContext;
+}
 
 // TODO should pair with server side registered output parser
-export type ContentRenderer = (content: unknown) => React.ReactElement;
+export type MessageRenderer = (message: IMessage, renderProps: RenderProps) => React.ReactElement;
 export type ActionExecutor = (params: Record<string, unknown>) => void;
 export interface AssistantActions {
   send: (input: IMessage) => Promise<void>;
@@ -30,7 +37,7 @@ export interface SetupDependencies {
 }
 
 export interface AssistantSetup {
-  registerContentRenderer: (contentType: string, render: ContentRenderer) => void;
+  registerMessageRenderer: (contentType: string, render: MessageRenderer) => void;
   registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
   /**
    * Returns true if chat UI is enabled.

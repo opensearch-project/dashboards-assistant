@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MessageContent } from './message_content';
 import * as chatContextExports from '../../../contexts/chat_context';
 
@@ -15,13 +15,11 @@ jest.mock('../../../components/core_visualization', () => {
 });
 
 describe('<MessageContent />', () => {
-  const pplVisualizationRenderMock = jest.fn();
   const customizedRenderMock = jest.fn();
 
   beforeEach(() => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      contentRenderers: {
-        ppl_visualization: pplVisualizationRenderMock,
+      messageRenderers: {
         customized_content_type: customizedRenderMock,
       },
     });
@@ -79,19 +77,6 @@ describe('<MessageContent />', () => {
     expect(screen.queryAllByText('title')).toHaveLength(1);
   });
 
-  it('should render ppl visualization', () => {
-    render(
-      <MessageContent
-        message={{
-          type: 'output',
-          contentType: 'ppl_visualization',
-          content: 'mock ppl query',
-        }}
-      />
-    );
-    expect(pplVisualizationRenderMock).toHaveBeenCalledWith({ query: 'mock ppl query' });
-  });
-
   it('should render customized render content', () => {
     render(
       <MessageContent
@@ -102,6 +87,22 @@ describe('<MessageContent />', () => {
         }}
       />
     );
-    expect(customizedRenderMock).toHaveBeenCalledWith('mock customized content');
+    expect(customizedRenderMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "content": "mock customized content",
+        "contentType": "customized_content_type",
+        "type": "output",
+      }
+    `);
+    expect(customizedRenderMock.mock.calls[0][1].props).toMatchInlineSnapshot(`
+      Object {
+        "message": Object {
+          "content": "mock customized content",
+          "contentType": "customized_content_type",
+          "type": "output",
+        },
+      }
+    `);
+    expect(customizedRenderMock.mock.calls[0][1].chatContext).not.toBeUndefined();
   });
 });

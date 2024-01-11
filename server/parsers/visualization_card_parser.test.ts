@@ -29,18 +29,21 @@ describe('VisualizationCardParser', () => {
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
+        fullWidth: true,
       },
       {
         content: 'id2',
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
+        fullWidth: true,
       },
       {
         content: 'id3',
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
+        fullWidth: true,
       },
     ]);
   });
@@ -66,12 +69,14 @@ describe('VisualizationCardParser', () => {
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
+        fullWidth: true,
       },
       {
         content: 'id2',
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
+        fullWidth: true,
       },
     ]);
   });
@@ -110,6 +115,7 @@ describe('VisualizationCardParser', () => {
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
+        fullWidth: true,
       },
     ]);
   });
@@ -137,12 +143,14 @@ describe('VisualizationCardParser', () => {
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
+        fullWidth: true,
       },
       {
         content: 'id2',
         contentType: 'visualization',
         suggestedActions: [{ actionType: 'view_in_dashboards', message: 'View in Visualize' }],
         type: 'output',
+        fullWidth: true,
       },
     ]);
   });
