@@ -49,7 +49,7 @@ describe('regenerate route when rootAgentName is provided', () => {
     mockOllyChatService.regenerate.mockImplementationOnce(async () => {
       return {
         messages: [],
-        memoryId: 'foo',
+        conversationId: 'foo',
         interactionId: 'interaction_id',
       };
     });
@@ -142,7 +142,7 @@ describe('regenerate route when rootAgentName is provided', () => {
     mockOllyChatService.regenerate.mockImplementationOnce(async () => {
       return {
         messages: [],
-        memoryId: 'foo',
+        conversationId: 'foo',
         interactionId: 'interaction_id',
       };
     });

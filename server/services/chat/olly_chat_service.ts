@@ -126,7 +126,7 @@ export class OllyChatService implements ChatService {
         }>;
       }>;
       const outputBody = agentFrameworkResponse.body.inference_results?.[0]?.output;
-      const memoryIdItem = outputBody?.find((item) => item.name === MEMORY_ID_FIELD);
+      const conversationIdItem = outputBody?.find((item) => item.name === MEMORY_ID_FIELD);
       const interactionIdItem = outputBody?.find((item) => item.name === INTERACTION_ID_FIELD);
       return {
         /**
@@ -134,7 +134,7 @@ export class OllyChatService implements ChatService {
          * thus we do not need to return the latest message back.
          */
         messages: [],
-        memoryId: memoryIdItem?.result || '',
+        conversationId: conversationIdItem?.result || '',
         interactionId: interactionIdItem?.result || '',
       };
     } catch (error) {
@@ -152,7 +152,7 @@ export class OllyChatService implements ChatService {
     conversationId?: string;
   }): Promise<{
     messages: IMessage[];
-    memoryId: string;
+    conversationId: string;
     interactionId: string;
   }> {
     const { input, conversationId } = payload;
@@ -172,7 +172,7 @@ export class OllyChatService implements ChatService {
   async regenerate(payload: {
     conversationId: string;
     interactionId: string;
-  }): Promise<{ messages: IMessage[]; memoryId: string; interactionId: string }> {
+  }): Promise<{ messages: IMessage[]; conversationId: string; interactionId: string }> {
     const { conversationId, interactionId } = payload;
     const parametersPayload: Pick<
       AgentRunPayload,

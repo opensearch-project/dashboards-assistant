@@ -49,7 +49,7 @@ describe('send_message route when rootAgentName is provided', () => {
     mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
       return {
         messages: [],
-        memoryId: 'foo',
+        conversationId: 'foo',
         interactionId: 'interaction_id',
       };
     });
@@ -85,7 +85,7 @@ describe('send_message route when rootAgentName is provided', () => {
     mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
       return {
         messages: [],
-        memoryId: 'foo',
+        conversationId: 'foo',
         interactionId: 'interaction_id',
       };
     });
@@ -153,11 +153,11 @@ describe('send_message route when rootAgentName is provided', () => {
     `);
   });
 
-  it('return 500 when requestLLM return without memoryId and no conversation id provided', async () => {
+  it('return 500 when requestLLM return without conversationId and no conversation id provided', async () => {
     mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
       return {
         messages: [],
-        memoryId: '',
+        conversationId: '',
         interactionId: 'interaction_id',
       };
     });
@@ -228,7 +228,7 @@ describe('send_message route when rootAgentName is provided', () => {
     mockOllyChatService.requestLLM.mockImplementationOnce(async () => {
       return {
         messages: [],
-        memoryId: 'foo',
+        conversationId: 'foo',
         interactionId: 'interaction_id',
       };
     });

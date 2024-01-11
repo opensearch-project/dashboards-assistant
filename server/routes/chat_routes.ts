@@ -172,7 +172,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       /**
        * Retrieve latest interactions from memory
        */
-      const conversationId = outputs?.memoryId || (conversationIdInRequestBody as string);
+      const conversationId = outputs?.conversationId || (conversationIdInRequestBody as string);
       const interactionId = outputs?.interactionId || '';
       try {
         if (!conversationId) {

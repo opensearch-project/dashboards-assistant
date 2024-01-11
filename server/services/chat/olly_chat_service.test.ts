@@ -113,7 +113,7 @@ describe('OllyChatService', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "interactionId": "",
-        "memoryId": "foo",
+        "conversationId": "foo",
         "messages": Array [],
       }
     `);
@@ -233,7 +233,7 @@ describe('OllyChatService', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "interactionId": "",
-        "memoryId": "foo",
+        "conversationId": "foo",
         "messages": Array [],
       }
     `);
@@ -414,7 +414,7 @@ describe('OllyChatService', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "interactionId": "",
-        "memoryId": "foo",
+        "conversationId": "foo",
         "messages": Array [],
       }
     `);
