@@ -41,7 +41,7 @@ export interface IInput {
 }
 export interface IOutput {
   type: 'output';
-  traceId?: string; // used for tracing agent calls
+  interactionId?: string; // used for tracing agent calls
   toolsUsed?: string[];
   contentType: 'error' | 'markdown' | 'visualization' | string;
   content: string;
@@ -64,7 +64,7 @@ export type ISuggestedAction = ISuggestedActionBase &
       }
     | {
         actionType: 'view_trace';
-        metadata: { traceId: string; icon: string };
+        metadata: { interactionId: string; icon: string };
       }
   );
 export interface SendFeedbackBody {

@@ -99,7 +99,7 @@ export const BasicInputOutputParser: MessageParser = {
         type: 'output',
         contentType: 'markdown',
         content: sanitize(interaction.response),
-        traceId: interaction.interaction_id,
+        interactionId: interaction.interaction_id,
         suggestedActions: suggestedActions
           .filter((item) => item)
           .map((item) => ({

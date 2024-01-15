@@ -114,9 +114,9 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         const showSuggestions = i > lastInputIndex;
 
         let interaction: Interaction | undefined;
-        if (message.type === 'output' && message.traceId) {
+        if (message.type === 'output' && message.interactionId) {
           interaction = chatState.interactions.find(
-            (item) => item.interaction_id === message.traceId
+            (item) => item.interaction_id === message.interactionId
           );
         }
 
@@ -203,13 +203,13 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
   if (props.message.type !== 'output') {
     return null;
   }
-  const traceId = props.message.traceId;
+  const interactionId = props.message.interactionId;
 
   const suggestedActions = structuredClone(props.message.suggestedActions) || [];
-  if (traceId) {
+  if (interactionId) {
     const viewTraceAction: ISuggestedAction = {
       actionType: 'view_trace',
-      metadata: { traceId, icon: 'questionInCircle' },
+      metadata: { interactionId, icon: 'questionInCircle' },
       message: 'How was this generated?',
     };
     suggestedActions.push(viewTraceAction);

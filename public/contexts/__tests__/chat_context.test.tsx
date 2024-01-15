@@ -22,7 +22,7 @@ describe('useChatContext', () => {
       actionExecutors: {},
       currentAccount: { username: 'foo', tenant: '' },
       setTitle: jest.fn(),
-      setTraceId: jest.fn(),
+      setInteractionId: jest.fn(),
     };
     const { result } = renderHook(useChatContext, {
       wrapper: ({ children }) => (

@@ -109,10 +109,10 @@ const updateConversationRoute = {
 };
 
 const getTracesRoute = {
-  path: `${ASSISTANT_API.TRACE}/{traceId}`,
+  path: `${ASSISTANT_API.TRACE}/{interactionId}`,
   validate: {
     params: schema.object({
-      traceId: schema.string(),
+      interactionId: schema.string(),
     }),
   },
 };
@@ -307,7 +307,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const storageService = createStorageService(context);
 
       try {
-        const getResponse = await storageService.getTraces(request.params.traceId);
+        const getResponse = await storageService.getTraces(request.params.interactionId);
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -361,6 +361,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         outputs = await chatService.regenerate({ conversationId, interactionId });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
 
       /**

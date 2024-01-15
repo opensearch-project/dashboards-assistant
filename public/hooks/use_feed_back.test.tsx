@@ -62,7 +62,7 @@ describe('useFeedback hook', () => {
     } as IMessage;
     const mockOutputMessage = {
       type: 'output',
-      traceId: 'traceId',
+      interactionId: 'interactionId',
     } as IOutput;
     const mockMessages = [mockInputMessage, mockOutputMessage];
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
@@ -77,7 +77,7 @@ describe('useFeedback hook', () => {
       await sendFeedback(mockOutputMessage, true);
     });
     expect(httpMock.put).toHaveBeenCalledWith(
-      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.traceId}`,
+      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
       {
         body: JSON.stringify({
           satisfaction: true,
@@ -95,7 +95,7 @@ describe('useFeedback hook', () => {
     } as IMessage;
     const mockOutputMessage = {
       type: 'output',
-      traceId: 'traceId',
+      interactionId: 'interactionId',
     } as IOutput;
     const mockMessages = [mockInputMessage, mockOutputMessage];
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
@@ -111,7 +111,7 @@ describe('useFeedback hook', () => {
     });
 
     expect(httpMock.put).toHaveBeenCalledWith(
-      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.traceId}`,
+      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
       {
         body: JSON.stringify({
           satisfaction: true,
@@ -124,7 +124,7 @@ describe('useFeedback hook', () => {
   it('should not call API to feedback if there is no input message before passed output message', async () => {
     const mockOutputMessage = {
       type: 'output',
-      traceId: 'traceId',
+      interactionId: 'interactionId',
     } as IOutput;
     const mockMessages = [mockOutputMessage];
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
@@ -140,7 +140,7 @@ describe('useFeedback hook', () => {
     });
 
     expect(httpMock.put).not.toHaveBeenCalledWith(
-      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.traceId}`,
+      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
       {
         body: JSON.stringify({
           satisfaction: true,

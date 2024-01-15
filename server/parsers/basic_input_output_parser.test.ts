@@ -28,7 +28,7 @@ describe('BasicInputOutputParser', () => {
         type: 'output',
         contentType: 'markdown',
         content: 'response',
-        traceId: 'interaction_id',
+        interactionId: 'interaction_id',
         suggestedActions: [],
       },
     ]);
@@ -59,7 +59,7 @@ describe('BasicInputOutputParser', () => {
         type: 'output',
         contentType: 'markdown',
         content: 'response',
-        traceId: 'interaction_id',
+        interactionId: 'interaction_id',
         suggestedActions: [
           {
             actionType: 'send_as_input',
@@ -105,7 +105,7 @@ describe('BasicInputOutputParser', () => {
         type: 'output',
         contentType: 'markdown',
         content: 'response',
-        traceId: 'interaction_id',
+        interactionId: 'interaction_id',
         suggestedActions: [],
       },
     ]);
@@ -134,7 +134,7 @@ describe('BasicInputOutputParser', () => {
         content:
           'normal text<b></b>  [](http://evil.com/) [image](http://evil.com/) [good link](https://link)',
         contentType: 'markdown',
-        traceId: 'interaction_id',
+        interactionId: 'interaction_id',
         type: 'output',
         suggestedActions: [],
       },

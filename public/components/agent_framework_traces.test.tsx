@@ -56,7 +56,7 @@ describe('<AgentFrameworkTraces/> spec', () => {
 
     jest.spyOn(GetTraces, 'useFetchAgentFrameworkTraces').mockReturnValue(mockedGetTracesResult);
 
-    render(<AgentFrameworkTraces traceId="test-trace-id" />);
+    render(<AgentFrameworkTraces interactionId="test-interaction-id" />);
     expect(GetTraces.useFetchAgentFrameworkTraces).toBeCalledTimes(1);
     expect(document.body.children).toMatchSnapshot();
   });
@@ -66,7 +66,7 @@ describe('<AgentFrameworkTraces/> spec', () => {
       loading: false,
       data: [],
     });
-    render(<AgentFrameworkTraces traceId="test-trace-id" />);
+    render(<AgentFrameworkTraces interactionId="test-interaction-id" />);
     expect(screen.queryByText('Data not available.')).toBeInTheDocument();
   });
 
@@ -75,7 +75,7 @@ describe('<AgentFrameworkTraces/> spec', () => {
       loading: true,
       data: [],
     });
-    render(<AgentFrameworkTraces traceId="test-trace-id" />);
+    render(<AgentFrameworkTraces interactionId="test-interaction-id" />);
     expect(screen.queryByText('Loading...')).toBeInTheDocument();
   });
 
@@ -85,7 +85,7 @@ describe('<AgentFrameworkTraces/> spec', () => {
       data: [],
       error: new Error('test'),
     });
-    render(<AgentFrameworkTraces traceId="test-trace-id" />);
+    render(<AgentFrameworkTraces interactionId="test-interaction-id" />);
     expect(screen.queryByText('Error loading details')).toBeInTheDocument();
   });
 });

@@ -224,7 +224,7 @@ describe('<ChatPageContent />', () => {
         content: 'here are the indices in your cluster: .kibana',
         contentType: 'markdown',
         suggestedActions: [],
-        traceId: 'trace_id_mock',
+        interactionId: 'interaction_id_mock',
       },
     ];
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({

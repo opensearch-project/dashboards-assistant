@@ -119,21 +119,17 @@ describe('regenerate route when rootAgentName is provided', () => {
     const result = (await regenerateRequest({
       conversationId: 'foo',
       interactionId: 'bar',
-    })) as ResponseObject;
+    })) as Boom;
     expect(mockedLogger.error).toBeCalledTimes(1);
-    expect(result.source).toMatchInlineSnapshot(`
+    expect(result.output).toMatchInlineSnapshot(`
       Object {
-        "conversationId": "foo",
-        "interactions": Array [
-          Object {
-            "conversation_id": "foo",
-            "create_time": "create_time",
-            "input": "foo",
-            "interaction_id": "interaction_id",
-            "response": "bar",
-          },
-        ],
-        "messages": Array [],
+        "headers": Object {},
+        "payload": Object {
+          "error": "Internal Server Error",
+          "message": "something went wrong",
+          "statusCode": 500,
+        },
+        "statusCode": 500,
       }
     `);
   });

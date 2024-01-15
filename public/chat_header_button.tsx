@@ -36,7 +36,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
-  const [traceId, setTraceId] = useState<string | undefined>(undefined);
+  const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
   const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
   const [query, setQuery] = useState('');
   const [inputFocus, setInputFocus] = useState(false);
@@ -75,8 +75,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       currentAccount: props.currentAccount,
       title,
       setTitle,
-      traceId,
-      setTraceId,
+      interactionId,
+      setInteractionId,
     }),
     [
       appId,
@@ -91,8 +91,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       props.currentAccount,
       title,
       setTitle,
-      traceId,
-      setTraceId,
+      interactionId,
+      setInteractionId,
     ]
   );
 

@@ -17,10 +17,10 @@ jest.mock('./agent_framework_traces', () => {
 });
 
 describe('<AgentFrameworkTracesFlyout/> spec', () => {
-  it('show back button if traceId exists', async () => {
+  it('show back button if interactionId exists', async () => {
     const onCloseMock = jest.fn();
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      traceId: 'test-trace-Id',
+      interactionId: 'test-interaction-Id',
       setSelectedTabId: onCloseMock,
     });
     render(<AgentFrameworkTracesFlyoutBody />);
@@ -31,9 +31,9 @@ describe('<AgentFrameworkTracesFlyout/> spec', () => {
     });
   });
 
-  it('no back button if traceId does not exist', async () => {
+  it('no back button if interactionId does not exist', async () => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      traceId: undefined,
+      interactionId: undefined,
     });
     render(<AgentFrameworkTracesFlyoutBody />);
     expect(screen.queryAllByLabelText('back')).toHaveLength(0);
@@ -42,7 +42,7 @@ describe('<AgentFrameworkTracesFlyout/> spec', () => {
   it('fullscreen with opening from chat', async () => {
     const onCloseMock = jest.fn();
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      traceId: 'test-trace-id',
+      interactionId: 'test-interaction-id',
       flyoutFullScreen: true,
       setSelectedTabId: onCloseMock,
       preSelectedTabId: TAB_ID.CHAT,
@@ -58,7 +58,7 @@ describe('<AgentFrameworkTracesFlyout/> spec', () => {
   it('fullscreen with opening from history', async () => {
     const onCloseMock = jest.fn();
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      traceId: 'test-trace-id',
+      interactionId: 'test-interaction-id',
       flyoutFullScreen: true,
       setSelectedTabId: onCloseMock,
       preSelectedTabId: TAB_ID.HISTORY,

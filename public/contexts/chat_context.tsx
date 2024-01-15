@@ -23,8 +23,8 @@ export interface IChatContext {
   currentAccount: UserAccount;
   title?: string;
   setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
-  traceId?: string;
-  setTraceId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  interactionId?: string;
+  setInteractionId: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 

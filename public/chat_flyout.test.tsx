@@ -33,7 +33,7 @@ describe('<ChatFlyout />', () => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
       setFlyoutVisible: jest.fn(),
       selectedTabId: TAB_ID.CHAT,
-      traceId: 'chat_trace_id_mock',
+      interactionId: 'chat_interaction_id_mock',
     });
   });
 
@@ -45,7 +45,7 @@ describe('<ChatFlyout />', () => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
       setFlyoutVisible: jest.fn(),
       selectedTabId: TAB_ID.CHAT,
-      traceId: 'chat_trace_id_mock',
+      interactionId: 'chat_interaction_id_mock',
     });
 
     render(
@@ -65,7 +65,7 @@ describe('<ChatFlyout />', () => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
       setFlyoutVisible: jest.fn(),
       selectedTabId: TAB_ID.HISTORY,
-      traceId: 'chat_trace_id_mock',
+      interactionId: 'chat_interaction_id_mock',
     });
 
     render(
@@ -85,7 +85,7 @@ describe('<ChatFlyout />', () => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
       setFlyoutVisible: jest.fn(),
       selectedTabId: TAB_ID.HISTORY,
-      traceId: 'chat_trace_id_mock',
+      interactionId: 'chat_interaction_id_mock',
     });
 
     render(
@@ -108,7 +108,7 @@ describe('<ChatFlyout />', () => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
       setFlyoutVisible: jest.fn(),
       selectedTabId: TAB_ID.TRACE,
-      traceId: 'chat_trace_id_mock',
+      interactionId: 'chat_interaction_id_mock',
     });
 
     render(
@@ -130,7 +130,7 @@ describe('<ChatFlyout />', () => {
       setFlyoutVisible: jest.fn(),
       // current tab is NOT chat
       selectedTabId: TAB_ID.HISTORY,
-      traceId: 'chat_trace_id_mock',
+      interactionId: 'chat_interaction_id_mock',
     });
 
     render(
