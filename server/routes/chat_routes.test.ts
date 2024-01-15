@@ -45,11 +45,11 @@ const triggerUpdateConversation = (
     path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
     req: httpServerMock.createRawRequest({ params, payload }),
   });
-const triggerGetTrace = (traceId: string) =>
+const triggerGetTrace = (interactionId: string) =>
   triggerHandler(router, {
     method: 'get',
-    path: `${ASSISTANT_API.TRACE}/{traceId}`,
-    req: httpServerMock.createRawRequest({ params: { traceId } }),
+    path: `${ASSISTANT_API.TRACE}/{interactionId}`,
+    req: httpServerMock.createRawRequest({ params: { interactionId } }),
   });
 const triggerAbortAgentExecution = (conversationId: string) =>
   triggerHandler(router, {
@@ -134,7 +134,7 @@ describe('chat routes', () => {
   });
 
   describe('get traces', () => {
-    it('should call get traces with passed trace id and return consistent data', async () => {
+    it('should call get traces with passed interaction id and return consistent data', async () => {
       const getTraceResultMock = [
         {
           interactionId: 'interaction-1',
@@ -149,15 +149,15 @@ describe('chat routes', () => {
       mockAgentFrameworkStorageService.getTraces.mockResolvedValueOnce(getTraceResultMock);
 
       expect(mockAgentFrameworkStorageService.getTraces).not.toHaveBeenCalled();
-      const result = (await triggerGetTrace('trace-1')) as ResponseObject;
-      expect(mockAgentFrameworkStorageService.getTraces).toHaveBeenCalledWith('trace-1');
+      const result = (await triggerGetTrace('interaction-1')) as ResponseObject;
+      expect(mockAgentFrameworkStorageService.getTraces).toHaveBeenCalledWith('interaction-1');
       expect(result.source).toEqual(getTraceResultMock);
     });
 
     it('should log error and return 500 error when failed to get traces', async () => {
       mockAgentFrameworkStorageService.getTraces.mockRejectedValueOnce(new Error());
 
-      const result = (await triggerGetTrace('trace-1')) as Boom;
+      const result = (await triggerGetTrace('interaction-1')) as Boom;
 
       expect(mockedLogger.error).toHaveBeenCalledWith(expect.any(Error));
       expect(result.output.statusCode).toBe(500);

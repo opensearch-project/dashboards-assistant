@@ -59,7 +59,7 @@ describe('useChatActions hook', () => {
   const setFlyoutVisibleMock = jest.fn();
   const setSelectedTabIdMock = jest.fn();
   const pplVisualizationRenderMock = jest.fn();
-  const setTraceIdMock = jest.fn();
+  const setInteractionIdMock = jest.fn();
 
   const chatContextMock: chatContextHookExports.IChatContext = {
     selectedTabId: 'chat',
@@ -71,7 +71,7 @@ describe('useChatActions hook', () => {
     actionExecutors: {
       view_ppl_visualization: pplVisualizationRenderMock,
     },
-    setTraceId: setTraceIdMock,
+    setInteractionId: setInteractionIdMock,
     flyoutVisible: false,
     flyoutFullScreen: false,
     userHasAccess: false,
@@ -242,17 +242,17 @@ describe('useChatActions hook', () => {
       {
         actionType: 'view_trace',
         message: '',
-        metadata: { traceId: 'trace_id_mock', icon: '' },
+        metadata: { interactionId: 'interaction_id_mock', icon: '' },
       },
       {
         type: 'output',
         contentType: 'markdown',
         content: 'output markdown mock',
-        traceId: 'trace_id_mock',
+        interactionId: 'interaction_id_mock',
       }
     );
     expect(setSelectedTabIdMock).toHaveBeenCalledWith('trace');
-    expect(setTraceIdMock).toHaveBeenCalledWith('trace_id_mock');
+    expect(setInteractionIdMock).toHaveBeenCalledWith('interaction_id_mock');
   });
 
   it('should abort agent execution', async () => {

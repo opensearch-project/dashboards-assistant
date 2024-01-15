@@ -11,12 +11,12 @@ import { HttpHandler } from '../../../../src/core/public';
 import { AbortError } from '../../../../src/plugins/data/common';
 
 describe('useFetchAgentFrameworkTraces hook', () => {
-  const traceId = 'foo';
+  const interactionId = 'foo';
   const services = coreMock.createStart();
   const { Provider } = createOpenSearchDashboardsReactContext(services);
   const wrapper = { wrapper: Provider };
 
-  it('return undefined when trace id is not specfied', () => {
+  it('return undefined when interaction id is not specfied', () => {
     const { result } = renderHook(() => useFetchAgentFrameworkTraces(''));
     expect(result.current).toMatchObject({
       data: undefined,
@@ -39,13 +39,13 @@ describe('useFetchAgentFrameworkTraces hook', () => {
 
     services.http.get.mockResolvedValueOnce(traces);
     const { result, waitForNextUpdate } = renderHook(
-      () => useFetchAgentFrameworkTraces(traceId),
+      () => useFetchAgentFrameworkTraces(interactionId),
       wrapper
     );
 
     await waitForNextUpdate();
     expect(services.http.get).toHaveBeenCalledWith(
-      `/api/assistant/trace/${traceId}`,
+      `/api/assistant/trace/${interactionId}`,
       expect.objectContaining({
         signal: expect.any(Object),
       })
@@ -60,14 +60,14 @@ describe('useFetchAgentFrameworkTraces hook', () => {
   it('return error when fetch trace error happend', async () => {
     services.http.get.mockRejectedValue(new Error('trace not found'));
     const { result, waitForNextUpdate } = renderHook(
-      () => useFetchAgentFrameworkTraces(traceId),
+      () => useFetchAgentFrameworkTraces(interactionId),
       wrapper
     );
 
     await waitForNextUpdate();
 
     expect(services.http.get).toHaveBeenCalledWith(
-      `/api/assistant/trace/${traceId}`,
+      `/api/assistant/trace/${interactionId}`,
       expect.objectContaining({
         signal: expect.any(Object),
       })
@@ -101,14 +101,14 @@ describe('useFetchAgentFrameworkTraces hook', () => {
       });
     }) as HttpHandler);
 
-    const { unmount } = renderHook(() => useFetchAgentFrameworkTraces(traceId), wrapper);
+    const { unmount } = renderHook(() => useFetchAgentFrameworkTraces(interactionId), wrapper);
 
     act(() => {
       unmount();
     });
 
     expect(services.http.get).toHaveBeenCalledWith(
-      `/api/assistant/trace/${traceId}`,
+      `/api/assistant/trace/${interactionId}`,
       expect.objectContaining({
         signal: expect.any(Object),
       })
