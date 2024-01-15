@@ -8,23 +8,23 @@ import { useChatActions } from './use_chat_actions';
 import * as chatContextHookExports from '../contexts/chat_context';
 import * as coreHookExports from '../contexts/core_context';
 import { httpServiceMock } from '../../../../src/core/public/mocks';
-import { SessionsService } from '../services/sessions_service';
-import { SessionLoadService } from '../services/session_load_service';
+import { ConversationsService } from '../services/conversations_service';
+import { ConversationLoadService } from '../services/conversation_load_service';
 import * as chatStateHookExports from './use_chat_state';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { IMessage } from 'common/types/chat_saved_object_attributes';
 
-jest.mock('../services/sessions_service', () => {
+jest.mock('../services/conversations_service', () => {
   return {
-    SessionsService: jest.fn().mockImplementation(() => {
+    ConversationsService: jest.fn().mockImplementation(() => {
       return { reload: jest.fn() };
     }),
   };
 });
 
-jest.mock('../services/session_load_service', () => {
+jest.mock('../services/conversation_load_service', () => {
   return {
-    SessionLoadService: jest.fn().mockImplementation(() => {
+    ConversationLoadService: jest.fn().mockImplementation(() => {
       return { load: jest.fn().mockReturnValue({ messages: [], interactions: [] }) };
     }),
   };
@@ -36,7 +36,7 @@ const INPUT_MESSAGE = {
   content: 'what indices are in my cluster?',
 };
 const SEND_MESSAGE_RESPONSE = {
-  sessionId: 'session_id_mock',
+  conversationId: 'conversation_id_mock',
   title: 'title mock',
   messages: [
     { type: 'input', contentType: 'text', content: 'what indices are in my cluster?' },
@@ -63,7 +63,7 @@ describe('useChatActions hook', () => {
 
   const chatContextMock: chatContextHookExports.IChatContext = {
     selectedTabId: 'chat',
-    setSessionId: jest.fn(),
+    setConversationId: jest.fn(),
     setTitle: jest.fn(),
     setSelectedTabId: setSelectedTabIdMock,
     setFlyoutComponent: jest.fn(),
@@ -88,8 +88,8 @@ describe('useChatActions hook', () => {
     jest.spyOn(coreHookExports, 'useCore').mockReturnValue({
       services: {
         http: httpMock,
-        sessions: new SessionsService(httpMock),
-        sessionLoad: new SessionLoadService(httpMock),
+        conversations: new ConversationsService(httpMock),
+        conversationLoad: new ConversationLoadService(httpMock),
       },
     });
 
@@ -157,19 +157,19 @@ describe('useChatActions hook', () => {
     expect(chatStateDispatchMock).toHaveBeenCalledWith(expect.objectContaining({ type: 'error' }));
   });
 
-  it('should load session by id', async () => {
+  it('should load conversation by id', async () => {
     const { result } = renderHook(() => useChatActions());
     expect(chatStateDispatchMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'receive' })
     );
 
-    await result.current.loadChat('session_id_mock');
+    await result.current.loadChat('conversation_id_mock');
     expect(chatStateDispatchMock).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'receive' })
     );
   });
 
-  it('should reset current session if loadChat with no session id', async () => {
+  it('should reset current conversation if loadChat with no conversation id', async () => {
     const { result } = renderHook(() => useChatActions());
     expect(chatStateDispatchMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'reset' })
@@ -257,10 +257,10 @@ describe('useChatActions hook', () => {
 
   it('should abort agent execution', async () => {
     const { result } = renderHook(() => useChatActions());
-    await result.current.abortAction('session_id_to_abort');
+    await result.current.abortAction('conversation_id_to_abort');
     expect(chatStateDispatchMock).toHaveBeenCalledWith({ type: 'abort' });
     expect(httpMock.post).toHaveBeenCalledWith(ASSISTANT_API.ABORT_AGENT_EXECUTION, {
-      body: JSON.stringify({ sessionId: 'session_id_to_abort' }),
+      body: JSON.stringify({ conversationId: 'conversation_id_to_abort' }),
     });
   });
 
@@ -268,7 +268,7 @@ describe('useChatActions hook', () => {
     httpMock.put.mockResolvedValue(SEND_MESSAGE_RESPONSE);
     jest
       .spyOn(chatContextHookExports, 'useChatContext')
-      .mockReturnValue({ ...chatContextMock, sessionId: 'session_id_mock' });
+      .mockReturnValue({ ...chatContextMock, conversationId: 'conversation_id_mock' });
 
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
       chatState: {
@@ -285,7 +285,7 @@ describe('useChatActions hook', () => {
     expect(chatStateDispatchMock).toHaveBeenCalledWith({ type: 'regenerate' });
     expect(httpMock.put).toHaveBeenCalledWith(ASSISTANT_API.REGENERATE, {
       body: JSON.stringify({
-        sessionId: 'session_id_mock',
+        conversationId: 'conversation_id_mock',
         interactionId: 'interaction_id_mock',
       }),
     });
@@ -312,7 +312,7 @@ describe('useChatActions hook', () => {
     httpMock.put.mockResolvedValue(SEND_MESSAGE_RESPONSE);
     jest
       .spyOn(chatContextHookExports, 'useChatContext')
-      .mockReturnValue({ ...chatContextMock, sessionId: 'session_id_mock' });
+      .mockReturnValue({ ...chatContextMock, conversationId: 'conversation_id_mock' });
 
     const { result } = renderHook(() => useChatActions());
     await result.current.regenerate('interaction_id_mock');
@@ -320,7 +320,7 @@ describe('useChatActions hook', () => {
     expect(chatStateDispatchMock).toHaveBeenCalledWith({ type: 'regenerate' });
     expect(httpMock.put).toHaveBeenCalledWith(ASSISTANT_API.REGENERATE, {
       body: JSON.stringify({
-        sessionId: 'session_id_mock',
+        conversationId: 'conversation_id_mock',
         interactionId: 'interaction_id_mock',
       }),
     });
@@ -336,7 +336,7 @@ describe('useChatActions hook', () => {
     });
     jest
       .spyOn(chatContextHookExports, 'useChatContext')
-      .mockReturnValue({ ...chatContextMock, sessionId: 'session_id_mock' });
+      .mockReturnValue({ ...chatContextMock, conversationId: 'conversation_id_mock' });
 
     const { result } = renderHook(() => useChatActions());
     await result.current.regenerate('interaction_id_mock');
@@ -353,7 +353,7 @@ describe('useChatActions hook', () => {
     });
     jest
       .spyOn(chatContextHookExports, 'useChatContext')
-      .mockReturnValue({ ...chatContextMock, sessionId: 'session_id_mock' });
+      .mockReturnValue({ ...chatContextMock, conversationId: 'conversation_id_mock' });
 
     const { result } = renderHook(() => useChatActions());
     await result.current.regenerate('interaction_id_mock');

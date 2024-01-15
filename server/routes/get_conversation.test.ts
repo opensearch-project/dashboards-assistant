@@ -10,7 +10,7 @@ import { enhanceWithContext, triggerHandler } from './router.mock';
 import { httpServerMock } from '../../../../src/core/server/http/http_server.mocks';
 import { mockAgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service.mock';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
-import { GetSessionSchema, registerChatRoutes } from './chat_routes';
+import { GetConversationSchema, registerChatRoutes } from './chat_routes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
 const mockedLogger = loggerMock.create();
@@ -28,11 +28,11 @@ registerChatRoutes(router, {
   messageParsers: [],
 });
 
-describe('getSession route', () => {
-  const getSessionRequest = (payload: GetSessionSchema) =>
+describe('getConversation route', () => {
+  const getConversationRequest = (payload: GetConversationSchema) =>
     triggerHandler(router, {
       method: 'get',
-      path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+      path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
       req: httpServerMock.createRawRequest({
         params: payload,
       }),
@@ -40,8 +40,8 @@ describe('getSession route', () => {
   beforeEach(() => {
     loggerMock.clear(mockedLogger);
   });
-  it('return back successfully when getSession returns session back', async () => {
-    mockAgentFrameworkStorageService.getSession.mockImplementationOnce(async () => {
+  it('return back successfully when getConversation returns conversation back', async () => {
+    mockAgentFrameworkStorageService.getConversation.mockImplementationOnce(async () => {
       return {
         messages: [],
         title: 'foo',
@@ -50,8 +50,8 @@ describe('getSession route', () => {
         updatedTimeMs: 0,
       };
     });
-    const result = (await getSessionRequest({
-      sessionId: '1',
+    const result = (await getConversationRequest({
+      conversationId: '1',
     })) as ResponseObject;
     expect(result.source).toMatchInlineSnapshot(`
       Object {
@@ -64,12 +64,12 @@ describe('getSession route', () => {
     `);
   });
 
-  it('return 500 when getSession throws error', async () => {
-    mockAgentFrameworkStorageService.getSession.mockImplementationOnce(() => {
-      throw new Error('getSession error');
+  it('return 500 when getConversation throws error', async () => {
+    mockAgentFrameworkStorageService.getConversation.mockImplementationOnce(() => {
+      throw new Error('getConversation error');
     });
-    const result = (await getSessionRequest({
-      sessionId: '1',
+    const result = (await getConversationRequest({
+      conversationId: '1',
     })) as Boom;
     expect(mockedLogger.error).toBeCalledTimes(1);
     expect(result.output).toMatchInlineSnapshot(`
@@ -77,7 +77,7 @@ describe('getSession route', () => {
         "headers": Object {},
         "payload": Object {
           "error": "Internal Server Error",
-          "message": "getSession error",
+          "message": "getConversation error",
           "statusCode": 500,
         },
         "statusCode": 500,

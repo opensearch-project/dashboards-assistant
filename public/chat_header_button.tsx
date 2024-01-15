@@ -30,7 +30,7 @@ let flyoutLoaded = false;
 
 export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [appId, setAppId] = useState<string>();
-  const [sessionId, setSessionId] = useState<string>();
+  const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
@@ -57,8 +57,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const chatContextValue: IChatContext = useMemo(
     () => ({
       appId,
-      sessionId,
-      setSessionId,
+      conversationId,
+      setConversationId,
       selectedTabId,
       preSelectedTabId,
       setSelectedTabId: (tabId: TabId) => {
@@ -80,7 +80,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     }),
     [
       appId,
-      sessionId,
+      conversationId,
       flyoutVisible,
       flyoutFullScreen,
       selectedTabId,

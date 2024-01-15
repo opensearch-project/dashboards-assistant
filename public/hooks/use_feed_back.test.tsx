@@ -20,7 +20,7 @@ describe('useFeedback hook', () => {
   const chatContextMock = {
     rootAgentId: 'root_agent_id_mock',
     selectedTabId: 'chat',
-    setSessionId: jest.fn(),
+    setConversationId: jest.fn(),
     setTitle: jest.fn(),
     currentAccount: { username: 'admin' },
   };

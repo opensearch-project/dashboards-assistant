@@ -16,7 +16,7 @@ export interface Interaction {
   parent_interaction_id?: string;
 }
 
-export interface ISession {
+export interface IConversation {
   title: string;
   version?: number;
   createdTimeMs: number;
@@ -25,8 +25,8 @@ export interface ISession {
   interactions: Interaction[];
 }
 
-export interface ISessionFindResponse {
-  objects: Array<ISession & { id: string }>;
+export interface IConversationFindResponse {
+  objects: Array<IConversation & { id: string }>;
   total: number;
 }
 
@@ -72,7 +72,7 @@ export interface SendFeedbackBody {
 }
 
 export interface SendResponse {
-  sessionId: string;
+  conversationId: string;
   title?: string;
   messages: IMessage[];
   interactions: Interaction[];

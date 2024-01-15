@@ -116,7 +116,7 @@ describe('BasicInputOutputParser', () => {
       input: 'test question',
       response:
         'normal text<b onmouseover=alert("XSS testing!")></b> <img src="image.jpg" alt="image" width="500" height="600"> !!!!!!![](http://evil.com/) ![image](http://evil.com/) [good link](https://link)',
-      conversation_id: 'test-session',
+      conversation_id: 'test-conversation',
       interaction_id: 'interaction_id',
       create_time: '',
     };

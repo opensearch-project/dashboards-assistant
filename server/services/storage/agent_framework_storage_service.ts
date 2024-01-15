@@ -8,17 +8,17 @@ import { AgentFrameworkTrace } from '../../../common/utils/llm_chat/traces';
 import { OpenSearchClient } from '../../../../../src/core/server';
 import {
   IMessage,
-  ISession,
-  ISessionFindResponse,
+  IConversation,
+  IConversationFindResponse,
   Interaction,
 } from '../../../common/types/chat_saved_object_attributes';
-import { GetSessionsSchema } from '../../routes/chat_routes';
+import { GetConversationsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
 import { MessageParser } from '../../types';
 import { MessageParserRunner } from '../../utils/message_parser_runner';
 import { ML_COMMONS_BASE_API } from '../../utils/constants';
 
-export interface SessionOptResponse {
+export interface ConversationOptResponse {
   success: boolean;
   statusCode?: number | null;
   message?: string;
@@ -29,11 +29,11 @@ export class AgentFrameworkStorageService implements StorageService {
     private readonly client: OpenSearchClient,
     private readonly messageParsers: MessageParser[] = []
   ) {}
-  async getSession(sessionId: string): Promise<ISession> {
+  async getConversation(conversationId: string): Promise<IConversation> {
     const [interactionsResp, conversation] = await Promise.all([
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/_list?max_results=1000`,
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}/_list?max_results=1000`,
       }) as TransportRequestPromise<
         ApiResponse<{
           interactions: Interaction[];
@@ -41,7 +41,7 @@ export class AgentFrameworkStorageService implements StorageService {
       >,
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}`,
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}`,
       }) as TransportRequestPromise<
         ApiResponse<{
           conversation_id: string;
@@ -62,7 +62,7 @@ export class AgentFrameworkStorageService implements StorageService {
     };
   }
 
-  async getSessions(query: GetSessionsSchema): Promise<ISessionFindResponse> {
+  async getConversations(query: GetConversationsSchema): Promise<IConversationFindResponse> {
     let sortField = '';
     if (query.sortField === 'updatedTimeMs') {
       sortField = 'updated_time';
@@ -97,14 +97,14 @@ export class AgentFrameworkStorageService implements StorageService {
       ...(sortField && query.sortOrder && { sort: [{ [sortField]: query.sortOrder }] }),
     };
 
-    const sessions = await this.client.transport.request({
+    const conversations = await this.client.transport.request({
       method: 'GET',
       path: `${ML_COMMONS_BASE_API}/memory/conversation/_search`,
       body: requestParams,
     });
 
     return {
-      objects: sessions.body.hits.hits
+      objects: conversations.body.hits.hits
         .filter(
           (hit: {
             _source: { name: string; create_time: string; updated_time: string };
@@ -125,25 +125,25 @@ export class AgentFrameworkStorageService implements StorageService {
           })
         ),
       total:
-        typeof sessions.body.hits.total === 'number'
-          ? sessions.body.hits.total
-          : sessions.body.hits.total.value,
+        typeof conversations.body.hits.total === 'number'
+          ? conversations.body.hits.total
+          : conversations.body.hits.total.value,
     };
   }
 
   async saveMessages(
     title: string,
-    sessionId: string | undefined,
+    conversationId: string | undefined,
     messages: IMessage[]
-  ): Promise<{ sessionId: string; messages: IMessage[] }> {
+  ): Promise<{ conversationId: string; messages: IMessage[] }> {
     throw new Error('Method is not needed');
   }
 
-  async deleteSession(sessionId: string): Promise<SessionOptResponse> {
+  async deleteConversation(conversationId: string): Promise<ConversationOptResponse> {
     try {
       const response = await this.client.transport.request({
         method: 'DELETE',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/_delete`,
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}/_delete`,
       });
       if (response.statusCode === 200) {
         return {
@@ -161,11 +161,14 @@ export class AgentFrameworkStorageService implements StorageService {
     }
   }
 
-  async updateSession(sessionId: string, title: string): Promise<SessionOptResponse> {
+  async updateConversation(
+    conversationId: string,
+    title: string
+  ): Promise<ConversationOptResponse> {
     try {
       const response = await this.client.transport.request({
         method: 'PUT',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/_update`,
+        path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}/_update`,
         body: {
           name: title,
         },
@@ -221,7 +224,7 @@ export class AgentFrameworkStorageService implements StorageService {
   async updateInteraction(
     interactionId: string,
     additionalInfo: Record<string, Record<string, boolean | string>>
-  ): Promise<SessionOptResponse> {
+  ): Promise<ConversationOptResponse> {
     try {
       const response = await this.client.transport.request({
         method: 'PUT',
@@ -263,16 +266,16 @@ export class AgentFrameworkStorageService implements StorageService {
     return finalMessages;
   }
 
-  async getInteraction(sessionId: string, interactionId: string): Promise<Interaction> {
-    if (!sessionId) {
-      throw new Error('sessionId is required');
+  async getInteraction(conversationId: string, interactionId: string): Promise<Interaction> {
+    if (!conversationId) {
+      throw new Error('conversationId is required');
     }
     if (!interactionId) {
       throw new Error('interactionId is required');
     }
     const interactionsResp = (await this.client.transport.request({
       method: 'GET',
-      path: `${ML_COMMONS_BASE_API}/memory/conversation/${sessionId}/${interactionId}`,
+      path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}/${interactionId}`,
     })) as ApiResponse<Interaction>;
     return interactionsResp.body;
   }

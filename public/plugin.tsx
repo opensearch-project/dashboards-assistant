@@ -12,8 +12,8 @@ import {
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
-import { SessionLoadService } from './services/session_load_service';
-import { SessionsService } from './services/sessions_service';
+import { ConversationLoadService } from './services/conversation_load_service';
+import { ConversationsService } from './services/conversations_service';
 import {
   ActionExecutor,
   AppPluginStartDependencies,
@@ -81,8 +81,8 @@ export class AssistantPlugin
           ...coreStart,
           setupDeps,
           startDeps,
-          sessionLoad: new SessionLoadService(coreStart.http),
-          sessions: new SessionsService(coreStart.http),
+          conversationLoad: new ConversationLoadService(coreStart.http),
+          conversations: new ConversationsService(coreStart.http),
         });
         const account = await getAccount();
         const username = account.data.user_name;

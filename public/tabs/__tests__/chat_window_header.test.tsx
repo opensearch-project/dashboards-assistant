@@ -19,10 +19,10 @@ const setup = ({
   ...props
 }: Partial<ChatWindowHeaderProps> & { selectedTabId?: TabId } = {}) => {
   const useChatContextMock = {
-    sessionId: '1',
+    conversationId: '1',
     title: 'foo',
     selectedTabId: selectedTabId || 'chat',
-    setSessionId: jest.fn(),
+    setConversationId: jest.fn(),
     setTitle: jest.fn(),
     setFlyoutVisible: jest.fn(),
     setSelectedTabId: jest.fn(),

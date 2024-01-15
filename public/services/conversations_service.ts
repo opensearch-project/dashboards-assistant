@@ -5,11 +5,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { HttpFetchQuery, HttpStart, SavedObjectsFindOptions } from '../../../../src/core/public';
-import { ISessionFindResponse } from '../../common/types/chat_saved_object_attributes';
+import { IConversationFindResponse } from '../../common/types/chat_saved_object_attributes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
-export class SessionsService {
-  sessions$: BehaviorSubject<ISessionFindResponse | null> = new BehaviorSubject<ISessionFindResponse | null>(
+export class ConversationsService {
+  conversations$: BehaviorSubject<IConversationFindResponse | null> = new BehaviorSubject<IConversationFindResponse | null>(
     null
   );
   status$: BehaviorSubject<'idle' | 'loading' | { error: Error }> = new BehaviorSubject<
@@ -35,15 +35,15 @@ export class SessionsService {
     this._options = query;
     try {
       this.status$.next('loading');
-      this.sessions$.next(
-        await this._http.get<ISessionFindResponse>(ASSISTANT_API.SESSIONS, {
+      this.conversations$.next(
+        await this._http.get<IConversationFindResponse>(ASSISTANT_API.CONVERSATIONS, {
           query: this._options as HttpFetchQuery,
           signal: this.abortController.signal,
         })
       );
       this.status$.next('idle');
     } catch (error) {
-      this.sessions$.next(null);
+      this.conversations$.next(null);
       this.status$.next({ error });
     }
   };

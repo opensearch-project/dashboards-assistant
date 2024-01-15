@@ -30,16 +30,19 @@ registerChatRoutes(router, {
   messageParsers: [],
 });
 
-const triggerDeleteSession = (sessionId: string) =>
+const triggerDeleteConversation = (conversationId: string) =>
   triggerHandler(router, {
     method: 'delete',
-    path: `${ASSISTANT_API.SESSION}/{sessionId}`,
-    req: httpServerMock.createRawRequest({ params: { sessionId } }),
+    path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
+    req: httpServerMock.createRawRequest({ params: { conversationId } }),
   });
-const triggerUpdateSession = (params: { sessionId: string }, payload: { title: string }) =>
+const triggerUpdateConversation = (
+  params: { conversationId: string },
+  payload: { title: string }
+) =>
   triggerHandler(router, {
     method: 'put',
-    path: `${ASSISTANT_API.SESSION}/{sessionId}`,
+    path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
     req: httpServerMock.createRawRequest({ params, payload }),
   });
 const triggerGetTrace = (traceId: string) =>
@@ -48,11 +51,11 @@ const triggerGetTrace = (traceId: string) =>
     path: `${ASSISTANT_API.TRACE}/{traceId}`,
     req: httpServerMock.createRawRequest({ params: { traceId } }),
   });
-const triggerAbortAgentExecution = (sessionId: string) =>
+const triggerAbortAgentExecution = (conversationId: string) =>
   triggerHandler(router, {
     method: 'post',
     path: ASSISTANT_API.ABORT_AGENT_EXECUTION,
-    req: httpServerMock.createRawRequest({ payload: { sessionId } }),
+    req: httpServerMock.createRawRequest({ payload: { conversationId } }),
   });
 const triggerFeedback = (params: { interactionId: string }, payload: { satisfaction: boolean }) =>
   triggerHandler(router, {
@@ -69,15 +72,15 @@ describe('chat routes', () => {
     jest.resetAllMocks();
   });
 
-  describe('delete session', () => {
-    it('should call delete session with passed session id and return consistent data', async () => {
-      mockAgentFrameworkStorageService.deleteSession.mockResolvedValueOnce({
+  describe('delete conversation', () => {
+    it('should call delete conversation with passed conversation id and return consistent data', async () => {
+      mockAgentFrameworkStorageService.deleteConversation.mockResolvedValueOnce({
         success: true,
       });
 
-      expect(mockAgentFrameworkStorageService.deleteSession).not.toHaveBeenCalled();
-      const result = (await triggerDeleteSession('foo')) as ResponseObject;
-      expect(mockAgentFrameworkStorageService.deleteSession).toHaveBeenCalledWith('foo');
+      expect(mockAgentFrameworkStorageService.deleteConversation).not.toHaveBeenCalled();
+      const result = (await triggerDeleteConversation('foo')) as ResponseObject;
+      expect(mockAgentFrameworkStorageService.deleteConversation).toHaveBeenCalledWith('foo');
       expect(result.source).toMatchInlineSnapshot(`
         Object {
           "success": true,
@@ -86,27 +89,27 @@ describe('chat routes', () => {
     });
 
     it('should log error and return 500 error', async () => {
-      mockAgentFrameworkStorageService.deleteSession.mockRejectedValueOnce(new Error());
+      mockAgentFrameworkStorageService.deleteConversation.mockRejectedValueOnce(new Error());
 
-      const result = (await triggerDeleteSession('foo')) as Boom;
+      const result = (await triggerDeleteConversation('foo')) as Boom;
 
       expect(mockedLogger.error).toHaveBeenCalledWith(expect.any(Error));
       expect(result.output.statusCode).toBe(500);
     });
   });
 
-  describe('update session', () => {
-    it('should call update session with passed session id and title then return consistent data', async () => {
-      mockAgentFrameworkStorageService.updateSession.mockResolvedValueOnce({
+  describe('update conversation', () => {
+    it('should call update conversation with passed conversation id and title then return consistent data', async () => {
+      mockAgentFrameworkStorageService.updateConversation.mockResolvedValueOnce({
         success: true,
       });
 
-      expect(mockAgentFrameworkStorageService.updateSession).not.toHaveBeenCalled();
-      const result = (await triggerUpdateSession(
-        { sessionId: 'foo' },
+      expect(mockAgentFrameworkStorageService.updateConversation).not.toHaveBeenCalled();
+      const result = (await triggerUpdateConversation(
+        { conversationId: 'foo' },
         { title: 'new-title' }
       )) as ResponseObject;
-      expect(mockAgentFrameworkStorageService.updateSession).toHaveBeenCalledWith(
+      expect(mockAgentFrameworkStorageService.updateConversation).toHaveBeenCalledWith(
         'foo',
         'new-title'
       );
@@ -117,11 +120,11 @@ describe('chat routes', () => {
       `);
     });
 
-    it('should log error and return 500 error  when failed to update session', async () => {
-      mockAgentFrameworkStorageService.updateSession.mockRejectedValueOnce(new Error());
+    it('should log error and return 500 error  when failed to update conversation', async () => {
+      mockAgentFrameworkStorageService.updateConversation.mockRejectedValueOnce(new Error());
 
-      const result = (await triggerUpdateSession(
-        { sessionId: 'foo' },
+      const result = (await triggerUpdateConversation(
+        { conversationId: 'foo' },
         { title: 'new-title' }
       )) as Boom;
 
@@ -162,7 +165,7 @@ describe('chat routes', () => {
   });
 
   describe('abort agent execution', () => {
-    it('should call get abort agent with passed session id and call log info', async () => {
+    it('should call get abort agent with passed conversation id and call log info', async () => {
       expect(mockOllyChatService.abortAgentExecution).not.toHaveBeenCalled();
 
       await triggerAbortAgentExecution('foo');
@@ -189,11 +192,11 @@ describe('chat routes', () => {
 
   describe('feedback', () => {
     it('should call update interaction with passed interaction id and satisfaction then return consistent data', async () => {
-      mockAgentFrameworkStorageService.updateSession.mockResolvedValueOnce({
+      mockAgentFrameworkStorageService.updateConversation.mockResolvedValueOnce({
         success: true,
       });
 
-      expect(mockAgentFrameworkStorageService.updateSession).not.toHaveBeenCalled();
+      expect(mockAgentFrameworkStorageService.updateConversation).not.toHaveBeenCalled();
       const result = (await triggerFeedback(
         { interactionId: 'foo' },
         { satisfaction: true }

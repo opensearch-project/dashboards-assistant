@@ -16,7 +16,7 @@ import {
 } from '../delete_conversation_confirm_modal';
 import { HttpHandler } from '../../../../../../src/core/public';
 
-const setup = ({ onClose, sessionId }: DeleteConversationConfirmModalProps) => {
+const setup = ({ onClose, conversationId }: DeleteConversationConfirmModalProps) => {
   const useCoreMock = {
     services: coreMock.createStart(),
   };
@@ -24,7 +24,7 @@ const setup = ({ onClose, sessionId }: DeleteConversationConfirmModalProps) => {
 
   const renderResult = render(
     <I18nProvider>
-      <DeleteConversationConfirmModal onClose={onClose} sessionId={sessionId} />
+      <DeleteConversationConfirmModal onClose={onClose} conversationId={conversationId} />
     </I18nProvider>
   );
 
@@ -37,7 +37,7 @@ const setup = ({ onClose, sessionId }: DeleteConversationConfirmModalProps) => {
 describe('<DeleteConversationConfirmModal />', () => {
   it('should render confirm text and button', async () => {
     const { renderResult } = setup({
-      sessionId: '1',
+      conversationId: '1',
     });
 
     await waitFor(async () => {
@@ -54,7 +54,7 @@ describe('<DeleteConversationConfirmModal />', () => {
   it('should call onClose with "canceled" after cancel button click', async () => {
     const onCloseMock = jest.fn();
     const { renderResult } = setup({
-      sessionId: '1',
+      conversationId: '1',
       onClose: onCloseMock,
     });
 
@@ -67,10 +67,10 @@ describe('<DeleteConversationConfirmModal />', () => {
     });
   });
 
-  it('should show success toast and call onClose with "deleted" after delete session succeed', async () => {
+  it('should show success toast and call onClose with "deleted" after delete conversation succeed', async () => {
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
-      sessionId: '1',
+      conversationId: '1',
       onClose: onCloseMock,
     });
     useCoreMock.services.http.delete.mockImplementation(() => Promise.resolve());
@@ -87,10 +87,10 @@ describe('<DeleteConversationConfirmModal />', () => {
     });
   });
 
-  it('should show error toasts and call onClose with "errored" after delete session failed', async () => {
+  it('should show error toasts and call onClose with "errored" after delete conversation failed', async () => {
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
-      sessionId: '1',
+      conversationId: '1',
       onClose: onCloseMock,
     });
     useCoreMock.services.http.delete.mockImplementation(() => Promise.reject(new Error()));
@@ -104,10 +104,10 @@ describe('<DeleteConversationConfirmModal />', () => {
     });
   });
 
-  it('should call onClose with cancelled after delete session aborted', async () => {
+  it('should call onClose with cancelled after delete conversation aborted', async () => {
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
-      sessionId: '1',
+      conversationId: '1',
       onClose: onCloseMock,
     });
     useCoreMock.services.http.delete.mockImplementation(((_path, options) => {

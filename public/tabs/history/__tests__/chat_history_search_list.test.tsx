@@ -23,7 +23,7 @@ const setup = ({
   ...restProps
 }: Partial<ChatHistorySearchListProps> = {}) => {
   const useChatContextMock = {
-    sessionId: '1',
+    conversationId: '1',
     setTitle: jest.fn(),
   };
   const useCoreMock = {

@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { coreMock } from '../../../../../src/core/public/mocks';
-import { SessionLoadService } from '../../services/session_load_service';
+import { ConversationLoadService } from '../../services/conversation_load_service';
 import { ChatPage } from './chat_page';
 import * as chatContextExports from '../../contexts/chat_context';
 import * as coreContextExports from '../../contexts/core_context';
@@ -28,31 +28,31 @@ jest.mock('./chat_page_content', () => {
 describe('<ChatPage />', () => {
   const dispatchMock = jest.fn();
   const loadMock = jest.fn().mockResolvedValue({
-    title: 'session title',
+    title: 'conversation title',
     version: 1,
     createdTimeMs: new Date().getTime(),
     updatedTimeMs: new Date().getTime(),
     messages: [],
     interactions: [],
   });
-  const sessionLoadService = new SessionLoadService(coreMock.createStart().http);
+  const conversationLoadService = new ConversationLoadService(coreMock.createStart().http);
 
   beforeEach(() => {
-    jest.spyOn(sessionLoadService, 'load').mockImplementation(loadMock);
+    jest.spyOn(conversationLoadService, 'load').mockImplementation(loadMock);
 
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      sessionId: 'mocked_session_id',
+      conversationId: 'mocked_conversation_id',
       chatEnabled: true,
     });
 
     jest.spyOn(hookExports, 'useChatState').mockReturnValue({
       chatStateDispatch: dispatchMock,
-      chatState: { messages: [], llmResponding: false },
+      chatState: { messages: [], llmResponding: false, interactions: [] },
     });
 
     jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
       services: {
-        sessionLoad: sessionLoadService,
+        conversationLoad: conversationLoadService,
       },
     });
   });
@@ -65,7 +65,7 @@ describe('<ChatPage />', () => {
     render(<ChatPage />);
     fireEvent.click(screen.getByText('refresh'));
 
-    expect(loadMock).toHaveBeenCalledWith('mocked_session_id');
+    expect(loadMock).toHaveBeenCalledWith('mocked_conversation_id');
     await waitFor(() => {
       expect(dispatchMock).toHaveBeenCalledWith({
         type: 'receive',
@@ -76,7 +76,7 @@ describe('<ChatPage />', () => {
 
   it('should NOT call reload if current conversation is not set', async () => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      sessionId: undefined,
+      conversationId: undefined,
       chatEnabled: true,
     });
     render(<ChatPage />);

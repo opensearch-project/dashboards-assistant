@@ -29,7 +29,7 @@ describe('<ChatPageContent />', () => {
 
   beforeEach(() => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
-      sessionId: 'test_session_id',
+      conversationId: 'test_conversation_id',
       actionExecutors: {
         view_ppl_visualization: jest.fn(),
       },
@@ -209,7 +209,7 @@ describe('<ChatPageContent />', () => {
     render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
     expect(screen.queryByText('Stop generating response')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Stop generating response'));
-    expect(abortActionMock).toHaveBeenCalledWith('test_session_id');
+    expect(abortActionMock).toHaveBeenCalledWith('test_conversation_id');
   });
 
   it('should display `How was this generated?`', () => {

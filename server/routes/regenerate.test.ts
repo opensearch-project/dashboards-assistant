@@ -49,7 +49,7 @@ describe('regenerate route when rootAgentName is provided', () => {
     mockOllyChatService.regenerate.mockImplementationOnce(async () => {
       return {
         messages: [],
-        memoryId: 'foo',
+        conversationId: 'foo',
         interactionId: 'interaction_id',
       };
     });
@@ -74,11 +74,12 @@ describe('regenerate route when rootAgentName is provided', () => {
       }
     );
     const result = (await regenerateRequest({
-      sessionId: 'foo',
+      conversationId: 'foo',
       interactionId: 'bar',
     })) as ResponseObject;
     expect(result.source).toMatchInlineSnapshot(`
       Object {
+        "conversationId": "foo",
         "interactions": Array [
           Object {
             "conversation_id": "foo",
@@ -95,7 +96,6 @@ describe('regenerate route when rootAgentName is provided', () => {
             "type": "output",
           },
         ],
-        "sessionId": "foo",
       }
     `);
   });
@@ -117,12 +117,13 @@ describe('regenerate route when rootAgentName is provided', () => {
       async () => []
     );
     const result = (await regenerateRequest({
-      sessionId: 'foo',
+      conversationId: 'foo',
       interactionId: 'bar',
     })) as ResponseObject;
     expect(mockedLogger.error).toBeCalledTimes(1);
     expect(result.source).toMatchInlineSnapshot(`
       Object {
+        "conversationId": "foo",
         "interactions": Array [
           Object {
             "conversation_id": "foo",
@@ -133,16 +134,15 @@ describe('regenerate route when rootAgentName is provided', () => {
           },
         ],
         "messages": Array [],
-        "sessionId": "foo",
       }
     `);
   });
 
-  it('return 500 when get session throws an error', async () => {
+  it('return 500 when get conversation throws an error', async () => {
     mockOllyChatService.regenerate.mockImplementationOnce(async () => {
       return {
         messages: [],
-        memoryId: 'foo',
+        conversationId: 'foo',
         interactionId: 'interaction_id',
       };
     });
@@ -150,7 +150,7 @@ describe('regenerate route when rootAgentName is provided', () => {
       throw new Error('foo');
     });
     const result = (await regenerateRequest({
-      sessionId: 'foo',
+      conversationId: 'foo',
       interactionId: 'bar',
     })) as Boom;
     expect(mockedLogger.error).toBeCalledTimes(1);
@@ -197,7 +197,7 @@ describe('regenerate route when rootAgentName is not provided', () => {
   it('return 400', async () => {
     const result = (await regenerateRequest({
       interactionId: 'bar',
-      sessionId: 'foo',
+      conversationId: 'foo',
     })) as Boom;
     expect(mockedLogger.error).toBeCalledTimes(1);
     expect(mockedLogger.error).toBeCalledWith(AgentNameNotFoundError);

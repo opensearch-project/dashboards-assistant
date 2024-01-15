@@ -21,12 +21,12 @@ import { ChatWindowHeaderTitle } from '../chat_window_header_title';
 const setup = ({
   messages = [],
   ...rest
-}: { messages?: IMessage[]; sessionId?: string | undefined } = {}) => {
+}: { messages?: IMessage[]; conversationId?: string | undefined } = {}) => {
   const useCoreMock = {
     services: {
       ...coreMock.createStart(),
-      sessions: {
-        sessions$: new BehaviorSubject({
+      conversations: {
+        conversations$: new BehaviorSubject({
           objects: [
             {
               id: '1',
@@ -45,9 +45,9 @@ const setup = ({
     chatState: { messages },
   };
   const useChatContextMock = {
-    sessionId: 'sessionId' in rest ? rest.sessionId : '1',
+    conversationId: 'conversationId' in rest ? rest.conversationId : '1',
     title: 'foo',
-    setSessionId: jest.fn(),
+    setConversationId: jest.fn(),
     setTitle: jest.fn(),
   };
   const useChatActionsMock = {
@@ -87,11 +87,11 @@ describe('<ChatWindowHeaderTitle />', () => {
       target: { value: 'bar' },
     });
 
-    expect(useCoreMock.services.sessions.reload).not.toHaveBeenCalled();
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
     await waitFor(() => {
-      expect(useCoreMock.services.sessions.reload).toHaveBeenCalled();
+      expect(useCoreMock.services.conversations.reload).toHaveBeenCalled();
     });
   });
 
@@ -171,9 +171,9 @@ describe('<ChatWindowHeaderTitle />', () => {
     expect(renderResult.getByRole('button', { name: 'Save to notebook' })).toBeDisabled();
   });
 
-  it('should show "OpenSearch Assistant" when sessionId is undefined', async () => {
+  it('should show "OpenSearch Assistant" when conversationId is undefined', async () => {
     const { renderResult } = setup({
-      sessionId: undefined,
+      conversationId: undefined,
     });
 
     expect(renderResult.getByText('OpenSearch Assistant')).toBeInTheDocument();

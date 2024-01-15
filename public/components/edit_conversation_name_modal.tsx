@@ -7,17 +7,17 @@ import React, { useCallback, useRef } from 'react';
 
 import { EuiConfirmModal, EuiFieldText, EuiSpacer, EuiText } from '@elastic/eui';
 import { useCore } from '../contexts/core_context';
-import { usePatchSession } from '../hooks';
+import { usePatchConversation } from '../hooks';
 
 export interface EditConversationNameModalProps {
   onClose?: (status: 'updated' | 'cancelled' | 'errored', newTitle?: string) => void;
-  sessionId: string;
+  conversationId: string;
   defaultTitle: string;
 }
 
 export const EditConversationNameModal = ({
   onClose,
-  sessionId,
+  conversationId,
   defaultTitle,
 }: EditConversationNameModalProps) => {
   const {
@@ -26,7 +26,7 @@ export const EditConversationNameModal = ({
     },
   } = useCore();
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const { loading, abort, patchSession, isAborted } = usePatchSession();
+  const { loading, abort, patchConversation, isAborted } = usePatchConversation();
 
   const handleCancel = useCallback(() => {
     abort();
@@ -38,7 +38,7 @@ export const EditConversationNameModal = ({
       return;
     }
     try {
-      await patchSession(sessionId, title);
+      await patchConversation(conversationId, title);
       toasts.addSuccess('This conversation was successfully updated.');
     } catch (_e) {
       if (isAborted()) {
@@ -49,7 +49,7 @@ export const EditConversationNameModal = ({
       return;
     }
     onClose?.('updated', title);
-  }, [onClose, sessionId, patchSession, toasts.addSuccess, toasts.addDanger, isAborted]);
+  }, [onClose, conversationId, patchConversation, toasts.addSuccess, toasts.addDanger, isAborted]);
 
   return (
     <EuiConfirmModal

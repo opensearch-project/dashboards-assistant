@@ -10,8 +10,8 @@ export const useCore = jest.fn(() => {
   const useCoreMock = {
     services: {
       ...coreMock.createStart(),
-      sessions: {
-        sessions$: new BehaviorSubject({
+      conversations: {
+        conversations$: new BehaviorSubject({
           objects: [
             {
               id: '1',
@@ -23,7 +23,7 @@ export const useCore = jest.fn(() => {
         status$: new BehaviorSubject('idle'),
         load: jest.fn(),
       },
-      sessionLoad: {},
+      conversationLoad: {},
     },
   };
   useCoreMock.services.http.delete.mockReturnValue(Promise.resolve());
