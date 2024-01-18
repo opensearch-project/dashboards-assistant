@@ -10,10 +10,11 @@ import { ChatWindowHeaderTitle } from '../components/chat_window_header_title';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../assets/chat.svg';
 import { TAB_ID } from '../utils/constants';
+import { SidecarIconMenu } from '../components/sidecar_icon_menu';
 
 export interface ChatWindowHeaderProps {
   flyoutFullScreen: boolean;
-  toggleFlyoutFullScreen: () => void;
+  toggleFlyoutFullScreen: (direction: string) => void;
 }
 
 export const ChatWindowHeader = React.memo((props: ChatWindowHeaderProps) => {
@@ -55,7 +56,8 @@ export const ChatWindowHeader = React.memo((props: ChatWindowHeaderProps) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <SidecarIconMenu setDockedDirection={props.toggleFlyoutFullScreen} />
+        {/* <EuiFlexItem grow={false}>
           <EuiButtonIcon
             aria-label="history"
             iconType="clock"
@@ -80,7 +82,7 @@ export const ChatWindowHeader = React.memo((props: ChatWindowHeaderProps) => {
             iconType={props.flyoutFullScreen ? dockRight : dockBottom}
             onClick={props.toggleFlyoutFullScreen}
           />
-        </EuiFlexItem>
+        </EuiFlexItem> */}
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             aria-label="close"

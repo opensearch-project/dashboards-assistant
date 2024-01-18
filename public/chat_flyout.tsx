@@ -18,7 +18,7 @@ interface ChatFlyoutProps {
   overrideComponent: React.ReactNode | null;
   flyoutProps: Partial<React.ComponentProps<typeof EuiFlyout>>;
   flyoutFullScreen: boolean;
-  toggleFlyoutFullScreen: () => void;
+  toggleFlyoutFullScreen: (direction: string) => void;
 }
 
 export const ChatFlyout = (props: ChatFlyoutProps) => {
@@ -81,17 +81,10 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
   const rightPanelSize = getRightPanelSize();
 
   return (
-    <EuiFlyout
+    <div
       className={cs('llm-chat-flyout', {
         'llm-chat-fullscreen': props.flyoutFullScreen,
-        'llm-chat-hidden': !props.flyoutVisible,
       })}
-      type="push"
-      paddingSize="none"
-      size="460px"
-      ownFocus={false}
-      hideCloseButton
-      onClose={() => chatContext.setFlyoutVisible(false)}
       {...props.flyoutProps}
     >
       <>
@@ -146,6 +139,6 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
           )}
         </EuiResizableContainer>
       </>
-    </EuiFlyout>
+    </div>
   );
 };

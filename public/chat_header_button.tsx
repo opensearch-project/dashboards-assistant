@@ -18,6 +18,11 @@ import { ChatStateProvider } from './hooks';
 import './index.scss';
 import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount } from './types';
 import { TAB_ID } from './utils/constants';
+import { useCore } from './contexts/core_context';
+import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsReactContext } from '../../../src/plugins/opensearch_dashboards_react/public';
+import { AssistantServices } from './contexts/core_context';
+import { ISidecarConfig } from '../../../src/core/public';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -26,6 +31,7 @@ interface HeaderChatButtonProps {
   actionExecutors: Record<string, ActionExecutor>;
   assistantActions: AssistantActions;
   currentAccount: UserAccount;
+  coreContext: OpenSearchDashboardsReactContext<AssistantServices>;
 }
 
 let flyoutLoaded = false;
@@ -40,21 +46,47 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
   const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
   const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
+  const [dockedDirection, setDockedDirection] = useState<ISidecarConfig['dockedDirection']>(
+    'right'
+  );
   const [inputFocus, setInputFocus] = useState(false);
-  const flyoutFullScreen = chatSize === 'fullscreen';
+  const flyoutFullScreen = dockedDirection === 'bottom';
   const inputRef = useRef<HTMLInputElement>(null);
   const registry = getIncontextInsightRegistry();
 
   if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
+  // const [flyoutLoaded, setFlyoutLoaded] = useState(false);
+  const core = useCore();
+  // if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
 
   useEffectOnce(() => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
     return () => subscription.unsubscribe();
   });
 
-  const toggleFlyoutFullScreen = useCallback(() => {
-    setChatSize(flyoutFullScreen ? 'dock-right' : 'fullscreen');
-  }, [flyoutFullScreen, setChatSize]);
+  const toggleFlyoutFullScreen = useCallback(
+    (direction: ISidecarConfig['dockedMode']) => {
+      setDockedDirection((prevDirection) => {
+        if (prevDirection === direction) {
+          return prevDirection;
+        } else {
+          if (direction === 'bottom') {
+            core.overlays.sidecar().setSidecarConfig({
+              dockedMode: 'bottom',
+              paddingSize: window.innerHeight - 136,
+            });
+          } else {
+            core.overlays.sidecar().setSidecarConfig({
+              dockedMode: direction,
+              paddingSize: 460,
+            });
+          }
+          return direction;
+        }
+      });
+    },
+    [flyoutFullScreen]
+  );
 
   const chatContextValue: IChatContext = useMemo(
     () => ({
@@ -118,6 +150,46 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       }
     }
   };
+
+  const Chat = (
+    <props.coreContext.Provider>
+      <ChatContext.Provider value={chatContextValue}>
+        <ChatStateProvider>
+          <SetContext assistantActions={props.assistantActions} />
+          <ChatFlyout
+            flyoutVisible={flyoutVisible}
+            overrideComponent={flyoutComponent}
+            flyoutProps={flyoutFullScreen ? { size: '100%' } : {}}
+            flyoutFullScreen={flyoutFullScreen}
+            toggleFlyoutFullScreen={toggleFlyoutFullScreen}
+          />
+        </ChatStateProvider>
+      </ChatContext.Provider>
+    </props.coreContext.Provider>
+  );
+
+  useEffect(() => {
+    console.log('visa', flyoutVisible, flyoutLoaded);
+    if (!flyoutLoaded && flyoutVisible) {
+      console.log('mounut');
+      core.overlays.sidecar().open(toMountPoint(Chat), {
+        className: 'chatbot-sidecar',
+        config: {
+          dockedDirection: 'right',
+          paddingSize: 460,
+        },
+      });
+      flyoutLoaded = true;
+    } else if (flyoutLoaded && flyoutVisible) {
+      console.log('show');
+
+      core.overlays.sidecar().show();
+    } else if (flyoutLoaded && !flyoutVisible) {
+      console.log('hide');
+
+      core.overlays.sidecar().hide();
+    }
+  }, [flyoutVisible, flyoutLoaded]);
 
   const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -207,20 +279,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           disabled={!props.userHasAccess}
         />
       </div>
-      <ChatContext.Provider value={chatContextValue}>
-        <ChatStateProvider>
-          <SetContext assistantActions={props.assistantActions} />
-          {flyoutLoaded ? (
-            <ChatFlyout
-              flyoutVisible={flyoutVisible}
-              overrideComponent={flyoutComponent}
-              flyoutProps={flyoutFullScreen ? { size: '100%' } : {}}
-              flyoutFullScreen={flyoutFullScreen}
-              toggleFlyoutFullScreen={toggleFlyoutFullScreen}
-            />
-          ) : null}
-        </ChatStateProvider>
-      </ChatContext.Provider>
     </>
   );
 };
