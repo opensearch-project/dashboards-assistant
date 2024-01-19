@@ -29,6 +29,14 @@ export const parseSuggestedActions = (value: string): string[] => {
     suggestedActions = [];
   }
 
+  /**
+   * The suggestedOutputString may be 'null'
+   * Fail fast here.
+   */
+  if (!suggestedActions) {
+    return [];
+  }
+
   if (suggestedActions.length) {
     if (isStringArray(suggestedActions)) {
       return suggestedActions;

@@ -194,4 +194,8 @@ describe('parseSuggestedActions', () => {
     expect(parseSuggestedActions('')).toEqual([]);
     expect(parseSuggestedActions((null as unknown) as string)).toEqual([]);
   });
+
+  it('should not throw error when suggested actions is "null"', () => {
+    expect(parseSuggestedActions('null')).toEqual([]);
+  });
 });
