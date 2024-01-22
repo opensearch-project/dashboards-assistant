@@ -192,6 +192,9 @@ describe('parseSuggestedActions', () => {
 
   it('should return empty array when input is not valid', () => {
     expect(parseSuggestedActions('')).toEqual([]);
+    expect(parseSuggestedActions('6')).toEqual([]);
+    expect(parseSuggestedActions('true')).toEqual([]);
+    expect(parseSuggestedActions('false')).toEqual([]);
     expect(parseSuggestedActions((null as unknown) as string)).toEqual([]);
   });
 
