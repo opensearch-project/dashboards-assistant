@@ -24,7 +24,7 @@ describe('AgentFrameworkStorageService', () => {
   });
   it('getConversation', async () => {
     mockedTransport.mockImplementation(async (params) => {
-      if (params.path.includes('/_list?max_results=1000')) {
+      if (params.path.includes('/messages?max_results=1000')) {
         return {
           body: {
             interactions: [
@@ -66,13 +66,13 @@ describe('AgentFrameworkStorageService', () => {
         Array [
           Object {
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/_mock/_list?max_results=1000",
+            "path": "/_plugins/_ml/memory/_mock/messages?max_results=1000",
           },
         ],
         Array [
           Object {
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/_mock",
+            "path": "/_plugins/_ml/memory/_mock",
           },
         ],
       ]
@@ -163,7 +163,7 @@ describe('AgentFrameworkStorageService', () => {
               "size": 10,
             },
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/_search",
+            "path": "/_plugins/_ml/memory/_search",
           },
         ],
         Array [
@@ -181,7 +181,7 @@ describe('AgentFrameworkStorageService', () => {
               "size": 10,
             },
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/_search",
+            "path": "/_plugins/_ml/memory/_search",
           },
         ],
       ]
@@ -263,7 +263,6 @@ describe('AgentFrameworkStorageService', () => {
             input: 'input',
             response: 'response',
             origin: 'origin',
-            parent_interaction_id: 'parent_interaction_id',
             trace_number: 1,
           },
         ],
@@ -277,7 +276,6 @@ describe('AgentFrameworkStorageService', () => {
           "interactionId": "interaction_id",
           "origin": "origin",
           "output": "response",
-          "parentInteractionId": "parent_interaction_id",
           "traceNumber": 1,
         },
       ]

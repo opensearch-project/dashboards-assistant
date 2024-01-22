@@ -5,7 +5,6 @@
 
 export interface AgentFrameworkTrace {
   interactionId: string;
-  parentInteractionId: string;
   createTime: string;
   input: string;
   output: string;
