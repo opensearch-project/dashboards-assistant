@@ -18,7 +18,7 @@ export const formatInteractionFromBackend = (
   const { message_id: messageId, memory_id: memoryId, ...others } = interaction || {};
   return {
     ...others,
-    interaction_id: messageId,
-    conversation_id: memoryId,
+    interaction_id: messageId || '',
+    conversation_id: memoryId || '',
   };
 };

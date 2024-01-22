@@ -52,7 +52,9 @@ describe('AgentFrameworkStorageService', () => {
         "createdTimeMs": 0,
         "interactions": Array [
           Object {
+            "conversation_id": "",
             "input": "input",
+            "interaction_id": "",
             "response": "response",
           },
         ],
@@ -273,7 +275,7 @@ describe('AgentFrameworkStorageService', () => {
         Object {
           "createTime": "create_time",
           "input": "input",
-          "interactionId": "interaction_id",
+          "interactionId": undefined,
           "origin": "origin",
           "output": "response",
           "traceNumber": 1,
@@ -351,7 +353,9 @@ describe('AgentFrameworkStorageService', () => {
     expect(agentFrameworkService.getInteraction('_id', 'interaction_id')).resolves
       .toMatchInlineSnapshot(`
       Object {
+        "conversation_id": "",
         "input": "input",
+        "interaction_id": "",
         "response": "response",
       }
     `);
