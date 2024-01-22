@@ -5,8 +5,8 @@
 
 import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useEffectOnce } from 'react-use';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { useEffectOnce, useObservable } from 'react-use';
 import { ApplicationStart } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';
@@ -49,8 +49,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [dockedDirection, setDockedDirection] = useState<ISidecarConfig['dockedDirection']>(
     'right'
   );
+  const [query, setQuery] = useState('');
   const [inputFocus, setInputFocus] = useState(false);
-  const flyoutFullScreen = dockedDirection === 'bottom';
   const inputRef = useRef<HTMLInputElement>(null);
   const registry = getIncontextInsightRegistry();
 
@@ -58,6 +58,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   // const [flyoutLoaded, setFlyoutLoaded] = useState(false);
   const core = useCore();
   // if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
+  const sidecarConfig = useObservable(core.overlays.sidecar().getSidecarConfig$());
+  const flyoutFullScreen = sidecarConfig?.dockedMode === 'takeover';
 
   useEffectOnce(() => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
@@ -159,9 +161,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           <ChatFlyout
             flyoutVisible={flyoutVisible}
             overrideComponent={flyoutComponent}
-            flyoutProps={flyoutFullScreen ? { size: '100%' } : {}}
             flyoutFullScreen={flyoutFullScreen}
-            toggleFlyoutFullScreen={toggleFlyoutFullScreen}
           />
         </ChatStateProvider>
       </ChatContext.Provider>
@@ -169,24 +169,18 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   );
 
   useEffect(() => {
-    console.log('visa', flyoutVisible, flyoutLoaded);
     if (!flyoutLoaded && flyoutVisible) {
-      console.log('mounut');
       core.overlays.sidecar().open(toMountPoint(Chat), {
         className: 'chatbot-sidecar',
         config: {
-          dockedDirection: 'right',
+          dockedMode: 'right',
           paddingSize: 460,
         },
       });
       flyoutLoaded = true;
     } else if (flyoutLoaded && flyoutVisible) {
-      console.log('show');
-
       core.overlays.sidecar().show();
     } else if (flyoutLoaded && !flyoutVisible) {
-      console.log('hide');
-
       core.overlays.sidecar().hide();
     }
   }, [flyoutVisible, flyoutLoaded]);
