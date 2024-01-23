@@ -11,12 +11,14 @@ import {
   IConversation,
   IConversationFindResponse,
   Interaction,
+  InteractionFromAgentFramework,
 } from '../../../common/types/chat_saved_object_attributes';
 import { GetConversationsSchema } from '../../routes/chat_routes';
 import { StorageService } from './storage_service';
 import { MessageParser } from '../../types';
 import { MessageParserRunner } from '../../utils/message_parser_runner';
 import { ML_COMMONS_BASE_API } from '../../utils/constants';
+import { formatInteractionFromBackend } from '../../utils/format';
 
 export interface ConversationOptResponse {
   success: boolean;
@@ -33,15 +35,15 @@ export class AgentFrameworkStorageService implements StorageService {
     const [interactionsResp, conversation] = await Promise.all([
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}/_list?max_results=1000`,
+        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}/messages?max_results=1000`,
       }) as TransportRequestPromise<
         ApiResponse<{
-          interactions: Interaction[];
+          interactions: InteractionFromAgentFramework[];
         }>
       >,
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}`,
+        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
       }) as TransportRequestPromise<
         ApiResponse<{
           conversation_id: string;
@@ -51,7 +53,9 @@ export class AgentFrameworkStorageService implements StorageService {
         }>
       >,
     ]);
-    const finalInteractions = interactionsResp.body.interactions;
+    const finalInteractions = interactionsResp.body.interactions.map((item) =>
+      formatInteractionFromBackend(item)
+    );
 
     return {
       title: conversation.body.name,
@@ -99,7 +103,7 @@ export class AgentFrameworkStorageService implements StorageService {
 
     const conversations = await this.client.transport.request({
       method: 'GET',
-      path: `${ML_COMMONS_BASE_API}/memory/conversation/_search`,
+      path: `${ML_COMMONS_BASE_API}/memory/_search`,
       body: requestParams,
     });
 
@@ -143,7 +147,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'DELETE',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}/_delete`,
+        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
       });
       if (response.statusCode === 200) {
         return {
@@ -168,7 +172,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'PUT',
-        path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}/_update`,
+        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
         body: {
           name: title,
         },
@@ -193,23 +197,20 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = (await this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/trace/${interactionId}/_list`,
+        path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}/traces`,
       })) as ApiResponse<{
         traces: Array<{
-          conversation_id: string;
-          interaction_id: string;
+          message_id: string;
           create_time: string;
           input: string;
           response: string;
           origin: string;
-          parent_interaction_id: string;
           trace_number: number;
         }>;
       }>;
 
       return response.body.traces.map((item) => ({
-        interactionId: item.interaction_id,
-        parentInteractionId: item.parent_interaction_id,
+        interactionId: item.message_id,
         input: item.input,
         output: item.response,
         createTime: item.create_time,
@@ -228,7 +229,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'PUT',
-        path: `${ML_COMMONS_BASE_API}/memory/interaction/${interactionId}/_update`,
+        path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}`,
         body: {
           additional_info: additionalInfo,
         },
@@ -275,8 +276,8 @@ export class AgentFrameworkStorageService implements StorageService {
     }
     const interactionsResp = (await this.client.transport.request({
       method: 'GET',
-      path: `${ML_COMMONS_BASE_API}/memory/conversation/${conversationId}/${interactionId}`,
-    })) as ApiResponse<Interaction>;
-    return interactionsResp.body;
+      path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}`,
+    })) as ApiResponse<InteractionFromAgentFramework>;
+    return formatInteractionFromBackend(interactionsResp.body);
   }
 }

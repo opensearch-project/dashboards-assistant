@@ -138,7 +138,6 @@ describe('chat routes', () => {
       const getTraceResultMock = [
         {
           interactionId: 'interaction-1',
-          parentInteractionId: '',
           createTime: '',
           input: 'foo',
           output: 'bar',

@@ -28,7 +28,6 @@ describe('useFetchAgentFrameworkTraces hook', () => {
     const traces = [
       {
         interactionId: 'test_interactionId',
-        parentInteractionId: 'test_parent_interactionId',
         input: 'input',
         output: 'output',
         createTime: '',
