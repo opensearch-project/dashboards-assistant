@@ -6,7 +6,6 @@
 import { AgentFrameworkStorageService } from './agent_framework_storage_service';
 import { CoreRouteHandlerContext } from '../../../../../src/core/server/core_route_handler_context';
 import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
-import { loggerMock } from '../../../../../src/core/server/logging/logger.mock';
 
 describe('AgentFrameworkStorageService', () => {
   const coreContext = new CoreRouteHandlerContext(
@@ -39,7 +38,7 @@ describe('AgentFrameworkStorageService', () => {
 
       return {
         body: {
-          conversation_id: 'conversation_id',
+          memory_id: 'conversation_id',
           create_time: 0,
           updated_time: 0,
           name: 'foo',
@@ -259,8 +258,7 @@ describe('AgentFrameworkStorageService', () => {
       body: {
         traces: [
           {
-            conversation_id: 'conversation_id',
-            interaction_id: 'interaction_id',
+            message_id: 'interaction_id',
             create_time: 'create_time',
             input: 'input',
             response: 'response',
@@ -275,7 +273,7 @@ describe('AgentFrameworkStorageService', () => {
         Object {
           "createTime": "create_time",
           "input": "input",
-          "interactionId": undefined,
+          "interactionId": "interaction_id",
           "origin": "origin",
           "output": "response",
           "traceNumber": 1,

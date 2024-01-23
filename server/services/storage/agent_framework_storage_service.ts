@@ -200,7 +200,6 @@ export class AgentFrameworkStorageService implements StorageService {
         path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}/traces`,
       })) as ApiResponse<{
         traces: Array<{
-          memory_id: string;
           message_id: string;
           create_time: string;
           input: string;
