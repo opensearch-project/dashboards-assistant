@@ -17,7 +17,12 @@ const assistantConfig = {
   schema: schema.object({
     chat: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      rootAgentName: schema.maybe(schema.string()),
+      rootAgentName: schema.conditional(
+        schema.siblingRef('enabled'),
+        true,
+        schema.string(),
+        schema.maybe(schema.string())
+      ),
     }),
   }),
 };
