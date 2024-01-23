@@ -13,8 +13,15 @@ export interface Interaction {
   interaction_id: string;
   create_time: string;
   additional_info?: { feedback?: SendFeedbackBody; [key: string]: unknown };
-  parent_interaction_id?: string;
 }
+
+export type InteractionFromAgentFramework = Omit<
+  Interaction,
+  'interaction_id' | 'conversation_id'
+> & {
+  message_id: string;
+  memory_id: string;
+};
 
 export interface IConversation {
   title: string;

@@ -14,7 +14,6 @@ describe('<AgentFrameworkTraces/> spec', () => {
     const traces = [
       {
         interactionId: 'test_interactionId',
-        parentInteractionId: 'test_parent_interactionId',
         input: 'input',
         output: 'output',
         createTime: '',
@@ -23,7 +22,6 @@ describe('<AgentFrameworkTraces/> spec', () => {
       },
       {
         interactionId: 'test_interactionId',
-        parentInteractionId: 'test_parent_interactionId',
         input: 'input',
         output: 'output',
         createTime: '',
@@ -32,7 +30,6 @@ describe('<AgentFrameworkTraces/> spec', () => {
       },
       {
         interactionId: 'test_interactionId',
-        parentInteractionId: 'test_parent_interactionId',
         input: 'input',
         output: '',
         createTime: '',
@@ -41,7 +38,6 @@ describe('<AgentFrameworkTraces/> spec', () => {
       },
       {
         interactionId: 'test_interactionId',
-        parentInteractionId: 'test_parent_interactionId',
         input: '',
         output: 'output',
         createTime: '',

@@ -32,7 +32,6 @@ describe('MessageParserRunner', () => {
           interaction_id: '',
           create_time: '',
           additional_info: {},
-          parent_interaction_id: '',
         },
         {
           interactions: [
@@ -43,7 +42,6 @@ describe('MessageParserRunner', () => {
               interaction_id: '',
               create_time: '',
               additional_info: {},
-              parent_interaction_id: '',
             },
           ],
         }
@@ -122,7 +120,6 @@ describe('MessageParserRunner', () => {
           interaction_id: '',
           create_time: '',
           additional_info: {},
-          parent_interaction_id: '',
         },
         {
           interactions: [
@@ -133,7 +130,6 @@ describe('MessageParserRunner', () => {
               interaction_id: '',
               create_time: '',
               additional_info: {},
-              parent_interaction_id: '',
             },
           ],
         }
@@ -199,7 +195,6 @@ describe('MessageParserRunner', () => {
           interaction_id: '',
           create_time: '',
           additional_info: {},
-          parent_interaction_id: '',
         },
         {
           interactions: [
@@ -210,7 +205,6 @@ describe('MessageParserRunner', () => {
               interaction_id: '',
               create_time: '',
               additional_info: {},
-              parent_interaction_id: '',
             },
           ],
         }

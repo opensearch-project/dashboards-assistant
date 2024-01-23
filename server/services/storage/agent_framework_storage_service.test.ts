@@ -6,7 +6,6 @@
 import { AgentFrameworkStorageService } from './agent_framework_storage_service';
 import { CoreRouteHandlerContext } from '../../../../../src/core/server/core_route_handler_context';
 import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
-import { loggerMock } from '../../../../../src/core/server/logging/logger.mock';
 
 describe('AgentFrameworkStorageService', () => {
   const coreContext = new CoreRouteHandlerContext(
@@ -24,7 +23,7 @@ describe('AgentFrameworkStorageService', () => {
   });
   it('getConversation', async () => {
     mockedTransport.mockImplementation(async (params) => {
-      if (params.path.includes('/_list?max_results=1000')) {
+      if (params.path.includes('/messages?max_results=1000')) {
         return {
           body: {
             interactions: [
@@ -39,7 +38,7 @@ describe('AgentFrameworkStorageService', () => {
 
       return {
         body: {
-          conversation_id: 'conversation_id',
+          memory_id: 'conversation_id',
           create_time: 0,
           updated_time: 0,
           name: 'foo',
@@ -52,7 +51,9 @@ describe('AgentFrameworkStorageService', () => {
         "createdTimeMs": 0,
         "interactions": Array [
           Object {
+            "conversation_id": "",
             "input": "input",
+            "interaction_id": "",
             "response": "response",
           },
         ],
@@ -66,13 +67,13 @@ describe('AgentFrameworkStorageService', () => {
         Array [
           Object {
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/_mock/_list?max_results=1000",
+            "path": "/_plugins/_ml/memory/_mock/messages?max_results=1000",
           },
         ],
         Array [
           Object {
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/_mock",
+            "path": "/_plugins/_ml/memory/_mock",
           },
         ],
       ]
@@ -163,7 +164,7 @@ describe('AgentFrameworkStorageService', () => {
               "size": 10,
             },
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/_search",
+            "path": "/_plugins/_ml/memory/_search",
           },
         ],
         Array [
@@ -181,7 +182,7 @@ describe('AgentFrameworkStorageService', () => {
               "size": 10,
             },
             "method": "GET",
-            "path": "/_plugins/_ml/memory/conversation/_search",
+            "path": "/_plugins/_ml/memory/_search",
           },
         ],
       ]
@@ -257,13 +258,11 @@ describe('AgentFrameworkStorageService', () => {
       body: {
         traces: [
           {
-            conversation_id: 'conversation_id',
-            interaction_id: 'interaction_id',
+            message_id: 'interaction_id',
             create_time: 'create_time',
             input: 'input',
             response: 'response',
             origin: 'origin',
-            parent_interaction_id: 'parent_interaction_id',
             trace_number: 1,
           },
         ],
@@ -277,7 +276,6 @@ describe('AgentFrameworkStorageService', () => {
           "interactionId": "interaction_id",
           "origin": "origin",
           "output": "response",
-          "parentInteractionId": "parent_interaction_id",
           "traceNumber": 1,
         },
       ]
@@ -353,7 +351,9 @@ describe('AgentFrameworkStorageService', () => {
     expect(agentFrameworkService.getInteraction('_id', 'interaction_id')).resolves
       .toMatchInlineSnapshot(`
       Object {
+        "conversation_id": "",
         "input": "input",
+        "interaction_id": "",
         "response": "response",
       }
     `);
