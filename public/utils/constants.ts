@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { SIDECAR_DOCKED_MODE } from '../../../../src/core/public';
 
 export enum TAB_ID {
   CHAT = 'chat',
@@ -10,3 +11,5 @@ export enum TAB_ID {
   HISTORY = 'history',
   TRACE = 'trace',
 }
+
+export const DEFAULT_SIDECAR_DOCKED_MODE = SIDECAR_DOCKED_MODE.RIGHT;

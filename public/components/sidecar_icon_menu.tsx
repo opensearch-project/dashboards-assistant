@@ -5,9 +5,9 @@
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useObservable } from 'react-use';
 import { useCore } from '../contexts/core_context';
-import { ISidecarConfig } from '../../../../src/core/public';
+import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../../src/core/public';
+import { useChatContext } from '../contexts/chat_context';
 
 const ALL_SIDECAR_DIRECTIONS: Array<{
   mode: ISidecarConfig['dockedMode'];
@@ -15,17 +15,17 @@ const ALL_SIDECAR_DIRECTIONS: Array<{
   icon: string;
 }> = [
   {
-    mode: 'right',
+    mode: SIDECAR_DOCKED_MODE.RIGHT,
     name: 'Dock Right',
     icon: 'dockedRight',
   },
   {
-    mode: 'left',
+    mode: SIDECAR_DOCKED_MODE.LEFT,
     name: 'Dock Left',
     icon: 'dockedLeft',
   },
   {
-    mode: 'takeover',
+    mode: SIDECAR_DOCKED_MODE.TAKEOVER,
     name: 'Dock Full Width',
     icon: 'dockedTakeover',
   },
@@ -33,8 +33,8 @@ const ALL_SIDECAR_DIRECTIONS: Array<{
 
 export const SidecarIconMenu = () => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const chatContext = useChatContext();
   const core = useCore();
-  const sidecarConfig = useObservable(core.overlays.sidecar().getSidecarConfig$());
 
   const onButtonClick = useCallback(() => {
     setPopoverOpen((flag) => !flag);
@@ -46,13 +46,13 @@ export const SidecarIconMenu = () => {
 
   const setDockedMode = useCallback(
     (mode: ISidecarConfig['dockedMode']) => {
-      const currentMode = sidecarConfig?.dockedMode;
+      const currentMode = chatContext.sidecarDockedMode;
       if (currentMode === mode) {
         return;
       } else {
         if (mode === 'takeover') {
           core.overlays.sidecar().setSidecarConfig({
-            dockedMode: 'takeover',
+            dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
             paddingSize: window.innerHeight - 136,
           });
         } else {
@@ -61,9 +61,10 @@ export const SidecarIconMenu = () => {
             paddingSize: 460,
           });
         }
+        chatContext.setSidecarDockedMode(mode);
       }
     },
-    [sidecarConfig]
+    [chatContext]
   );
 
   const menuItems = useMemo(
@@ -75,18 +76,18 @@ export const SidecarIconMenu = () => {
             closePopover();
             setDockedMode(mode);
           }}
-          icon={sidecarConfig?.dockedMode === mode ? 'check' : icon}
+          icon={chatContext.sidecarDockedMode === mode ? 'check' : icon}
         >
           {name}
         </EuiContextMenuItem>
       )),
-    [sidecarConfig]
+    [chatContext]
   );
 
   const selectMenuItemIndex = useMemo(() => {
-    const dockedMode = sidecarConfig?.dockedMode ?? 'right';
+    const dockedMode = chatContext.sidecarDockedMode;
     return ALL_SIDECAR_DIRECTIONS.findIndex((item) => item.mode === dockedMode);
-  }, [sidecarConfig]);
+  }, [chatContext]);
 
   return (
     <>

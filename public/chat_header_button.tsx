@@ -6,7 +6,7 @@
 import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { useEffectOnce, useObservable } from 'react-use';
+import { useEffectOnce } from 'react-use';
 import { ApplicationStart } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';
@@ -16,16 +16,12 @@ import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks';
 import './index.scss';
-import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount } from './types';
-import { TAB_ID } from './utils/constants';
+import { ActionExecutor, AssistantActions, MessageRenderer, UserAccount, TabId } from './types';
+import { TAB_ID, DEFAULT_SIDECAR_DOCKED_MODE } from './utils/constants';
 import { useCore } from './contexts/core_context';
-import {
-  toMountPoint,
-  MountPointPortal,
-} from '../../../src/plugins/opensearch_dashboards_react/public';
+import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { OpenSearchDashboardsReactContext } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { AssistantServices } from './contexts/core_context';
-import { ISidecarConfig } from '../../../src/core/public';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -59,10 +55,9 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
 
   if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
   // const [flyoutLoaded, setFlyoutLoaded] = useState(false);
+  const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
   const core = useCore();
-  // if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
-  const sidecarConfig = useObservable(core.overlays.sidecar().getSidecarConfig$());
-  const flyoutFullScreen = sidecarConfig?.dockedMode === 'takeover';
+  const flyoutFullScreen = sidecarDockedMode === 'takeover';
   const flyoutMountPoint = useRef(null);
 
   useEffectOnce(() => {
@@ -117,6 +112,8 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
       setTitle,
       interactionId,
       setInteractionId,
+      sidecarDockedMode,
+      setSidecarDockedMode,
     }),
     [
       appId,
@@ -133,6 +130,8 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
       setTitle,
       interactionId,
       setInteractionId,
+      sidecarDockedMode,
+      setSidecarDockedMode,
     ]
   );
 
@@ -157,26 +156,19 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
     }
   };
 
-  // const mountPoint = toMountPoint(
-  // <ChatFlyout
-  //   flyoutVisible={flyoutVisible}
-  //   overrideComponent={flyoutComponent}
-  //   flyoutFullScreen={flyoutFullScreen}
-  // />
-  // );
-
   useEffect(() => {
     if (!flyoutLoaded && flyoutVisible) {
-      const a = flyoutMountPoint.current;
-
-      core.overlays.sidecar().open(a, {
-        className: 'chatbot-sidecar',
-        config: {
-          dockedMode: 'right',
-          paddingSize: 460,
-        },
-      });
-      flyoutLoaded = true;
+      const mountPoint = flyoutMountPoint.current;
+      if (mountPoint) {
+        core.overlays.sidecar().open(flyoutMountPoint.current, {
+          className: 'chatbot-sidecar',
+          config: {
+            dockedMode: 'right',
+            paddingSize: 460,
+          },
+        });
+        flyoutLoaded = true;
+      }
     } else if (flyoutLoaded && flyoutVisible) {
       core.overlays.sidecar().show();
     } else if (flyoutLoaded && !flyoutVisible) {
@@ -191,7 +183,6 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
   };
 
   const setMountPoint = useCallback((mountPoint) => {
-    // setFlyoutMountPoint(() => mountPoint);
     flyoutMountPoint.current = mountPoint;
   }, []);
   useEffect(() => {
@@ -285,7 +276,6 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
                   overrideComponent={flyoutComponent}
                   flyoutFullScreen={flyoutFullScreen}
                 />
-                {/* <div>123</div> */}
               </MountPointPortal>
             </ChatStateProvider>
           </ChatContext.Provider>
