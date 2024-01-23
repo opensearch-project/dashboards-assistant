@@ -19,7 +19,10 @@ import './index.scss';
 import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount } from './types';
 import { TAB_ID } from './utils/constants';
 import { useCore } from './contexts/core_context';
-import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
+import {
+  toMountPoint,
+  MountPointPortal,
+} from '../../../src/plugins/opensearch_dashboards_react/public';
 import { OpenSearchDashboardsReactContext } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { AssistantServices } from './contexts/core_context';
 import { ISidecarConfig } from '../../../src/core/public';
@@ -36,7 +39,7 @@ interface HeaderChatButtonProps {
 
 let flyoutLoaded = false;
 
-export const HeaderChatButton = (props: HeaderChatButtonProps) => {
+export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
@@ -60,6 +63,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   // if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
   const sidecarConfig = useObservable(core.overlays.sidecar().getSidecarConfig$());
   const flyoutFullScreen = sidecarConfig?.dockedMode === 'takeover';
+  const flyoutMountPoint = useRef(null);
 
   useEffectOnce(() => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
@@ -153,24 +157,19 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     }
   };
 
-  const Chat = (
-    <props.coreContext.Provider>
-      <ChatContext.Provider value={chatContextValue}>
-        <ChatStateProvider>
-          <SetContext assistantActions={props.assistantActions} />
-          <ChatFlyout
-            flyoutVisible={flyoutVisible}
-            overrideComponent={flyoutComponent}
-            flyoutFullScreen={flyoutFullScreen}
-          />
-        </ChatStateProvider>
-      </ChatContext.Provider>
-    </props.coreContext.Provider>
-  );
+  // const mountPoint = toMountPoint(
+  // <ChatFlyout
+  //   flyoutVisible={flyoutVisible}
+  //   overrideComponent={flyoutComponent}
+  //   flyoutFullScreen={flyoutFullScreen}
+  // />
+  // );
 
   useEffect(() => {
     if (!flyoutLoaded && flyoutVisible) {
-      core.overlays.sidecar().open(toMountPoint(Chat), {
+      const a = flyoutMountPoint.current;
+
+      core.overlays.sidecar().open(a, {
         className: 'chatbot-sidecar',
         config: {
           dockedMode: 'right',
@@ -183,7 +182,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     } else if (flyoutLoaded && !flyoutVisible) {
       core.overlays.sidecar().hide();
     }
-  }, [flyoutVisible, flyoutLoaded]);
+  }, [flyoutVisible, flyoutLoaded, flyoutMountPoint]);
 
   const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -191,6 +190,10 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     }
   };
 
+  const setMountPoint = useCallback((mountPoint) => {
+    // setFlyoutMountPoint(() => mountPoint);
+    flyoutMountPoint.current = mountPoint;
+  }, []);
   useEffect(() => {
     if (!props.userHasAccess) {
       return;
@@ -272,7 +275,22 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           }
           disabled={!props.userHasAccess}
         />
+        <props.coreContext.Provider>
+          <ChatContext.Provider value={chatContextValue}>
+            <ChatStateProvider>
+              <SetContext assistantActions={props.assistantActions} />
+              <MountPointPortal setMountPoint={setMountPoint}>
+                <ChatFlyout
+                  flyoutVisible={flyoutVisible}
+                  overrideComponent={flyoutComponent}
+                  flyoutFullScreen={flyoutFullScreen}
+                />
+                {/* <div>123</div> */}
+              </MountPointPortal>
+            </ChatStateProvider>
+          </ChatContext.Provider>
+        </props.coreContext.Provider>
       </div>
     </>
   );
-};
+});
