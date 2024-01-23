@@ -15,7 +15,7 @@ const sanitize = (content: string) => {
 };
 
 const isStringArray = (array?: unknown): array is string[] =>
-  Array.isArray(array) && array.every((item) => typeof item === 'string');
+  Array.isArray(array) && !!array.length && array.every((item) => typeof item === 'string');
 
 export const parseSuggestedActions = (value: string): string[] => {
   if (!value) {
@@ -29,12 +29,8 @@ export const parseSuggestedActions = (value: string): string[] => {
     suggestedActions = [];
   }
 
-  if (suggestedActions.length) {
-    if (isStringArray(suggestedActions)) {
-      return suggestedActions;
-    }
-
-    return [];
+  if (isStringArray(suggestedActions)) {
+    return suggestedActions;
   }
 
   /**
