@@ -5,16 +5,16 @@
 
 import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import { ApplicationStart } from '../../../src/core/public';
+import chatIcon from './assets/chat.svg';
 import { ChatFlyout } from './chat_flyout';
 import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks';
 import './index.scss';
-import chatIcon from './assets/chat.svg';
-import { ActionExecutor, AssistantActions, MessageRenderer, UserAccount, TabId } from './types';
+import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount } from './types';
 import { TAB_ID } from './utils/constants';
 
 interface HeaderChatButtonProps {
@@ -38,7 +38,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
   const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
   const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
-  const [query, setQuery] = useState('');
   const [inputFocus, setInputFocus] = useState(false);
   const flyoutFullScreen = chatSize === 'fullscreen';
   const inputRef = useRef<HTMLInputElement>(null);
@@ -97,7 +96,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   );
 
   const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && query.trim().length > 0) {
+    if (e.key === 'Enter' && inputRef.current && inputRef.current.value.trim().length > 0) {
       // open chat window
       setFlyoutVisible(true);
       // start a new chat
@@ -106,11 +105,11 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       props.assistantActions.send({
         type: 'input',
         contentType: 'text',
-        content: query,
+        content: inputRef.current.value,
         context: { appId },
       });
       // reset query to empty
-      setQuery('');
+      inputRef.current.value = '';
       if (inputRef.current) {
         inputRef.current.blur();
       }
@@ -146,10 +145,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           aria-label="chat input"
           inputRef={inputRef}
           compressed
-          value={query}
           onFocus={() => setInputFocus(true)}
           onBlur={() => setInputFocus(false)}
-          onChange={(e) => setQuery(e.target.value)}
           placeholder="Ask question"
           onKeyPress={onKeyPress}
           onKeyUp={onKeyUp}
