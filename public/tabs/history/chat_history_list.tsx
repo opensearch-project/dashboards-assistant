@@ -51,7 +51,7 @@ export const ChatHistoryListItem = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
+      <EuiFlexGroup gutterSize="xs" responsive={false} data-test-subj={`chatHistoryItem-${id}`}>
         <EuiFlexItem>
           <EuiLink onClick={handleTitleClick}>
             <EuiText size="s">
