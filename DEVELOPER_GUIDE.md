@@ -41,7 +41,6 @@ Ultimately, your directory structure should look like this:
 │       └── dashboards-assistant
 ```
 
-
 ## Build
 
 To build the plugin's distributable zip simply run `yarn build`.
@@ -56,6 +55,35 @@ Example output: `./build/assistantDashboards-2.11.0.zip`
   - Starts OpenSearch-Dashboards and includes this plugin. OpenSearch-Dashboards will be available on `localhost:5601`.
   - Please run in the OpenSearch-Dashboards root directory
   - You must have OpenSearch running with the ML Commons plugin
+- Quick setup version utilizing Bedrock:
+
+1. Export keys locally:
+```sh
+# defaults to us-west-2
+# Requires permission to Bedrock and granted access to Claude
+export REGION=
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export AWS_SESSION_TOKEN=
+```
+2. Setup OSD plugins
+```sh
+# from OSD root folder
+cd plugins
+git clone https://github.com/opensearch-project/dashboards-assistant
+(cd dashboards-assistant && yarn setup)
+
+# example with security plugin
+git clone --depth 1 --branch $VERSION https://github.com/opensearch-project/security-dashboards-plugin.git
+
+cd ../
+yarn osd bootstrap
+```
+2. Start up an OpenSearch snapshot with ML-Commons, SQL, Observability, Alerting, and Security. Adds some default models. Finally, starts up OpenSearch Dashboards:
+```sh
+# from OSD root folder
+yarn start:assistant
+```
 
 ## Test
 
