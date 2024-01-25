@@ -46,20 +46,31 @@ export const SidecarIconMenu = () => {
 
   const setDockedMode = useCallback(
     (mode: ISidecarConfig['dockedMode']) => {
-      const currentMode = chatContext.sidecarDockedMode;
-      if (currentMode === mode) {
+      const previousMode = chatContext.sidecarDockedMode;
+      if (previousMode === mode) {
         return;
       } else {
-        if (mode === 'takeover') {
-          core.overlays.sidecar().setSidecarConfig({
-            dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
-            paddingSize: window.innerHeight - 136,
-          });
-        } else {
+        if (mode === SIDECAR_DOCKED_MODE.TAKEOVER) {
+          const defaultTakeOverSize = window.innerHeight - 136;
           core.overlays.sidecar().setSidecarConfig({
             dockedMode: mode,
-            paddingSize: 460,
+            paddingSize: defaultTakeOverSize,
           });
+        } else {
+          const defaultLeftOrRightSize = 460;
+          let newConfig;
+          if (previousMode !== SIDECAR_DOCKED_MODE.TAKEOVER) {
+            // Maintain the same panel sidecar width when switching between both dock left and dock right.
+            newConfig = {
+              dockedMode: mode,
+            };
+          } else {
+            newConfig = {
+              dockedMode: mode,
+              paddingSize: defaultLeftOrRightSize,
+            };
+          }
+          core.overlays.sidecar().setSidecarConfig(newConfig);
         }
         chatContext.setSidecarDockedMode(mode);
       }
