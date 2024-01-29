@@ -25,7 +25,8 @@ export const useFeedback = (interaction?: Interaction | null) => {
     });
     const inputMessage = chatState.messages
       .slice(0, outputMessageIndex)
-      .findLast((item) => item.type === 'input');
+      .reverse()
+      .find((item) => item.type === 'input');
     if (!inputMessage) {
       return;
     }

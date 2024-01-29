@@ -22,6 +22,7 @@ import {
 import { WelcomeMessage } from '../../components/chat_welcome_message';
 import { useChatContext } from '../../contexts';
 import { useChatState, useChatActions } from '../../hooks';
+import { findLastIndex } from '../../utils';
 import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
@@ -81,7 +82,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   }
 
   const firstInputIndex = chatState.messages.findIndex((msg) => msg.type === 'input');
-  const lastInputIndex = chatState.messages.findLastIndex((msg) => msg.type === 'input');
+  const lastInputIndex = findLastIndex(chatState.messages, (msg) => msg.type === 'input');
 
   return (
     <>

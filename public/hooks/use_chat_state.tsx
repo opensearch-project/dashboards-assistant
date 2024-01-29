@@ -6,6 +6,7 @@
 import { produce } from 'immer';
 import React, { useContext, useMemo, useReducer } from 'react';
 import { IMessage, Interaction } from '../../common/types/chat_saved_object_attributes';
+import { findLastIndex } from '../utils';
 
 export interface ChatState {
   messages: IMessage[];
@@ -104,7 +105,7 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
         draft.llmResponding = false;
         break;
       case 'regenerate':
-        const lastInputIndex = draft.messages.findLastIndex((msg) => msg.type === 'input');
+        const lastInputIndex = findLastIndex(draft.messages, (msg) => msg.type === 'input');
         // Exclude the last outputs
         draft.messages = draft.messages.slice(0, lastInputIndex + 1);
         draft.llmResponding = true;
