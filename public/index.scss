@@ -5,6 +5,9 @@
 
 .llm-chat-header-icon-wrapper {
   margin: 0 8px;
+  height: 48px;
+  display: flex;
+  align-items: center;
 
   .euiFormControlLayout__prepend {
     background-color: transparent !important;
