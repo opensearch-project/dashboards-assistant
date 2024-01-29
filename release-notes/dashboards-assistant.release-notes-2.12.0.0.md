@@ -2,7 +2,7 @@
 
 Compatible with OpenSearch and OpenSearch Dashboards Version 2.12.0
 
-### Features
+### Experimental Features
 
 - Add asking assistant and getting response ([#2](https://github.com/opensearch-project/dashboards-assistant/pull/2))([88eb43e](https://github.com/opensearch-project/dashboards-assistant/commit/88eb43e))
 - Add loading conversations and conversation ([7ceee22](https://github.com/opensearch-project/dashboards-assistant/commit/7ceee22))([d941234](https://github.com/opensearch-project/dashboards-assistant/commit/d941234))
