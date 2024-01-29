@@ -18,6 +18,8 @@ import { AgentFrameworkStorageService } from '../services/storage/agent_framewor
 import { RoutesOptions } from '../types';
 import { ChatService } from '../services/chat/chat_service';
 
+const delayPromise = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
+
 const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
   validate: {
@@ -168,6 +170,12 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
+
+      /**
+       * Remove following delay after:
+       * https://github.com/opensearch-project/ml-commons/issues/1894 resolve.
+       */
+      await delayPromise(100);
 
       /**
        * Retrieve latest interactions from memory
@@ -363,6 +371,12 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
+
+      /**
+       * Remove following delay after:
+       * https://github.com/opensearch-project/ml-commons/issues/1894 resolve.
+       */
+      await delayPromise(100);
 
       /**
        * Retrieve latest interactions from memory
