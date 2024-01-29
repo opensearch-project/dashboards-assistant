@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const WelcomeMessage = (props: Props) => {
-  const usernamePlaceHolder = props.username ? ` ${props.username} ` : '';
+  const usernamePlaceHolder = props.username ? ` ${props.username} ` : ' ';
   return (
     <EuiEmptyPrompt
       aria-label="chat welcome message"
