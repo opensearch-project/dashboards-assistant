@@ -20,7 +20,7 @@ export interface IChatContext {
   userHasAccess: boolean;
   messageRenderers: Record<string, MessageRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
-  currentAccount: UserAccount;
+  currentAccount?: UserAccount;
   title?: string;
   setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
   interactionId?: string;
