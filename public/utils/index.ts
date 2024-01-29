@@ -4,3 +4,4 @@
  */
 
 export * from './notebook';
+export * from './find_last_index';
