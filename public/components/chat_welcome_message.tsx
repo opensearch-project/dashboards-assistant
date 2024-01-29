@@ -7,10 +7,11 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 
 interface Props {
-  username: string;
+  username?: string;
 }
 
 export const WelcomeMessage = (props: Props) => {
+  const usernamePlaceHolder = props.username ? ` ${props.username} ` : '';
   return (
     <EuiEmptyPrompt
       aria-label="chat welcome message"
@@ -19,7 +20,7 @@ export const WelcomeMessage = (props: Props) => {
       titleSize="s"
       body={
         <EuiText color="default">
-          <p>Welcome {props.username} to the OpenSearch Assistant!</p>
+          <p>Welcome{usernamePlaceHolder}to the OpenSearch Assistant!</p>
           <p>I can help you analyze data, create visualizations, and get other insights.</p>
           <p>How can I help?</p>
           <EuiText size="xs" color="subdued">

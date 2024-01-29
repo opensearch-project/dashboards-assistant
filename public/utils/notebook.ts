@@ -63,8 +63,8 @@ const createDashboardVizObject = (objectId: string) => {
   return basicVizObject;
 };
 
-export const convertMessagesToParagraphs = (messages: IMessage[], username: string) => {
-  const userMessagePrefix = `${username}: `;
+export const convertMessagesToParagraphs = (messages: IMessage[], username?: string) => {
+  const userMessagePrefix = username ? `${username}: ` : 'User: ';
 
   return messages.map((message: IMessage) => {
     const paragraph = buildBasicGraph();
