@@ -90,7 +90,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         message={{ type: 'output', contentType: 'markdown', content: '' }}
         showActionBar={false}
       >
-        <WelcomeMessage username={chatContext.currentAccount.username} />
+        <WelcomeMessage username={chatContext?.currentAccount?.username} />
       </MessageBubble>
       {firstInputIndex < 0 && (
         <Suggestions

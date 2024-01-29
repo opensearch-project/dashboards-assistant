@@ -61,7 +61,7 @@ export const useSaveChat = () => {
       const id = await createNotebook(name);
       const paragraphs = convertMessagesToParagraphs(
         chatState.messages,
-        chatContext.currentAccount.username
+        chatContext?.currentAccount?.username
       );
       await setParagraphs(id, paragraphs);
       return id;
