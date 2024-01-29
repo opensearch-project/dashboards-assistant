@@ -10,9 +10,10 @@ export const findLastIndex = <T>(
   if (array.length === 0) {
     return -1;
   }
-  const index = [...array].reverse().findIndex(predicate);
-  if (index === -1) {
-    return -1;
+  for (let i = array.length - 1; i >= 0; i--) {
+    if (predicate(array[i], i, array)) {
+      return i;
+    }
   }
-  return array.length - index - 1;
+  return -1;
 };
