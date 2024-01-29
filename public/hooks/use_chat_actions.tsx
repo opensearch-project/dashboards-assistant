@@ -5,6 +5,7 @@
 
 import { TAB_ID } from '../utils/constants';
 import { ASSISTANT_API } from '../../common/constants/llm';
+import { findLastIndex } from '../utils';
 import {
   IMessage,
   ISuggestedAction,
@@ -187,7 +188,8 @@ export const useChatActions = (): AssistantActions => {
          * In implementation of Agent framework, it will generate a new interactionId
          * so need to remove the staled interaction in Frontend manually.
          */
-        const findRegeratedMessageIndex = chatState.messages.findLastIndex(
+        const findRegeratedMessageIndex = findLastIndex(
+          chatState.messages,
           (message) => message.type === 'input'
         );
         if (findRegeratedMessageIndex > -1) {
