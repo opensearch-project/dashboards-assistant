@@ -52,23 +52,23 @@ export const ChatWindowHeader = React.memo((props: ChatWindowHeaderProps) => {
             <EuiFlexItem grow={false}>
               <ChatWindowHeaderTitle />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label="history"
-                iconType="clock"
-                size="xs"
-                color="text"
-                onClick={() => {
-                  chatContext.setFlyoutComponent(undefined);
-                  // Back to chat tab if history page already visible
-                  chatContext.setSelectedTabId(
-                    chatContext.selectedTabId === TAB_ID.HISTORY ? TAB_ID.CHAT : TAB_ID.HISTORY
-                  );
-                }}
-                display={chatContext.selectedTabId === TAB_ID.HISTORY ? 'fill' : undefined}
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label="history"
+            iconType="clock"
+            size="xs"
+            color="text"
+            onClick={() => {
+              chatContext.setFlyoutComponent(undefined);
+              // Back to chat tab if history page already visible
+              chatContext.setSelectedTabId(
+                chatContext.selectedTabId === TAB_ID.HISTORY ? TAB_ID.CHAT : TAB_ID.HISTORY
+              );
+            }}
+            display={chatContext.selectedTabId === TAB_ID.HISTORY ? 'fill' : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
