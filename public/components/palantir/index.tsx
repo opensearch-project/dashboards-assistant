@@ -149,7 +149,7 @@ export const Palantir = ({
 
   const summaryPopoverBody: React.ReactNode = (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
-      <>{palantirInput.summary}</>
+      <EuiText size="s">{palantirInput.summary}</EuiText>
     </EuiPanel>
   );
 
@@ -218,7 +218,6 @@ export const Palantir = ({
       closePopover={closeAssistantPopover}
       anchorClassName="palantirAnchor"
       anchorPosition="upCenter"
-      display="block"
       panelPaddingSize="s"
     >
       <EuiPopoverTitle className="palantirPopoverTitle" paddingSize="none">

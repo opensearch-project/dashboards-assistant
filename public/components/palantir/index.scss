@@ -1,6 +1,4 @@
-.palantirAnchor {
-  text-align: center;
-}
+
 
 .palantirAnchorButton {
   padding-top: 0;
@@ -41,6 +39,7 @@
   // TODO: Remove this one paddingSize is fixed
   padding: 0 !important;
   border: none;
+  margin-bottom: 2px !important;
 
   :first-child {
     border: none;
