@@ -9,11 +9,6 @@ import { ISuggestedAction, Interaction } from '../../../common/types/chat_saved_
 
 export class PalantirRegistry extends EventEmitter {
   private registry: Palantiri = new Map();
-  private errorOutput: Palantir = {
-    key: 'error',
-    type: 'error',
-    suggestions: ['Error'],
-  };
 
   private mapper = (palantir: Palantir) => {
     return {
@@ -42,7 +37,6 @@ export class PalantirRegistry extends EventEmitter {
   }
 
   public get(key: string): Palantir {
-    if (!this.registry.has(key)) return this.errorOutput;
     return this.registry.get(key) as Palantir;
   }
 

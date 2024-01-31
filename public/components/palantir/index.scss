@@ -28,6 +28,10 @@
   }
 }
 
+.palantirAnchorButton:focus {
+  background: none;
+}
+
 .palantirAnchorContent {
   text-decoration: underline dashed 1.5px;
   text-underline-offset: 2px;

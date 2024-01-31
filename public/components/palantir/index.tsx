@@ -32,12 +32,10 @@ import { getPalantirRegistry, getChrome, getNotifications, PalantirRegistry } fr
 export const Palantir = ({
   children,
   key,
-  input,
   onSubmit,
 }: {
   children: React.ReactNode;
   key?: string;
-  input?: PalantirInput;
   onSubmit?: () => void;
 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -45,8 +43,30 @@ export const Palantir = ({
   const [chatValue, setChatValue] = useState('');
 
   let registry: PalantirRegistry;
+  let palantirInput: PalantirInput | undefined;
+  let targetChild = children;
+
+  // TODO: i18n && delay
+  // TODO: compressed loading component (empty prompt)
+  // TODO: --- loading 2-3 seconds
   try {
     registry = getPalantirRegistry();
+    const searchForChild = (node: React.ReactNode): React.ReactNode => {
+      if (!isValidElement(node)) return;
+      if (node.key && registry.get(node.key as string)) {
+        palantirInput = registry.get(node.key as string);
+        targetChild = node;
+        return;
+      }
+
+      if (node.props.children) {
+        Children.forEach(node.props.children, (child) => {
+          searchForChild(child);
+        });
+      }
+    };
+    searchForChild(children);
+    if (!palantirInput) throw Error('Child key not found in registry.');
   } catch {
     return children;
   }
@@ -56,7 +76,7 @@ export const Palantir = ({
 
   // TODO: error handling for bad implemention from plugins or just don't render?
   const onAnchorClick = () => setIsVisible((visible) => !visible);
-  const onSubmitClick = (palantirInput: PalantirInput, suggestion: string) => {
+  const onSubmitClick = (targetInput: PalantirInput, suggestion: string) => {
     setIsVisible(false);
     if (onSubmit) {
       onSubmit();
@@ -65,7 +85,7 @@ export const Palantir = ({
 
     // TODO: we have access to the React child. We can crawl it for data and values to pass for more context
     // Example: We can get the text and provide the chat bot more information or think about supporting tokens in the registry
-    registry.open(palantirInput, suggestion);
+    registry.open(targetInput, suggestion);
   };
 
   // useEffect(() => {
@@ -82,6 +102,7 @@ export const Palantir = ({
   // }, []);
 
   const closeAssistantPopover = () => setIsVisible(false);
+
   const anchorContent = (
     <EuiButtonEmpty
       className="palantirAnchorButton"
@@ -92,25 +113,9 @@ export const Palantir = ({
       onClick={onAnchorClick}
       buttonRef={anchorRef}
     >
-      <span className="palantirAnchorContent">{children}</span>
+      <div className="palantirAnchorContent">{targetChild}</div>
     </EuiButtonEmpty>
   );
-
-  // TODO: i18n && delay
-  // TODO: compressed loading component (empty prompt)
-  // TODO: --- loading 2-3 seconds
-  const getPalantirInputByChildKey = () => {
-    let palantir;
-    Children.forEach(children, (child) => {
-      if (isValidElement(child) && child.key && registry.get(child.key as string)) {
-        palantir = registry.get(child.key as string);
-      }
-    });
-    if (!palantir) throw Error('Child key not found in registry.');
-    return palantir;
-  };
-
-  const palantirInput = input ?? getPalantirInputByChildKey();
 
   const suggestionsPopoverFooter: React.ReactNode = (
     <EuiPopoverFooter className="palantirPopoverFooter" paddingSize="none">
@@ -119,7 +124,7 @@ export const Palantir = ({
       </EuiText>
       <EuiListGroup flush>
         {registry.getSuggestions(palantirInput.key).map((suggestion, index) => (
-          <div key={`${palantirInput.key}-${index}-${palantirInput.interactionId}`}>
+          <div key={`${palantirInput!.key}-${index}-${palantirInput!.interactionId}`}>
             <EuiSpacer size="xs" />
             <EuiListGroupItem
               label={suggestion}
@@ -127,7 +132,7 @@ export const Palantir = ({
               color="subdued"
               iconType="chatRight"
               iconProps={{ size: 's' }}
-              onClick={() => onSubmitClick(palantirInput, suggestion)}
+              onClick={() => onSubmitClick(palantirInput!, suggestion)}
               aria-label={suggestion}
               wrapText
               size="xs"
@@ -187,7 +192,7 @@ export const Palantir = ({
   );
 
   const getPopoverBody = () => {
-    switch (palantirInput.type) {
+    switch (palantirInput!.type) {
       case 'suggestions':
         return suggestionsPopoverFooter;
       case 'generate':
