@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { useChatContext } from '../contexts';
@@ -28,6 +29,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
   const [isSaveNotebookModalOpen, setSaveNotebookModalOpen] = useState(false);
   const { chatState } = useChatState();
   const { saveChat } = useSaveChat();
+  const displayTitle = chatContext.conversationId ? chatContext.title : 'OpenSearch Assistant';
 
   const onButtonClick = useCallback(() => {
     setPopoverOpen((flag) => !flag);
@@ -67,9 +69,9 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       responsive={false}
     >
       <EuiFlexItem onClick={onButtonClick} style={{ overflow: 'hidden' }}>
-        <h3 className="eui-textTruncate">
-          {chatContext.conversationId ? chatContext.title : 'OpenSearch Assistant'}
-        </h3>
+        <EuiToolTip position="bottom" content={displayTitle}>
+          <h3 className="eui-textTruncate">{displayTitle}</h3>
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ChatExperimentalBadge onClick={closePopover} />
