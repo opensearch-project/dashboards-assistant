@@ -151,13 +151,20 @@ describe('<ChatWindowHeaderTitle />', () => {
   });
 
   it('should show save to notebook modal after "Save to notebook" clicked', async () => {
-    const { renderResult } = setup();
+    const { renderResult } = setup({
+      messages: [{ type: 'input', contentType: 'text', content: 'foo' }],
+    });
 
     fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
+
+    expect(renderResult.getByRole('button', { name: 'Save to notebook' })).not.toBeDisabled();
+
     fireEvent.click(renderResult.getByRole('button', { name: 'Save to notebook' }));
 
     await waitFor(() => {
-      expect(renderResult.queryByText('Save to notebook')).toBeInTheDocument();
+      expect(
+        renderResult.queryByText('Please enter a name for your notebook.')
+      ).toBeInTheDocument();
     });
   });
 
