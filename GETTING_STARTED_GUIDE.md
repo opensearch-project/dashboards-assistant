@@ -5,7 +5,7 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
 
 1. Setup a 2.12+ OpenSearch cluster with OpenSearch Dashboards by following the options here: https://opensearch.org/docs/latest/install-and-configure/
    1. Note: If you are using a min distribution, there are required OpenSearch and OpenSearch Dashboards plugin to run the assistant.
-      1. Required OpenSearch plugins: ML-Commons, Flow Framework, and Observability
+      1. Required OpenSearch plugins: ML-Commons, Flow Framework, Skill, SQL, and Observability
       2. Required OpenSearch Dashboard plugins: Dashboard Assistant, Dashboard Observability
 2. Enable the following settings to enable the features:
    1. To enable the chat assistant feature, set `assistant.chat.enabled` to `true` and `assistant.chat.rootAgentName` to `"Root agent"` in the `opensearch_dashboards.yml` file.
@@ -360,6 +360,20 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
               "memory": {
                 "type": "conversation_index"
               },
+              "type": "flow"
+            }
+          },
+          {
+            "id": "ppl_agent",
+            "type": "register_agent",
+            "previous_node_inputs": {
+              "TransferQuestionToPPLAndExecuteTool": "tools"
+            },
+            "user_inputs": {
+              "parameters": {},
+              "app_type": "query_assist",
+              "name": "PPL agent",
+              "description": "this is the PPL agent",
               "type": "flow"
             }
           }
