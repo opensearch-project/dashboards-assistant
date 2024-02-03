@@ -6,9 +6,8 @@
 import './index.scss';
 
 import {
-  EuiPopover,
+  EuiWrappingPopover,
   EuiButton,
-  EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,110 +20,78 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
+  keys,
+  EuiButtonEmpty,
+  EuiPopover,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { Palantir as PalantirInput } from '../../types';
-import { getPalantirRegistry, getChrome, getNotifications, PalantirRegistry } from '../../services';
+import { getPalantirRegistry, getChrome, getNotifications } from '../../services';
 
-// TODO: type content
-// ?? what is the content going to be? does it change from anchor to anchor
-// ?? what is the anchor point? will assume character based
-export const Palantir = ({
-  children,
-  key,
-  onSubmit,
-}: {
+export interface PalantirProps {
   children: React.ReactNode;
-  key?: string;
-  onSubmit?: () => void;
-}) => {
+}
+
+// #38414D underline
+// use arrow right for the suggestions
+
+export const Palantir = ({ children }: PalantirProps) => {
+  const anchor = useRef<HTMLButtonElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const anchorRef = useRef<HTMLButtonElement>(null);
-  const [chatValue, setChatValue] = useState('');
+  const logos = getChrome().logos;
+  const toasts = getNotifications().toasts;
+  const registry = getPalantirRegistry();
+  let target: React.ReactNode;
+  let input: PalantirInput;
 
-  let registry: PalantirRegistry;
-  let palantirInput: PalantirInput | undefined;
-  let targetChild = children;
-
-  // TODO: i18n && delay
-  // TODO: compressed loading component (empty prompt)
-  // TODO: --- loading 2-3 seconds
-  try {
-    registry = getPalantirRegistry();
-    const searchForChild = (node: React.ReactNode): React.ReactNode => {
+  const findPalantir = (node: React.ReactNode): React.ReactNode => {
+    try {
       if (!isValidElement(node)) return;
       if (node.key && registry.get(node.key as string)) {
-        palantirInput = registry.get(node.key as string);
-        targetChild = node;
+        input = registry.get(node.key as string);
+        target = node;
         return;
       }
 
       if (node.props.children) {
         Children.forEach(node.props.children, (child) => {
-          searchForChild(child);
+          findPalantir(child);
         });
       }
-    };
-    searchForChild(children);
-    if (!palantirInput) throw Error('Child key not found in registry.');
-  } catch {
-    return children;
-  }
-
-  const logos = getChrome().logos;
-  const toasts = getNotifications().toasts;
-
-  // TODO: error handling for bad implemention from plugins or just don't render?
-  const onAnchorClick = () => setIsVisible((visible) => !visible);
-  const onSubmitClick = (targetInput: PalantirInput, suggestion: string) => {
-    setIsVisible(false);
-    if (onSubmit) {
-      onSubmit();
+      if (!input) throw Error('Child key not found in registry.');
+    } catch {
       return;
     }
-
-    // TODO: we have access to the React child. We can crawl it for data and values to pass for more context
-    // Example: We can get the text and provide the chat bot more information or think about supporting tokens in the registry
-    registry.open(targetInput, suggestion);
   };
 
-  // useEffect(() => {
-  //   const handleAnchorEvent = (event: any) => {
-  //     if (event.key === key) {
-  //       anchorRef.current?.focus();
-  //     }
-  //   };
+  const onAnchorClick = () => {
+    setIsVisible(!isVisible);
+  };
 
-  //   anchorRef.current?.addEventListener('palantirAnchor', handleAnchorEvent);
-  //   return () => {
-  //     anchorRef.current?.removeEventListener('palantirAnchor', handleAnchorEvent);
-  //   };
-  // }, []);
+  const onAnchorKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === keys.TAB) {
+      onAnchorClick();
+    }
+  };
 
-  const closeAssistantPopover = () => setIsVisible(false);
+  const closePopover = () => {
+    setIsVisible(false);
+  };
 
-  const anchorContent = (
-    <EuiButtonEmpty
-      className="palantirAnchorButton"
-      size="xs"
-      flush="left"
-      iconType={logos.Chat.url}
-      iconSide="right"
-      onClick={onAnchorClick}
-      buttonRef={anchorRef}
-    >
-      <div className="palantirAnchorContent">{targetChild}</div>
-    </EuiButtonEmpty>
-  );
+  const onSubmitClick = (palantir: PalantirInput, suggestion: string) => {
+    setIsVisible(false);
+    registry.open(palantir, suggestion);
+  };
 
-  const suggestionsPopoverFooter: React.ReactNode = (
+  const SuggestionsPopoverFooter: React.FC<{ palantir: PalantirInput }> = ({ palantir }) => (
     <EuiPopoverFooter className="palantirPopoverFooter" paddingSize="none">
       <EuiText size="xs" color="subdued">
         Available suggestions
       </EuiText>
       <EuiListGroup flush>
-        {registry.getSuggestions(palantirInput.key).map((suggestion, index) => (
-          <div key={`${palantirInput!.key}-${index}-${palantirInput!.interactionId}`}>
+        {registry.getSuggestions(palantir.key).map((suggestion, index) => (
+          <div key={`${palantir.key}-${index}-${palantir.interactionId}`}>
             <EuiSpacer size="xs" />
             <EuiListGroupItem
               label={suggestion}
@@ -132,7 +99,7 @@ export const Palantir = ({
               color="subdued"
               iconType="chatRight"
               iconProps={{ size: 's' }}
-              onClick={() => onSubmitClick(palantirInput!, suggestion)}
+              onClick={() => onSubmitClick(palantir, suggestion)}
               aria-label={suggestion}
               wrapText
               size="xs"
@@ -143,32 +110,30 @@ export const Palantir = ({
     </EuiPopoverFooter>
   );
 
-  const generatePopoverBody: React.ReactNode = (
+  const GeneratePopoverBody: React.FC<{}> = ({}) => (
     <EuiButton onClick={() => toasts.addDanger('To be implemented...')}>Generate summary</EuiButton>
   );
 
-  const summaryPopoverBody: React.ReactNode = (
+  const SummaryPopoverBody: React.FC<{ palantir: PalantirInput }> = ({ palantir }) => (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
-      <EuiText size="s">{palantirInput.summary}</EuiText>
+      <EuiText size="s">{palantir.summary}</EuiText>
     </EuiPanel>
   );
 
-  const summaryWithSuggestionsPopoverBody: React.ReactNode = (
+  const SummaryWithSuggestionsPopoverBody: React.FC<{ palantir: PalantirInput }> = ({
+    palantir,
+  }) => (
     <>
-      {summaryPopoverBody}
-      {suggestionsPopoverFooter}
+      {<SummaryPopoverBody palantir={palantir} />}
+      {<SuggestionsPopoverFooter palantir={palantir} />}
     </>
   );
 
-  const chatPopoverBody: React.ReactNode = (
+  const ChatPopoverBody: React.FC<{}> = ({}) => (
     <EuiFlexGroup>
       <EuiFlexItem grow={6}>
         <EuiFormRow>
-          <EuiFieldText
-            placeholder="Ask a question"
-            value={chatValue}
-            onChange={(e) => setChatValue(e.target.value)}
-          />
+          <EuiFieldText placeholder="Ask a question" />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -176,7 +141,7 @@ export const Palantir = ({
           fill
           iconType="returnKey"
           iconSide="right"
-          onClick={() => toasts.addDanger(`To be implemented... received ${chatValue}`)}
+          onClick={() => toasts.addDanger('To be implemented...')}
         >
           Go
         </EuiButton>
@@ -184,52 +149,71 @@ export const Palantir = ({
     </EuiFlexGroup>
   );
 
-  const chatWithSuggestionsPopoverBody: React.ReactNode = (
+  const ChatWithSuggestionsPopoverBody: React.FC<{ palantir: PalantirInput }> = ({ palantir }) => (
     <>
-      {chatPopoverBody}
-      {suggestionsPopoverFooter}
+      {<ChatPopoverBody />}
+      {<SuggestionsPopoverFooter palantir={palantir} />}
     </>
   );
 
-  const getPopoverBody = () => {
-    switch (palantirInput!.type) {
-      case 'suggestions':
-        return suggestionsPopoverFooter;
-      case 'generate':
-        return generatePopoverBody;
-      case 'summary':
-        return summaryPopoverBody;
-      case 'summaryWithSuggestions':
-        return summaryWithSuggestionsPopoverBody;
-      case 'chat':
-        return chatPopoverBody;
-      case 'chatWithSuggestions':
-        return chatWithSuggestionsPopoverBody;
-      default:
-        return summaryWithSuggestionsPopoverBody;
-    }
+  const renderPopover = () => {
+    if (!input || !target) return children;
+    const anchorContent = (
+      <EuiButtonEmpty
+        className="palantirAnchorButton"
+        size="xs"
+        flush="left"
+        iconType={logos.Chat.url}
+        iconSide="right"
+        onClick={onAnchorClick}
+        buttonRef={anchor}
+      >
+        <div className="palantirAnchorContent">{target}</div>
+      </EuiButtonEmpty>
+    );
+
+    return (
+      <EuiPopover
+        key={input.key}
+        button={anchorContent}
+        isOpen={isVisible}
+        closePopover={closePopover}
+        anchorClassName="palantirAnchor"
+        anchorPosition="upCenter"
+        panelPaddingSize="s"
+      >
+        <EuiPopoverTitle className="palantirPopoverTitle" paddingSize="none">
+          <EuiBadge color="hollow" iconType={logos.Chat.url} iconSide="left">
+            OpenSearch Assistant
+          </EuiBadge>
+        </EuiPopoverTitle>
+        <div className="palantirPopoverBody">
+          {() => {
+            switch (input.type) {
+              case 'suggestions':
+                return <SuggestionsPopoverFooter palantir={input} />;
+              case 'generate':
+                return <GeneratePopoverBody />;
+              case 'summary':
+                return <SummaryPopoverBody palantir={input} />;
+              case 'summaryWithSuggestions':
+                return <SummaryWithSuggestionsPopoverBody palantir={input} />;
+              case 'chat':
+                return <ChatPopoverBody />;
+              case 'chatWithSuggestions':
+                return <ChatWithSuggestionsPopoverBody palantir={input} />;
+              default:
+                return <SummaryWithSuggestionsPopoverBody palantir={input} />;
+            }
+          }}
+        </div>
+      </EuiPopover>
+    );
   };
 
-  const assistantPopover: React.ReactNode = (
-    <EuiPopover
-      key={key ?? palantirInput.key}
-      button={anchorContent}
-      isOpen={isVisible}
-      closePopover={closeAssistantPopover}
-      anchorClassName="palantirAnchor"
-      anchorPosition="upCenter"
-      panelPaddingSize="s"
-    >
-      <EuiPopoverTitle className="palantirPopoverTitle" paddingSize="none">
-        <EuiBadge color="hollow" iconType={logos.Chat.url} iconSide="left">
-          OpenSearch Assistant
-        </EuiBadge>
-      </EuiPopoverTitle>
-      <div className="palantirPopoverBody">{getPopoverBody()}</div>
-    </EuiPopover>
-  );
+  findPalantir(children);
 
-  return <>{assistantPopover}</>;
+  return renderPopover();
 };
 
 // eslint-disable-next-line import/no-default-export
