@@ -1,28 +1,36 @@
 
 
 .palantirAnchorButton {
-  padding-top: 0;
-  padding-bottom: 0;
   box-shadow: none;
+  border-radius: 360px;
+  box-sizing: border-box;
+  max-width: fit-content;
+  padding: 1.25px 4px;
+  margin: -1.25px -4px;
 
-  img {
-    opacity: 0;
-    height: 100%;
-    width: auto;
+  .palantirAnchorIcon {
+    padding: 0 2px;
+    :first-child {
+      opacity: 0;
+      display: none;;
+    }
   }
 }
 
 .palantirAnchorButton:hover {
-  padding-top: 0;
-  padding-bottom: 0;
   box-shadow: 0 0 0 1.25px $ouiBorderColor;
-  border-radius: 5px;
+  cursor: pointer;
 
-  img {
-    margin: 0 0 0 -2px;
-    padding: 0 2px 0 0;
-    opacity: 1;
-    transition: opacity 100ms linear;
+  .palantirAnchorContent {
+    text-decoration: underline dashed 1.5px transparent;
+  }
+
+  .palantirAnchorIcon {
+    :first-child {
+      opacity: 1;
+      transition: opacity 100ms linear;
+      display: block;
+    }
   }
 }
 
@@ -31,8 +39,8 @@
 }
 
 .palantirAnchorContent {
-  text-decoration: underline dashed 1.5px;
-  text-underline-offset: 2px;
+  text-decoration: underline dashed 1.5px #38414D;
+  text-underline-offset: 3.75px;
 }
 
 .palantirPopoverTitle {

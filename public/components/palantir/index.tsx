@@ -21,8 +21,7 @@ import {
   EuiListGroupItem,
   EuiPanel,
   keys,
-  EuiButtonEmpty,
-  EuiPopover,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -33,11 +32,17 @@ export interface PalantirProps {
   children: React.ReactNode;
 }
 
-// #38414D underline
 // use arrow right for the suggestions
+// handle bad unmounting of the popover when navigating away
+// propograte H3 headers
+// i18n
+// onloadstate
+// try for customer attribute
+const container = document.createElement('div');
+document.body.appendChild(container);
 
 export const Palantir = ({ children }: PalantirProps) => {
-  const anchor = useRef<HTMLButtonElement>(null);
+  const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const logos = getChrome().logos;
   const toasts = getNotifications().toasts;
@@ -156,30 +161,62 @@ export const Palantir = ({ children }: PalantirProps) => {
     </>
   );
 
-  const renderPopover = () => {
+  const renderAnchor = () => {
     if (!input || !target) return children;
-    const anchorContent = (
-      <EuiButtonEmpty
-        className="palantirAnchorButton"
-        size="xs"
-        flush="left"
-        iconType={logos.Chat.url}
-        iconSide="right"
-        onClick={onAnchorClick}
-        buttonRef={anchor}
-      >
-        <div className="palantirAnchorContent">{target}</div>
-      </EuiButtonEmpty>
-    );
 
     return (
-      <EuiPopover
+      <EuiFlexGroup
+        className="palantirAnchorButton"
+        onKeyDown={onAnchorKeyPress}
+        onClick={onAnchorClick}
+        gutterSize="none"
+        alignItems="center"
+        ref={anchor}
+      >
+        <EuiFlexItem>
+          <div className="palantirAnchorContent" ref={renderPopover}>
+            {target}
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div className="palantirAnchorIcon">
+            <EuiIcon type={logos.Chat.url} />
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  const renderPopover = () => {
+    if (!input || !target || !anchor.current) return children;
+    const popoverBody = () => {
+      switch (input.type) {
+        case 'suggestions':
+          return <SuggestionsPopoverFooter palantir={input} />;
+        case 'generate':
+          return <GeneratePopoverBody />;
+        case 'summary':
+          return <SummaryPopoverBody palantir={input} />;
+        case 'summaryWithSuggestions':
+          return <SummaryWithSuggestionsPopoverBody palantir={input} />;
+        case 'chat':
+          return <ChatPopoverBody />;
+        case 'chatWithSuggestions':
+          return <ChatWithSuggestionsPopoverBody palantir={input} />;
+        default:
+          return <SummaryWithSuggestionsPopoverBody palantir={input} />;
+      }
+    };
+
+    const popover = (
+      <EuiWrappingPopover
         key={input.key}
-        button={anchorContent}
+        button={anchor.current?.firstChild as HTMLElement}
         isOpen={isVisible}
         closePopover={closePopover}
         anchorClassName="palantirAnchor"
-        anchorPosition="upCenter"
+        anchorPosition="rightUp"
+        offset={5}
         panelPaddingSize="s"
       >
         <EuiPopoverTitle className="palantirPopoverTitle" paddingSize="none">
@@ -187,33 +224,16 @@ export const Palantir = ({ children }: PalantirProps) => {
             OpenSearch Assistant
           </EuiBadge>
         </EuiPopoverTitle>
-        <div className="palantirPopoverBody">
-          {() => {
-            switch (input.type) {
-              case 'suggestions':
-                return <SuggestionsPopoverFooter palantir={input} />;
-              case 'generate':
-                return <GeneratePopoverBody />;
-              case 'summary':
-                return <SummaryPopoverBody palantir={input} />;
-              case 'summaryWithSuggestions':
-                return <SummaryWithSuggestionsPopoverBody palantir={input} />;
-              case 'chat':
-                return <ChatPopoverBody />;
-              case 'chatWithSuggestions':
-                return <ChatWithSuggestionsPopoverBody palantir={input} />;
-              default:
-                return <SummaryWithSuggestionsPopoverBody palantir={input} />;
-            }
-          }}
-        </div>
-      </EuiPopover>
+        <div className="palantirPopoverBody">{popoverBody()}</div>
+      </EuiWrappingPopover>
     );
+
+    ReactDOM.render(popover, container);
   };
 
   findPalantir(children);
 
-  return renderPopover();
+  return <div>{renderAnchor()}</div>;
 };
 
 // eslint-disable-next-line import/no-default-export
