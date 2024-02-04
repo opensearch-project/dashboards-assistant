@@ -180,7 +180,7 @@ export const Palantir = ({ children }: PalantirProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div className="palantirAnchorIcon">
-            <EuiIcon type={logos.Chat.url} />
+            <EuiIcon type={logos.Chat.url} size="l" />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
