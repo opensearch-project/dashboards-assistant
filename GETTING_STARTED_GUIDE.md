@@ -2,17 +2,23 @@
 
 ### How to run assistant on your own machine
 Below are the set of steps to run OpenSearch and OpenSearch dashboards with the OpenSearch assistant and the query generation functionality in the Observability Log Explorer page correctly on the cluster.
-**Note** that the `feature/langchain` is the branch used in this guide.
 
-1. Follow steps here to setup docker for OpenSearch: https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/
-   1. Note: When running docker pull, use this command instead: `docker pull public.ecr.aws/w1m7p7g2/opensearch-reinvent2023:latest`
-   2. Note: This docker image may get incrementally updated over time.
-
-
-2. Follow steps here to setup docker to OpenSearch Dashboards: https://opensearch.org/docs/latest/install-and-configure/install-dashboards/docker/
-   1. Note: When running docker pull, use this command instead for OSD: `docker pull public.ecr.aws/w1m7p7g2/opensearch-dashboards-reinvent2023:latest`
-   2. Note: This docker image may get incrementally updated over time.
-   3. If you want to enable the chat assistant feature, set `assistant.chat.enabled` to `true` in the `opensearch_dashboards.yml` file.
+1. Setup a 2.12+ OpenSearch cluster with OpenSearch Dashboards by following the options here: https://opensearch.org/docs/latest/install-and-configure/
+   1. Note: If you are using a min distribution, there are required OpenSearch and OpenSearch Dashboards plugin to run the assistant.
+      1. Required OpenSearch plugins: ML-Commons, Flow Framework, Skill, SQL, and Observability
+      2. Required OpenSearch Dashboard plugins: Dashboard Assistant, Dashboard Observability
+2. Enable the following settings to enable the features:
+   1. To enable the chat assistant feature, set `assistant.chat.enabled` to `true` in the `opensearch_dashboards.yml` file, and config the root agent id by calling the api as follows:
+   ```
+   PUT .plugins-ml-config/_doc/os_chat
+   {
+      "type":"os_chat_root_agent",
+      "configuration":{
+         "agent_id": "your root agent id"
+      }
+   }
+   ```
+   2. To enable the query assistant feature, set `observability.query_assist.enabled` to `true` and `observability.query_assist.ppl_agent_name` to `"PPL agent"` in the `opensearch_dashboards.yml` file.
 3. After OpenSearch and OpenSearch Dashboards are running, we will setup ML Commons to connect to the LLM model
 4. Run ML commons on Data node
    ```

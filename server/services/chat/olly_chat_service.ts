@@ -11,6 +11,7 @@ import {
   ML_COMMONS_BASE_API,
   RESOURCE_NOT_FOUND_STATUS_CODE,
   RESOURCE_NOT_FOUND_ERROR,
+  ROOT_AGENT_CONFIG_ID,
 } from '../../utils/constants';
 
 interface AgentRunPayload {
@@ -27,42 +28,28 @@ export class OllyChatService implements ChatService {
   static abortControllers: Map<string, AbortController> = new Map();
   private static rootAgentId: string | undefined;
 
-  constructor(
-    private readonly context: RequestHandlerContext,
-    private readonly rootAgentName: string
-  ) {}
+  constructor(private readonly context: RequestHandlerContext) {}
 
   private async initRootAgent() {
-    OllyChatService.rootAgentId = await this.searchRootAgent(this.rootAgentName);
+    OllyChatService.rootAgentId = await this.getRootAgent();
   }
 
-  private async searchRootAgent(rootAgentName: string): Promise<string> {
+  private async getRootAgent(): Promise<string> {
     try {
-      const requestParams = {
-        query: {
-          term: {
-            'name.keyword': rootAgentName,
-          },
-        },
-        sort: {
-          created_time: 'desc',
-        },
-      };
-
       const opensearchClient = this.context.core.opensearch.client.asCurrentUser;
+      const path = `${ML_COMMONS_BASE_API}/config/${ROOT_AGENT_CONFIG_ID}`;
       const response = await opensearchClient.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/agents/_search`,
-        body: requestParams,
+        path,
       });
 
-      if (!response || response.body.hits.total.value === 0) {
-        throw new Error('cannot find any root agent by name: ' + rootAgentName);
+      if (!response || !response.body.configuration?.agent_id) {
+        throw new Error(`cannot get root agent by calling the api: ${path}`);
       }
-      return response.body.hits.hits[0]._id;
+      return response.body.configuration.agent_id;
     } catch (error) {
       const errorMessage = JSON.stringify(error.meta?.body) || error;
-      throw new Error('search root agent failed, reason: ' + errorMessage);
+      throw new Error('get root agent failed, reason: ' + errorMessage);
     }
   }
 
