@@ -40,7 +40,6 @@ export interface MessageParser {
 
 export interface RoutesOptions {
   messageParsers: MessageParser[];
-  rootAgentName?: string;
 }
 
 declare module '../../../src/core/server' {

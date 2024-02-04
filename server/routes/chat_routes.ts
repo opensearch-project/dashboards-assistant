@@ -37,9 +37,6 @@ const llmRequestRoute = {
 };
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
 
-export const AgentNameNotFoundError =
-  'rootAgentName is required, please specify one in opensearch_dashboards.yml';
-
 const getConversationRoute = {
   path: `${ASSISTANT_API.CONVERSATION}/{conversationId}`,
   validate: {
@@ -135,8 +132,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       context.core.opensearch.client.asCurrentUser,
       routeOptions.messageParsers
     );
-  const createChatService = (context: RequestHandlerContext, rootAgentName: string) =>
-    new OllyChatService(context, rootAgentName);
+  const createChatService = (context: RequestHandlerContext) => new OllyChatService(context);
 
   router.post(
     llmRequestRoute,
@@ -145,13 +141,9 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      if (!routeOptions.rootAgentName) {
-        context.assistant_plugin.logger.error(AgentNameNotFoundError);
-        return response.custom({ statusCode: 400, body: AgentNameNotFoundError });
-      }
       const { messages = [], input, conversationId: conversationIdInRequestBody } = request.body;
       const storageService = createStorageService(context);
-      const chatService = createChatService(context, routeOptions.rootAgentName);
+      const chatService = createChatService(context);
 
       let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
 
@@ -344,13 +336,9 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      if (!routeOptions.rootAgentName) {
-        context.assistant_plugin.logger.error(AgentNameNotFoundError);
-        return response.custom({ statusCode: 400, body: AgentNameNotFoundError });
-      }
       const { conversationId, interactionId } = request.body;
       const storageService = createStorageService(context);
-      const chatService = createChatService(context, routeOptions.rootAgentName);
+      const chatService = createChatService(context);
 
       let outputs: Awaited<ReturnType<ChatService['regenerate']>> | undefined;
 

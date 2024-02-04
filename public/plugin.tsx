@@ -30,7 +30,6 @@ interface PublicConfig {
   chat: {
     // whether chat feature is enabled, UI should hide if false
     enabled: boolean;
-    rootAgentName?: string;
   };
 }
 

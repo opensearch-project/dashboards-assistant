@@ -23,7 +23,7 @@ describe('OllyChatService', () => {
       logger: loggerMock.create(),
     },
   };
-  const ollyChatService: OllyChatService = new OllyChatService(contextMock, 'test');
+  const ollyChatService: OllyChatService = new OllyChatService(contextMock);
   beforeEach(async () => {
     mockedTransport.mockClear();
     ollyChatService.resetRootAgentId();
@@ -31,19 +31,12 @@ describe('OllyChatService', () => {
 
   it('requestLLM should invoke client call with correct params', async () => {
     mockedTransport.mockImplementation((args) => {
-      if (args.path === '/_plugins/_ml/agents/_search') {
+      if (args.path === '/_plugins/_ml/config/os_chat') {
         return {
           body: {
-            hits: {
-              total: {
-                value: 1,
-              },
-              hits: [
-                {
-                  _index: '.plugins-ml-agent',
-                  _id: 'rootAgentId',
-                },
-              ],
+            type: 'os_chat_root_agent',
+            configuration: {
+              agent_id: '4qJKOo0BT01kB_DHroJv',
             },
           },
         };
@@ -77,18 +70,8 @@ describe('OllyChatService', () => {
       Array [
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "term": Object {
-                  "name.keyword": "test",
-                },
-              },
-              "sort": Object {
-                "created_time": "desc",
-              },
-            },
             "method": "GET",
-            "path": "/_plugins/_ml/agents/_search",
+            "path": "/_plugins/_ml/config/os_chat",
           },
         ],
         Array [
@@ -101,7 +84,7 @@ describe('OllyChatService', () => {
               },
             },
             "method": "POST",
-            "path": "/_plugins/_ml/agents/rootAgentId/_execute",
+            "path": "/_plugins/_ml/agents/4qJKOo0BT01kB_DHroJv/_execute",
           },
           Object {
             "maxRetries": 0,
@@ -124,16 +107,9 @@ describe('OllyChatService', () => {
       .mockImplementationOnce(() => {
         return {
           body: {
-            hits: {
-              total: {
-                value: 1,
-              },
-              hits: [
-                {
-                  _index: '.plugins-ml-agent',
-                  _id: 'rootAgentId',
-                },
-              ],
+            type: 'os_chat_root_agent',
+            configuration: {
+              agent_id: '4qJKOo0BT01kB_DHroJv',
             },
           },
         };
@@ -156,19 +132,12 @@ describe('OllyChatService', () => {
 
   it('regenerate should invoke client call with correct params', async () => {
     mockedTransport.mockImplementation((args) => {
-      if (args.path === '/_plugins/_ml/agents/_search') {
+      if (args.path === '/_plugins/_ml/config/os_chat') {
         return {
           body: {
-            hits: {
-              total: {
-                value: 1,
-              },
-              hits: [
-                {
-                  _index: '.plugins-ml-agent',
-                  _id: 'rootAgentId',
-                },
-              ],
+            type: 'os_chat_root_agent',
+            configuration: {
+              agent_id: '4qJKOo0BT01kB_DHroJv',
             },
           },
         };
@@ -197,18 +166,8 @@ describe('OllyChatService', () => {
       Array [
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "term": Object {
-                  "name.keyword": "test",
-                },
-              },
-              "sort": Object {
-                "created_time": "desc",
-              },
-            },
             "method": "GET",
-            "path": "/_plugins/_ml/agents/_search",
+            "path": "/_plugins/_ml/config/os_chat",
           },
         ],
         Array [
@@ -221,7 +180,7 @@ describe('OllyChatService', () => {
               },
             },
             "method": "POST",
-            "path": "/_plugins/_ml/agents/rootAgentId/_execute",
+            "path": "/_plugins/_ml/agents/4qJKOo0BT01kB_DHroJv/_execute",
           },
           Object {
             "maxRetries": 0,
@@ -244,16 +203,9 @@ describe('OllyChatService', () => {
       .mockImplementationOnce(() => {
         return {
           body: {
-            hits: {
-              total: {
-                value: 1,
-              },
-              hits: [
-                {
-                  _index: '.plugins-ml-agent',
-                  _id: 'rootAgentId',
-                },
-              ],
+            type: 'os_chat_root_agent',
+            configuration: {
+              agent_id: '4qJKOo0BT01kB_DHroJv',
             },
           },
         };
@@ -274,16 +226,9 @@ describe('OllyChatService', () => {
       .mockImplementationOnce(() => {
         return {
           body: {
-            hits: {
-              total: {
-                value: 1,
-              },
-              hits: [
-                {
-                  _index: '.plugins-ml-agent',
-                  _id: 'rootAgentId',
-                },
-              ],
+            type: 'os_chat_root_agent',
+            configuration: {
+              agent_id: '4qJKOo0BT01kB_DHroJv',
             },
           },
         };
@@ -304,16 +249,9 @@ describe('OllyChatService', () => {
       .mockImplementationOnce(() => {
         return {
           body: {
-            hits: {
-              total: {
-                value: 1,
-              },
-              hits: [
-                {
-                  _index: '.plugins-ml-agent',
-                  _id: 'rootAgentId',
-                },
-              ],
+            type: 'os_chat_root_agent',
+            configuration: {
+              agent_id: '4qJKOo0BT01kB_DHroJv',
             },
           },
         };
@@ -347,18 +285,8 @@ describe('OllyChatService', () => {
       Array [
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "term": Object {
-                  "name.keyword": "test",
-                },
-              },
-              "sort": Object {
-                "created_time": "desc",
-              },
-            },
             "method": "GET",
-            "path": "/_plugins/_ml/agents/_search",
+            "path": "/_plugins/_ml/config/os_chat",
           },
         ],
         Array [
@@ -370,7 +298,7 @@ describe('OllyChatService', () => {
               },
             },
             "method": "POST",
-            "path": "/_plugins/_ml/agents/rootAgentId/_execute",
+            "path": "/_plugins/_ml/agents/4qJKOo0BT01kB_DHroJv/_execute",
           },
           Object {
             "maxRetries": 0,
@@ -379,18 +307,8 @@ describe('OllyChatService', () => {
         ],
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "term": Object {
-                  "name.keyword": "test",
-                },
-              },
-              "sort": Object {
-                "created_time": "desc",
-              },
-            },
             "method": "GET",
-            "path": "/_plugins/_ml/agents/_search",
+            "path": "/_plugins/_ml/config/os_chat",
           },
         ],
         Array [
@@ -402,7 +320,7 @@ describe('OllyChatService', () => {
               },
             },
             "method": "POST",
-            "path": "/_plugins/_ml/agents/rootAgentId/_execute",
+            "path": "/_plugins/_ml/agents/4qJKOo0BT01kB_DHroJv/_execute",
           },
           Object {
             "maxRetries": 0,
@@ -439,7 +357,7 @@ describe('OllyChatService', () => {
         interactionId: 'interactionId',
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: search root agent failed, reason: Error: cannot find any root agent by name: test]`
+      `[Error: get root agent failed, reason: Error: cannot get root agent by calling the api: /_plugins/_ml/config/os_chat]`
     );
   });
 });

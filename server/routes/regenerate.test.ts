@@ -14,12 +14,12 @@ import {
 } from '../services/storage/agent_framework_storage_service.mock';
 import { httpServerMock } from '../../../../src/core/server/http/http_server.mocks';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
-import { registerChatRoutes, RegenerateSchema, AgentNameNotFoundError } from './chat_routes';
+import { registerChatRoutes, RegenerateSchema } from './chat_routes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 
 const mockedLogger = loggerMock.create();
 
-describe('regenerate route when rootAgentName is provided', () => {
+describe('test regenerate route', () => {
   const router = new Router(
     '',
     mockedLogger,
@@ -31,7 +31,6 @@ describe('regenerate route when rootAgentName is provided', () => {
   );
   registerChatRoutes(router, {
     messageParsers: [],
-    rootAgentName: 'foo',
   });
   const regenerateRequest = (payload: RegenerateSchema) =>
     triggerHandler(router, {
@@ -162,51 +161,5 @@ describe('regenerate route when rootAgentName is provided', () => {
           "statusCode": 500,
         }
       `);
-  });
-});
-
-describe('regenerate route when rootAgentName is not provided', () => {
-  const router = new Router(
-    '',
-    mockedLogger,
-    enhanceWithContext({
-      assistant_plugin: {
-        logger: mockedLogger,
-      },
-    })
-  );
-  registerChatRoutes(router, {
-    messageParsers: [],
-  });
-  const regenerateRequest = (payload: RegenerateSchema) =>
-    triggerHandler(router, {
-      method: 'put',
-      path: ASSISTANT_API.REGENERATE,
-      req: httpServerMock.createRawRequest({
-        payload: JSON.stringify(payload),
-      }),
-    });
-  beforeEach(() => {
-    loggerMock.clear(mockedLogger);
-  });
-
-  it('return 400', async () => {
-    const result = (await regenerateRequest({
-      interactionId: 'bar',
-      conversationId: 'foo',
-    })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
-    expect(mockedLogger.error).toBeCalledWith(AgentNameNotFoundError);
-    expect(result.output).toMatchInlineSnapshot(`
-      Object {
-        "headers": Object {},
-        "payload": Object {
-          "error": "Bad Request",
-          "message": "rootAgentName is required, please specify one in opensearch_dashboards.yml",
-          "statusCode": 400,
-        },
-        "statusCode": 400,
-      }
-    `);
   });
 });
