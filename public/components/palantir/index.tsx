@@ -32,9 +32,10 @@ export interface PalantirProps {
   children: React.ReactNode;
 }
 
-// use arrow right for the suggestions
+// x button
+// active state (remove anchor)
+// saved objects
 // handle bad unmounting of the popover when navigating away
-// propograte H3 headers
 // i18n
 // onloadstate
 // try for customer attribute
@@ -108,6 +109,13 @@ export const Palantir = ({ children }: PalantirProps) => {
               aria-label={suggestion}
               wrapText
               size="xs"
+              extraAction={{
+                onClick: () => onSubmitClick(palantir, suggestion),
+                iconType: 'sortRight',
+                iconSize: 's',
+                alwaysShow: true,
+                color: 'subdued',
+              }}
             />
           </div>
         ))}

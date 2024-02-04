@@ -91,4 +91,17 @@
     margin: 2px;
     margin-right: 5px;
   }
+
+  .euiListGroupItem__extraAction {
+    margin-left: 8px;
+    margin-right: -2px;
+  }
+
+  .euiListGroupItem__extraAction:hover {
+    background: none;
+  }
+
+  .euiListGroupItem__extraAction:focus {
+    background: none;
+  }
 }
