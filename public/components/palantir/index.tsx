@@ -22,6 +22,7 @@ import {
   EuiPanel,
   keys,
   EuiIcon,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -32,9 +33,10 @@ export interface PalantirProps {
   children: React.ReactNode;
 }
 
-// x button
+// TODO:
+// Ask if arrow looks ok
 // active state (remove anchor)
-// saved objects
+// saved objects / config
 // handle bad unmounting of the popover when navigating away
 // i18n
 // onloadstate
@@ -228,9 +230,26 @@ export const Palantir = ({ children }: PalantirProps) => {
         panelPaddingSize="s"
       >
         <EuiPopoverTitle className="palantirPopoverTitle" paddingSize="none">
-          <EuiBadge color="hollow" iconType={logos.Chat.url} iconSide="left">
-            OpenSearch Assistant
-          </EuiBadge>
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem>
+              <div>
+                <EuiBadge color="hollow" iconType={logos.Chat.url} iconSide="left">
+                  OpenSearch Assistant
+                </EuiBadge>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div>
+                <EuiButtonIcon
+                  title="Close assistant popover"
+                  aria-label="Close assistant popover"
+                  iconType="cross"
+                  onClick={closePopover}
+                  color="subdued"
+                />
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
         <div className="palantirPopoverBody">{popoverBody()}</div>
       </EuiWrappingPopover>
