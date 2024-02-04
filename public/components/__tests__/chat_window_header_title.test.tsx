@@ -81,7 +81,7 @@ describe('<ChatWindowHeaderTitle />', () => {
   it('should reload history list after edit conversation name', async () => {
     const { renderResult, useCoreMock } = setup();
 
-    fireEvent.click(renderResult.getByText('foo'));
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
     fireEvent.click(renderResult.getByText('Rename conversation'));
     fireEvent.change(renderResult.getByLabelText('Conversation name input'), {
       target: { value: 'bar' },
@@ -108,7 +108,7 @@ describe('<ChatWindowHeaderTitle />', () => {
       renderResult.queryByRole('button', { name: 'Save to notebook' })
     ).not.toBeInTheDocument();
 
-    fireEvent.click(renderResult.getByText('foo'));
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
 
     expect(renderResult.getByRole('button', { name: 'Rename conversation' })).toBeInTheDocument();
     expect(renderResult.getByRole('button', { name: 'New conversation' })).toBeInTheDocument();
@@ -118,7 +118,7 @@ describe('<ChatWindowHeaderTitle />', () => {
   it('should show rename modal and hide rename actions after rename button clicked', async () => {
     const { renderResult } = setup();
 
-    fireEvent.click(renderResult.getByText('foo'));
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
     fireEvent.click(renderResult.getByRole('button', { name: 'Rename conversation' }));
 
     await waitFor(() => {
@@ -132,7 +132,7 @@ describe('<ChatWindowHeaderTitle />', () => {
   it('should call loadChat with undefined, hide actions and show success toasts after new conversation button clicked', async () => {
     const { renderResult, useCoreMock, useChatActionsMock } = setup();
 
-    fireEvent.click(renderResult.getByText('foo'));
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
 
     expect(useChatActionsMock.loadChat).not.toHaveBeenCalled();
     expect(useCoreMock.services.notifications.toasts.addSuccess).not.toHaveBeenCalled();
@@ -151,13 +151,20 @@ describe('<ChatWindowHeaderTitle />', () => {
   });
 
   it('should show save to notebook modal after "Save to notebook" clicked', async () => {
-    const { renderResult } = setup();
+    const { renderResult } = setup({
+      messages: [{ type: 'input', contentType: 'text', content: 'foo' }],
+    });
 
-    fireEvent.click(renderResult.getByText('foo'));
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
+
+    expect(renderResult.getByRole('button', { name: 'Save to notebook' })).not.toBeDisabled();
+
     fireEvent.click(renderResult.getByRole('button', { name: 'Save to notebook' }));
 
     await waitFor(() => {
-      expect(renderResult.queryByText('Save to notebook')).toBeInTheDocument();
+      expect(
+        renderResult.queryByText('Please enter a name for your notebook.')
+      ).toBeInTheDocument();
     });
   });
 
@@ -166,7 +173,7 @@ describe('<ChatWindowHeaderTitle />', () => {
       messages: [{ type: 'output', content: 'bar', contentType: 'markdown' }],
     });
 
-    fireEvent.click(renderResult.getByText('foo'));
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
 
     expect(renderResult.getByRole('button', { name: 'Save to notebook' })).toBeDisabled();
   });
