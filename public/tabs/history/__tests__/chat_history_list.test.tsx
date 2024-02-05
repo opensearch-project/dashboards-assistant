@@ -21,8 +21,8 @@ describe('<ChatHistoryList />', () => {
 
     expect(getByText('foo')).toBeInTheDocument();
     expect(getByText('bar')).toBeInTheDocument();
-    expect(getByText('January 1, 1970 at 12:0 AM')).toBeInTheDocument();
-    expect(getByText('January 1, 1970 at 12:6 AM')).toBeInTheDocument();
+    expect(getByText('January 1, 1970 at 12:00 AM')).toBeInTheDocument();
+    expect(getByText('January 1, 1970 at 12:06 AM')).toBeInTheDocument();
     expect(getAllByLabelText('history horizontal rule')).toHaveLength(1);
   });
 

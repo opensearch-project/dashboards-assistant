@@ -69,7 +69,7 @@ export const ChatHistoryListItem = ({
           </EuiLink>
           <EuiText size="s" color="subdued">
             {moment(updatedTimeMs).format('MMMM D, YYYY')} at{' '}
-            {moment(updatedTimeMs).format('h:m A')}
+            {moment(updatedTimeMs).format('h:mm A')}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
