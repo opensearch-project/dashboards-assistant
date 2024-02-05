@@ -80,7 +80,7 @@ describe('OllyChatService', () => {
               "parameters": Object {
                 "memory_id": "conversationId",
                 "question": "content",
-                "verbose": true,
+                "verbose": false,
               },
             },
             "method": "POST",
@@ -176,7 +176,7 @@ describe('OllyChatService', () => {
               "parameters": Object {
                 "memory_id": "conversationId",
                 "regenerate_interaction_id": "interactionId",
-                "verbose": true,
+                "verbose": false,
               },
             },
             "method": "POST",
@@ -294,7 +294,7 @@ describe('OllyChatService', () => {
             "body": Object {
               "parameters": Object {
                 "question": "content",
-                "verbose": true,
+                "verbose": false,
               },
             },
             "method": "POST",
@@ -316,7 +316,7 @@ describe('OllyChatService', () => {
             "body": Object {
               "parameters": Object {
                 "question": "content",
-                "verbose": true,
+                "verbose": false,
               },
             },
             "method": "POST",
