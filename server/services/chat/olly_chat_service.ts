@@ -146,7 +146,7 @@ export class OllyChatService implements ChatService {
 
     const parametersPayload: Pick<AgentRunPayload, 'question' | 'verbose' | 'memory_id'> = {
       question: input.content,
-      verbose: true,
+      verbose: false,
     };
 
     if (conversationId) {
@@ -167,7 +167,7 @@ export class OllyChatService implements ChatService {
     > = {
       memory_id: conversationId,
       regenerate_interaction_id: interactionId,
-      verbose: true,
+      verbose: false,
     };
 
     return await this.requestAgentRun(parametersPayload);
