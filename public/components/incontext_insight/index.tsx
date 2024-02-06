@@ -42,6 +42,7 @@ export interface IncontextInsightProps {
 // onloadstate
 // try for customer attribute
 const container = document.createElement('div');
+container.id = 'incontext-insight-target';
 document.body.appendChild(container);
 
 export const IncontextInsight = ({ children }: IncontextInsightProps) => {
@@ -190,9 +191,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
         ref={anchor}
       >
         <EuiFlexItem>
-          <div className="incontextInsightAnchorContent" ref={renderPopover}>
-            {target}
-          </div>
+          <div className="incontextInsightAnchorContent">{target}</div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div className="incontextInsightAnchorIcon">
@@ -204,7 +203,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   };
 
   const renderPopover = () => {
-    if (!input || !target || !anchor.current) return children;
+    if (!input || !target || !anchor.current) return;
     const popoverBody = () => {
       switch (input.type) {
         case 'suggestions':
@@ -224,7 +223,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
       }
     };
 
-    const popover = (
+    return (
       <EuiWrappingPopover
         key={input.key}
         button={anchor.current?.firstChild as HTMLElement}
@@ -260,13 +259,16 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
         <div className="incontextInsightPopoverBody">{popoverBody()}</div>
       </EuiWrappingPopover>
     );
-
-    ReactDOM.render(popover, container);
   };
 
   findIncontextInsight(children);
 
-  return <div>{renderAnchor()}</div>;
+  return (
+    <>
+      <>{renderPopover()}</>
+      <>{renderAnchor()}</>
+    </>
+  );
 };
 
 // eslint-disable-next-line import/no-default-export
