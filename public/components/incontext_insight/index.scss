@@ -1,6 +1,6 @@
 
 
-.palantirAnchorButton {
+.incontextInsightAnchorButton {
   box-sizing: border-box;
   max-width: fit-content;
   border-radius: 0;
@@ -9,7 +9,7 @@
   padding: 0 5px;
   margin: 0 -2px -5px -5px;
 
-  .palantirAnchorIcon {
+  .incontextInsightAnchorIcon {
     :first-child {
       opacity: 0;
       display: none;
@@ -17,13 +17,13 @@
   }
 }
 
-.palantirAnchorButton:hover {
+.incontextInsightAnchorButton:hover {
   cursor: pointer;
   border-radius: 180px;
   border: solid 2px $ouiBorderColor;
   margin: -2px -5px -5px -7px;
 
-  .palantirAnchorIcon {
+  .incontextInsightAnchorIcon {
     :first-child {
       margin-left: 6px;
       margin-right: 2px;
@@ -34,11 +34,11 @@
   }
 }
 
-.palantirAnchorButton:focus {
+.incontextInsightAnchorButton:focus {
   background: none;
 }
 
-.palantirPopoverTitle {
+.incontextInsightPopoverTitle {
   // TODO: Remove this one paddingSize is fixed
   padding: 0 !important;
   border: none;
@@ -63,22 +63,22 @@
   }
 }
 
-.palantirPopoverFooter {
+.incontextInsightPopoverFooter {
   // TODO: Remove this one paddingSize is fixed
   padding: 4px 12px 8px !important;
   border: none;
 }
 
-.palantirPopoverBody {
+.incontextInsightPopoverBody {
   width: 300px;
 }
 
-.palantirSummary {
+.incontextInsightSummary {
   border: $euiBorderThin;
   border-radius: 4px;
 }
 
-.palantirSuggestionListItem {
+.incontextInsightSuggestionListItem {
   margin-top: 0;
   border: $euiBorderThin;
   border-radius: 4px;

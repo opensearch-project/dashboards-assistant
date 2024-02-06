@@ -26,10 +26,10 @@ import {
 } from '@elastic/eui';
 import React, { Children, isValidElement, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Palantir as PalantirInput } from '../../types';
-import { getPalantirRegistry, getChrome, getNotifications } from '../../services';
+import { IncontextInsight as IncontextInsightInput } from '../../types';
+import { getIncontextInsightRegistry, getChrome, getNotifications } from '../../services';
 
-export interface PalantirProps {
+export interface IncontextInsightProps {
   children: React.ReactNode;
 }
 
@@ -44,16 +44,16 @@ export interface PalantirProps {
 const container = document.createElement('div');
 document.body.appendChild(container);
 
-export const Palantir = ({ children }: PalantirProps) => {
+export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const logos = getChrome().logos;
   const toasts = getNotifications().toasts;
-  const registry = getPalantirRegistry();
+  const registry = getIncontextInsightRegistry();
   let target: React.ReactNode;
-  let input: PalantirInput;
+  let input: IncontextInsightInput;
 
-  const findPalantir = (node: React.ReactNode): React.ReactNode => {
+  const findIncontextInsight = (node: React.ReactNode): React.ReactNode => {
     try {
       if (!isValidElement(node)) return;
       if (node.key && registry.get(node.key as string)) {
@@ -64,7 +64,7 @@ export const Palantir = ({ children }: PalantirProps) => {
 
       if (node.props.children) {
         Children.forEach(node.props.children, (child) => {
-          findPalantir(child);
+          findIncontextInsight(child);
         });
       }
       if (!input) throw Error('Child key not found in registry.');
@@ -87,32 +87,34 @@ export const Palantir = ({ children }: PalantirProps) => {
     setIsVisible(false);
   };
 
-  const onSubmitClick = (palantir: PalantirInput, suggestion: string) => {
+  const onSubmitClick = (incontextInsight: IncontextInsightInput, suggestion: string) => {
     setIsVisible(false);
-    registry.open(palantir, suggestion);
+    registry.open(incontextInsight, suggestion);
   };
 
-  const SuggestionsPopoverFooter: React.FC<{ palantir: PalantirInput }> = ({ palantir }) => (
-    <EuiPopoverFooter className="palantirPopoverFooter" paddingSize="none">
+  const SuggestionsPopoverFooter: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
+    incontextInsight,
+  }) => (
+    <EuiPopoverFooter className="incontextInsightPopoverFooter" paddingSize="none">
       <EuiText size="xs" color="subdued">
         Available suggestions
       </EuiText>
       <EuiListGroup flush>
-        {registry.getSuggestions(palantir.key).map((suggestion, index) => (
-          <div key={`${palantir.key}-${index}-${palantir.interactionId}`}>
+        {registry.getSuggestions(incontextInsight.key).map((suggestion, index) => (
+          <div key={`${incontextInsight.key}-${index}-${incontextInsight.interactionId}`}>
             <EuiSpacer size="xs" />
             <EuiListGroupItem
               label={suggestion}
-              className="palantirSuggestionListItem"
+              className="incontextInsightSuggestionListItem"
               color="subdued"
               iconType="chatRight"
               iconProps={{ size: 's' }}
-              onClick={() => onSubmitClick(palantir, suggestion)}
+              onClick={() => onSubmitClick(incontextInsight, suggestion)}
               aria-label={suggestion}
               wrapText
               size="xs"
               extraAction={{
-                onClick: () => onSubmitClick(palantir, suggestion),
+                onClick: () => onSubmitClick(incontextInsight, suggestion),
                 iconType: 'sortRight',
                 iconSize: 's',
                 alwaysShow: true,
@@ -129,18 +131,20 @@ export const Palantir = ({ children }: PalantirProps) => {
     <EuiButton onClick={() => toasts.addDanger('To be implemented...')}>Generate summary</EuiButton>
   );
 
-  const SummaryPopoverBody: React.FC<{ palantir: PalantirInput }> = ({ palantir }) => (
+  const SummaryPopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
+    incontextInsight,
+  }) => (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
-      <EuiText size="s">{palantir.summary}</EuiText>
+      <EuiText size="s">{incontextInsight.summary}</EuiText>
     </EuiPanel>
   );
 
-  const SummaryWithSuggestionsPopoverBody: React.FC<{ palantir: PalantirInput }> = ({
-    palantir,
-  }) => (
+  const SummaryWithSuggestionsPopoverBody: React.FC<{
+    incontextInsight: IncontextInsightInput;
+  }> = ({ incontextInsight }) => (
     <>
-      {<SummaryPopoverBody palantir={palantir} />}
-      {<SuggestionsPopoverFooter palantir={palantir} />}
+      {<SummaryPopoverBody incontextInsight={incontextInsight} />}
+      {<SuggestionsPopoverFooter incontextInsight={incontextInsight} />}
     </>
   );
 
@@ -164,10 +168,12 @@ export const Palantir = ({ children }: PalantirProps) => {
     </EuiFlexGroup>
   );
 
-  const ChatWithSuggestionsPopoverBody: React.FC<{ palantir: PalantirInput }> = ({ palantir }) => (
+  const ChatWithSuggestionsPopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
+    incontextInsight,
+  }) => (
     <>
       {<ChatPopoverBody />}
-      {<SuggestionsPopoverFooter palantir={palantir} />}
+      {<SuggestionsPopoverFooter incontextInsight={incontextInsight} />}
     </>
   );
 
@@ -176,7 +182,7 @@ export const Palantir = ({ children }: PalantirProps) => {
 
     return (
       <EuiFlexGroup
-        className="palantirAnchorButton"
+        className="incontextInsightAnchorButton"
         onKeyDown={onAnchorKeyPress}
         onClick={onAnchorClick}
         gutterSize="none"
@@ -184,12 +190,12 @@ export const Palantir = ({ children }: PalantirProps) => {
         ref={anchor}
       >
         <EuiFlexItem>
-          <div className="palantirAnchorContent" ref={renderPopover}>
+          <div className="incontextInsightAnchorContent" ref={renderPopover}>
             {target}
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <div className="palantirAnchorIcon">
+          <div className="incontextInsightAnchorIcon">
             <EuiIcon type={logos.Chat.url} size="l" />
           </div>
         </EuiFlexItem>
@@ -202,19 +208,19 @@ export const Palantir = ({ children }: PalantirProps) => {
     const popoverBody = () => {
       switch (input.type) {
         case 'suggestions':
-          return <SuggestionsPopoverFooter palantir={input} />;
+          return <SuggestionsPopoverFooter incontextInsight={input} />;
         case 'generate':
           return <GeneratePopoverBody />;
         case 'summary':
-          return <SummaryPopoverBody palantir={input} />;
+          return <SummaryPopoverBody incontextInsight={input} />;
         case 'summaryWithSuggestions':
-          return <SummaryWithSuggestionsPopoverBody palantir={input} />;
+          return <SummaryWithSuggestionsPopoverBody incontextInsight={input} />;
         case 'chat':
           return <ChatPopoverBody />;
         case 'chatWithSuggestions':
-          return <ChatWithSuggestionsPopoverBody palantir={input} />;
+          return <ChatWithSuggestionsPopoverBody incontextInsight={input} />;
         default:
-          return <SummaryWithSuggestionsPopoverBody palantir={input} />;
+          return <SummaryWithSuggestionsPopoverBody incontextInsight={input} />;
       }
     };
 
@@ -224,12 +230,12 @@ export const Palantir = ({ children }: PalantirProps) => {
         button={anchor.current?.firstChild as HTMLElement}
         isOpen={isVisible}
         closePopover={closePopover}
-        anchorClassName="palantirAnchor"
+        anchorClassName="incontextInsightAnchor"
         anchorPosition="rightUp"
         offset={5}
         panelPaddingSize="s"
       >
-        <EuiPopoverTitle className="palantirPopoverTitle" paddingSize="none">
+        <EuiPopoverTitle className="incontextInsightPopoverTitle" paddingSize="none">
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem>
               <div>
@@ -251,17 +257,17 @@ export const Palantir = ({ children }: PalantirProps) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
-        <div className="palantirPopoverBody">{popoverBody()}</div>
+        <div className="incontextInsightPopoverBody">{popoverBody()}</div>
       </EuiWrappingPopover>
     );
 
     ReactDOM.render(popover, container);
   };
 
-  findPalantir(children);
+  findIncontextInsight(children);
 
   return <div>{renderAnchor()}</div>;
 };
 
 // eslint-disable-next-line import/no-default-export
-export { Palantir as default };
+export { IncontextInsight as default };

@@ -10,7 +10,7 @@ import { useEffectOnce } from 'react-use';
 import { ApplicationStart } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';
-import { getPalantirRegistry } from './services';
+import { getIncontextInsightRegistry } from './services';
 import { ChatFlyout } from './chat_flyout';
 import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
@@ -43,7 +43,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [inputFocus, setInputFocus] = useState(false);
   const flyoutFullScreen = chatSize === 'fullscreen';
   const inputRef = useRef<HTMLInputElement>(null);
-  const registry = getPalantirRegistry();
+  const registry = getIncontextInsightRegistry();
 
   if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
 

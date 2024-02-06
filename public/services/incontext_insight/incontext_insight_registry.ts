@@ -4,43 +4,45 @@
  */
 
 import EventEmitter from 'events';
-import { Palantir, Palantiri } from '../../types';
+import { IncontextInsight, IncontextInsights } from '../../types';
 import { ISuggestedAction, Interaction } from '../../../common/types/chat_saved_object_attributes';
 
-export class PalantirRegistry extends EventEmitter {
-  private registry: Palantiri = new Map();
+export class IncontextInsightRegistry extends EventEmitter {
+  private registry: IncontextInsights = new Map();
 
-  private mapper = (palantir: Palantir) => {
+  private mapper = (incontextInsight: IncontextInsight) => {
     return {
-      key: palantir.key,
-      type: palantir.type,
-      summary: palantir.summary,
-      suggestions: palantir.suggestions,
+      key: incontextInsight.key,
+      type: incontextInsight.type,
+      summary: incontextInsight.summary,
+      suggestions: incontextInsight.suggestions,
     };
   };
 
-  public open(item: Palantir, suggestion: string) {
-    // TODO: passing palantir for future usage
+  public open(item: IncontextInsight, suggestion: string) {
+    // TODO: passing incontextInsight for future usage
     this.emit('onSuggestion', {
       suggestion,
     });
   }
 
-  public register(item: Palantir | Palantir[]): void;
+  public register(item: IncontextInsight | IncontextInsight[]): void;
   public register(item: unknown) {
     if (Array.isArray(item)) {
-      item.forEach((palantir: Palantir) => this.registry.set(palantir.key, this.mapper(palantir)));
+      item.forEach((incontextInsight: IncontextInsight) =>
+        this.registry.set(incontextInsight.key, this.mapper(incontextInsight))
+      );
     } else {
-      const palantir = item as Palantir;
-      this.registry.set(palantir.key, this.mapper(palantir));
+      const incontextInsight = item as IncontextInsight;
+      this.registry.set(incontextInsight.key, this.mapper(incontextInsight));
     }
   }
 
-  public get(key: string): Palantir {
-    return this.registry.get(key) as Palantir;
+  public get(key: string): IncontextInsight {
+    return this.registry.get(key) as IncontextInsight;
   }
 
-  public getAll(): Palantir[] {
+  public getAll(): IncontextInsight[] {
     return Array.from(this.registry.values());
   }
 
@@ -62,22 +64,22 @@ export class PalantirRegistry extends EventEmitter {
       suggestedActions.filter(({ actionType }) => actionType === 'send_as_input').length === 0
     )
       return;
-    const palantir = Array.from(this.registry.values()).find(
+    const incontextInsight = Array.from(this.registry.values()).find(
       (value) => value.interactionId && value.interactionId === interactionId
     );
-    if (!palantir) return;
-    this.get(palantir.key).suggestions = suggestedActions
+    if (!incontextInsight) return;
+    this.get(incontextInsight.key).suggestions = suggestedActions
       .filter(({ actionType }) => actionType === 'send_as_input')
       .map(({ message }) => message);
   }
 
   public setInteractionId(interaction: Interaction | undefined) {
     if (!interaction || !interaction.interaction_id || !interaction.input) return;
-    const palantir = Array.from(this.registry.values()).find(
+    const incontextInsight = Array.from(this.registry.values()).find(
       (value) => value.suggestions && value.suggestions.includes(interaction.input)
     );
-    if (!palantir) return;
-    this.registry.get(palantir.key)!.interactionId = interaction.interaction_id;
+    if (!incontextInsight) return;
+    this.registry.get(incontextInsight.key)!.interactionId = interaction.interaction_id;
   }
 
   // TODO: two way service pltr component to chat bot

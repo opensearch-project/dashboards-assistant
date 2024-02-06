@@ -5,15 +5,15 @@
 
 import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/public';
 import { ChromeStart, NotificationsStart } from '../../../../src/core/public';
-import { PalantirRegistry } from './palantir';
+import { IncontextInsightRegistry } from './incontext_insight';
 
-export * from './palantir';
+export * from './incontext_insight';
 export { ConversationLoadService } from './conversation_load_service';
 export { ConversationsService } from './conversations_service';
 
-export const [getPalantirRegistry, setPalantirRegistry] = createGetterSetter<PalantirRegistry>(
-  'PalantirRegistry'
-);
+export const [getIncontextInsightRegistry, setIncontextInsightRegistry] = createGetterSetter<
+  IncontextInsightRegistry
+>('IncontextInsightRegistry');
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 

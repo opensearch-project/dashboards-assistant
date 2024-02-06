@@ -8,7 +8,7 @@ import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddabl
 import { IMessage, ISuggestedAction } from '../common/types/chat_saved_object_attributes';
 import { IChatContext } from './contexts/chat_context';
 import { MessageContentProps } from './tabs/chat/messages/message_content';
-import { PalantirRegistry } from './services';
+import { IncontextInsightRegistry } from './services';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -48,7 +48,7 @@ export interface AssistantSetup {
    */
   userHasAccess: () => Promise<boolean>;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
-  registerPalantir: PalantirRegistry['register'];
+  registerIncontextInsight: IncontextInsightRegistry['register'];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -63,17 +63,17 @@ export interface ChatConfig {
   terms_accepted: boolean;
 }
 
-export type Palantiri = Map<string, Palantir>;
+export type IncontextInsights = Map<string, IncontextInsight>;
 
-export interface Palantir {
+export interface IncontextInsight {
   key: string;
-  type?: PalantirType;
+  type?: IncontextInsightType;
   summary?: string;
   suggestions?: string[];
   interactionId?: string;
 }
 
-export type PalantirType =
+export type IncontextInsightType =
   | 'suggestions'
   | 'generate'
   | 'summary'

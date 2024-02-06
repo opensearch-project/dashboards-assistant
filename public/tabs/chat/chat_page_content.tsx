@@ -26,7 +26,7 @@ import { findLastIndex } from '../../utils';
 import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
-import { getPalantirRegistry } from '../../services';
+import { getIncontextInsightRegistry } from '../../services';
 
 interface ChatPageContentProps {
   messagesLoading: boolean;
@@ -40,7 +40,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const pageEndRef = useRef<HTMLDivElement>(null);
   const loading = props.messagesLoading || chatState.llmResponding;
   const chatActions = useChatActions();
-  const registry = getPalantirRegistry();
+  const registry = getIncontextInsightRegistry();
 
   useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
@@ -203,7 +203,7 @@ interface SuggestionsProps {
 const Suggestions: React.FC<SuggestionsProps> = (props) => {
   const chatContext = useChatContext();
   const { executeAction } = useChatActions();
-  const registry = getPalantirRegistry();
+  const registry = getIncontextInsightRegistry();
 
   if (props.message.type !== 'output') {
     return null;

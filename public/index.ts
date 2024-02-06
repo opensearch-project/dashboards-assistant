@@ -4,15 +4,15 @@
  */
 
 import { PluginInitializerContext } from '../../../src/core/public';
-import { AssistantPlugin, PalantirComponent } from './plugin';
-import { AssistantSetup, AssistantStart, Palantir } from './types';
+import { AssistantPlugin, IncontextInsightComponent } from './plugin';
+import { AssistantSetup, AssistantStart, IncontextInsight } from './types';
 
 export {
   AssistantPlugin as Plugin,
   AssistantSetup as AssistantPublicPluginSetup,
   AssistantStart as AssistantPublicPluginStart,
-  Palantir,
-  PalantirComponent,
+  IncontextInsight,
+  IncontextInsightComponent,
 };
 
 export * from './services';

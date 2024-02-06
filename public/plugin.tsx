@@ -23,23 +23,23 @@ import {
   MessageRenderer,
 } from './types';
 import {
-  PalantirRegistry,
+  IncontextInsightRegistry,
   ConversationLoadService,
   ConversationsService,
   setChrome,
   setNotifications,
-  setPalantirRegistry,
+  setIncontextInsightRegistry,
 } from './services';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 // @ts-ignore
-const LazyPalantirComponent = lazy(() => import('./components/palantir'));
+const LazyIncontextInsightComponent = lazy(() => import('./components/incontext_insight'));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const PalantirComponent = (props: any) => (
+export const IncontextInsightComponent = (props: any) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
-    <LazyPalantirComponent {...props} />
+    <LazyIncontextInsightComponent {...props} />
   </Suspense>
 );
 
@@ -63,7 +63,7 @@ export class AssistantPlugin
       AssistantPluginStartDependencies
     > {
   private config: PublicConfig;
-  palantirRegistry: PalantirRegistry | undefined;
+  incontextInsightRegistry: IncontextInsightRegistry | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfig>();
@@ -73,8 +73,8 @@ export class AssistantPlugin
     core: CoreSetup<AssistantPluginStartDependencies>,
     setupDeps: AssistantPluginSetupDependencies
   ): AssistantSetup {
-    this.palantirRegistry = new PalantirRegistry();
-    setPalantirRegistry(this.palantirRegistry);
+    this.incontextInsightRegistry = new IncontextInsightRegistry();
+    setIncontextInsightRegistry(this.incontextInsightRegistry);
     const messageRenderers: Record<string, MessageRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
@@ -149,7 +149,9 @@ export class AssistantPlugin
       chatEnabled: () => this.config.chat.enabled,
       userHasAccess: async () => await getAccount().then(checkAccess),
       assistantActions,
-      registerPalantir: this.palantirRegistry.register.bind(this.palantirRegistry),
+      registerIncontextInsight: this.incontextInsightRegistry.register.bind(
+        this.incontextInsightRegistry
+      ),
     };
   }
 
