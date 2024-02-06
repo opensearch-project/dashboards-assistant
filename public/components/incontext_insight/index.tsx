@@ -25,7 +25,6 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getIncontextInsightRegistry, getChrome, getNotifications } from '../../services';
 
@@ -33,11 +32,7 @@ export interface IncontextInsightProps {
   children: React.ReactNode;
 }
 
-// TODO:
-// Ask if arrow looks ok
-// active state (remove anchor)
-// saved objects / config
-// i18n
+// TODO: add saved objects / config && i18n
 const container = document.createElement('div');
 container.id = 'incontext-insight-target';
 document.body.appendChild(container);
