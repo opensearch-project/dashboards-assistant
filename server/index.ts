@@ -16,4 +16,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 
 export const plugin = (initContext: PluginInitializerContext) => new AssistantPlugin(initContext);
 
-export { AssistantPluginSetup, AssistantPluginStart } from './types';
+export { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
