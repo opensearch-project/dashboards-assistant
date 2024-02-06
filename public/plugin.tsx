@@ -115,6 +115,7 @@ export class AssistantPlugin
         const account = await getAccount();
         const username = account.data.user_name;
         const tenant = account.data.user_requested_tenant ?? '';
+        document.querySelector('#incontext-insight-target')?.setAttribute('data-enabled', 'true');
 
         coreStart.chrome.navControls.registerRight({
           order: 10000,

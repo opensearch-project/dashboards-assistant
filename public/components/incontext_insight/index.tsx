@@ -36,16 +36,12 @@ export interface IncontextInsightProps {
 // TODO: add saved objects / config && i18n
 const container = document.createElement('div');
 container.id = 'incontext-insight-target';
+container.setAttribute('data-enabled', 'false');
 document.body.appendChild(container);
 
 export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const logos = getChrome().logos;
-  const toasts = getNotifications().toasts;
-  const registry = getIncontextInsightRegistry();
-  let target: React.ReactNode;
-  let input: IncontextInsightInput;
 
   useEffect(() => {
     // TODO: use animation when not using display: none
@@ -82,6 +78,13 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
       }, 1125);
     }
   }, []);
+
+  if (container.getAttribute('data-enabled') === 'false') return children;
+  const registry = getIncontextInsightRegistry();
+  const logos = getChrome()?.logos;
+  const toasts = getNotifications()?.toasts;
+  let target: React.ReactNode;
+  let input: IncontextInsightInput;
 
   const findIncontextInsight = (node: React.ReactNode): React.ReactNode => {
     try {
