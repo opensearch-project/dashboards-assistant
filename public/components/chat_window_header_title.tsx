@@ -108,7 +108,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
         alignItems="center"
         responsive={false}
       >
-        <EuiToolTip position="bottom" content={displayTitle}>
+        <EuiToolTip anchorClassName="eui-textTruncate" position="bottom" content={displayTitle}>
           <h3 className="eui-textTruncate">{displayTitle}</h3>
         </EuiToolTip>
         <EuiFlexItem grow={false}>
