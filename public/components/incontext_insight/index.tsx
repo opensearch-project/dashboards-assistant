@@ -81,8 +81,8 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
 
   if (container.getAttribute('data-enabled') === 'false') return children;
   const registry = getIncontextInsightRegistry();
-  const logos = getChrome()?.logos;
-  const toasts = getNotifications()?.toasts;
+  const logos = getChrome().logos;
+  const toasts = getNotifications().toasts;
   let target: React.ReactNode;
   let input: IncontextInsightInput;
 

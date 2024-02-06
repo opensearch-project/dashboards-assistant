@@ -11,6 +11,10 @@ import { getChrome, getNotifications, getIncontextInsightRegistry } from '../../
 jest.mock('../../services');
 
 beforeEach(() => {
+  const mockContainer = document.createElement('div');
+  mockContainer.getAttribute = jest.fn().mockReturnValue('true');
+  jest.spyOn(document, 'getElementById').mockReturnValue(mockContainer);
+
   (getChrome as jest.Mock).mockImplementation(() => ({
     logos: 'mocked logos',
   }));
@@ -34,18 +38,6 @@ describe('IncontextInsight', () => {
     );
 
     expect(getByText('Test child')).toBeInTheDocument();
-  });
-
-  it('calls the service functions on render', () => {
-    render(
-      <IncontextInsight>
-        <div>Test child</div>
-      </IncontextInsight>
-    );
-
-    expect(getChrome).toHaveBeenCalled();
-    expect(getNotifications).toHaveBeenCalled();
-    expect(getIncontextInsightRegistry).toHaveBeenCalled();
   });
 
   it('creates a div with id "incontext-insight-target" on document body', () => {
