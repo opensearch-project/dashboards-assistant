@@ -5,6 +5,7 @@
 
 import './index.scss';
 
+import { i18n } from '@osd/i18n';
 import {
   EuiWrappingPopover,
   EuiButton,
@@ -144,7 +145,9 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   }) => (
     <EuiPopoverFooter className="incontextInsightPopoverFooter" paddingSize="none">
       <EuiText size="xs" color="subdued">
-        Available suggestions
+        {i18n.translate('assistantDashboards.incontextInsight.availableSuggestions', {
+          defaultMessage: 'Available suggestions',
+        })}
       </EuiText>
       <EuiListGroup flush>
         {registry.getSuggestions(incontextInsight.key).map((suggestion, index) => (
@@ -285,15 +288,24 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
             <EuiFlexItem>
               <div>
                 <EuiBadge color="hollow" iconType={logos.Chat.url} iconSide="left">
-                  OpenSearch Assistant
+                  {i18n.translate('assistantDashboards.incontextInsight.assistant', {
+                    defaultMessage: 'OpenSearch Assistant',
+                  })}
                 </EuiBadge>
               </div>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
                 <EuiButtonIcon
-                  title="Close assistant popover"
-                  aria-label="Close assistant popover"
+                  title={i18n.translate('assistantDashboards.incontextInsight.closeAssistant', {
+                    defaultMessage: 'Close assistant popover',
+                  })}
+                  aria-label={i18n.translate(
+                    'assistantDashboards.incontextInsight.closeAssistant',
+                    {
+                      defaultMessage: 'Close assistant popover',
+                    }
+                  )}
                   iconType="cross"
                   onClick={closePopover}
                   color="subdued"
