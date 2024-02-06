@@ -24,7 +24,7 @@ import {
   EuiIcon,
   EuiButtonIcon,
 } from '@elastic/eui';
-import React, { Children, isValidElement, useRef, useState } from 'react';
+import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getIncontextInsightRegistry, getChrome, getNotifications } from '../../services';
@@ -37,10 +37,7 @@ export interface IncontextInsightProps {
 // Ask if arrow looks ok
 // active state (remove anchor)
 // saved objects / config
-// handle bad unmounting of the popover when navigating away
 // i18n
-// onloadstate
-// try for customer attribute
 const container = document.createElement('div');
 container.id = 'incontext-insight-target';
 document.body.appendChild(container);
@@ -53,6 +50,42 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   const registry = getIncontextInsightRegistry();
   let target: React.ReactNode;
   let input: IncontextInsightInput;
+
+  useEffect(() => {
+    // TODO: use animation when not using display: none
+    if (anchor.current) {
+      const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
+        '.incontextInsightAnchorButton'
+      )?.classList;
+      const incontextInsightAnchorIconClassList = anchor.current.querySelector(
+        '.incontextInsightAnchorIcon'
+      )?.children[0].classList;
+
+      if (!incontextInsightAnchorButtonClassList || !incontextInsightAnchorIconClassList) return;
+
+      incontextInsightAnchorButtonClassList.add('hoverEffectUnderline');
+      incontextInsightAnchorIconClassList.add(
+        'hoverEffect25',
+        'hoverEffect50',
+        'hoverEffect75',
+        'hoverEffect100'
+      );
+
+      setTimeout(() => {
+        incontextInsightAnchorIconClassList.remove('hoverEffect100');
+        setTimeout(() => {
+          incontextInsightAnchorIconClassList.remove('hoverEffect75');
+          setTimeout(() => {
+            incontextInsightAnchorIconClassList.remove('hoverEffect50');
+            setTimeout(() => {
+              incontextInsightAnchorIconClassList.remove('hoverEffect25');
+              incontextInsightAnchorButtonClassList.remove('hoverEffectUnderline');
+            }, 10);
+          }, 15);
+        }, 20);
+      }, 1125);
+    }
+  }, []);
 
   const findIncontextInsight = (node: React.ReactNode): React.ReactNode => {
     try {
@@ -76,6 +109,12 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
 
   const onAnchorClick = () => {
     setIsVisible(!isVisible);
+    if (anchor.current) {
+      const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
+        '.incontextInsightAnchorButton'
+      )?.classList;
+      incontextInsightAnchorButtonClassList?.add('hoverEffectUnderline');
+    }
   };
 
   const onAnchorKeyPress = (event: React.KeyboardEvent) => {
@@ -86,11 +125,23 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
 
   const closePopover = () => {
     setIsVisible(false);
+    if (anchor.current) {
+      const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
+        '.incontextInsightAnchorButton'
+      )?.classList;
+      incontextInsightAnchorButtonClassList?.remove('hoverEffectUnderline');
+    }
   };
 
   const onSubmitClick = (incontextInsight: IncontextInsightInput, suggestion: string) => {
     setIsVisible(false);
     registry.open(incontextInsight, suggestion);
+    if (anchor.current) {
+      const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
+        '.incontextInsightAnchorButton'
+      )?.classList;
+      incontextInsightAnchorButtonClassList?.remove('hoverEffectUnderline');
+    }
   };
 
   const SuggestionsPopoverFooter: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
@@ -190,10 +241,10 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
         alignItems="center"
         ref={anchor}
       >
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <div className="incontextInsightAnchorContent">{target}</div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={1}>
           <div className="incontextInsightAnchorIcon">
             <EuiIcon type={logos.Chat.url} size="l" />
           </div>
@@ -231,7 +282,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
         closePopover={closePopover}
         anchorClassName="incontextInsightAnchor"
         anchorPosition="rightUp"
-        offset={5}
+        offset={6}
         panelPaddingSize="s"
       >
         <EuiPopoverTitle className="incontextInsightPopoverTitle" paddingSize="none">
