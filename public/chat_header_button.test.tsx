@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 
 let mockSend: jest.Mock;
 let mockLoadChat: jest.Mock;
-let mockPalantirRegistry: jest.Mock;
+let mockIncontextInsightRegistry: jest.Mock;
 
 jest.mock('./hooks/use_chat_actions', () => {
   mockSend = jest.fn();
@@ -48,12 +48,12 @@ jest.mock('./chat_flyout', () => {
 });
 
 jest.mock('./services', () => {
-  mockPalantirRegistry = jest.fn().mockReturnValue({
+  mockIncontextInsightRegistry = jest.fn().mockReturnValue({
     on: jest.fn(),
     off: jest.fn(),
   });
   return {
-    getPalantirRegistry: mockPalantirRegistry,
+    getIncontextInsightRegistry: mockIncontextInsightRegistry,
   };
 });
 
