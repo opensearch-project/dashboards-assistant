@@ -5,7 +5,7 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../src/core/server';
 import { AssistantPlugin } from './plugin';
-import { configSchema, ConfigSchema } from '../config';
+import { configSchema, ConfigSchema } from './config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
