@@ -57,6 +57,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
 
       incontextInsightAnchorButtonClassList.add('hoverEffectUnderline');
       incontextInsightAnchorIconClassList.add(
+        'hoverEffect0',
         'hoverEffect25',
         'hoverEffect50',
         'hoverEffect75',
@@ -64,18 +65,16 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
       );
 
       setTimeout(() => {
-        incontextInsightAnchorIconClassList.remove('hoverEffect100');
-        setTimeout(() => {
-          incontextInsightAnchorIconClassList.remove('hoverEffect75');
-          setTimeout(() => {
-            incontextInsightAnchorIconClassList.remove('hoverEffect50');
-            setTimeout(() => {
-              incontextInsightAnchorIconClassList.remove('hoverEffect25');
-              incontextInsightAnchorButtonClassList.remove('hoverEffectUnderline');
-            }, 10);
-          }, 15);
-        }, 20);
-      }, 1125);
+        let opacityLevel = 100;
+        const intervalId = setInterval(() => {
+          incontextInsightAnchorIconClassList.remove(`hoverEffect${opacityLevel}`);
+          if (opacityLevel === 0) {
+            incontextInsightAnchorButtonClassList.remove('hoverEffectUnderline');
+            clearInterval(intervalId);
+          }
+          opacityLevel -= 25;
+        }, 25);
+      }, 1250);
     }
   }, []);
 
