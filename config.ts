@@ -9,12 +9,6 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   chat: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
-    rootAgentName: schema.conditional(
-      schema.siblingRef('enabled'),
-      true,
-      schema.string(),
-      schema.maybe(schema.string())
-    ),
   }),
 });
 

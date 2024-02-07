@@ -37,7 +37,7 @@ export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreS
 const LazyIncontextInsightComponent = lazy(() => import('./components/incontext_insight'));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const IncontextInsightComponent = (props: any) => (
+export const IncontextInsightComponent: React.FC<{ props: any }> = (props) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <LazyIncontextInsightComponent {...props} />
   </Suspense>
@@ -153,6 +153,8 @@ export class AssistantPlugin
       registerIncontextInsight: this.incontextInsightRegistry.register.bind(
         this.incontextInsightRegistry
       ),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      renderIncontextInsight: (props: any) => <IncontextInsightComponent {...props} />,
     };
   }
 

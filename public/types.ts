@@ -49,6 +49,7 @@ export interface AssistantSetup {
   userHasAccess: () => Promise<boolean>;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
   registerIncontextInsight: IncontextInsightRegistry['register'];
+  renderIncontextInsight: (component: React.ReactNode) => React.ReactNode;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
