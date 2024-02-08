@@ -10,11 +10,12 @@
 // links for toolkit info
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../src/core/server';
 import { AssistantPlugin } from './plugin';
-import { configSchema, ConfigSchema } from './config';
+import { configSchema, ConfigSchema } from '../common/types/config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     chat: true,
+    incontextInsight: true,
   },
   schema: configSchema,
 };

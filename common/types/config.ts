@@ -10,6 +10,9 @@ export const configSchema = schema.object({
   chat: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  incontextInsight: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

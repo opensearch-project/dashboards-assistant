@@ -32,7 +32,7 @@ import { getIncontextInsightRegistry, getNotifications } from '../../services';
 import chatIcon from '../../assets/chat.svg';
 
 export interface IncontextInsightProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 // TODO: add saved objects / config

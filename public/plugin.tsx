@@ -30,6 +30,7 @@ import {
   setNotifications,
   setIncontextInsightRegistry,
 } from './services';
+import { ConfigSchema } from '../common/types/config';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -43,13 +44,6 @@ export const IncontextInsightComponent: React.FC<{ props: any }> = (props) => (
   </Suspense>
 );
 
-interface PublicConfig {
-  chat: {
-    // whether chat feature is enabled, UI should hide if false
-    enabled: boolean;
-  };
-}
-
 interface UserAccountResponse {
   data: { roles: string[]; user_name: string; user_requested_tenant?: string };
 }
@@ -62,11 +56,11 @@ export class AssistantPlugin
       AssistantPluginSetupDependencies,
       AssistantPluginStartDependencies
     > {
-  private config: PublicConfig;
+  private config: ConfigSchema;
   incontextInsightRegistry: IncontextInsightRegistry | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<PublicConfig>();
+    this.config = initializerContext.config.get<ConfigSchema>();
   }
 
   public setup(
@@ -115,7 +109,7 @@ export class AssistantPlugin
         const account = await getAccount();
         const username = account.data.user_name;
         const tenant = account.data.user_requested_tenant ?? '';
-        this.incontextInsightRegistry?.setIsEnabled(true);
+        this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
 
         coreStart.chrome.navControls.registerRight({
           order: 10000,
