@@ -38,7 +38,6 @@ export interface IncontextInsightProps {
 // TODO: add saved objects / config && i18n
 const container = document.createElement('div');
 container.id = 'incontext-insight-target';
-container.setAttribute('data-enabled', 'false');
 document.body.appendChild(container);
 
 export const IncontextInsight = ({ children }: IncontextInsightProps) => {
@@ -80,7 +79,6 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
     }
   }, []);
 
-  if (container.getAttribute('data-enabled') === 'false') return children;
   const registry = getIncontextInsightRegistry();
   const toasts = getNotifications().toasts;
   let target: React.ReactNode;

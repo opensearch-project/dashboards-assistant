@@ -115,7 +115,7 @@ export class AssistantPlugin
         const account = await getAccount();
         const username = account.data.user_name;
         const tenant = account.data.user_requested_tenant ?? '';
-        document.querySelector('#incontext-insight-target')?.setAttribute('data-enabled', 'true');
+        this.incontextInsightRegistry?.setIsEnabled(true);
 
         coreStart.chrome.navControls.registerRight({
           order: 10000,
@@ -154,7 +154,10 @@ export class AssistantPlugin
         this.incontextInsightRegistry
       ),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      renderIncontextInsight: (props: any) => <IncontextInsightComponent {...props} />,
+      renderIncontextInsight: (props: any) => {
+        if (!this.incontextInsightRegistry?.isEnabled()) return <div {...props} />;
+        return <IncontextInsightComponent {...props} />;
+      },
     };
   }
 

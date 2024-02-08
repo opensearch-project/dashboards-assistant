@@ -9,6 +9,7 @@ import { ISuggestedAction, Interaction } from '../../../common/types/chat_saved_
 
 export class IncontextInsightRegistry extends EventEmitter {
   private registry: IncontextInsights = new Map();
+  private enabled: boolean = false;
 
   private mapper = (incontextInsight: IncontextInsight) => {
     return {
@@ -18,6 +19,14 @@ export class IncontextInsightRegistry extends EventEmitter {
       suggestions: incontextInsight.suggestions,
     };
   };
+
+  public isEnabled() {
+    return this.enabled;
+  }
+
+  public setIsEnabled(enabled: boolean) {
+    this.enabled = enabled;
+  }
 
   public open(item: IncontextInsight, suggestion: string) {
     // TODO: passing incontextInsight for future usage
