@@ -55,21 +55,21 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
 
       if (!incontextInsightAnchorButtonClassList || !incontextInsightAnchorIconClassList) return;
 
-      incontextInsightAnchorButtonClassList.add('hoverEffectUnderline');
+      incontextInsightAnchorButtonClassList.add('incontextInsightHoverEffectUnderline');
       incontextInsightAnchorIconClassList.add(
-        'hoverEffect0',
-        'hoverEffect25',
-        'hoverEffect50',
-        'hoverEffect75',
-        'hoverEffect100'
+        'incontextInsightHoverEffect0',
+        'incontextInsightHoverEffect25',
+        'incontextInsightHoverEffect50',
+        'incontextInsightHoverEffect75',
+        'incontextInsightHoverEffect100'
       );
 
       setTimeout(() => {
         let opacityLevel = 100;
         const intervalId = setInterval(() => {
-          incontextInsightAnchorIconClassList.remove(`hoverEffect${opacityLevel}`);
+          incontextInsightAnchorIconClassList.remove(`incontextInsightHoverEffect${opacityLevel}`);
           if (opacityLevel === 0) {
-            incontextInsightAnchorButtonClassList.remove('hoverEffectUnderline');
+            incontextInsightAnchorButtonClassList.remove('incontextInsightHoverEffectUnderline');
             clearInterval(intervalId);
           }
           opacityLevel -= 25;
@@ -109,7 +109,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
       const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
         '.incontextInsightAnchorButton'
       )?.classList;
-      incontextInsightAnchorButtonClassList?.add('hoverEffectUnderline');
+      incontextInsightAnchorButtonClassList?.add('incontextInsightHoverEffectUnderline');
     }
   };
 
@@ -125,7 +125,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
       const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
         '.incontextInsightAnchorButton'
       )?.classList;
-      incontextInsightAnchorButtonClassList?.remove('hoverEffectUnderline');
+      incontextInsightAnchorButtonClassList?.remove('incontextInsightHoverEffectUnderline');
     }
   };
 
@@ -136,7 +136,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
       const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
         '.incontextInsightAnchorButton'
       )?.classList;
-      incontextInsightAnchorButtonClassList?.remove('hoverEffectUnderline');
+      incontextInsightAnchorButtonClassList?.remove('incontextInsightHoverEffectUnderline');
     }
   };
 

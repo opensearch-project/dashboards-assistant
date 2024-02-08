@@ -1,11 +1,11 @@
 // TODO: fix the styling due to not wanting the chat icon to push elements
 // Might be worth reconsidering the icon for absolute positioning
-.hoverEffectUnderline {
+.incontextInsightHoverEffectUnderline {
   border: solid 2px transparent !important;
   margin: -2px -5px -5px -7px !important;
 }
 
-.hoverEffect0 {
+.incontextInsightHoverEffect0 {
   margin-left: 6px;
   margin-right: 2px;
   padding: 0 2px;
@@ -13,22 +13,22 @@
   display: block !important;
 }
 
-.hoverEffect25 {
+.incontextInsightHoverEffect25 {
   opacity: .25 !important;
   display: block !important;
 }
 
-.hoverEffect50 {
+.incontextInsightHoverEffect50 {
   opacity: .5 !important;
   display: block !important;
 }
 
-.hoverEffect75 {
+.incontextInsightHoverEffect75 {
   opacity: .75 !important;
   display: block !important;
 }
 
-.hoverEffect100 {
+.incontextInsightHoverEffect100 {
   opacity: 1 !important;
   display: block !important;
 }
