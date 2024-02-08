@@ -26,7 +26,7 @@ describe('AgentFrameworkStorageService', () => {
       if (params.path.includes('/messages?max_results=1000')) {
         return {
           body: {
-            interactions: [
+            messages: [
               {
                 input: 'input',
                 response: 'response',
