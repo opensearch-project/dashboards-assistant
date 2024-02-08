@@ -35,9 +35,8 @@ export interface IncontextInsightProps {
   children: React.ReactNode;
 }
 
-// TODO: add saved objects / config && i18n
+// TODO: add saved objects / config
 const container = document.createElement('div');
-container.id = 'incontext-insight-target';
 document.body.appendChild(container);
 
 export const IncontextInsight = ({ children }: IncontextInsightProps) => {
