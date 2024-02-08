@@ -13,4 +13,6 @@ Compatible with OpenSearch and OpenSearch Dashboards Version 2.12.0
 
 ### Feature
 - Set verbose to false ([#131](https://github.com/opensearch-project/dashboards-assistant/pull/131))
+
+### Bug Fixes
 - Fix: comply with the field change of agent framework ([#137](https://github.com/opensearch-project/dashboards-assistant/pull/137))
