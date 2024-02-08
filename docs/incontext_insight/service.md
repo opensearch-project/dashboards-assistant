@@ -71,3 +71,11 @@ insights.forEach(insight => {
   console.log(`Suggestion: ${insight.suggestions[0]}`);
 });
 ```
+
+## Disabling incontext insights
+
+By default, `IncontextInsights` will be enabled if chat is enabled. The following configuration disables this component:
+
+```yaml
+assistant.incontextInsight.enabled: false
+```
