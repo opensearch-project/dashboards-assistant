@@ -28,6 +28,8 @@ import {
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getIncontextInsightRegistry, getChrome, getNotifications } from '../../services';
+// TODO: Replace with getChrome().logos.Chat.url
+import chatIcon from '../assets/chat.svg';
 
 export interface IncontextInsightProps {
   children: React.ReactNode;
@@ -80,7 +82,6 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
 
   if (container.getAttribute('data-enabled') === 'false') return children;
   const registry = getIncontextInsightRegistry();
-  const logos = getChrome().logos;
   const toasts = getNotifications().toasts;
   let target: React.ReactNode;
   let input: IncontextInsightInput;
@@ -246,7 +247,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <div className="incontextInsightAnchorIcon">
-            <EuiIcon type={logos.Chat.url} size="l" />
+            <EuiIcon type={chatIcon} size="l" />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -289,7 +290,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem>
               <div>
-                <EuiBadge color="hollow" iconType={logos.Chat.url} iconSide="left">
+                <EuiBadge color="hollow" iconType={chatIcon} iconSide="left">
                   {i18n.translate('assistantDashboards.incontextInsight.assistant', {
                     defaultMessage: 'OpenSearch Assistant',
                   })}
