@@ -27,9 +27,9 @@ import {
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getIncontextInsightRegistry, getChrome, getNotifications } from '../../services';
+import { getIncontextInsightRegistry, getNotifications } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
-import chatIcon from '../assets/chat.svg';
+import chatIcon from '../../assets/chat.svg';
 
 export interface IncontextInsightProps {
   children: React.ReactNode;
