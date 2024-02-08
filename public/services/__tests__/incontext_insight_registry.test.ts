@@ -45,4 +45,13 @@ describe('IncontextInsightRegistry', () => {
 
     expect(registry.get(insight2.key)).toEqual(insight2);
   });
+
+  it('checks if the registry is disabled on default', () => {
+    expect(registry.isEnabled()).toBe(false);
+  });
+
+  it('checks if the registry is enabled after setting', () => {
+    registry.setIsEnabled(true);
+    expect(registry.isEnabled()).toBe(true);
+  });
 });

@@ -11,10 +11,6 @@ import { getChrome, getNotifications, getIncontextInsightRegistry } from '../../
 jest.mock('../../services');
 
 beforeEach(() => {
-  const mockContainer = document.createElement('div');
-  mockContainer.getAttribute = jest.fn().mockReturnValue('true');
-  jest.spyOn(document, 'getElementById').mockReturnValue(mockContainer);
-
   (getChrome as jest.Mock).mockImplementation(() => ({
     logos: 'mocked logos',
   }));
@@ -30,7 +26,7 @@ beforeEach(() => {
 describe('IncontextInsight', () => {
   afterEach(cleanup);
 
-  it('renders the children', () => {
+  it('renders the child', () => {
     const { getByText } = render(
       <IncontextInsight>
         <div>Test child</div>
@@ -40,14 +36,16 @@ describe('IncontextInsight', () => {
     expect(getByText('Test child')).toBeInTheDocument();
   });
 
-  it('creates a div with id "incontext-insight-target" on document body', () => {
-    render(
+  it('renders the children', () => {
+    const { getByText } = render(
       <IncontextInsight>
-        <div>Test child</div>
+        <div>
+          <h3>Test child</h3>
+          <div>Test child 2</div>
+        </div>
       </IncontextInsight>
     );
 
-    const targetDiv = document.getElementById('incontext-insight-target');
-    expect(targetDiv).not.toBeNull();
+    expect(getByText('Test child')).toBeInTheDocument();
   });
 });
