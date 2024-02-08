@@ -38,7 +38,7 @@ export class AgentFrameworkStorageService implements StorageService {
         path: `${ML_COMMONS_BASE_API}/memory/${conversationId}/messages?max_results=1000`,
       }) as TransportRequestPromise<
         ApiResponse<{
-          interactions: InteractionFromAgentFramework[];
+          messages: InteractionFromAgentFramework[];
         }>
       >,
       this.client.transport.request({
@@ -53,7 +53,7 @@ export class AgentFrameworkStorageService implements StorageService {
         }>
       >,
     ]);
-    const finalInteractions = interactionsResp.body.interactions.map((item) =>
+    const finalInteractions = interactionsResp.body.messages.map((item) =>
       formatInteractionFromBackend(item)
     );
 
