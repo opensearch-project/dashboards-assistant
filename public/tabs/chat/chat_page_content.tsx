@@ -26,6 +26,7 @@ import { findLastIndex } from '../../utils';
 import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
+import { getIncontextInsightRegistry } from '../../services';
 
 interface ChatPageContentProps {
   messagesLoading: boolean;
@@ -39,6 +40,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const pageEndRef = useRef<HTMLDivElement>(null);
   const loading = props.messagesLoading || chatState.llmResponding;
   const chatActions = useChatActions();
+  const registry = getIncontextInsightRegistry();
 
   useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
@@ -119,6 +121,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           interaction = chatState.interactions.find(
             (item) => item.interaction_id === message.interactionId
           );
+          registry.setInteractionId(interaction);
         }
 
         return (
@@ -200,6 +203,7 @@ interface SuggestionsProps {
 const Suggestions: React.FC<SuggestionsProps> = (props) => {
   const chatContext = useChatContext();
   const { executeAction } = useChatActions();
+  const registry = getIncontextInsightRegistry();
 
   if (props.message.type !== 'output') {
     return null;
@@ -219,6 +223,8 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
   if (!suggestedActions.length) {
     return null;
   }
+
+  registry.setSuggestionsByInteractionId(interactionId, suggestedActions);
 
   return (
     <div aria-label="chat suggestions" style={{ marginLeft: '55px', marginTop: '5px' }}>

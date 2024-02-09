@@ -4,7 +4,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { AssistantConfig } from '.';
+import { ConfigSchema } from '../common/types/config';
 import {
   CoreSetup,
   CoreStart,
@@ -28,7 +28,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
   public async setup(core: CoreSetup): Promise<AssistantPluginSetup> {
     this.logger.debug('Assistant: Setup');
     const config = await this.initializerContext.config
-      .create<AssistantConfig>()
+      .create<ConfigSchema>()
       .pipe(first())
       .toPromise();
 

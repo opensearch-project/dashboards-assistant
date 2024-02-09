@@ -8,12 +8,12 @@ import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddabl
 import { IMessage, ISuggestedAction } from '../common/types/chat_saved_object_attributes';
 import { IChatContext } from './contexts/chat_context';
 import { MessageContentProps } from './tabs/chat/messages/message_content';
+import { IncontextInsightRegistry } from './services';
 
 export interface RenderProps {
   props: MessageContentProps;
   chatContext: IChatContext;
 }
-
 // TODO should pair with server side registered output parser
 export type MessageRenderer = (message: IMessage, renderProps: RenderProps) => React.ReactElement;
 export type ActionExecutor = (params: Record<string, unknown>) => void;
@@ -26,12 +26,12 @@ export interface AssistantActions {
   regenerate: (interactionId: string) => Promise<void>;
 }
 
-export interface AppPluginStartDependencies {
+export interface AssistantPluginStartDependencies {
   embeddable: EmbeddableStart;
   dashboard: DashboardStart;
 }
 
-export interface SetupDependencies {
+export interface AssistantPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   securityDashboards?: {};
 }
@@ -48,6 +48,8 @@ export interface AssistantSetup {
    */
   userHasAccess: () => Promise<boolean>;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
+  registerIncontextInsight: IncontextInsightRegistry['register'];
+  renderIncontextInsight: (component: React.ReactNode) => React.ReactNode;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -61,5 +63,24 @@ export interface UserAccount {
 export interface ChatConfig {
   terms_accepted: boolean;
 }
+
+export type IncontextInsights = Map<string, IncontextInsight>;
+
+export interface IncontextInsight {
+  key: string;
+  type?: IncontextInsightType;
+  summary?: string;
+  suggestions?: string[];
+  interactionId?: string;
+}
+
+export type IncontextInsightType =
+  | 'suggestions'
+  | 'generate'
+  | 'summary'
+  | 'summaryWithSuggestions'
+  | 'chat'
+  | 'chatWithSuggestions'
+  | 'error';
 
 export type TabId = 'chat' | 'compose' | 'insights' | 'history' | 'trace';
