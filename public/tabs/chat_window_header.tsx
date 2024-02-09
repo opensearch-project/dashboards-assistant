@@ -7,6 +7,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui'
 import React from 'react';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatWindowHeaderTitle } from '../components/chat_window_header_title';
+// TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../assets/chat.svg';
 import { TAB_ID } from '../utils/constants';
 
