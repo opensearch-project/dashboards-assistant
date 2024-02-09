@@ -3,29 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { schema, TypeOf } from '@osd/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../src/core/server';
 import { AssistantPlugin } from './plugin';
+import { configSchema, ConfigSchema } from '../common/types/config';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new AssistantPlugin(initializerContext);
-}
-
-export { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
-
-const assistantConfig = {
-  schema: schema.object({
-    chat: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-    }),
-  }),
-};
-
-export type AssistantConfig = TypeOf<typeof assistantConfig.schema>;
-
-export const config: PluginConfigDescriptor<AssistantConfig> = {
-  schema: assistantConfig.schema,
+export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     chat: true,
+    incontextInsight: true,
   },
+  schema: configSchema,
 };
+
+export const plugin = (initContext: PluginInitializerContext) => new AssistantPlugin(initContext);
+
+export { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';

@@ -1,0 +1,144 @@
+// TODO: fix the styling due to not wanting the chat icon to push elements
+// Might be worth reconsidering the icon for absolute positioning
+.incontextInsightHoverEffectUnderline {
+  border: solid 2px transparent !important;
+  margin: -2px -5px -5px -7px !important;
+}
+
+.incontextInsightHoverEffect0 {
+  margin-left: 6px;
+  margin-right: 2px;
+  padding: 0 2px;
+  opacity: 0 !important;
+  display: block !important;
+}
+
+.incontextInsightHoverEffect25 {
+  opacity: .25 !important;
+  display: block !important;
+}
+
+.incontextInsightHoverEffect50 {
+  opacity: .5 !important;
+  display: block !important;
+}
+
+.incontextInsightHoverEffect75 {
+  opacity: .75 !important;
+  display: block !important;
+}
+
+.incontextInsightHoverEffect100 {
+  opacity: 1 !important;
+  display: block !important;
+}
+
+.incontextInsightAnchorButton {
+  box-sizing: border-box;
+  max-width: fit-content;
+  border-radius: 0;
+  border-bottom: dashed 2px #38414D;
+  white-space: nowrap;
+  // TODO: this doesn't scale nicely on same elements on view
+  // border-image: linear-gradient(to left, #38414D 60%, transparent 40%) 20% repeat;
+  padding: 0 5px;
+  margin: 0 -2px -5px -5px;
+
+  .incontextInsightAnchorIcon {
+    :first-child {
+      opacity: 0;
+      display: none;
+    }
+  }
+}
+
+.incontextInsightAnchorButton:hover {
+  cursor: pointer;
+  border-radius: 180px;
+  border: solid 2px $ouiBorderColor;
+  margin: -2px -5px -5px -7px;
+
+  .incontextInsightAnchorIcon {
+    :first-child {
+      margin-left: 6px;
+      margin-right: 2px;
+      padding: 0 2px;
+      opacity: 1;
+      transition: opacity 100ms linear;
+      display: block;
+    }
+  }
+}
+
+.incontextInsightAnchorButton:focus {
+  background: none;
+}
+
+.incontextInsightPopoverTitle {
+  // TODO: Remove this one paddingSize is fixed
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+  border: none;
+
+  :first-child {
+    border: none;
+  }
+
+  .euiBadge__text {
+    text-transform: none;
+    font-weight: bold;
+  }
+
+  .euiBadge__icon {
+    margin: 2px 0 2px 0;
+  }
+
+  .euiIcon--small {
+    height: 100%;
+    width: 22px;
+    padding: 2px 0;
+  }
+}
+
+.incontextInsightPopoverFooter {
+  // TODO: Remove this one paddingSize is fixed
+  padding: 4px 12px 8px !important;
+  border: none;
+}
+
+.incontextInsightPopoverBody {
+  width: 300px;
+}
+
+.incontextInsightSummary {
+  border: $euiBorderThin;
+  border-radius: 4px;
+}
+
+.incontextInsightSuggestionListItem {
+  margin-top: 0;
+  border: $euiBorderThin;
+  border-radius: 4px;
+
+  .euiListGroupItem__button {
+    padding: 0;
+  }
+
+  .euiListGroupItem__icon {
+    margin: 2px;
+    margin-right: 5px;
+  }
+
+  .euiListGroupItem__extraAction {
+    margin-left: 10px;
+    margin-right: -2px;
+  }
+
+  .euiListGroupItem__extraAction:hover {
+    background: none;
+  }
+
+  .euiListGroupItem__extraAction:focus {
+    background: none;
+  }
+}
