@@ -35,10 +35,7 @@ export interface IncontextInsightProps {
   children?: React.ReactNode;
 }
 
-// TODO: add saved objects / config
-const container = document.createElement('div');
-document.body.appendChild(container);
-
+// TODO: add saved objects / config to store seed suggestions
 export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
