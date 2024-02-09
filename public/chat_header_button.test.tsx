@@ -13,6 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 
 let mockSend: jest.Mock;
 let mockLoadChat: jest.Mock;
+let mockIncontextInsightRegistry: jest.Mock;
 
 jest.mock('./hooks/use_chat_actions', () => {
   mockSend = jest.fn();
@@ -43,6 +44,16 @@ jest.mock('./chat_flyout', () => {
         <p>{flyoutFullScreen ? 'fullscreen mode' : 'dock-right mode'}</p>
       </div>
     ),
+  };
+});
+
+jest.mock('./services', () => {
+  mockIncontextInsightRegistry = jest.fn().mockReturnValue({
+    on: jest.fn(),
+    off: jest.fn(),
+  });
+  return {
+    getIncontextInsightRegistry: mockIncontextInsightRegistry,
   };
 });
 
