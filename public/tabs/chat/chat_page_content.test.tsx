@@ -10,6 +10,9 @@ import * as chatContextExports from '../../contexts/chat_context';
 import * as chatStateHookExports from '../../hooks/use_chat_state';
 import * as chatActionHookExports from '../../hooks/use_chat_actions';
 import { IMessage } from '../../../common/types/chat_saved_object_attributes';
+import { getIncontextInsightRegistry } from '../../services';
+
+jest.mock('../../services');
 
 jest.mock('./messages/message_bubble', () => {
   return {
@@ -21,6 +24,13 @@ jest.mock('./messages/message_bubble', () => {
 
 jest.mock('./messages/message_content', () => {
   return { MessageContent: () => <div /> };
+});
+
+beforeEach(() => {
+  (getIncontextInsightRegistry as jest.Mock).mockImplementation(() => ({
+    setSuggestionsByInteractionId: jest.fn(),
+    setInteractionId: jest.fn(),
+  }));
 });
 
 describe('<ChatPageContent />', () => {

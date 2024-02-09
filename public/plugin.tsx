@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../src/core/public';
 import {
   createOpenSearchDashboardsReactContext,
@@ -12,42 +13,62 @@ import {
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
-import { ConversationLoadService } from './services/conversation_load_service';
-import { ConversationsService } from './services/conversations_service';
 import {
   ActionExecutor,
-  AppPluginStartDependencies,
+  AssistantPluginStartDependencies,
+  AssistantPluginSetupDependencies,
   AssistantActions,
   AssistantSetup,
   AssistantStart,
   MessageRenderer,
-  SetupDependencies,
 } from './types';
+import {
+  IncontextInsightRegistry,
+  ConversationLoadService,
+  ConversationsService,
+  setChrome,
+  setNotifications,
+  setIncontextInsightRegistry,
+} from './services';
+import { ConfigSchema } from '../common/types/config';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
-interface PublicConfig {
-  chat: {
-    // whether chat feature is enabled, UI should hide if false
-    enabled: boolean;
-  };
-}
+// @ts-ignore
+const LazyIncontextInsightComponent = lazy(() => import('./components/incontext_insight'));
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const IncontextInsightComponent: React.FC<{ props: any }> = (props) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <LazyIncontextInsightComponent {...props} />
+  </Suspense>
+);
 
 interface UserAccountResponse {
   data: { roles: string[]; user_name: string; user_requested_tenant?: string };
 }
 
 export class AssistantPlugin
-  implements Plugin<AssistantSetup, AssistantStart, SetupDependencies, AppPluginStartDependencies> {
-  private config: PublicConfig;
+  implements
+    Plugin<
+      AssistantSetup,
+      AssistantStart,
+      AssistantPluginSetupDependencies,
+      AssistantPluginStartDependencies
+    > {
+  private config: ConfigSchema;
+  incontextInsightRegistry: IncontextInsightRegistry | undefined;
+
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<PublicConfig>();
+    this.config = initializerContext.config.get<ConfigSchema>();
   }
 
   public setup(
-    core: CoreSetup<AppPluginStartDependencies>,
-    setupDeps: SetupDependencies
+    core: CoreSetup<AssistantPluginStartDependencies>,
+    setupDeps: AssistantPluginSetupDependencies
   ): AssistantSetup {
+    this.incontextInsightRegistry = new IncontextInsightRegistry();
+    setIncontextInsightRegistry(this.incontextInsightRegistry);
     const messageRenderers: Record<string, MessageRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
@@ -75,7 +96,9 @@ export class AssistantPlugin
       account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role));
 
     if (this.config.chat.enabled) {
-      core.getStartServices().then(async ([coreStart, startDeps]) => {
+      const setupChat = async () => {
+        const [coreStart, startDeps] = await core.getStartServices();
+
         const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
           ...coreStart,
           setupDeps,
@@ -86,6 +109,7 @@ export class AssistantPlugin
         const account = await getAccount();
         const username = account.data.user_name;
         const tenant = account.data.user_requested_tenant ?? '';
+        this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
 
         coreStart.chrome.navControls.registerRight({
           order: 10000,
@@ -102,7 +126,8 @@ export class AssistantPlugin
             </CoreContext.Provider>
           ),
         });
-      });
+      };
+      setupChat();
     }
 
     return {
@@ -119,11 +144,21 @@ export class AssistantPlugin
       chatEnabled: () => this.config.chat.enabled,
       userHasAccess: async () => await getAccount().then(checkAccess),
       assistantActions,
+      registerIncontextInsight: this.incontextInsightRegistry.register.bind(
+        this.incontextInsightRegistry
+      ),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      renderIncontextInsight: (props: any) => {
+        if (!this.incontextInsightRegistry?.isEnabled()) return <div {...props} />;
+        return <IncontextInsightComponent {...props} />;
+      },
     };
   }
 
-  public start(core: CoreStart, startDeps: AppPluginStartDependencies): AssistantStart {
+  public start(core: CoreStart): AssistantStart {
     setCoreStart(core);
+    setChrome(core.chrome);
+    setNotifications(core.notifications);
 
     return {};
   }
