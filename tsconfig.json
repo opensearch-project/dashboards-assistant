@@ -23,7 +23,6 @@
   "include": [
     "test/**/*",
     "index.ts",
-    "config.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",

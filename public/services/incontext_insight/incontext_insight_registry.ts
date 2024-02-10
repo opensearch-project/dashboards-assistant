@@ -7,6 +7,7 @@ import EventEmitter from 'events';
 import { IncontextInsight, IncontextInsights } from '../../types';
 import { ISuggestedAction, Interaction } from '../../../common/types/chat_saved_object_attributes';
 
+// TODO: implement chat to incontext insight interaction
 export class IncontextInsightRegistry extends EventEmitter {
   private registry: IncontextInsights = new Map();
   private enabled: boolean = false;
@@ -82,7 +83,7 @@ export class IncontextInsightRegistry extends EventEmitter {
       .map(({ message }) => message);
   }
 
-  public setInteractionId(interaction: Interaction | undefined) {
+  public setInteraction(interaction: Interaction | undefined) {
     if (!interaction || !interaction.interaction_id || !interaction.input) return;
     const incontextInsight = Array.from(this.registry.values()).find(
       (value) => value.suggestions && value.suggestions.includes(interaction.input)
@@ -90,7 +91,4 @@ export class IncontextInsightRegistry extends EventEmitter {
     if (!incontextInsight) return;
     this.registry.get(incontextInsight.key)!.interactionId = interaction.interaction_id;
   }
-
-  // TODO: two way service pltr component to chat bot
-  // TODO: two way service chat bot to pltr component
 }
