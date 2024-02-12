@@ -8,15 +8,10 @@ import './index.scss';
 import { i18n } from '@osd/i18n';
 import {
   EuiWrappingPopover,
-  EuiButton,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPopoverTitle,
-  EuiText,
   EuiBadge,
-  EuiPanel,
   keys,
   EuiIcon,
   EuiButtonIcon,
@@ -26,7 +21,14 @@ import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getIncontextInsightRegistry, getNotifications } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
-import { SuggestionsPopoverFooter } from './components';
+import {
+  ChatPopoverBody,
+  ChatWithSuggestionsPopover,
+  GenerateSummaryPopoverBody,
+  SuggestionsPopoverFooter,
+  SummaryPopoverBody,
+  SummaryWithSuggestionsPopover,
+} from './components';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
@@ -67,8 +69,8 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
             clearInterval(intervalId);
           }
           opacityLevel -= 25;
-        }, 25);
-      }, 1250);
+        }, 45);
+      }, 3000);
     }
   }, []);
 
@@ -134,68 +136,6 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
     }
   };
 
-  const GeneratePopoverBody: React.FC<{}> = ({}) => (
-    <EuiButton onClick={() => toasts.addDanger('To be implemented...')}>Generate summary</EuiButton>
-  );
-
-  const SummaryPopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
-    incontextInsight,
-  }) => (
-    <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
-      <EuiText size="s">{incontextInsight.summary}</EuiText>
-    </EuiPanel>
-  );
-
-  const SummaryWithSuggestionsPopoverBody: React.FC<{
-    incontextInsight: IncontextInsightInput;
-  }> = ({ incontextInsight }) => (
-    <>
-      {<SummaryPopoverBody incontextInsight={incontextInsight} />}
-      {
-        <SuggestionsPopoverFooter
-          incontextInsight={incontextInsight}
-          suggestions={registry.getSuggestions(incontextInsight.key)}
-          onSubmitClick={onSubmitClick}
-        />
-      }
-    </>
-  );
-
-  const ChatPopoverBody: React.FC<{}> = ({}) => (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={6}>
-        <EuiFormRow>
-          <EuiFieldText placeholder="Ask a question" />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          iconType="returnKey"
-          iconSide="right"
-          onClick={() => toasts.addDanger('To be implemented...')}
-        >
-          Go
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  const ChatWithSuggestionsPopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
-    incontextInsight,
-  }) => (
-    <>
-      {<ChatPopoverBody />}
-      {
-        <SuggestionsPopoverFooter
-          incontextInsight={incontextInsight}
-          suggestions={registry.getSuggestions(incontextInsight.key)}
-          onSubmitClick={onSubmitClick}
-        />
-      }
-    </>
-  );
-
   const renderAnchor = () => {
     if (!input || !target) return children;
 
@@ -233,17 +173,36 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
             />
           );
         case 'generate':
-          return <GeneratePopoverBody />;
+          return <GenerateSummaryPopoverBody toasts={toasts} />;
         case 'summary':
           return <SummaryPopoverBody incontextInsight={input} />;
         case 'summaryWithSuggestions':
-          return <SummaryWithSuggestionsPopoverBody incontextInsight={input} />;
+          return (
+            <SummaryWithSuggestionsPopover
+              incontextInsight={input}
+              suggestions={registry.getSuggestions(input.key)}
+              onSubmitClick={onSubmitClick}
+            />
+          );
         case 'chat':
-          return <ChatPopoverBody />;
+          return <ChatPopoverBody toasts={toasts} />;
         case 'chatWithSuggestions':
-          return <ChatWithSuggestionsPopoverBody incontextInsight={input} />;
+          return (
+            <ChatWithSuggestionsPopover
+              toasts={toasts}
+              incontextInsight={input}
+              suggestions={registry.getSuggestions(input.key)}
+              onSubmitClick={onSubmitClick}
+            />
+          );
         default:
-          return <SummaryWithSuggestionsPopoverBody incontextInsight={input} />;
+          return (
+            <SummaryWithSuggestionsPopover
+              incontextInsight={input}
+              suggestions={registry.getSuggestions(input.key)}
+              onSubmitClick={onSubmitClick}
+            />
+          );
       }
     };
 
