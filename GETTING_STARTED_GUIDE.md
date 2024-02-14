@@ -45,7 +45,7 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
    }
    ```
 6. Call the flow framework plugin to setup the cluster for the assistant.
-   1. See https://github.com/opensearch-project/flow-framework/tree/HEAD/sample-templates for sample templates.
+   1. See https://github.com/opensearch-project/flow-framework/tree/HEAD/sample-templates for sample templates. For setting up the chat assistant use the `observability-chat-agent` template, and for query assist feature use the `query-assist-agent` template.
    1. Note that other models from other services can be used instead.
    1. Note that if using the Bedrock model, IAM credentials need to be passed into the template to connect to Bedrock.
 
