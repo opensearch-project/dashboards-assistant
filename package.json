@@ -21,7 +21,7 @@
     "autosize": "^6.0.1",
     "csv-parser": "^3.0.0",
     "dompurify": "^2.4.1",
-    "jsdom": "^22.1.0",
+    "jsdom": "^21.1.2",
     "postinstall": "^0.7.4"
   },
   "devDependencies": {
