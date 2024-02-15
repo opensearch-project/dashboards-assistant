@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getIncontextInsightRegistry, getNotifications } from '../../services';
+import { getIncontextInsightRegistry, getNotifications, getUISettings } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
 import {
@@ -29,6 +29,7 @@ import {
   SummaryPopoverBody,
   SummaryWithSuggestionsPopover,
 } from './components';
+import { INCONTEXT_INSIGHT_INITIAL_ONLOAD_TIME_SETTING } from '../../../common/constants';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
@@ -38,6 +39,11 @@ export interface IncontextInsightProps {
 export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const registry = getIncontextInsightRegistry();
+  const toasts = getNotifications().toasts;
+  const initialOnloadTime = getUISettings().get(INCONTEXT_INSIGHT_INITIAL_ONLOAD_TIME_SETTING);
+  let target: React.ReactNode;
+  let input: IncontextInsightInput;
 
   useEffect(() => {
     // TODO: use animation when not using display: none
@@ -70,14 +76,9 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
           }
           opacityLevel -= 25;
         }, 45);
-      }, 3000);
+      }, initialOnloadTime);
     }
-  }, []);
-
-  const registry = getIncontextInsightRegistry();
-  const toasts = getNotifications().toasts;
-  let target: React.ReactNode;
-  let input: IncontextInsightInput;
+  }, [initialOnloadTime]);
 
   const findIncontextInsight = (node: React.ReactNode): React.ReactNode => {
     try {

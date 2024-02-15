@@ -18,7 +18,10 @@
     "useUnknownInCatchVariables": false,
     "alwaysStrict": false,
     "noImplicitUseStrict": false,
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "paths": {
+      "opensearch-dashboards/server": ["../../src/core/server"],
+    },
   },
   "include": [
     "test/**/*",

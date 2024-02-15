@@ -29,8 +29,10 @@ import {
   setChrome,
   setNotifications,
   setIncontextInsightRegistry,
+  setUISettings,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
+import { INCONTEXT_INSIGHT_INITIAL_ONLOAD_TIME_SETTING } from '../common/constants';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -109,7 +111,10 @@ export class AssistantPlugin
         const account = await getAccount();
         const username = account.data.user_name;
         const tenant = account.data.user_requested_tenant ?? '';
-        this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
+        this.incontextInsightRegistry?.setIsEnabled(
+          this.config.incontextInsight.enabled &&
+            coreStart.uiSettings.get(INCONTEXT_INSIGHT_INITIAL_ONLOAD_TIME_SETTING) >= 0
+        );
 
         coreStart.chrome.navControls.registerRight({
           order: 10000,
@@ -159,6 +164,7 @@ export class AssistantPlugin
     setCoreStart(core);
     setChrome(core.chrome);
     setNotifications(core.notifications);
+    setUISettings(core.uiSettings);
 
     return {};
   }

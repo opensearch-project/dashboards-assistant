@@ -16,6 +16,7 @@ import { setupRoutes } from './routes/index';
 import { AssistantPluginSetup, AssistantPluginStart, MessageParser } from './types';
 import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
 import { VisualizationCardParser } from './parsers/visualization_card_parser';
+import { uiSettings } from './ui_settings';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
@@ -51,6 +52,8 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
         show: true,
       },
     }));
+
+    core.uiSettings.register(uiSettings);
 
     const registerMessageParser = (messageParser: MessageParser) => {
       const findItem = this.messageParsers.find((item) => item.id === messageParser.id);

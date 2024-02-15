@@ -6,7 +6,12 @@
 import React from 'react';
 import { render, cleanup } from '@testing-library/react';
 import { IncontextInsight } from '../incontext_insight';
-import { getChrome, getNotifications, getIncontextInsightRegistry } from '../../services';
+import {
+  getChrome,
+  getNotifications,
+  getIncontextInsightRegistry,
+  getUISettings,
+} from '../../services';
 
 jest.mock('../../services');
 
@@ -21,6 +26,9 @@ beforeEach(() => {
     },
   }));
   (getIncontextInsightRegistry as jest.Mock).mockImplementation(() => {});
+  (getUISettings as jest.Mock).mockImplementation(() => ({
+    get: jest.fn(),
+  }));
 });
 
 describe('IncontextInsight', () => {
