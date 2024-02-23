@@ -13,6 +13,7 @@ import * as useChatActionsExports from '../../../hooks/use_chat_actions';
 
 describe('<MessageBubble />', () => {
   const sendFeedbackMock = jest.fn();
+  const executeActionMock = jest.fn();
 
   beforeEach(() => {
     jest
@@ -23,7 +24,7 @@ describe('<MessageBubble />', () => {
       send: jest.fn(),
       loadChat: jest.fn(),
       openChatUI: jest.fn(),
-      executeAction: jest.fn(),
+      executeAction: executeActionMock,
       abortAction: jest.fn(),
       regenerate: jest.fn(),
     });
@@ -256,6 +257,8 @@ describe('<MessageBubble />', () => {
       />
     );
     expect(screen.getByTestId('trace-icon-bar')).toBeVisible();
+    fireEvent.click(screen.getByTestId('trace-icon-bar'));
+    expect(executeActionMock).toHaveBeenCalledTimes(1);
   });
 
   it('should NOT display action: view trace', () => {
