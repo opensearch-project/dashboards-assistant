@@ -66,7 +66,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
         'incontextInsightHoverEffect100'
       );
 
-      setTimeout(() => {
+      const fadeOut = () => {
         let opacityLevel = 100;
         const intervalId = setInterval(() => {
           incontextInsightAnchorIconClassList.remove(`incontextInsightHoverEffect${opacityLevel}`);
@@ -76,7 +76,21 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
           }
           opacityLevel -= 25;
         }, 45);
+      };
+
+      const handleAnyClickEvent = (_: MouseEvent) => {
+        fadeOut();
+      };
+
+      document.addEventListener('click', handleAnyClickEvent);
+
+      setTimeout(() => {
+        fadeOut();
       }, initialOnloadTime);
+
+      return () => {
+        document.removeEventListener('click', handleAnyClickEvent);
+      };
     }
   }, [initialOnloadTime]);
 
