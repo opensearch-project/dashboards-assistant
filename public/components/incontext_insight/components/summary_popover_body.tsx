@@ -12,7 +12,7 @@ export interface SummaryPopoverBodyProps {
 }
 
 export const SummaryPopoverBody: React.FC<SummaryPopoverBodyProps> = ({ incontextInsight }) => (
-  <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
+  <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="subdued">
     <EuiText size="s">{incontextInsight.summary}</EuiText>
   </EuiPanel>
 );
