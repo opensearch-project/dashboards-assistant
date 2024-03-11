@@ -44,17 +44,10 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
   const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
-  const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
-  const [dockedDirection, setDockedDirection] = useState<ISidecarConfig['dockedDirection']>(
-    'right'
-  );
-  const [query, setQuery] = useState('');
   const [inputFocus, setInputFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const registry = getIncontextInsightRegistry();
 
-  if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
-  // const [flyoutLoaded, setFlyoutLoaded] = useState(false);
   const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
   const core = useCore();
   const flyoutFullScreen = sidecarDockedMode === 'takeover';
@@ -64,30 +57,6 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
     return () => subscription.unsubscribe();
   });
-
-  const toggleFlyoutFullScreen = useCallback(
-    (direction: ISidecarConfig['dockedMode']) => {
-      setDockedDirection((prevDirection) => {
-        if (prevDirection === direction) {
-          return prevDirection;
-        } else {
-          if (direction === 'bottom') {
-            core.overlays.sidecar().setSidecarConfig({
-              dockedMode: 'bottom',
-              paddingSize: window.innerHeight - 136,
-            });
-          } else {
-            core.overlays.sidecar().setSidecarConfig({
-              dockedMode: direction,
-              paddingSize: 460,
-            });
-          }
-          return direction;
-        }
-      });
-    },
-    [flyoutFullScreen]
-  );
 
   const chatContextValue: IChatContext = useMemo(
     () => ({
