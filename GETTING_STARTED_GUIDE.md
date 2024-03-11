@@ -29,7 +29,7 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
      }
    }
    ```
-   optionally, you can also enable the summarization feature for PPL responses by setting `observability.summarize.enabled` to `true` in the `opensearch_dashboards.yml` file, then config the agent ids:
+   Optionally, you can also enable the summarization feature for PPL responses by setting `observability.summarize.enabled` to `true` in the `opensearch_dashboards.yml` file, then config the agent ids:
    ```http
    PUT /.plugins-ml-config/_doc/os_query_assist_response_summary
    {
