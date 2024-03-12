@@ -4,6 +4,4 @@
  */
 
 export const ML_COMMONS_BASE_API = '/_plugins/_ml';
-export const RESOURCE_NOT_FOUND_STATUS_CODE = 404;
-export const RESOURCE_NOT_FOUND_ERROR = 'resource_not_found_exception';
 export const ROOT_AGENT_CONFIG_ID = 'os_chat';
