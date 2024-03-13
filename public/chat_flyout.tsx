@@ -19,7 +19,7 @@ interface ChatFlyoutProps {
   flyoutFullScreen: boolean;
 }
 
-export const ChatFlyout = React.memo((props: ChatFlyoutProps) => {
+export const ChatFlyout = (props: ChatFlyoutProps) => {
   const chatContext = useChatContext();
   const chatHistoryPageLoadedRef = useRef(false);
 
@@ -135,4 +135,4 @@ export const ChatFlyout = React.memo((props: ChatFlyoutProps) => {
       </>
     </div>
   );
-});
+};

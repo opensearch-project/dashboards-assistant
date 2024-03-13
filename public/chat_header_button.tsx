@@ -5,7 +5,7 @@
 
 import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import { ApplicationStart } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
@@ -16,7 +16,7 @@ import { ChatContext, IChatContext } from './contexts/chat_context';
 import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks';
 import './index.scss';
-import { ActionExecutor, AssistantActions, MessageRenderer, UserAccount, TabId } from './types';
+import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount } from './types';
 import { TAB_ID, DEFAULT_SIDECAR_DOCKED_MODE } from './utils/constants';
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
@@ -35,7 +35,7 @@ interface HeaderChatButtonProps {
 
 let flyoutLoaded = false;
 
-export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
+export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
@@ -252,4 +252,4 @@ export const HeaderChatButton = React.memo((props: HeaderChatButtonProps) => {
       </div>
     </>
   );
-});
+};
