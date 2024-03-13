@@ -7,7 +7,7 @@ import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
-import { ApplicationStart } from '../../../src/core/public';
+import { ApplicationStart, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';
 import { getIncontextInsightRegistry } from './services';
@@ -20,8 +20,6 @@ import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount }
 import { TAB_ID, DEFAULT_SIDECAR_DOCKED_MODE } from './utils/constants';
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
-import { OpenSearchDashboardsReactContext } from '../../../src/plugins/opensearch_dashboards_react/public';
-import { AssistantServices } from './contexts/core_context';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -30,7 +28,6 @@ interface HeaderChatButtonProps {
   actionExecutors: Record<string, ActionExecutor>;
   assistantActions: AssistantActions;
   currentAccount: UserAccount;
-  coreContext: OpenSearchDashboardsReactContext<AssistantServices>;
 }
 
 let flyoutLoaded = false;
@@ -50,7 +47,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
   const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
   const core = useCore();
-  const flyoutFullScreen = sidecarDockedMode === 'takeover';
+  const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
   const flyoutMountPoint = useRef(null);
 
   useEffectOnce(() => {
@@ -129,10 +126,10 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (!flyoutLoaded && flyoutVisible) {
       const mountPoint = flyoutMountPoint.current;
       if (mountPoint) {
-        core.overlays.sidecar().open(flyoutMountPoint.current, {
+        core.overlays.sidecar().open(mountPoint, {
           className: 'chatbot-sidecar',
           config: {
-            dockedMode: 'right',
+            dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
             paddingSize: 460,
           },
         });
@@ -154,6 +151,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const setMountPoint = useCallback((mountPoint) => {
     flyoutMountPoint.current = mountPoint;
   }, []);
+
   useEffect(() => {
     if (!props.userHasAccess) {
       return;
@@ -235,20 +233,19 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           }
           disabled={!props.userHasAccess}
         />
-        <props.coreContext.Provider>
-          <ChatContext.Provider value={chatContextValue}>
-            <ChatStateProvider>
-              <SetContext assistantActions={props.assistantActions} />
-              <MountPointPortal setMountPoint={setMountPoint}>
-                <ChatFlyout
-                  flyoutVisible={flyoutVisible}
-                  overrideComponent={flyoutComponent}
-                  flyoutFullScreen={flyoutFullScreen}
-                />
-              </MountPointPortal>
-            </ChatStateProvider>
-          </ChatContext.Provider>
-        </props.coreContext.Provider>
+        <ChatContext.Provider value={chatContextValue}>
+          <ChatStateProvider>
+            <SetContext assistantActions={props.assistantActions} />
+            {/* Chatbot's DOM consists of two parts. One part is the headerButton inside the OSD, and the other part is the flyout/sidecar outside the OSD. This is to allow the context of the two parts to be shared. */}
+            <MountPointPortal setMountPoint={setMountPoint}>
+              <ChatFlyout
+                flyoutVisible={flyoutVisible}
+                overrideComponent={flyoutComponent}
+                flyoutFullScreen={flyoutFullScreen}
+              />
+            </MountPointPortal>
+          </ChatStateProvider>
+        </ChatContext.Provider>
       </div>
     </>
   );
