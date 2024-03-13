@@ -88,6 +88,7 @@ export const SidecarIconMenu = () => {
             setDockedMode(mode);
           }}
           icon={chatContext.sidecarDockedMode === mode ? 'check' : icon}
+          data-test-subj={`sidecar-mode-icon-menu-item-${mode}`}
         >
           {name}
         </EuiContextMenuItem>
@@ -117,7 +118,7 @@ export const SidecarIconMenu = () => {
         panelPaddingSize="none"
         anchorPosition="downRight"
       >
-        <EuiContextMenuPanel size="m" items={menuItems} />
+        <EuiContextMenuPanel size="m" items={menuItems} data-test-subj="sidecar-mode-icon-menu" />
       </EuiPopover>
     </>
   );
