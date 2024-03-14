@@ -10,8 +10,8 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
       2. Required OpenSearch Dashboard plugins: Dashboard Assistant, Dashboard Observability
 2. Enable the following settings to enable the features:
    1. To enable the chat assistant feature, set `assistant.chat.enabled` to `true` in the `opensearch_dashboards.yml` file, and config the root agent id by calling the api as follows:
-   ```
-   PUT .plugins-ml-config/_doc/os_chat
+   ```http
+   PUT /.plugins-ml-config/_doc/os_chat
    {
      "type":"os_chat_root_agent",
      "configuration":{
@@ -19,11 +19,37 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
      }
    }
    ```
-   2. To enable the query assistant feature, set `observability.query_assist.enabled` to `true` and `observability.query_assist.ppl_agent_name` to `"PPL agent"` in the `opensearch_dashboards.yml` file.
+   2. To enable the query assistant feature, set `observability.query_assist.enabled` to `true` in the `opensearch_dashboards.yml` file, and config the PPL agent id by calling the api as follows:
+   ```http
+   PUT /.plugins-ml-config/_doc/os_query_assist_ppl
+   {
+     "type":"os_query_assist_ppl_agent",
+     "configuration":{
+       "agent_id": "your ppl agent id"
+     }
+   }
+   ```
+   Optionally, you can also enable the summarization feature for PPL responses by setting `observability.summarize.enabled` to `true` in the `opensearch_dashboards.yml` file, then config the agent ids:
+   ```http
+   PUT /.plugins-ml-config/_doc/os_query_assist_response_summary
+   {
+     "type":"os_query_assist_response_summary_agent",
+     "configuration":{
+       "agent_id": "your response summary agent id"
+     }
+   }
+   PUT /.plugins-ml-config/_doc/os_query_assist_error_summary
+   {
+     "type":"os_query_assist_error_summary_agent",
+     "configuration":{
+       "agent_id": "your error summary agent id"
+     }
+   }
+   ```
 3. After OpenSearch and OpenSearch Dashboards are running, we will setup ML Commons to connect to the LLM model
 4. Run ML commons on Data node
-   ```
-   PUT _cluster/settings
+   ```http
+   PUT /_cluster/settings
    {
      "persistent" : {
        "plugins.ml_commons.only_run_on_ml_node":"false"
@@ -31,8 +57,8 @@ Below are the set of steps to run OpenSearch and OpenSearch dashboards with the 
    }
    ```
 5. Add Trusted Endpoints ([reference doc](https://opensearch.org/docs/latest/ml-commons-plugin/remote-models/index/))
-   ```
-   PUT _cluster/settings
+   ```http
+   PUT /_cluster/settings
    {
      "persistent" : {
        "plugins.ml_commons.trusted_connector_endpoints_regex": [
