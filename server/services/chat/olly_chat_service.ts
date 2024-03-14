@@ -49,12 +49,7 @@ export class OllyChatService implements ChatService {
     }
 
     const rootAgentId = await this.getRootAgent();
-
-    try {
-      return await this.callExecuteAgentAPI(payload, rootAgentId);
-    } catch (error) {
-      throw error;
-    }
+    return await this.callExecuteAgentAPI(payload, rootAgentId);
   }
 
   private async callExecuteAgentAPI(payload: AgentRunPayload, rootAgentId: string) {
