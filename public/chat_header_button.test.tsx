@@ -10,6 +10,8 @@ import { HeaderChatButton } from './chat_header_button';
 import { applicationServiceMock } from '../../../src/core/public/mocks';
 import { AssistantActions } from './types';
 import { BehaviorSubject } from 'rxjs';
+import * as coreContextExports from './contexts/core_context';
+import { MountWrapper } from '../../../src/core/public/utils';
 
 let mockSend: jest.Mock;
 let mockLoadChat: jest.Mock;
@@ -32,18 +34,7 @@ jest.mock('./hooks/use_chat_actions', () => {
 
 jest.mock('./chat_flyout', () => {
   return {
-    ChatFlyout: ({
-      toggleFlyoutFullScreen,
-      flyoutFullScreen,
-    }: {
-      toggleFlyoutFullScreen: () => void;
-      flyoutFullScreen: boolean;
-    }) => (
-      <div aria-label="chat flyout mock">
-        <button onClick={toggleFlyoutFullScreen}>toggle chat flyout fullscreen</button>
-        <p>{flyoutFullScreen ? 'fullscreen mode' : 'dock-right mode'}</p>
-      </div>
-    ),
+    ChatFlyout: () => <div aria-label="chat flyout mock" />,
   };
 });
 
@@ -55,6 +46,30 @@ jest.mock('./services', () => {
   return {
     getIncontextInsightRegistry: mockIncontextInsightRegistry,
   };
+});
+
+// mock sidecar open,hide and show
+jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
+  overlays: {
+    // @ts-ignore
+    sidecar: () => {
+      const attachElement = document.createElement('div');
+      return {
+        open: (mountPoint) => {
+          document.body.appendChild(attachElement);
+          render(<MountWrapper mount={mountPoint} />, {
+            container: attachElement,
+          });
+        },
+        hide: () => {
+          attachElement.style.display = 'none';
+        },
+        show: () => {
+          attachElement.style.display = 'block';
+        },
+      };
+    },
+  },
 });
 
 describe('<HeaderChatButton />', () => {
@@ -106,24 +121,6 @@ describe('<HeaderChatButton />', () => {
     // the input value is cleared after pressing enter
     expect(screen.getByLabelText('chat input')).toHaveValue('');
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
-  });
-
-  it('should toggle chat flyout size', () => {
-    render(
-      <HeaderChatButton
-        application={applicationServiceMock.createStartContract()}
-        userHasAccess={true}
-        messageRenderers={{}}
-        actionExecutors={{}}
-        assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
-      />
-    );
-    fireEvent.click(screen.getByLabelText('toggle chat flyout icon'));
-    expect(screen.queryByText('dock-right mode')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('toggle chat flyout fullscreen'));
-    expect(screen.queryByText('fullscreen mode')).toBeInTheDocument();
   });
 
   it('should focus in chat input when click and press Escape should blur', () => {

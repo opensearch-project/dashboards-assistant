@@ -107,7 +107,7 @@ export const SidecarIconMenu = () => {
         id="sidecarModeIcon"
         button={
           <EuiButtonIcon
-            aria-label="fullScreen"
+            aria-label="setSidecarMode"
             size="xs"
             iconType={ALL_SIDECAR_DIRECTIONS[selectMenuItemIndex].icon}
             onClick={onButtonClick}
