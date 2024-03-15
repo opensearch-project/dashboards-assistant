@@ -71,7 +71,7 @@ export type ISuggestedAction = ISuggestedActionBase &
       }
     | {
         actionType: 'view_trace';
-        metadata: { interactionId: string; icon: string };
+        metadata: { interactionId: string };
       }
   );
 export interface SendFeedbackBody {
