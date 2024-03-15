@@ -26,7 +26,6 @@ describe('OllyChatService', () => {
   const ollyChatService: OllyChatService = new OllyChatService(contextMock);
   beforeEach(async () => {
     mockedTransport.mockClear();
-    ollyChatService.resetRootAgentId();
   });
 
   it('requestLLM should invoke client call with correct params', async () => {
@@ -219,123 +218,6 @@ describe('OllyChatService', () => {
         interactionId: 'interactionId',
       })
     ).rejects.toMatchInlineSnapshot(`[Error: error]`);
-  });
-
-  it('refetch the root agent id when executing agent throws 404 error', async () => {
-    mockedTransport
-      .mockImplementationOnce(() => {
-        return {
-          body: {
-            type: 'os_chat_root_agent',
-            configuration: {
-              agent_id: '4qJKOo0BT01kB_DHroJv',
-            },
-          },
-        };
-      })
-      .mockImplementationOnce(() => {
-        const meta: ApiResponse = {
-          body: {
-            error: {
-              type: 'resource_not_found_exception',
-              reason: 'Agent not found',
-            },
-            status: 404,
-          },
-          statusCode: 404,
-        };
-        throw new ResponseError(meta);
-      })
-      .mockImplementationOnce(() => {
-        return {
-          body: {
-            type: 'os_chat_root_agent',
-            configuration: {
-              agent_id: '4qJKOo0BT01kB_DHroJv',
-            },
-          },
-        };
-      })
-      .mockImplementationOnce(() => {
-        return {
-          body: {
-            inference_results: [
-              {
-                output: [
-                  {
-                    name: 'memory_id',
-                    result: 'foo',
-                  },
-                ],
-              },
-            ],
-          },
-        };
-      });
-    const result = await ollyChatService.requestLLM({
-      messages: [],
-      input: {
-        type: 'input',
-        contentType: 'text',
-        content: 'content',
-      },
-      conversationId: '',
-    });
-    expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "method": "GET",
-            "path": "/_plugins/_ml/config/os_chat",
-          },
-        ],
-        Array [
-          Object {
-            "body": Object {
-              "parameters": Object {
-                "question": "content",
-                "verbose": false,
-              },
-            },
-            "method": "POST",
-            "path": "/_plugins/_ml/agents/4qJKOo0BT01kB_DHroJv/_execute",
-          },
-          Object {
-            "maxRetries": 0,
-            "requestTimeout": 300000,
-          },
-        ],
-        Array [
-          Object {
-            "method": "GET",
-            "path": "/_plugins/_ml/config/os_chat",
-          },
-        ],
-        Array [
-          Object {
-            "body": Object {
-              "parameters": Object {
-                "question": "content",
-                "verbose": false,
-              },
-            },
-            "method": "POST",
-            "path": "/_plugins/_ml/agents/4qJKOo0BT01kB_DHroJv/_execute",
-          },
-          Object {
-            "maxRetries": 0,
-            "requestTimeout": 300000,
-          },
-        ],
-      ]
-    `);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "conversationId": "foo",
-        "interactionId": "",
-        "messages": Array [],
-      }
-    `);
   });
 
   it('fetching root agent id throws error', async () => {
