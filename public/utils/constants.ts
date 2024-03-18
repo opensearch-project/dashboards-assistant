@@ -15,4 +15,4 @@ export enum TAB_ID {
 export const DEFAULT_SIDECAR_DOCKED_MODE = SIDECAR_DOCKED_MODE.RIGHT;
 export const DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE = 460;
 // this is a default padding top size for sidecar when switching to takeover
-export const DEFAULT_SIDECAR_TAKEOVER_PADDING_TOP_SIZE = 460;
+export const DEFAULT_SIDECAR_TAKEOVER_PADDING_TOP_SIZE = 136;
