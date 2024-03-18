@@ -8,6 +8,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useCore } from '../contexts/core_context';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../../src/core/public';
 import { useChatContext } from '../contexts/chat_context';
+import {
+  DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+  DEFAULT_SIDECAR_TAKEOVER_PADDING_TOP_SIZE,
+} from '../utils/constants';
 
 const ALL_SIDECAR_DIRECTIONS: Array<{
   mode: ISidecarConfig['dockedMode'];
@@ -33,7 +37,7 @@ const ALL_SIDECAR_DIRECTIONS: Array<{
 
 export const SidecarIconMenu = () => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const chatContext = useChatContext();
+  const { sidecarDockedMode, setSidecarDockedMode } = useChatContext();
   const core = useCore();
 
   const onButtonClick = useCallback(() => {
@@ -46,18 +50,18 @@ export const SidecarIconMenu = () => {
 
   const setDockedMode = useCallback(
     (mode: ISidecarConfig['dockedMode']) => {
-      const previousMode = chatContext.sidecarDockedMode;
+      const previousMode = sidecarDockedMode;
       if (previousMode === mode) {
         return;
       } else {
         if (mode === SIDECAR_DOCKED_MODE.TAKEOVER) {
-          const defaultTakeOverSize = window.innerHeight - 136;
+          const defaultTakeOverSize =
+            window.innerHeight - DEFAULT_SIDECAR_TAKEOVER_PADDING_TOP_SIZE;
           core.overlays.sidecar().setSidecarConfig({
             dockedMode: mode,
             paddingSize: defaultTakeOverSize,
           });
         } else {
-          const defaultLeftOrRightSize = 460;
           let newConfig;
           if (previousMode !== SIDECAR_DOCKED_MODE.TAKEOVER) {
             // Maintain the same panel sidecar width when switching between both dock left and dock right.
@@ -67,15 +71,15 @@ export const SidecarIconMenu = () => {
           } else {
             newConfig = {
               dockedMode: mode,
-              paddingSize: defaultLeftOrRightSize,
+              paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
             };
           }
           core.overlays.sidecar().setSidecarConfig(newConfig);
         }
-        chatContext.setSidecarDockedMode(mode);
+        setSidecarDockedMode(mode);
       }
     },
-    [chatContext]
+    [setSidecarDockedMode, sidecarDockedMode]
   );
 
   const menuItems = useMemo(
@@ -87,19 +91,18 @@ export const SidecarIconMenu = () => {
             closePopover();
             setDockedMode(mode);
           }}
-          icon={chatContext.sidecarDockedMode === mode ? 'check' : icon}
+          icon={sidecarDockedMode === mode ? 'check' : icon}
           data-test-subj={`sidecar-mode-icon-menu-item-${mode}`}
         >
           {name}
         </EuiContextMenuItem>
       )),
-    [chatContext]
+    [sidecarDockedMode, closePopover]
   );
 
   const selectMenuItemIndex = useMemo(() => {
-    const dockedMode = chatContext.sidecarDockedMode;
-    return ALL_SIDECAR_DIRECTIONS.findIndex((item) => item.mode === dockedMode);
-  }, [chatContext]);
+    return ALL_SIDECAR_DIRECTIONS.findIndex((item) => item.mode === sidecarDockedMode);
+  }, [sidecarDockedMode]);
 
   return (
     <>

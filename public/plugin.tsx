@@ -122,7 +122,6 @@ export class AssistantPlugin
                 actionExecutors={actionExecutors}
                 assistantActions={assistantActions}
                 currentAccount={{ username, tenant }}
-                coreContext={CoreContext}
               />
             </CoreContext.Provider>
           ),

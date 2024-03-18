@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlyoutHeader, EuiResizableContainer } from '@elastic/eui';
+import { EuiResizableContainer } from '@elastic/eui';
 import cs from 'classnames';
 import React, { useRef } from 'react';
 import { useChatContext } from './contexts/chat_context';
@@ -85,9 +85,9 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
       })}
     >
       <>
-        <EuiFlyoutHeader className={cs('llm-chat-flyout-header')}>
+        <div className={cs('llm-chat-flyout-header')}>
           <ChatWindowHeader />
-        </EuiFlyoutHeader>
+        </div>
 
         {props.overrideComponent}
         <EuiResizableContainer style={{ height: '100%', overflow: 'hidden' }}>

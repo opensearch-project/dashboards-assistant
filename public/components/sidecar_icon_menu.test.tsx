@@ -8,8 +8,12 @@ import '@testing-library/jest-dom/extend-expect';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { SidecarIconMenu } from './sidecar_icon_menu';
 import * as chatContextExports from './../contexts/chat_context';
-import { SIDECAR_DOCKED_MODE, ISidecarConfig } from '../../../../src/core/public';
+import { SIDECAR_DOCKED_MODE } from '../../../../src/core/public';
 import * as coreContextExports from '../contexts/core_context';
+import {
+  DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+  DEFAULT_SIDECAR_TAKEOVER_PADDING_TOP_SIZE,
+} from '../utils/constants';
 
 const setSidecarDockedMode = jest.fn();
 const setSidecarConfig = jest.fn();
@@ -79,7 +83,7 @@ describe('<SidecarIconMenu/> spec', () => {
     fireEvent.click(icon);
     const takeoverIcon = screen.getByTestId('sidecar-mode-icon-menu-item-takeover');
     fireEvent.click(takeoverIcon);
-    const defaultTakeOverSize = window.innerHeight - 136;
+    const defaultTakeOverSize = window.innerHeight - DEFAULT_SIDECAR_TAKEOVER_PADDING_TOP_SIZE;
     expect(setSidecarConfig).toHaveBeenCalledWith({
       dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
       paddingSize: defaultTakeOverSize,
@@ -93,10 +97,9 @@ describe('<SidecarIconMenu/> spec', () => {
     fireEvent.click(icon);
     const leftIcon = screen.getByTestId('sidecar-mode-icon-menu-item-left');
     fireEvent.click(leftIcon);
-    const defaultLeftOrRightSize = 460;
     expect(setSidecarConfig).toHaveBeenCalledWith({
       dockedMode: SIDECAR_DOCKED_MODE.LEFT,
-      paddingSize: defaultLeftOrRightSize,
+      paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
     });
     expect(setSidecarDockedMode).toHaveBeenCalledWith(SIDECAR_DOCKED_MODE.LEFT);
   });

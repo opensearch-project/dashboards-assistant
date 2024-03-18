@@ -17,7 +17,11 @@ import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks';
 import './index.scss';
 import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount } from './types';
-import { TAB_ID, DEFAULT_SIDECAR_DOCKED_MODE } from './utils/constants';
+import {
+  TAB_ID,
+  DEFAULT_SIDECAR_DOCKED_MODE,
+  DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+} from './utils/constants';
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
 
@@ -130,7 +134,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           className: 'chatbot-sidecar',
           config: {
             dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
-            paddingSize: 460,
+            paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
           },
         });
         flyoutLoaded = true;
@@ -140,7 +144,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     } else if (flyoutLoaded && !flyoutVisible) {
       core.overlays.sidecar().hide();
     }
-  }, [flyoutVisible, flyoutLoaded, flyoutMountPoint]);
+  }, [flyoutVisible, flyoutLoaded]);
 
   const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {

@@ -54,6 +54,7 @@ jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
     // @ts-ignore
     sidecar: () => {
       const attachElement = document.createElement('div');
+      attachElement.id = 'sidecar-mock-div';
       return {
         open: (mountPoint) => {
           document.body.appendChild(attachElement);
@@ -62,10 +63,16 @@ jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
           });
         },
         hide: () => {
-          attachElement.style.display = 'none';
+          const element = document.getElementById('sidecar-mock-div');
+          if (element) {
+            element.style.display = 'none';
+          }
         },
         show: () => {
-          attachElement.style.display = 'block';
+          const element = document.getElementById('sidecar-mock-div');
+          if (element) {
+            element.style.display = 'block';
+          }
         },
       };
     },
@@ -77,7 +84,7 @@ describe('<HeaderChatButton />', () => {
     jest.clearAllMocks();
   });
 
-  it('should open chat flyout and send the initial message', () => {
+  it('should open chat flyout, send the initial message and hide and show flyout', () => {
     const applicationStart = {
       ...applicationServiceMock.createStartContract(),
       currentAppId$: new BehaviorSubject(''),
@@ -121,6 +128,14 @@ describe('<HeaderChatButton />', () => {
     // the input value is cleared after pressing enter
     expect(screen.getByLabelText('chat input')).toHaveValue('');
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
+
+    // sidecar show
+    const toggleButton = screen.getByLabelText('toggle chat flyout icon');
+    fireEvent.click(toggleButton);
+    expect(screen.queryByLabelText('chat flyout mock')).not.toBeVisible();
+    // sidecar hide
+    fireEvent.click(toggleButton);
+    expect(screen.queryByLabelText('chat flyout mock')).toBeVisible();
   });
 
   it('should focus in chat input when click and press Escape should blur', () => {
