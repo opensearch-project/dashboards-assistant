@@ -9,14 +9,25 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MessageBubble } from './message_bubble';
 import { IOutput } from '../../../../common/types/chat_saved_object_attributes';
 import * as useFeedbackHookExports from '../../../hooks/use_feed_back';
+import * as useChatActionsExports from '../../../hooks/use_chat_actions';
 
 describe('<MessageBubble />', () => {
   const sendFeedbackMock = jest.fn();
+  const executeActionMock = jest.fn();
 
   beforeEach(() => {
     jest
       .spyOn(useFeedbackHookExports, 'useFeedback')
       .mockReturnValue({ feedbackResult: undefined, sendFeedback: sendFeedbackMock });
+
+    jest.spyOn(useChatActionsExports, 'useChatActions').mockReturnValue({
+      send: jest.fn(),
+      loadChat: jest.fn(),
+      openChatUI: jest.fn(),
+      executeAction: executeActionMock,
+      abortAction: jest.fn(),
+      regenerate: jest.fn(),
+    });
   });
 
   afterEach(() => {
@@ -223,5 +234,45 @@ describe('<MessageBubble />', () => {
     render(<MessageBubble showActionBar={true} message={message} />);
     fireEvent.click(screen.getByLabelText('feedback thumbs up'));
     expect(sendFeedbackMock).not.toHaveBeenCalled();
+  });
+
+  it('should display action: view trace', () => {
+    render(
+      <MessageBubble
+        showActionBar={true}
+        showRegenerate={true}
+        message={{
+          type: 'output',
+          contentType: 'markdown',
+          content: 'here are the indices in your cluster: .alert',
+          interactionId: 'bar',
+        }}
+        interaction={{
+          input: 'foo',
+          response: 'bar',
+          conversation_id: 'foo',
+          interaction_id: 'bar',
+          create_time: new Date().toLocaleString(),
+        }}
+      />
+    );
+    expect(screen.getByTestId('trace-icon-bar')).toBeVisible();
+    fireEvent.click(screen.getByTestId('trace-icon-bar'));
+    expect(executeActionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should NOT display action: view trace', () => {
+    render(
+      <MessageBubble
+        showActionBar={true}
+        showRegenerate={false}
+        message={{
+          type: 'output',
+          contentType: 'markdown',
+          content: 'here are the indices in your cluster: .alert',
+        }}
+      />
+    );
+    expect(screen.queryByTestId('trace-icon-bar')).toBeNull();
   });
 });
