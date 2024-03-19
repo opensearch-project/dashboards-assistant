@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlyout, EuiFlyoutHeader, EuiResizableContainer } from '@elastic/eui';
+import { EuiResizableContainer } from '@elastic/eui';
 import cs from 'classnames';
 import React, { useRef } from 'react';
 import { useChatContext } from './contexts/chat_context';
@@ -16,9 +16,7 @@ import { TAB_ID } from './utils/constants';
 interface ChatFlyoutProps {
   flyoutVisible: boolean;
   overrideComponent: React.ReactNode | null;
-  flyoutProps: Partial<React.ComponentProps<typeof EuiFlyout>>;
   flyoutFullScreen: boolean;
-  toggleFlyoutFullScreen: () => void;
 }
 
 export const ChatFlyout = (props: ChatFlyoutProps) => {
@@ -81,26 +79,15 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
   const rightPanelSize = getRightPanelSize();
 
   return (
-    <EuiFlyout
+    <div
       className={cs('llm-chat-flyout', {
         'llm-chat-fullscreen': props.flyoutFullScreen,
-        'llm-chat-hidden': !props.flyoutVisible,
       })}
-      type="push"
-      paddingSize="none"
-      size="460px"
-      ownFocus={false}
-      hideCloseButton
-      onClose={() => chatContext.setFlyoutVisible(false)}
-      {...props.flyoutProps}
     >
       <>
-        <EuiFlyoutHeader className={cs('llm-chat-flyout-header')}>
-          <ChatWindowHeader
-            flyoutFullScreen={props.flyoutFullScreen}
-            toggleFlyoutFullScreen={props.toggleFlyoutFullScreen}
-          />
-        </EuiFlyoutHeader>
+        <div className={cs('llm-chat-flyout-header')}>
+          <ChatWindowHeader />
+        </div>
 
         {props.overrideComponent}
         <EuiResizableContainer style={{ height: '100%', overflow: 'hidden' }}>
@@ -146,6 +133,6 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
           )}
         </EuiResizableContainer>
       </>
-    </EuiFlyout>
+    </div>
   );
 };

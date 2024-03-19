@@ -56,7 +56,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter className={props.className}>
+      <EuiFlyoutFooter className="llm-chat-flyout-footer">
         <EuiSpacer size="xs" />
         <ChatInputControls
           loading={chatState.llmResponding}

@@ -7,7 +7,7 @@ import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
-import { ApplicationStart } from '../../../src/core/public';
+import { ApplicationStart, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';
 import { getIncontextInsightRegistry } from './services';
@@ -17,7 +17,13 @@ import { SetContext } from './contexts/set_context';
 import { ChatStateProvider } from './hooks';
 import './index.scss';
 import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount } from './types';
-import { TAB_ID } from './utils/constants';
+import {
+  TAB_ID,
+  DEFAULT_SIDECAR_DOCKED_MODE,
+  DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+} from './utils/constants';
+import { useCore } from './contexts/core_context';
+import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -39,22 +45,19 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
   const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
-  const [chatSize, setChatSize] = useState<number | 'fullscreen' | 'dock-right'>('dock-right');
   const [inputFocus, setInputFocus] = useState(false);
-  const flyoutFullScreen = chatSize === 'fullscreen';
   const inputRef = useRef<HTMLInputElement>(null);
   const registry = getIncontextInsightRegistry();
 
-  if (!flyoutLoaded && flyoutVisible) flyoutLoaded = true;
+  const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
+  const core = useCore();
+  const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
+  const flyoutMountPoint = useRef(null);
 
   useEffectOnce(() => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
     return () => subscription.unsubscribe();
   });
-
-  const toggleFlyoutFullScreen = useCallback(() => {
-    setChatSize(flyoutFullScreen ? 'dock-right' : 'fullscreen');
-  }, [flyoutFullScreen, setChatSize]);
 
   const chatContextValue: IChatContext = useMemo(
     () => ({
@@ -79,6 +82,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       setTitle,
       interactionId,
       setInteractionId,
+      sidecarDockedMode,
+      setSidecarDockedMode,
     }),
     [
       appId,
@@ -95,6 +100,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       setTitle,
       interactionId,
       setInteractionId,
+      sidecarDockedMode,
+      setSidecarDockedMode,
     ]
   );
 
@@ -119,11 +126,35 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     }
   };
 
+  useEffect(() => {
+    if (!flyoutLoaded && flyoutVisible) {
+      const mountPoint = flyoutMountPoint.current;
+      if (mountPoint) {
+        core.overlays.sidecar().open(mountPoint, {
+          className: 'chatbot-sidecar',
+          config: {
+            dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+            paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+          },
+        });
+        flyoutLoaded = true;
+      }
+    } else if (flyoutLoaded && flyoutVisible) {
+      core.overlays.sidecar().show();
+    } else if (flyoutLoaded && !flyoutVisible) {
+      core.overlays.sidecar().hide();
+    }
+  }, [flyoutVisible, flyoutLoaded]);
+
   const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       inputRef.current?.blur();
     }
   };
+
+  const setMountPoint = useCallback((mountPoint) => {
+    flyoutMountPoint.current = mountPoint;
+  }, []);
 
   useEffect(() => {
     if (!props.userHasAccess) {
@@ -206,21 +237,20 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           }
           disabled={!props.userHasAccess}
         />
+        <ChatContext.Provider value={chatContextValue}>
+          <ChatStateProvider>
+            <SetContext assistantActions={props.assistantActions} />
+            {/* Chatbot's DOM consists of two parts. One part is the headerButton inside the OSD, and the other part is the flyout/sidecar outside the OSD. This is to allow the context of the two parts to be shared. */}
+            <MountPointPortal setMountPoint={setMountPoint}>
+              <ChatFlyout
+                flyoutVisible={flyoutVisible}
+                overrideComponent={flyoutComponent}
+                flyoutFullScreen={flyoutFullScreen}
+              />
+            </MountPointPortal>
+          </ChatStateProvider>
+        </ChatContext.Provider>
       </div>
-      <ChatContext.Provider value={chatContextValue}>
-        <ChatStateProvider>
-          <SetContext assistantActions={props.assistantActions} />
-          {flyoutLoaded ? (
-            <ChatFlyout
-              flyoutVisible={flyoutVisible}
-              overrideComponent={flyoutComponent}
-              flyoutProps={flyoutFullScreen ? { size: '100%' } : {}}
-              flyoutFullScreen={flyoutFullScreen}
-              toggleFlyoutFullScreen={toggleFlyoutFullScreen}
-            />
-          ) : null}
-        </ChatStateProvider>
-      </ChatContext.Provider>
     </>
   );
 };
