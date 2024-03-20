@@ -334,9 +334,13 @@ describe('AgentFrameworkStorageService', () => {
     mockedTransport.mockImplementationOnce(async (params) => {
       return Promise.reject({ meta: { body: 'error' } });
     });
-    expect(agentFrameworkService.getTraces('foo')).rejects.toMatchInlineSnapshot(
-      `[Error: get traces failed, reason:"error"]`
-    );
+    expect(agentFrameworkService.getTraces('foo')).rejects.toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "body": "error",
+        },
+      }
+    `);
   });
 
   it('should encode id when calls getTraces with non-standard params in request payload', async () => {
@@ -408,7 +412,13 @@ describe('AgentFrameworkStorageService', () => {
           bar: 'foo',
         },
       })
-    ).rejects.toMatchInlineSnapshot(`[Error: update interaction failed, reason:"error"]`);
+    ).rejects.toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "body": "error",
+        },
+      }
+    `);
   });
 
   it('should encode id when calls updateInteraction with non-standard params in request payload', async () => {
