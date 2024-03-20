@@ -35,7 +35,9 @@ export class AgentFrameworkStorageService implements StorageService {
     const [interactionsResp, conversation] = await Promise.all([
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}/messages?max_results=1000`,
+        path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(
+          conversationId
+        )}/messages?max_results=1000`,
       }) as TransportRequestPromise<
         ApiResponse<{
           messages: InteractionFromAgentFramework[];
@@ -43,7 +45,7 @@ export class AgentFrameworkStorageService implements StorageService {
       >,
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
+        path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
       }) as TransportRequestPromise<
         ApiResponse<{
           conversation_id: string;
@@ -147,7 +149,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'DELETE',
-        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
+        path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
       });
       if (response.statusCode === 200) {
         return {
@@ -172,7 +174,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'PUT',
-        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
+        path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
         body: {
           name: title,
         },
@@ -197,7 +199,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = (await this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}/traces`,
+        path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}/traces`,
       })) as ApiResponse<{
         traces: Array<{
           message_id: string;
@@ -229,7 +231,7 @@ export class AgentFrameworkStorageService implements StorageService {
     try {
       const response = await this.client.transport.request({
         method: 'PUT',
-        path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}`,
+        path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}`,
         body: {
           additional_info: additionalInfo,
         },
@@ -276,7 +278,7 @@ export class AgentFrameworkStorageService implements StorageService {
     }
     const interactionsResp = (await this.client.transport.request({
       method: 'GET',
-      path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}`,
+      path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}`,
     })) as ApiResponse<InteractionFromAgentFramework>;
     return formatInteractionFromBackend(interactionsResp.body);
   }
