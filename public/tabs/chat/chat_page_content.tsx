@@ -211,14 +211,6 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
   const interactionId = props.message.interactionId;
 
   const suggestedActions = structuredClone(props.message.suggestedActions) || [];
-  if (interactionId) {
-    const viewTraceAction: ISuggestedAction = {
-      actionType: 'view_trace',
-      metadata: { interactionId, icon: 'questionInCircle' },
-      message: 'How was this generated?',
-    };
-    suggestedActions.push(viewTraceAction);
-  }
 
   if (!suggestedActions.length) {
     return null;
@@ -251,7 +243,6 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
                   }
                   color={props.inputDisabled ? 'subdued' : 'default'}
                   content={suggestedAction.message}
-                  iconType={suggestedAction.metadata?.icon}
                 />
               </EuiFlexItem>
             </div>

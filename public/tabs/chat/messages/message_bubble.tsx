@@ -19,10 +19,12 @@ import React, { useCallback } from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import cx from 'classnames';
 // TODO: Replace with getChrome().logos.Chat.url
+import { useChatActions } from '../../../hooks';
 import chatIcon from '../../../assets/chat.svg';
 import {
   IMessage,
   IOutput,
+  ISuggestedAction,
   Interaction,
 } from '../../../../common/types/chat_saved_object_attributes';
 import { useFeedback } from '../../../hooks/use_feed_back';
@@ -46,6 +48,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
   const { feedbackResult, sendFeedback } = useFeedback(
     'interaction' in props ? props.interaction : null
   );
+
+  const { executeAction } = useChatActions();
 
   // According to the design of the feedback, only markdown type output is supported.
   const showFeedback =
@@ -227,6 +231,29 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     ) : null}
                   </>
                 )}
+                {props.message.interactionId ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      aria-label="How was this generated?"
+                      data-test-subj={`trace-icon-${props.message.interactionId}`}
+                      onClick={() => {
+                        const message = props.message as IOutput;
+
+                        const viewTraceAction: ISuggestedAction = {
+                          actionType: 'view_trace',
+                          metadata: {
+                            interactionId: message.interactionId || '',
+                          },
+                          message: 'How was this generated?',
+                        };
+                        executeAction(viewTraceAction, message);
+                      }}
+                      title="How was this generated?"
+                      color="text"
+                      iconType="iInCircle"
+                    />
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </>
           )}

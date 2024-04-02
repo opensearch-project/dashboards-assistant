@@ -67,6 +67,7 @@
 }
 
 .llm-chat-flyout {
+  height: 100%;
   .euiFlyoutFooter {
     background: transparent;
   }
@@ -81,7 +82,7 @@
   }
 }
 
-.euiFlyoutHeader.llm-chat-flyout-header {
+.llm-chat-flyout-header {
   padding-top: 4px;
 }
 
@@ -89,6 +90,10 @@
   background-color: $euiPageBackgroundColor;
   margin: 8px;
   border-radius: 8px;
+}
+
+.llm-chat-flyout-footer {
+  padding-bottom: 24px;
 }
 
 .llm-chat-bubble-wrapper {

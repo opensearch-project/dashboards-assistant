@@ -35,7 +35,9 @@ export class AgentFrameworkStorageService implements StorageService {
     const [interactionsResp, conversation] = await Promise.all([
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}/messages?max_results=1000`,
+        path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(
+          conversationId
+        )}/messages?max_results=1000`,
       }) as TransportRequestPromise<
         ApiResponse<{
           messages: InteractionFromAgentFramework[];
@@ -43,7 +45,7 @@ export class AgentFrameworkStorageService implements StorageService {
       >,
       this.client.transport.request({
         method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
+        path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
       }) as TransportRequestPromise<
         ApiResponse<{
           conversation_id: string;
@@ -144,24 +146,20 @@ export class AgentFrameworkStorageService implements StorageService {
   }
 
   async deleteConversation(conversationId: string): Promise<ConversationOptResponse> {
-    try {
-      const response = await this.client.transport.request({
-        method: 'DELETE',
-        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
-      });
-      if (response.statusCode === 200) {
-        return {
-          success: true,
-        };
-      } else {
-        return {
-          success: false,
-          statusCode: response.statusCode,
-          message: JSON.stringify(response.body),
-        };
-      }
-    } catch (error) {
-      throw new Error('delete conversation failed, reason:' + JSON.stringify(error.meta?.body));
+    const response = await this.client.transport.request({
+      method: 'DELETE',
+      path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
+    });
+    if (response.statusCode === 200) {
+      return {
+        success: true,
+      };
+    } else {
+      return {
+        success: false,
+        statusCode: response.statusCode,
+        message: JSON.stringify(response.body),
+      };
     }
   }
 
@@ -169,84 +167,72 @@ export class AgentFrameworkStorageService implements StorageService {
     conversationId: string,
     title: string
   ): Promise<ConversationOptResponse> {
-    try {
-      const response = await this.client.transport.request({
-        method: 'PUT',
-        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
-        body: {
-          name: title,
-        },
-      });
-      if (response.statusCode === 200) {
-        return {
-          success: true,
-        };
-      } else {
-        return {
-          success: false,
-          statusCode: response.statusCode,
-          message: JSON.stringify(response.body),
-        };
-      }
-    } catch (error) {
-      throw new Error('update conversation failed, reason:' + JSON.stringify(error.meta?.body));
+    const response = await this.client.transport.request({
+      method: 'PUT',
+      path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
+      body: {
+        name: title,
+      },
+    });
+    if (response.statusCode === 200) {
+      return {
+        success: true,
+      };
+    } else {
+      return {
+        success: false,
+        statusCode: response.statusCode,
+        message: JSON.stringify(response.body),
+      };
     }
   }
 
   async getTraces(interactionId: string): Promise<AgentFrameworkTrace[]> {
-    try {
-      const response = (await this.client.transport.request({
-        method: 'GET',
-        path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}/traces`,
-      })) as ApiResponse<{
-        traces: Array<{
-          message_id: string;
-          create_time: string;
-          input: string;
-          response: string;
-          origin: string;
-          trace_number: number;
-        }>;
+    const response = (await this.client.transport.request({
+      method: 'GET',
+      path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}/traces`,
+    })) as ApiResponse<{
+      traces: Array<{
+        message_id: string;
+        create_time: string;
+        input: string;
+        response: string;
+        origin: string;
+        trace_number: number;
       }>;
+    }>;
 
-      return response.body.traces.map((item) => ({
-        interactionId: item.message_id,
-        input: item.input,
-        output: item.response,
-        createTime: item.create_time,
-        origin: item.origin,
-        traceNumber: item.trace_number,
-      }));
-    } catch (error) {
-      throw new Error('get traces failed, reason:' + JSON.stringify(error.meta?.body));
-    }
+    return response.body.traces.map((item) => ({
+      interactionId: item.message_id,
+      input: item.input,
+      output: item.response,
+      createTime: item.create_time,
+      origin: item.origin,
+      traceNumber: item.trace_number,
+    }));
   }
 
   async updateInteraction(
     interactionId: string,
     additionalInfo: Record<string, Record<string, boolean | string>>
   ): Promise<ConversationOptResponse> {
-    try {
-      const response = await this.client.transport.request({
-        method: 'PUT',
-        path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}`,
-        body: {
-          additional_info: additionalInfo,
-        },
-      });
-      if (response.statusCode === 200) {
-        return {
-          success: true,
-        };
-      } else {
-        return {
-          success: false,
-          statusCode: response.statusCode,
-          message: JSON.stringify(response.body),
-        };
-      }
-    } catch (error) {
-      throw new Error('update interaction failed, reason:' + JSON.stringify(error.meta?.body));
+    const response = await this.client.transport.request({
+      method: 'PUT',
+      path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}`,
+      body: {
+        additional_info: additionalInfo,
+      },
+    });
+    if (response.statusCode === 200) {
+      return {
+        success: true,
+      };
+    } else {
+      return {
+        success: false,
+        statusCode: response.statusCode,
+        message: JSON.stringify(response.body),
+      };
     }
   }
 
@@ -276,7 +262,7 @@ export class AgentFrameworkStorageService implements StorageService {
     }
     const interactionsResp = (await this.client.transport.request({
       method: 'GET',
-      path: `${ML_COMMONS_BASE_API}/memory/message/${interactionId}`,
+      path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}`,
     })) as ApiResponse<InteractionFromAgentFramework>;
     return formatInteractionFromBackend(interactionsResp.body);
   }

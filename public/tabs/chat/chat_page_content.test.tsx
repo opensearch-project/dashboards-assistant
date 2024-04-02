@@ -222,29 +222,6 @@ describe('<ChatPageContent />', () => {
     expect(abortActionMock).toHaveBeenCalledWith('test_conversation_id');
   });
 
-  it('should display `How was this generated?`', () => {
-    const messages: IMessage[] = [
-      {
-        type: 'input',
-        content: 'what indices are in my cluster?',
-        contentType: 'text',
-      },
-      {
-        type: 'output',
-        content: 'here are the indices in your cluster: .kibana',
-        contentType: 'markdown',
-        suggestedActions: [],
-        interactionId: 'interaction_id_mock',
-      },
-    ];
-    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
-      chatState: { messages, llmResponding: false, interactions: [] },
-      chatStateDispatch: jest.fn(),
-    });
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
-    expect(screen.queryByText('How was this generated?')).toBeInTheDocument();
-  });
-
   it('should call executeAction', () => {
     render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
     fireEvent.click(screen.getByText('What are the indices in my cluster?'));

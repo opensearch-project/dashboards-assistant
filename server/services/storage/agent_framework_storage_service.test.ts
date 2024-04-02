@@ -80,6 +80,24 @@ describe('AgentFrameworkStorageService', () => {
     `);
   });
 
+  it('should encode id when calls getConversation with non-standard params in request payload', async () => {
+    mockedTransport.mockResolvedValue({
+      body: {
+        messages: [],
+      },
+    });
+
+    await agentFrameworkService.getConversation('../non-standard/id');
+    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "method": "GET",
+          "path": "/_plugins/_ml/memory/..%2Fnon-standard%2Fid/messages?max_results=1000",
+        },
+      ]
+    `);
+  });
+
   it('getConversations', async () => {
     mockedTransport.mockImplementation(async (params) => {
       return {
@@ -223,6 +241,21 @@ describe('AgentFrameworkStorageService', () => {
     expect(agentFrameworkService.deleteConversation('foo')).rejects.toBeDefined();
   });
 
+  it('should encode id when calls deleteConversation with non-standard params in request payload', async () => {
+    mockedTransport.mockResolvedValueOnce({
+      statusCode: 200,
+    });
+    await agentFrameworkService.deleteConversation('../non-standard/id');
+    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "method": "DELETE",
+          "path": "/_plugins/_ml/memory/..%2Fnon-standard%2Fid",
+        },
+      ]
+    `);
+  });
+
   it('updateConversation', async () => {
     mockedTransport.mockImplementationOnce(async (params) => ({
       statusCode: 200,
@@ -251,6 +284,24 @@ describe('AgentFrameworkStorageService', () => {
       return Promise.reject({ meta: { body: 'error' } });
     });
     expect(agentFrameworkService.updateConversation('foo', 'title')).rejects.toBeDefined();
+  });
+
+  it('should encode id when calls updateConversation with non-standard params in request payload', async () => {
+    mockedTransport.mockResolvedValueOnce({
+      statusCode: 200,
+    });
+    await agentFrameworkService.updateConversation('../non-standard/id', 'title');
+    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "body": Object {
+            "name": "title",
+          },
+          "method": "PUT",
+          "path": "/_plugins/_ml/memory/..%2Fnon-standard%2Fid",
+        },
+      ]
+    `);
   });
 
   it('getTraces', async () => {
@@ -283,9 +334,39 @@ describe('AgentFrameworkStorageService', () => {
     mockedTransport.mockImplementationOnce(async (params) => {
       return Promise.reject({ meta: { body: 'error' } });
     });
-    expect(agentFrameworkService.getTraces('foo')).rejects.toMatchInlineSnapshot(
-      `[Error: get traces failed, reason:"error"]`
-    );
+    expect(agentFrameworkService.getTraces('foo')).rejects.toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "body": "error",
+        },
+      }
+    `);
+  });
+
+  it('should encode id when calls getTraces with non-standard params in request payload', async () => {
+    mockedTransport.mockResolvedValueOnce({
+      body: {
+        traces: [
+          {
+            message_id: 'interaction_id',
+            create_time: 'create_time',
+            input: 'input',
+            response: 'response',
+            origin: 'origin',
+            trace_number: 1,
+          },
+        ],
+      },
+    });
+    await agentFrameworkService.getTraces('../non-standard/id');
+    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "method": "GET",
+          "path": "/_plugins/_ml/memory/message/..%2Fnon-standard%2Fid/traces",
+        },
+      ]
+    `);
   });
 
   it('updateInteraction', async () => {
@@ -331,7 +412,39 @@ describe('AgentFrameworkStorageService', () => {
           bar: 'foo',
         },
       })
-    ).rejects.toMatchInlineSnapshot(`[Error: update interaction failed, reason:"error"]`);
+    ).rejects.toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "body": "error",
+        },
+      }
+    `);
+  });
+
+  it('should encode id when calls updateInteraction with non-standard params in request payload', async () => {
+    mockedTransport.mockResolvedValueOnce({
+      statusCode: 200,
+    });
+    await agentFrameworkService.updateInteraction('../non-standard/id', {
+      foo: {
+        bar: 'foo',
+      },
+    });
+    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "body": Object {
+            "additional_info": Object {
+              "foo": Object {
+                "bar": "foo",
+              },
+            },
+          },
+          "method": "PUT",
+          "path": "/_plugins/_ml/memory/message/..%2Fnon-standard%2Fid",
+        },
+      ]
+    `);
   });
 
   it('getInteraction', async () => {
@@ -358,5 +471,23 @@ describe('AgentFrameworkStorageService', () => {
       }
     `);
     expect(mockedTransport).toBeCalledTimes(1);
+  });
+
+  it('should encode id when calls getInteraction with non-standard params in request payload', async () => {
+    mockedTransport.mockResolvedValueOnce({
+      body: {
+        input: 'input',
+        response: 'response',
+      },
+    });
+    await agentFrameworkService.getInteraction('_id', '../non-standard/id');
+    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "method": "GET",
+          "path": "/_plugins/_ml/memory/message/..%2Fnon-standard%2Fid",
+        },
+      ]
+    `);
   });
 });
