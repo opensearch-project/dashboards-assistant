@@ -4,7 +4,7 @@
  */
 
 import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/public';
-import { ChromeStart, NotificationsStart } from '../../../../src/core/public';
+import { ChromeStart, NotificationsStart, IUiSettingsClient } from '../../../../src/core/public';
 import { IncontextInsightRegistry } from './incontext_insight';
 
 export * from './incontext_insight';
@@ -20,3 +20,5 @@ export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
+
+export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');

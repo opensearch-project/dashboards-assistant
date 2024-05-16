@@ -29,7 +29,7 @@ jest.mock('./messages/message_content', () => {
 beforeEach(() => {
   (getIncontextInsightRegistry as jest.Mock).mockImplementation(() => ({
     setSuggestionsByInteractionId: jest.fn(),
-    setInteractionId: jest.fn(),
+    setInteraction: jest.fn(),
   }));
 });
 

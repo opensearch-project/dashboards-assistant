@@ -5,6 +5,7 @@
 
 import { IncontextInsightRegistry } from '../incontext_insight';
 import { IncontextInsight } from '../../types';
+import { ISuggestedAction, Interaction } from '../../../common/types/chat_saved_object_attributes';
 
 describe('IncontextInsightRegistry', () => {
   let registry: IncontextInsightRegistry;
@@ -14,9 +15,9 @@ describe('IncontextInsightRegistry', () => {
   beforeEach(() => {
     registry = new IncontextInsightRegistry();
     insight = {
-      key: 'test',
+      key: 'test1',
       summary: 'test',
-      suggestions: [],
+      suggestions: ['suggestion1'],
     };
     insight2 = {
       key: 'test2',
@@ -53,5 +54,53 @@ describe('IncontextInsightRegistry', () => {
   it('checks if the registry is enabled after setting', () => {
     registry.setIsEnabled(true);
     expect(registry.isEnabled()).toBe(true);
+  });
+
+  it('sets interactionId when setInteraction is called', () => {
+    registry.register([insight, insight2]);
+
+    const interaction: Interaction = {
+      interaction_id: '123',
+      input: insight.suggestions![0],
+      response: 'test response',
+      conversation_id: '321',
+      create_time: new Date().toISOString(),
+    };
+
+    registry.setInteraction(interaction);
+
+    const updatedInsight = registry.get(insight.key);
+    expect(updatedInsight.interactionId).toBe(interaction.interaction_id);
+
+    const nonUpdatedInsight = registry.get(insight2.key);
+    expect(nonUpdatedInsight.interactionId).toBeUndefined();
+  });
+
+  it('sets suggestions when setSuggestionsByInteractionId is called', () => {
+    registry.register([insight, insight2]);
+
+    const interaction: Interaction = {
+      interaction_id: '123',
+      input: insight.suggestions![0],
+      response: 'test response',
+      conversation_id: '321',
+      create_time: new Date().toISOString(),
+    };
+
+    registry.setInteraction(interaction);
+    const updatedInsight = registry.get(insight.key);
+
+    const interactionId = updatedInsight.interactionId;
+    const suggestedActions: ISuggestedAction[] = [
+      { actionType: 'send_as_input', message: 'suggestion2' },
+      { actionType: 'send_as_input', message: 'suggestion3' },
+    ];
+
+    registry.setSuggestionsByInteractionId(interactionId, suggestedActions);
+
+    expect(registry.getSuggestions(insight.key)).toEqual(
+      suggestedActions.map(({ message }) => message)
+    );
+    expect(registry.getSuggestions(insight2.key)).toEqual([]);
   });
 });

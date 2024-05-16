@@ -121,7 +121,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           interaction = chatState.interactions.find(
             (item) => item.interaction_id === message.interactionId
           );
-          registry.setInteractionId(interaction);
+          registry.setInteraction(interaction);
         }
 
         return (

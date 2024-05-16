@@ -8,28 +8,28 @@ import './index.scss';
 import { i18n } from '@osd/i18n';
 import {
   EuiWrappingPopover,
-  EuiButton,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPopoverTitle,
-  EuiText,
-  EuiPopoverFooter,
   EuiBadge,
-  EuiSpacer,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiPanel,
   keys,
   EuiIcon,
   EuiButtonIcon,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getIncontextInsightRegistry, getNotifications } from '../../services';
+import { getIncontextInsightRegistry, getNotifications, getUISettings } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
+import {
+  ChatPopoverBody,
+  ChatWithSuggestionsPopover,
+  GenerateSummaryPopoverBody,
+  SuggestionsPopoverFooter,
+  SummaryPopoverBody,
+  SummaryWithSuggestionsPopover,
+} from './components';
+import { INCONTEXT_INSIGHT_INITIAL_ONLOAD_TIME_SETTING } from '../../../common/constants';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
@@ -39,6 +39,11 @@ export interface IncontextInsightProps {
 export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const registry = getIncontextInsightRegistry();
+  const toasts = getNotifications().toasts;
+  const initialOnloadTime = getUISettings().get(INCONTEXT_INSIGHT_INITIAL_ONLOAD_TIME_SETTING);
+  let target: React.ReactNode;
+  let input: IncontextInsightInput;
 
   useEffect(() => {
     // TODO: use animation when not using display: none
@@ -61,7 +66,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
         'incontextInsightHoverEffect100'
       );
 
-      setTimeout(() => {
+      const fadeOut = () => {
         let opacityLevel = 100;
         const intervalId = setInterval(() => {
           incontextInsightAnchorIconClassList.remove(`incontextInsightHoverEffect${opacityLevel}`);
@@ -70,15 +75,24 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
             clearInterval(intervalId);
           }
           opacityLevel -= 25;
-        }, 25);
-      }, 1250);
-    }
-  }, []);
+        }, 45);
+      };
 
-  const registry = getIncontextInsightRegistry();
-  const toasts = getNotifications().toasts;
-  let target: React.ReactNode;
-  let input: IncontextInsightInput;
+      const handleAnyClickEvent = (_: MouseEvent) => {
+        fadeOut();
+      };
+
+      document.addEventListener('click', handleAnyClickEvent);
+
+      setTimeout(() => {
+        fadeOut();
+      }, initialOnloadTime);
+
+      return () => {
+        document.removeEventListener('click', handleAnyClickEvent);
+      };
+    }
+  }, [initialOnloadTime]);
 
   const findIncontextInsight = (node: React.ReactNode): React.ReactNode => {
     try {
@@ -137,93 +151,6 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
     }
   };
 
-  const SuggestionsPopoverFooter: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
-    incontextInsight,
-  }) => (
-    <EuiPopoverFooter className="incontextInsightPopoverFooter" paddingSize="none">
-      <EuiText size="xs" color="subdued">
-        {i18n.translate('assistantDashboards.incontextInsight.availableSuggestions', {
-          defaultMessage: 'Available suggestions',
-        })}
-      </EuiText>
-      <EuiListGroup flush>
-        {registry.getSuggestions(incontextInsight.key).map((suggestion, index) => (
-          <div key={`${incontextInsight.key}-${index}-${incontextInsight.interactionId}`}>
-            <EuiSpacer size="xs" />
-            <EuiListGroupItem
-              label={suggestion}
-              className="incontextInsightSuggestionListItem"
-              color="subdued"
-              iconType="chatRight"
-              iconProps={{ size: 's' }}
-              onClick={() => onSubmitClick(incontextInsight, suggestion)}
-              aria-label={suggestion}
-              wrapText
-              size="xs"
-              extraAction={{
-                onClick: () => onSubmitClick(incontextInsight, suggestion),
-                iconType: 'sortRight',
-                iconSize: 's',
-                alwaysShow: true,
-                color: 'subdued',
-              }}
-            />
-          </div>
-        ))}
-      </EuiListGroup>
-    </EuiPopoverFooter>
-  );
-
-  const GeneratePopoverBody: React.FC<{}> = ({}) => (
-    <EuiButton onClick={() => toasts.addDanger('To be implemented...')}>Generate summary</EuiButton>
-  );
-
-  const SummaryPopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
-    incontextInsight,
-  }) => (
-    <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
-      <EuiText size="s">{incontextInsight.summary}</EuiText>
-    </EuiPanel>
-  );
-
-  const SummaryWithSuggestionsPopoverBody: React.FC<{
-    incontextInsight: IncontextInsightInput;
-  }> = ({ incontextInsight }) => (
-    <>
-      {<SummaryPopoverBody incontextInsight={incontextInsight} />}
-      {<SuggestionsPopoverFooter incontextInsight={incontextInsight} />}
-    </>
-  );
-
-  const ChatPopoverBody: React.FC<{}> = ({}) => (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={6}>
-        <EuiFormRow>
-          <EuiFieldText placeholder="Ask a question" />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          iconType="returnKey"
-          iconSide="right"
-          onClick={() => toasts.addDanger('To be implemented...')}
-        >
-          Go
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  const ChatWithSuggestionsPopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
-    incontextInsight,
-  }) => (
-    <>
-      {<ChatPopoverBody />}
-      {<SuggestionsPopoverFooter incontextInsight={incontextInsight} />}
-    </>
-  );
-
   const renderAnchor = () => {
     if (!input || !target) return children;
 
@@ -253,19 +180,44 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
     const popoverBody = () => {
       switch (input.type) {
         case 'suggestions':
-          return <SuggestionsPopoverFooter incontextInsight={input} />;
+          return (
+            <SuggestionsPopoverFooter
+              incontextInsight={input}
+              suggestions={registry.getSuggestions(input.key)}
+              onSubmitClick={onSubmitClick}
+            />
+          );
         case 'generate':
-          return <GeneratePopoverBody />;
+          return <GenerateSummaryPopoverBody toasts={toasts} />;
         case 'summary':
           return <SummaryPopoverBody incontextInsight={input} />;
         case 'summaryWithSuggestions':
-          return <SummaryWithSuggestionsPopoverBody incontextInsight={input} />;
+          return (
+            <SummaryWithSuggestionsPopover
+              incontextInsight={input}
+              suggestions={registry.getSuggestions(input.key)}
+              onSubmitClick={onSubmitClick}
+            />
+          );
         case 'chat':
-          return <ChatPopoverBody />;
+          return <ChatPopoverBody toasts={toasts} />;
         case 'chatWithSuggestions':
-          return <ChatWithSuggestionsPopoverBody incontextInsight={input} />;
+          return (
+            <ChatWithSuggestionsPopover
+              toasts={toasts}
+              incontextInsight={input}
+              suggestions={registry.getSuggestions(input.key)}
+              onSubmitClick={onSubmitClick}
+            />
+          );
         default:
-          return <SummaryWithSuggestionsPopoverBody incontextInsight={input} />;
+          return (
+            <SummaryWithSuggestionsPopover
+              incontextInsight={input}
+              suggestions={registry.getSuggestions(input.key)}
+              onSubmitClick={onSubmitClick}
+            />
+          );
       }
     };
 
