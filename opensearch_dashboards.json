@@ -8,7 +8,8 @@
     "dashboard",
     "embeddable",
     "opensearchDashboardsReact",
-    "opensearchDashboardsUtils"
+    "opensearchDashboardsUtils",
+    "dataSourceManagement"
   ],
   "optionalPlugins": [
     "securityDashboards",
@@ -16,6 +17,6 @@
     "dataSourceManagement"
   ],
   "configPath": [
-    "assistant"
+    "assistant" 
   ]
 }
