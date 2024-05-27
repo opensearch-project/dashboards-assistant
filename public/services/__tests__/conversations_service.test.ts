@@ -6,14 +6,17 @@
 import { HttpHandler } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { ConversationsService } from '../conversations_service';
+import { DataSourceServiceMock } from '../data_source_service.mock';
 
 const setup = () => {
   const http = httpServiceMock.createSetupContract();
-  const conversations = new ConversationsService(http);
+  const dataSourceServiceMock = new DataSourceServiceMock();
+  const conversations = new ConversationsService(http, dataSourceServiceMock);
 
   return {
     conversations,
     http,
+    dataSource: dataSourceServiceMock,
   };
 };
 
@@ -32,7 +35,7 @@ describe('ConversationsService', () => {
   });
 
   it('should update options property and call get with passed query', () => {
-    const { conversations, http } = setup();
+    const { conversations, http, dataSource } = setup();
 
     expect(conversations.options).toBeFalsy();
     conversations.load({
@@ -49,6 +52,7 @@ describe('ConversationsService', () => {
         query: {
           page: 1,
           perPage: 10,
+          dataSourceId: dataSource.getDataSourceQuery()?.dataSourceId,
         },
         signal: expect.anything(),
       })
@@ -69,7 +73,7 @@ describe('ConversationsService', () => {
   });
 
   it('should call get with same query again after reload called', async () => {
-    const { conversations, http } = setup();
+    const { conversations, http, dataSource } = setup();
 
     await conversations.load({
       page: 1,
@@ -85,6 +89,7 @@ describe('ConversationsService', () => {
         query: {
           page: 1,
           perPage: 10,
+          dataSourceId: dataSource.getDataSourceQuery()?.dataSourceId,
         },
         signal: expect.anything(),
       })

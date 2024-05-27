@@ -14,6 +14,7 @@ import * as useChatStateExports from '../../../hooks/use_chat_state';
 import * as chatContextExports from '../../../contexts/chat_context';
 import * as coreContextExports from '../../../contexts/core_context';
 import { ConversationsService } from '../../../services/conversations_service';
+import { DataSourceServiceMock } from '../../../services/data_source_service.mock';
 
 import { ChatHistoryPage } from '../chat_history_page';
 
@@ -42,7 +43,7 @@ const setup = ({
     services: {
       ...coreMock.createStart(),
       http,
-      conversations: new ConversationsService(http),
+      conversations: new ConversationsService(http, new DataSourceServiceMock()),
       conversationLoad: {},
     },
   };

@@ -6,10 +6,11 @@
 import { HttpHandler } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { ConversationLoadService } from '../conversation_load_service';
+import { DataSourceServiceMock } from '../data_source_service.mock';
 
 const setup = () => {
   const http = httpServiceMock.createSetupContract();
-  const conversationLoad = new ConversationLoadService(http);
+  const conversationLoad = new ConversationLoadService(http, new DataSourceServiceMock());
 
   return {
     conversationLoad,

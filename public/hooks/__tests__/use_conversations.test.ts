@@ -7,17 +7,36 @@ import { useDeleteConversation, usePatchConversation } from '../use_conversation
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useCore } from '../../contexts/core_context';
 import { HttpHandler } from '../../../../../src/core/public';
-
+import { DataSourceServiceMock } from '../../services/data_source_service.mock';
+import { httpServiceMock } from '../../../../../src/core/public/mocks';
 jest.mock('../../contexts/core_context');
-const useCoreMocked = useCore as jest.MockedFunction<typeof useCore>;
+
+const setup = () => {
+  const useCoreMocked = useCore as jest.MockedFunction<typeof useCore>;
+  const mockedDataSource = new DataSourceServiceMock();
+  const mockedHttp = httpServiceMock.createStartContract();
+  mockedHttp.delete = jest.fn(() => Promise.resolve());
+  mockedHttp.put = jest.fn(() => Promise.resolve());
+
+  useCoreMocked.mockReturnValue({
+    services: {
+      dataSource: mockedDataSource,
+      http: mockedHttp,
+    },
+  });
+
+  return useCoreMocked;
+};
 
 describe('useDeleteConversation', () => {
+  const useCoreMocked = setup();
   it('should call delete with path and signal', async () => {
     const { result } = renderHook(() => useDeleteConversation());
 
     await act(async () => {
       await result.current.deleteConversation('foo');
     });
+
     expect(useCoreMocked.mock.results[0].value.services.http.delete).toHaveBeenCalledWith(
       '/api/assistant/conversation/foo',
       expect.objectContaining({
@@ -96,6 +115,8 @@ describe('useDeleteConversation', () => {
 });
 
 describe('usePatchConversation', () => {
+  const useCoreMocked = setup();
+
   it('should call put with path, query and signal', async () => {
     const { result } = renderHook(() => usePatchConversation());
 

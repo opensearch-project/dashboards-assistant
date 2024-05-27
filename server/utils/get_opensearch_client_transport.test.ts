@@ -19,11 +19,12 @@ describe('getOpenSearchClientTransport', () => {
       })
     ).toBe(core.opensearch.client.asCurrentUser.transport);
   });
-  it('should data source id related opensearch transport', async () => {
+  it('should return data source id related opensearch transport', async () => {
     const transportMock = {};
     const core = coreMock.createRequestHandlerContext();
     const context = {
       core,
+      assistant_plugin: { logger: mockedLogger },
       dataSource: {
         opensearch: {
           getClient: async (_dataSourceId: string) => ({
@@ -35,7 +36,7 @@ describe('getOpenSearchClientTransport', () => {
 
     expect(
       await getOpenSearchClientTransport({
-        context: { core, assistant_plugin: { logger: mockedLogger } },
+        context,
         dataSourceId: 'foo',
       })
     ).toBe(transportMock);

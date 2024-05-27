@@ -13,6 +13,7 @@ import { ConversationLoadService } from '../services/conversation_load_service';
 import * as chatStateHookExports from './use_chat_state';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { IMessage } from 'common/types/chat_saved_object_attributes';
+import { DataSourceServiceMock } from '../services/data_source_service.mock';
 
 jest.mock('../services/conversations_service', () => {
   return {
@@ -60,6 +61,7 @@ describe('useChatActions hook', () => {
   const setSelectedTabIdMock = jest.fn();
   const pplVisualizationRenderMock = jest.fn();
   const setInteractionIdMock = jest.fn();
+  const dataSourceServiceMock = new DataSourceServiceMock();
 
   const chatContextMock: chatContextHookExports.IChatContext = {
     selectedTabId: 'chat',
@@ -88,8 +90,9 @@ describe('useChatActions hook', () => {
     jest.spyOn(coreHookExports, 'useCore').mockReturnValue({
       services: {
         http: httpMock,
-        conversations: new ConversationsService(httpMock),
-        conversationLoad: new ConversationLoadService(httpMock),
+        conversations: new ConversationsService(httpMock, dataSourceServiceMock),
+        conversationLoad: new ConversationLoadService(httpMock, dataSourceServiceMock),
+        dataSource: dataSourceServiceMock,
       },
     });
 
@@ -125,6 +128,7 @@ describe('useChatActions hook', () => {
         messages: [SEND_MESSAGE_RESPONSE.messages[0]],
         input: INPUT_MESSAGE,
       }),
+      query: dataSourceServiceMock.getDataSourceQuery(),
     });
 
     // it should send dispatch `receive` action to remove the message without messageId
@@ -199,6 +203,7 @@ describe('useChatActions hook', () => {
         messages: [],
         input: { type: 'input', content: 'message that send as input', contentType: 'text' },
       }),
+      query: dataSourceServiceMock.getDataSourceQuery(),
     });
   });
 
@@ -261,6 +266,7 @@ describe('useChatActions hook', () => {
     expect(chatStateDispatchMock).toHaveBeenCalledWith({ type: 'abort' });
     expect(httpMock.post).toHaveBeenCalledWith(ASSISTANT_API.ABORT_AGENT_EXECUTION, {
       body: JSON.stringify({ conversationId: 'conversation_id_to_abort' }),
+      query: dataSourceServiceMock.getDataSourceQuery(),
     });
   });
 
@@ -288,6 +294,7 @@ describe('useChatActions hook', () => {
         conversationId: 'conversation_id_mock',
         interactionId: 'interaction_id_mock',
       }),
+      query: dataSourceServiceMock.getDataSourceQuery(),
     });
     expect(chatStateDispatchMock).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'receive', payload: { messages: [], interactions: [] } })
@@ -323,6 +330,7 @@ describe('useChatActions hook', () => {
         conversationId: 'conversation_id_mock',
         interactionId: 'interaction_id_mock',
       }),
+      query: dataSourceServiceMock.getDataSourceQuery(),
     });
     expect(chatStateDispatchMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'receive' })

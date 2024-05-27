@@ -15,10 +15,13 @@ import {
   DeleteConversationConfirmModalProps,
 } from '../delete_conversation_confirm_modal';
 import { HttpHandler } from '../../../../../../src/core/public';
+import { DataSourceServiceMock } from '../../../services/data_source_service.mock';
 
 const setup = ({ onClose, conversationId }: DeleteConversationConfirmModalProps) => {
+  const dataSourceServiceMock = new DataSourceServiceMock();
+
   const useCoreMock = {
-    services: coreMock.createStart(),
+    services: { ...coreMock.createStart(), dataSource: dataSourceServiceMock },
   };
   jest.spyOn(coreContextExports, 'useCore').mockReturnValue(useCoreMock);
 
