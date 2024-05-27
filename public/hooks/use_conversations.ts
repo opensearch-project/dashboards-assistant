@@ -20,6 +20,7 @@ export const useDeleteConversation = () => {
       return core.services.http
         .delete(`${ASSISTANT_API.CONVERSATION}/${conversationId}`, {
           signal: abortControllerRef.current.signal,
+          query: core.services.dataSource.getDataSourceQuery(),
         })
         .then((payload) => {
           dispatch({ type: 'success', payload });

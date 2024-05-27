@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { HttpFetchQuery, HttpStart, SavedObjectsFindOptions } from '../../../../src/core/public';
 import { IConversationFindResponse } from '../../common/types/chat_saved_object_attributes';
 import { ASSISTANT_API } from '../../common/constants/llm';
+import { DataSourceService } from './data_source_service';
 
 export class ConversationsService {
   conversations$: BehaviorSubject<IConversationFindResponse | null> = new BehaviorSubject<IConversationFindResponse | null>(
@@ -21,7 +22,7 @@ export class ConversationsService {
   >;
   abortController?: AbortController;
 
-  constructor(private _http: HttpStart) {}
+  constructor(private _http: HttpStart, private _dataSource: DataSourceService) {}
 
   public get options() {
     return this._options;
@@ -37,7 +38,7 @@ export class ConversationsService {
       this.status$.next('loading');
       this.conversations$.next(
         await this._http.get<IConversationFindResponse>(ASSISTANT_API.CONVERSATIONS, {
-          query: this._options as HttpFetchQuery,
+          query: { ...this._options, ...this._dataSource.getDataSourceQuery() } as HttpFetchQuery,
           signal: this.abortController.signal,
         })
       );

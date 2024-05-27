@@ -38,6 +38,7 @@ export const useFeedback = (interaction?: Interaction | null) => {
     try {
       await core.services.http.put(`${ASSISTANT_API.FEEDBACK}/${message.interactionId}`, {
         body: JSON.stringify(body),
+        query: core.services.dataSource.getDataSourceQuery(),
       });
       setFeedbackResult(correct);
     } catch (error) {

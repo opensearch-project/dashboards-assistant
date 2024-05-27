@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { HttpStart } from '../../../../src/core/public';
 import { IConversation } from '../../common/types/chat_saved_object_attributes';
 import { ASSISTANT_API } from '../../common/constants/llm';
+import { DataSourceService } from './data_source_service';
 
 export class ConversationLoadService {
   status$: BehaviorSubject<
@@ -14,7 +15,7 @@ export class ConversationLoadService {
   > = new BehaviorSubject<'idle' | 'loading' | { status: 'error'; error: Error }>('idle');
   abortController?: AbortController;
 
-  constructor(private _http: HttpStart) {}
+  constructor(private _http: HttpStart, private _dataSource: DataSourceService) {}
 
   load = async (conversationId: string) => {
     this.abortController?.abort();
@@ -25,6 +26,7 @@ export class ConversationLoadService {
         `${ASSISTANT_API.CONVERSATION}/${conversationId}`,
         {
           signal: this.abortController.signal,
+          query: this._dataSource.getDataSourceQuery(),
         }
       );
       this.status$.next('idle');

@@ -17,6 +17,7 @@ import { OllyChatService } from '../services/chat/olly_chat_service';
 import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
 import { RoutesOptions } from '../types';
 import { ChatService } from '../services/chat/chat_service';
+import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
 
 const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
@@ -33,6 +34,9 @@ const llmRequestRoute = {
         contentType: schema.literal('text'),
       }),
     }),
+    query: schema.object({
+      dataSourceId: schema.maybe(schema.string()),
+    }),
   },
 };
 export type LLMRequestSchema = TypeOf<typeof llmRequestRoute.validate.body>;
@@ -42,6 +46,9 @@ const getConversationRoute = {
   validate: {
     params: schema.object({
       conversationId: schema.string(),
+    }),
+    query: schema.object({
+      dataSourceId: schema.maybe(schema.string()),
     }),
   },
 };
@@ -53,6 +60,9 @@ const abortAgentExecutionRoute = {
     body: schema.object({
       conversationId: schema.string(),
     }),
+    query: schema.object({
+      dataSourceId: schema.maybe(schema.string()),
+    }),
   },
 };
 export type AbortAgentExecutionSchema = TypeOf<typeof abortAgentExecutionRoute.validate.body>;
@@ -63,6 +73,9 @@ const regenerateRoute = {
     body: schema.object({
       conversationId: schema.string(),
       interactionId: schema.string(),
+    }),
+    query: schema.object({
+      dataSourceId: schema.maybe(schema.string()),
     }),
   },
 };
@@ -79,6 +92,7 @@ const getConversationsRoute = {
       fields: schema.maybe(schema.arrayOf(schema.string())),
       search: schema.maybe(schema.string()),
       searchFields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      dataSourceId: schema.maybe(schema.string()),
     }),
   },
 };
@@ -89,6 +103,9 @@ const deleteConversationRoute = {
   validate: {
     params: schema.object({
       conversationId: schema.string(),
+    }),
+    query: schema.object({
+      dataSourceId: schema.maybe(schema.string()),
     }),
   },
 };
@@ -102,6 +119,9 @@ const updateConversationRoute = {
     body: schema.object({
       title: schema.string(),
     }),
+    query: schema.object({
+      dataSourceId: schema.maybe(schema.string()),
+    }),
   },
 };
 
@@ -110,6 +130,9 @@ const getTracesRoute = {
   validate: {
     params: schema.object({
       interactionId: schema.string(),
+    }),
+    query: schema.object({
+      dataSourceId: schema.maybe(schema.string()),
     }),
   },
 };
@@ -123,16 +146,20 @@ const feedbackRoute = {
     body: schema.object({
       satisfaction: schema.boolean(),
     }),
+    query: schema.object({
+      dataSourceId: schema.maybe(schema.string()),
+    }),
   },
 };
 
 export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions) {
-  const createStorageService = (context: RequestHandlerContext) =>
+  const createStorageService = async (context: RequestHandlerContext, dataSourceId?: string) =>
     new AgentFrameworkStorageService(
-      context.core.opensearch.client.asCurrentUser,
+      await getOpenSearchClientTransport({ context, dataSourceId }),
       routeOptions.messageParsers
     );
-  const createChatService = (context: RequestHandlerContext) => new OllyChatService(context);
+  const createChatService = async (context: RequestHandlerContext, dataSourceId?: string) =>
+    new OllyChatService(await getOpenSearchClientTransport({ context, dataSourceId }));
 
   router.post(
     llmRequestRoute,
@@ -142,8 +169,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const { messages = [], input, conversationId: conversationIdInRequestBody } = request.body;
-      const storageService = createStorageService(context);
-      const chatService = createChatService(context);
+      const storageService = await createStorageService(context, request.query.dataSourceId);
+      const chatService = await createChatService(context, request.query.dataSourceId);
 
       let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
 
@@ -217,7 +244,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const storageService = createStorageService(context);
+      const storageService = await createStorageService(context, request.query.dataSourceId);
 
       try {
         const getResponse = await storageService.getConversation(request.params.conversationId);
@@ -236,7 +263,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const storageService = createStorageService(context);
+      const storageService = await createStorageService(context, request.query.dataSourceId);
 
       try {
         const getResponse = await storageService.getConversations(request.query);
@@ -255,7 +282,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const storageService = createStorageService(context);
+      const storageService = await createStorageService(context, request.query.dataSourceId);
 
       try {
         const getResponse = await storageService.deleteConversation(request.params.conversationId);
@@ -274,7 +301,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const storageService = createStorageService(context);
+      const storageService = await createStorageService(context, request.query.dataSourceId);
 
       try {
         const getResponse = await storageService.updateConversation(
@@ -296,7 +323,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const storageService = createStorageService(context);
+      const storageService = await createStorageService(context, request.query.dataSourceId);
 
       try {
         const getResponse = await storageService.getTraces(request.params.interactionId);
@@ -315,7 +342,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const chatService = createChatService(context, '');
+      const chatService = await createChatService(context, request.query.dataSourceId);
       try {
         chatService.abortAgentExecution(request.body.conversationId);
         context.assistant_plugin.logger.info(
@@ -337,8 +364,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const { conversationId, interactionId } = request.body;
-      const storageService = createStorageService(context);
-      const chatService = createChatService(context);
+      const storageService = await createStorageService(context, request.query.dataSourceId);
+      const chatService = await createChatService(context, request.query.dataSourceId);
 
       let outputs: Awaited<ReturnType<ChatService['regenerate']>> | undefined;
 
@@ -386,7 +413,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
-      const storageService = createStorageService(context);
+      const storageService = await createStorageService(context, request.query.dataSourceId);
       const { interactionId } = request.params;
 
       try {

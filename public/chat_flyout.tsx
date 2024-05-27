@@ -7,6 +7,7 @@ import { EuiResizableContainer } from '@elastic/eui';
 import cs from 'classnames';
 import React, { useMemo, useRef } from 'react';
 import { useObservable } from 'react-use';
+import { BehaviorSubject } from 'rxjs';
 import { useChatContext } from './contexts/chat_context';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatWindowHeader } from './tabs/chat_window_header';
@@ -25,8 +26,10 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
   const chatContext = useChatContext();
   const chatHistoryPageLoadedRef = useRef(false);
   const core = useCore();
+  // TODO: use DataSourceService to replace
   const selectedDS = useObservable(
-    core.services.setupDeps.dataSourceManagement.dataSourceSelection.getSelection$()
+    core.services.setupDeps?.dataSourceManagement?.dataSourceSelection?.getSelection$() ??
+      new BehaviorSubject(new Map())
   );
   const currentDS = useMemo(() => {
     return selectedDS?.values().next().value;
@@ -97,7 +100,7 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
           <ChatWindowHeader />
           <div>
             Data Source:
-            {currentDS?.[0].label}
+            {currentDS?.[0]?.label}
           </div>
         </div>
 

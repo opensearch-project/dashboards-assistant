@@ -15,6 +15,7 @@ export interface AssistantServices extends Required<OpenSearchDashboardsServices
   startDeps: AssistantPluginStartDependencies;
   conversationLoad: ConversationLoadService;
   conversations: ConversationsService;
+  // This service is maintained in chatbot instead of dataSource exported from core plugin.
   dataSource: DataSourceService;
 }
 

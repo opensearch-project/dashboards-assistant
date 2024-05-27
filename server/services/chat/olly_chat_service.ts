@@ -4,7 +4,7 @@
  */
 
 import { ApiResponse } from '@opensearch-project/opensearch';
-import { RequestHandlerContext } from '../../../../../src/core/server';
+import { OpenSearchClient } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
 import { ML_COMMONS_BASE_API, ROOT_AGENT_CONFIG_ID } from '../../utils/constants';
@@ -22,13 +22,12 @@ const INTERACTION_ID_FIELD = 'parent_interaction_id';
 export class OllyChatService implements ChatService {
   static abortControllers: Map<string, AbortController> = new Map();
 
-  constructor(private readonly context: RequestHandlerContext) {}
+  constructor(private readonly opensearchClientTransport: OpenSearchClient['transport']) {}
 
   private async getRootAgent(): Promise<string> {
     try {
-      const opensearchClient = this.context.core.opensearch.client.asCurrentUser;
       const path = `${ML_COMMONS_BASE_API}/config/${ROOT_AGENT_CONFIG_ID}`;
-      const response = await opensearchClient.transport.request({
+      const response = await this.opensearchClientTransport.request({
         method: 'GET',
         path,
       });
@@ -53,9 +52,8 @@ export class OllyChatService implements ChatService {
   }
 
   private async callExecuteAgentAPI(payload: AgentRunPayload, rootAgentId: string) {
-    const opensearchClient = this.context.core.opensearch.client.asCurrentUser;
     try {
-      const agentFrameworkResponse = (await opensearchClient.transport.request(
+      const agentFrameworkResponse = (await this.opensearchClientTransport.request(
         {
           method: 'POST',
           path: `${ML_COMMONS_BASE_API}/agents/${rootAgentId}/_execute`,
