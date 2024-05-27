@@ -20,3 +20,5 @@ export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
+
+export { DataSourceService } from './data_source_service';

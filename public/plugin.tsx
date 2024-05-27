@@ -31,6 +31,7 @@ import {
   setIncontextInsightRegistry,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
+import { DataSourceService } from './services/data_source_service';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -58,9 +59,11 @@ export class AssistantPlugin
     > {
   private config: ConfigSchema;
   incontextInsightRegistry: IncontextInsightRegistry | undefined;
+  private dataSourceService: DataSourceService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
+    this.dataSourceService = new DataSourceService();
   }
 
   public setup(
@@ -95,6 +98,11 @@ export class AssistantPlugin
     const checkAccess = (account: Awaited<ReturnType<typeof getAccount>>) =>
       account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role));
 
+    const dataSourceSetupResult = this.dataSourceService.setup({
+      uiSettings: core.uiSettings,
+      dataSourceManagement: setupDeps.dataSourceManagement,
+    });
+
     if (this.config.chat.enabled) {
       const setupChat = async () => {
         const [coreStart, startDeps] = await core.getStartServices();
@@ -105,6 +113,7 @@ export class AssistantPlugin
           startDeps,
           conversationLoad: new ConversationLoadService(coreStart.http),
           conversations: new ConversationsService(coreStart.http),
+          dataSource: this.dataSourceService,
         });
         const account = await getAccount();
         const username = account.data.user_name;
@@ -131,6 +140,7 @@ export class AssistantPlugin
     }
 
     return {
+      ...dataSourceSetupResult,
       registerMessageRenderer: (contentType, render) => {
         if (contentType in messageRenderers)
           console.warn(`Content renderer type ${contentType} is already registered.`);
@@ -160,8 +170,12 @@ export class AssistantPlugin
     setChrome(core.chrome);
     setNotifications(core.notifications);
 
-    return {};
+    return {
+      ...this.dataSourceService.start(),
+    };
   }
 
-  public stop() {}
+  public stop() {
+    this.dataSourceService.stop();
+  }
 }
