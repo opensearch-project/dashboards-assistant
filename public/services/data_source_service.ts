@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, PartialObserver, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
+import { first, map } from 'rxjs/operators';
+
 import type { IUiSettingsClient } from '../../../../src/core/public';
 import type { DataSourceOption } from '../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import type { DataSourceManagementPluginSetup } from '../types';
@@ -34,49 +36,33 @@ export class DataSourceService {
   private uiSettings: IUiSettingsClient | undefined;
   private dataSourceManagement: DataSourceManagementPluginSetup | undefined;
   private dataSourceSelectionSubscription: Subscription | undefined;
-  private dataSourceIdFrom: DataSourceIdFrom | undefined;
 
   constructor() {}
 
-  /**
-   * Init data source from data source selection or default data source.
-   * This function will check data source selection first, then it will fallback
-   * to the default data source if data source selection is empty.
-   * @returns void
-   */
-  init() {
+  private init() {
     if (!this.isMDSEnabled()) {
       return;
     }
-    const dataSourceSelectionMap = this.dataSourceManagement?.dataSourceSelection
+    if (!this.dataSourceManagement) {
+      return;
+    }
+    this.dataSourceSelectionSubscription = this.dataSourceManagement.dataSourceSelection
       .getSelection$()
-      .getValue();
-    const dataSourceSelectionOption = dataSourceSelectionMap
-      ? getSingleSelectedDataSourceOption(dataSourceSelectionMap)
-      : null;
-    if (dataSourceSelectionOption) {
-      this.setDataSourceId(dataSourceSelectionOption.id, DataSourceIdFrom.DataSourceSelection);
-      return;
-    }
-    const defaultDataSourceId = this.uiSettings?.get('defaultDataSource', null);
-    if (!defaultDataSourceId) {
-      return;
-    }
-    this.setDataSourceId(defaultDataSourceId, DataSourceIdFrom.UiSettings);
+      .pipe(map(getSingleSelectedDataSourceOption))
+      .subscribe((v) => {
+        this.setDataSourceId(v?.id ?? null);
+      });
   }
 
-  clearDataSourceId() {
-    this.setDataSourceId(null, undefined);
-  }
-
-  getDataSourceQuery() {
+  async getDataSourceQuery() {
     if (!this.isMDSEnabled()) {
       return {};
     }
-    const dataSourceId = this.dataSourceId$.getValue();
+    const dataSourceId = await this.getDataSourceId$().pipe(first()).toPromise();
     if (dataSourceId === null) {
       throw new Error('No data source id');
     }
+    // empty means using local cluster
     if (dataSourceId === '') {
       return {};
     }
@@ -87,20 +73,25 @@ export class DataSourceService {
     return !!this.dataSourceManagement;
   }
 
-  setDataSourceId(newDataSourceId: string | null, dataSourceIdFrom: DataSourceIdFrom | undefined) {
-    this.dataSourceIdFrom = dataSourceIdFrom;
+  setDataSourceId(newDataSourceId: string | null) {
     if (this.dataSourceId$.getValue() === newDataSourceId) {
       return;
     }
     this.dataSourceId$.next(newDataSourceId);
   }
 
-  getDataSourceId() {
-    return this.dataSourceId$.getValue();
-  }
-
-  subscribeDataSourceId(observer?: PartialObserver<string | null>) {
-    return this.dataSourceId$.subscribe(observer);
+  getDataSourceId$() {
+    return combineLatest([
+      this.dataSourceId$,
+      this.uiSettings?.get$('defaultDataSource', null) ?? of(null),
+    ]).pipe(
+      map(([selectedDataSourceId, defaultDataSourceId]) => {
+        if (selectedDataSourceId !== null) {
+          return selectedDataSourceId;
+        }
+        return defaultDataSourceId;
+      })
+    );
   }
 
   setup({
@@ -112,21 +103,11 @@ export class DataSourceService {
   }): DataSourceServiceContract {
     this.uiSettings = uiSettings;
     this.dataSourceManagement = dataSourceManagement;
+    this.init();
 
-    this.dataSourceSelectionSubscription = this.dataSourceManagement?.dataSourceSelection
-      ?.getSelection$()
-      .subscribe(() => {
-        this.init();
-      });
-
-    this.uiSettings.get$('defaultDataSource', null).subscribe((newDataSourceId) => {
-      if (this.dataSourceIdFrom === DataSourceIdFrom.UiSettings) {
-        this.setDataSourceId(newDataSourceId, DataSourceIdFrom.UiSettings);
-      }
-    });
     return {
       setDataSourceId: (newDataSourceId: string | null) => {
-        this.setDataSourceId(newDataSourceId, DataSourceIdFrom.Customized);
+        this.setDataSourceId(newDataSourceId);
       },
     };
   }
@@ -134,7 +115,7 @@ export class DataSourceService {
   start(): DataSourceServiceContract {
     return {
       setDataSourceId: (newDataSourceId: string | null) => {
-        this.setDataSourceId(newDataSourceId, DataSourceIdFrom.Customized);
+        this.setDataSourceId(newDataSourceId);
       },
     };
   }

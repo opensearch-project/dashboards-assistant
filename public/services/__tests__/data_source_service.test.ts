@@ -3,14 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { first } from 'rxjs/operators';
+
 import { uiSettingsServiceMock } from '../../../../../src/core/public/mocks';
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { DataSourceManagementPluginSetup } from '../../types';
 import { DataSourceService } from '../data_source_service';
 
-const setup = (options?: { dataSourceManagement?: DataSourceManagementPluginSetup }) => {
-  const dataSourceSelection$ = new BehaviorSubject<Map<string, DataSourceOption[]>>(new Map());
+const setup = (options?: {
+  dataSourceManagement?: DataSourceManagementPluginSetup;
+  defaultDataSourceId?: string | null;
+  dataSourceSelection?: Map<string, DataSourceOption[]>;
+}) => {
+  const dataSourceSelection$ = new BehaviorSubject<Map<string, DataSourceOption[]>>(
+    options?.dataSourceSelection ?? new Map()
+  );
   const uiSettings = uiSettingsServiceMock.createSetupContract();
   const dataSourceManagement: DataSourceManagementPluginSetup = {
     dataSourceSelection: {
@@ -18,8 +26,8 @@ const setup = (options?: { dataSourceManagement?: DataSourceManagementPluginSetu
     },
   };
   const dataSource = new DataSourceService();
-  const defaultDataSourceSelection$ = new Subject();
-  uiSettings.get$.mockReturnValueOnce(defaultDataSourceSelection$);
+  const defaultDataSourceSelection$ = new BehaviorSubject(options?.defaultDataSourceId ?? null);
+  uiSettings.get$.mockReturnValue(defaultDataSourceSelection$);
   const setupResult = dataSource.setup({
     uiSettings,
     dataSourceManagement:
@@ -30,7 +38,6 @@ const setup = (options?: { dataSourceManagement?: DataSourceManagementPluginSetu
 
   return {
     dataSource,
-    uiSettings,
     dataSourceSelection$,
     defaultDataSourceSelection$,
     setupResult,
@@ -38,129 +45,72 @@ const setup = (options?: { dataSourceManagement?: DataSourceManagementPluginSetu
 };
 
 describe('DataSourceService', () => {
-  it('should return data source selection provided data source id', () => {
-    const { dataSource, dataSourceSelection$ } = setup();
+  describe('getDataSourceId$', () => {
+    it('should return data source selection provided value', async () => {
+      const { dataSource } = setup({
+        defaultDataSourceId: 'foo',
+        dataSourceSelection: new Map([['test', [{ label: 'Bar', id: 'bar' }]]]),
+      });
 
-    expect(dataSource.getDataSourceId()).toBe(null);
-
-    dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
-
-    expect(dataSource.getDataSourceId()).toBe('foo');
-  });
-  describe('init', () => {
-    it('should return ui settings provided data source id', () => {
-      const { dataSource, uiSettings } = setup();
-
-      uiSettings.get.mockReturnValueOnce('foo');
-
-      expect(dataSource.getDataSourceId()).toBe(null);
-
-      dataSource.init();
-
-      expect(dataSource.getDataSourceId()).toBe('foo');
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('bar');
     });
-    it('should return data source selection provided data source', () => {
-      const { dataSource, dataSourceSelection$, uiSettings } = setup();
+    it('should return data source selection provided value even default data source changed', async () => {
+      const { dataSource, defaultDataSourceSelection$ } = setup({
+        defaultDataSourceId: 'foo',
+        dataSourceSelection: new Map([['test', [{ label: 'Bar', id: 'bar' }]]]),
+      });
 
-      uiSettings.get.mockReturnValueOnce('bar');
-
-      expect(dataSource.getDataSourceId()).toBe(null);
-
-      dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
-
-      expect(dataSource.getDataSourceId()).toBe('foo');
-
-      dataSource.init();
-      expect(dataSource.getDataSourceId()).toBe('foo');
+      defaultDataSourceSelection$.next('baz');
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('bar');
     });
-  });
-  it('should update data source id after default data source id changed', () => {
-    const { dataSource, defaultDataSourceSelection$, uiSettings } = setup();
+    it('should return default data source id if no data source selection', async () => {
+      const { dataSource } = setup({ defaultDataSourceId: 'foo' });
 
-    uiSettings.get.mockReturnValueOnce('foo');
-    dataSource.init();
-    expect(dataSource.getDataSourceId()).toBe('foo');
-    defaultDataSourceSelection$.next('bar');
-    expect(dataSource.getDataSourceId()).toBe('bar');
-  });
-  it('should not update data source id when data source id not from ui settings', () => {
-    const { dataSource, dataSourceSelection$, defaultDataSourceSelection$ } = setup();
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('foo');
+    });
+    it('should return default data source id if data source selection become empty', () => {
+      const { dataSource, dataSourceSelection$ } = setup({
+        defaultDataSourceId: 'foo',
+        dataSourceSelection: new Map([['test', [{ label: 'Bar', id: 'bar' }]]]),
+      });
+      const observerFn = jest.fn();
+      dataSource.getDataSourceId$().subscribe(observerFn);
+      expect(observerFn).toHaveBeenLastCalledWith('bar');
 
-    expect(dataSource.getDataSourceId()).toBe(null);
-
-    dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
-    defaultDataSourceSelection$.next('bar');
-    expect(dataSource.getDataSourceId()).toBe('foo');
-  });
-  it('should update data source id update data source selection change', () => {
-    const { dataSource, dataSourceSelection$ } = setup();
-
-    dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
-    expect(dataSource.getDataSourceId()).toBe('foo');
-
-    dataSourceSelection$.next(new Map([['test', [{ label: 'Bar', id: 'bar' }]]]));
-    expect(dataSource.getDataSourceId()).toBe('bar');
-  });
-  it('should fallback to default data source after data source selection become empty', () => {
-    const { dataSource, dataSourceSelection$, uiSettings } = setup();
-
-    uiSettings.get.mockReturnValueOnce('foo');
-    dataSourceSelection$.next(new Map([['test', [{ label: 'Bar', id: 'bar' }]]]));
-    expect(dataSource.getDataSourceId()).toBe('bar');
-
-    dataSourceSelection$.next(new Map([]));
-    expect(dataSource.getDataSourceId()).toBe('foo');
-  });
-  it('should return null for multi data source selection', () => {
-    const { dataSource, dataSourceSelection$ } = setup();
-
-    expect(dataSource.getDataSourceId()).toBe(null);
-
-    dataSourceSelection$.next(
-      new Map([
-        [
-          'test',
+      dataSourceSelection$.next(new Map());
+      expect(observerFn).toHaveBeenLastCalledWith('foo');
+    });
+    it('should return null for multi data source selection', async () => {
+      const { dataSource, dataSourceSelection$ } = setup({
+        dataSourceSelection: new Map([
           [
-            { label: 'Foo', id: 'foo' },
-            { label: 'Bar', id: 'bar' },
+            'test',
+            [
+              { label: 'Foo', id: 'foo' },
+              { label: 'Bar', id: 'bar' },
+            ],
           ],
-        ],
-      ])
-    );
-    expect(dataSource.getDataSourceId()).toBe(null);
+        ]),
+      });
 
-    dataSourceSelection$.next(
-      new Map([
-        ['component1', [{ label: 'Foo', id: 'foo' }]],
-        ['component2', [{ label: 'Bar', id: 'bar' }]],
-      ])
-    );
-    expect(dataSource.getDataSourceId()).toBe(null);
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe(null);
+
+      dataSourceSelection$.next(
+        new Map([
+          ['component1', [{ label: 'Foo', id: 'foo' }]],
+          ['component2', [{ label: 'Bar', id: 'bar' }]],
+        ])
+      );
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe(null);
+    });
+    it('should return null for empty data source selection', async () => {
+      const { dataSource, dataSourceSelection$ } = setup({
+        dataSourceSelection: new Map(),
+      });
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe(null);
+    });
   });
-  it('should return null for empty data source selection', () => {
-    const { dataSource, dataSourceSelection$ } = setup();
 
-    expect(dataSource.getDataSourceId()).toBe(null);
-
-    dataSourceSelection$.next(new Map());
-    expect(dataSource.getDataSourceId()).toBe(null);
-  });
-  it('should able to subscribe data source id changes', () => {
-    const { dataSource } = setup();
-    const mockFn = jest.fn();
-    dataSource.subscribeDataSourceId({ next: mockFn });
-
-    dataSource.setDataSourceId('foo', undefined);
-    expect(mockFn).toHaveBeenCalledWith('foo');
-    expect(mockFn).toHaveBeenCalledTimes(2);
-
-    dataSource.setDataSourceId('foo', undefined);
-    expect(mockFn).toHaveBeenCalledTimes(2);
-
-    dataSource.setDataSourceId('bar', undefined);
-    expect(mockFn).toHaveBeenCalledWith('bar');
-    expect(mockFn).toHaveBeenCalledTimes(3);
-  });
   describe('isMDSEnabled', () => {
     it('should return true if multi data source provided', () => {
       const { dataSource } = setup();
@@ -171,62 +121,90 @@ describe('DataSourceService', () => {
       expect(dataSource.isMDSEnabled()).toBe(false);
     });
   });
-
   describe('getDataSourceQuery', () => {
-    it('should return empty object if MDS not enabled', () => {
+    it('should return empty object if MDS not enabled', async () => {
       const { dataSource } = setup({ dataSourceManagement: undefined });
-      expect(dataSource.getDataSourceQuery()).toEqual({});
+      expect(await dataSource.getDataSourceQuery()).toEqual({});
     });
-    it('should return empty object if data source id is empty', () => {
-      const { dataSource, dataSourceSelection$ } = setup();
-      dataSourceSelection$.next(new Map([['test', [{ label: '', id: '' }]]]));
-      expect(dataSource.getDataSourceQuery()).toEqual({});
+    it('should return empty object if data source id is empty', async () => {
+      const { dataSource } = setup({
+        dataSourceSelection: new Map([['test', [{ label: '', id: '' }]]]),
+      });
+      expect(await dataSource.getDataSourceQuery()).toEqual({});
     });
-    it('should return query object with provided data source id', () => {
-      const { dataSource, dataSourceSelection$ } = setup();
-      dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
-      expect(dataSource.getDataSourceQuery()).toEqual({ dataSourceId: 'foo' });
+    it('should return query object with provided data source id', async () => {
+      const { dataSource } = setup({ defaultDataSourceId: 'foo' });
+      expect(await dataSource.getDataSourceQuery()).toEqual({ dataSourceId: 'foo' });
     });
-    it('should throw error if data source id not exists', () => {
+    it('should throw error if data source id not exists', async () => {
       const { dataSource } = setup();
       let error;
       try {
-        dataSource.getDataSourceQuery();
+        await dataSource.getDataSourceQuery();
       } catch (e) {
         error = e;
       }
       expect(error).toBeTruthy();
     });
   });
-  it('should clear data source id', () => {
-    const { dataSource, dataSourceSelection$ } = setup();
-    dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
-    expect(dataSource.getDataSourceId()).toEqual('foo');
-    dataSource.clearDataSourceId();
-    expect(dataSource.getDataSourceId()).toEqual(null);
-  });
-  it('should able to change data source id from outside', () => {
-    const { dataSource, setupResult } = setup();
-    setupResult.setDataSourceId('foo');
-    expect(dataSource.getDataSourceId()).toBe('foo');
-    dataSource.start().setDataSourceId('bar');
-    expect(dataSource.getDataSourceId()).toBe('bar');
-  });
   describe('stop', () => {
-    it('should unsubscribe data source selection', () => {
+    it('should not emit after data source selection unsubscribe', async () => {
       const { dataSource, dataSourceSelection$ } = setup();
+      const observerFn = jest.fn();
+      dataSource.getDataSourceId$().subscribe(observerFn);
+      expect(observerFn).toHaveBeenCalledTimes(1);
       dataSource.stop();
       dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
-      expect(dataSource.getDataSourceId()).toBe(null);
+      expect(observerFn).toHaveBeenCalledTimes(1);
     });
-    it('should complete data source id', () => {
+    it('should not emit after data source id subject complete', () => {
       const { dataSource } = setup();
-      const mockFn = jest.fn();
-      dataSource.subscribeDataSourceId({
-        complete: mockFn,
-      });
+      const observerFn = jest.fn();
+      dataSource.getDataSourceId$().subscribe(observerFn);
+      expect(observerFn).toHaveBeenCalledTimes(1);
       dataSource.stop();
-      expect(mockFn).toHaveBeenCalled();
+      dataSource.setDataSourceId('foo');
+      expect(observerFn).toHaveBeenCalledTimes(1);
     });
+  });
+
+  describe('setup', () => {
+    it('should able to change data source id from setup result', async () => {
+      const { dataSource, setupResult } = setup();
+      setupResult.setDataSourceId('foo');
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('foo');
+    });
+
+    it('should update data source id after data source selection changed', () => {
+      const { dataSource, dataSourceSelection$ } = setup();
+      const observerFn = jest.fn();
+      dataSource.getDataSourceId$().subscribe(observerFn);
+
+      dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
+      expect(observerFn).toHaveBeenLastCalledWith('foo');
+
+      dataSourceSelection$.next(new Map([['test', [{ label: 'Bar', id: 'bar' }]]]));
+      expect(observerFn).toHaveBeenLastCalledWith('bar');
+    });
+  });
+
+  it('should able to change data source id from start result', async () => {
+    const { dataSource } = setup();
+    dataSource.start().setDataSourceId('bar');
+    expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('bar');
+  });
+
+  it('should not fire change when call setDataSourceId with same data source id', async () => {
+    const { dataSource } = setup();
+    const observerFn = jest.fn();
+    dataSource.getDataSourceId$().subscribe(observerFn);
+    dataSource.setDataSourceId('foo');
+    expect(observerFn).toHaveBeenCalledTimes(2);
+
+    dataSource.setDataSourceId('foo');
+    expect(observerFn).toHaveBeenCalledTimes(2);
+
+    dataSource.setDataSourceId('bar');
+    expect(observerFn).toHaveBeenCalledTimes(3);
   });
 });
