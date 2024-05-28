@@ -34,8 +34,24 @@ export class DataSourceService {
 
   constructor() {}
 
-  initDefaultDataSourceIdIfNeed() {
-    if (!this.isMDSEnabled() || this.dataSourceId$.getValue() !== null) {
+  /**
+   * Init data source from data source selection or default data source.
+   * This function will check data source selection first, then it will fallback
+   * to the default data source if data source selection is empty.
+   * @returns void
+   */
+  init() {
+    if (!this.isMDSEnabled()) {
+      return;
+    }
+    const dataSourceSelectionMap = this.dataSourceManagement?.dataSourceSelection
+      .getSelection$()
+      .getValue();
+    const dataSourceSelectionOption = dataSourceSelectionMap
+      ? getSingleSelectedDataSourceOption(dataSourceSelectionMap)
+      : null;
+    if (dataSourceSelectionOption) {
+      this.setDataSourceId(dataSourceSelectionOption.id, DataSourceIdFrom.DataSourceSelection);
       return;
     }
     const defaultDataSourceId = this.uiSettings?.get('defaultDataSource', null);
@@ -95,12 +111,8 @@ export class DataSourceService {
 
     this.dataSourceSelectionSubscription = this.dataSourceManagement?.dataSourceSelection
       ?.getSelection$()
-      .subscribe((dataSourceSelection) => {
-        const selectedDataSourceOption = getSingleSelectedDataSourceOption(dataSourceSelection);
-        this.setDataSourceId(
-          selectedDataSourceOption?.id ?? null,
-          DataSourceIdFrom.DataSourceSelection
-        );
+      .subscribe(() => {
+        this.init();
       });
 
     this.uiSettings.get$('defaultDataSource', null).subscribe((newDataSourceId) => {

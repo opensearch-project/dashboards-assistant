@@ -47,7 +47,7 @@ describe('DataSourceService', () => {
 
     expect(dataSource.getDataSourceId()).toBe('foo');
   });
-  describe('initDefaultDataSourceIdIfNeed', () => {
+  describe('init', () => {
     it('should return ui settings provided data source id', () => {
       const { dataSource, uiSettings } = setup();
 
@@ -55,7 +55,7 @@ describe('DataSourceService', () => {
 
       expect(dataSource.getDataSourceId()).toBe(null);
 
-      dataSource.initDefaultDataSourceIdIfNeed();
+      dataSource.init();
 
       expect(dataSource.getDataSourceId()).toBe('foo');
     });
@@ -70,7 +70,7 @@ describe('DataSourceService', () => {
 
       expect(dataSource.getDataSourceId()).toBe('foo');
 
-      dataSource.initDefaultDataSourceIdIfNeed();
+      dataSource.init();
       expect(dataSource.getDataSourceId()).toBe('foo');
     });
   });
@@ -78,7 +78,7 @@ describe('DataSourceService', () => {
     const { dataSource, defaultDataSourceSelection$, uiSettings } = setup();
 
     uiSettings.get.mockReturnValueOnce('foo');
-    dataSource.initDefaultDataSourceIdIfNeed();
+    dataSource.init();
     expect(dataSource.getDataSourceId()).toBe('foo');
     defaultDataSourceSelection$.next('bar');
     expect(dataSource.getDataSourceId()).toBe('bar');
@@ -90,6 +90,25 @@ describe('DataSourceService', () => {
 
     dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
     defaultDataSourceSelection$.next('bar');
+    expect(dataSource.getDataSourceId()).toBe('foo');
+  });
+  it('should update data source id update data source selection change', () => {
+    const { dataSource, dataSourceSelection$ } = setup();
+
+    dataSourceSelection$.next(new Map([['test', [{ label: 'Foo', id: 'foo' }]]]));
+    expect(dataSource.getDataSourceId()).toBe('foo');
+
+    dataSourceSelection$.next(new Map([['test', [{ label: 'Bar', id: 'bar' }]]]));
+    expect(dataSource.getDataSourceId()).toBe('bar');
+  });
+  it('should fallback to default data source after data source selection become empty', () => {
+    const { dataSource, dataSourceSelection$, uiSettings } = setup();
+
+    uiSettings.get.mockReturnValueOnce('foo');
+    dataSourceSelection$.next(new Map([['test', [{ label: 'Bar', id: 'bar' }]]]));
+    expect(dataSource.getDataSourceId()).toBe('bar');
+
+    dataSourceSelection$.next(new Map([]));
     expect(dataSource.getDataSourceId()).toBe('foo');
   });
   it('should return null for multi data source selection', () => {
