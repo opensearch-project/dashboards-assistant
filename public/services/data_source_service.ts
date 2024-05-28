@@ -14,7 +14,9 @@ export enum DataSourceIdFrom {
   Customized,
 }
 
-const getDSMDataSourceSelectionOption = (dataSourceSelection: Map<string, DataSourceOption[]>) => {
+const getSingleSelectedDataSourceOption = (
+  dataSourceSelection: Map<string, DataSourceOption[]>
+) => {
   const values = [...dataSourceSelection.values()];
   // Should use default index if multi data source selected
   if (values.length === 0 || values.length > 1 || values?.[0]?.length > 1) {
@@ -94,7 +96,7 @@ export class DataSourceService {
     this.dataSourceSelectionSubscription = this.dataSourceManagement?.dataSourceSelection
       ?.getSelection$()
       .subscribe((dataSourceSelection) => {
-        const selectedDataSourceOption = getDSMDataSourceSelectionOption(dataSourceSelection);
+        const selectedDataSourceOption = getSingleSelectedDataSourceOption(dataSourceSelection);
         this.setDataSourceId(
           selectedDataSourceOption?.id ?? null,
           DataSourceIdFrom.DataSourceSelection
