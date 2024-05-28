@@ -24,7 +24,11 @@ export const useCore = jest.fn(() => {
         load: jest.fn(),
       },
       conversationLoad: {},
-      dataSource: {},
+      dataSource: {
+        getDataSourceQuery() {
+          return { dataSourceId: '' };
+        },
+      },
     },
   };
   useCoreMock.services.http.delete.mockReturnValue(Promise.resolve());

@@ -26,10 +26,12 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
   const chatContext = useChatContext();
   const chatHistoryPageLoadedRef = useRef(false);
   const core = useCore();
+  const defaultDataSourceSelection$ = new BehaviorSubject(new Map());
+
   // TODO: use DataSourceService to replace
   const selectedDS = useObservable(
     core.services.setupDeps?.dataSourceManagement?.dataSourceSelection?.getSelection$() ??
-      new BehaviorSubject(new Map())
+      defaultDataSourceSelection$
   );
   const currentDS = useMemo(() => {
     return selectedDS?.values().next().value;
