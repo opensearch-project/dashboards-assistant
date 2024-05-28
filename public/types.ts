@@ -9,7 +9,7 @@ import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddabl
 import { IMessage, ISuggestedAction } from '../common/types/chat_saved_object_attributes';
 import { IChatContext } from './contexts/chat_context';
 import { MessageContentProps } from './tabs/chat/messages/message_content';
-import { IncontextInsightRegistry } from './services';
+import { DataSourceServiceContract, IncontextInsightRegistry } from './services';
 import { DataSourceOption } from '../../../src/plugins/data_source_management/public';
 
 // TODO: should replace from DataSourceManagementPluginSetup in DSM plugin after data selection merged
@@ -47,6 +47,7 @@ export interface AssistantPluginSetupDependencies {
 }
 
 export interface AssistantSetup {
+  dataSource: DataSourceServiceContract;
   registerMessageRenderer: (contentType: string, render: MessageRenderer) => void;
   registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
   /**
@@ -62,8 +63,9 @@ export interface AssistantSetup {
   renderIncontextInsight: (component: React.ReactNode) => React.ReactNode;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AssistantStart {}
+export interface AssistantStart {
+  dataSource: DataSourceServiceContract;
+}
 
 export interface UserAccount {
   username: string;

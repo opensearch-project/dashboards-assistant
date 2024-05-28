@@ -21,4 +21,4 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
   'Notifications'
 );
 
-export { DataSourceService } from './data_source_service';
+export { DataSourceService, DataSourceServiceContract } from './data_source_service';

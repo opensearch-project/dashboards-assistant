@@ -14,6 +14,10 @@ export enum DataSourceIdFrom {
   Customized,
 }
 
+export interface DataSourceServiceContract {
+  setDataSourceId: (newDataSourceId: string | null) => void;
+}
+
 const getSingleSelectedDataSourceOption = (
   dataSourceSelection: Map<string, DataSourceOption[]>
 ) => {
@@ -105,7 +109,7 @@ export class DataSourceService {
   }: {
     uiSettings: IUiSettingsClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
-  }) {
+  }): DataSourceServiceContract {
     this.uiSettings = uiSettings;
     this.dataSourceManagement = dataSourceManagement;
 
@@ -127,7 +131,7 @@ export class DataSourceService {
     };
   }
 
-  start() {
+  start(): DataSourceServiceContract {
     return {
       setDataSourceId: (newDataSourceId: string | null) => {
         this.setDataSourceId(newDataSourceId, DataSourceIdFrom.Customized);

@@ -140,7 +140,7 @@ export class AssistantPlugin
     }
 
     return {
-      ...dataSourceSetupResult,
+      dataSource: dataSourceSetupResult,
       registerMessageRenderer: (contentType, render) => {
         if (contentType in messageRenderers)
           console.warn(`Content renderer type ${contentType} is already registered.`);
@@ -171,7 +171,7 @@ export class AssistantPlugin
     setNotifications(core.notifications);
 
     return {
-      ...this.dataSourceService.start(),
+      dataSource: this.dataSourceService.start(),
     };
   }
 
