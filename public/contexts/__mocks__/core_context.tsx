@@ -24,6 +24,7 @@ export const useCore = jest.fn(() => {
         load: jest.fn(),
       },
       conversationLoad: {},
+      dataSource: {},
     },
   };
   useCoreMock.services.http.delete.mockReturnValue(Promise.resolve());
