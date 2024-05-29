@@ -11,7 +11,9 @@
     "opensearchDashboardsUtils"
   ],
   "optionalPlugins": [
-    "securityDashboards"
+    "securityDashboards",
+    "dataSource",
+    "dataSourceManagement"
   ],
   "configPath": [
     "assistant"
