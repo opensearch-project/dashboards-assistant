@@ -43,7 +43,7 @@ export class DataSourceService {
     if (!this.isMDSEnabled()) {
       return;
     }
-    if (!this.dataSourceManagement) {
+    if (!this.dataSourceManagement?.dataSourceSelection) {
       return;
     }
     this.dataSourceSelectionSubscription = this.dataSourceManagement.dataSourceSelection

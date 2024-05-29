@@ -14,7 +14,7 @@ import { DataSourceOption } from '../../../src/plugins/data_source_management/pu
 
 // TODO: should replace from DataSourceManagementPluginSetup in DSM plugin after data selection merged
 export interface DataSourceManagementPluginSetup {
-  dataSourceSelection: {
+  dataSourceSelection?: {
     getSelection$: () => BehaviorSubject<Map<string, DataSourceOption[]>>;
   };
 }
