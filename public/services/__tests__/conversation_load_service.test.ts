@@ -24,6 +24,7 @@ describe('ConversationLoadService', () => {
     const { conversationLoad, http } = setup();
 
     conversationLoad.load('foo');
+    expect(conversationLoad.status$.getValue()).toBe('loading');
     await waitFor(() => {
       expect(http.get).toHaveBeenCalledWith(
         '/api/assistant/conversation/foo',
@@ -31,7 +32,6 @@ describe('ConversationLoadService', () => {
           signal: expect.anything(),
         })
       );
-      expect(conversationLoad.status$.getValue()).toBe('loading');
     });
   });
 
@@ -57,6 +57,9 @@ describe('ConversationLoadService', () => {
       });
     }) as HttpHandler);
     const loadResult = conversationLoad.load('foo');
+    await waitFor(() => {
+      expect(http.get).toHaveBeenCalled();
+    });
     conversationLoad.abortController?.abort();
 
     await loadResult;
