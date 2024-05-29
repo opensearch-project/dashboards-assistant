@@ -84,7 +84,7 @@ describe('useFeedback hook', () => {
         body: JSON.stringify({
           satisfaction: true,
         }),
-        query: dataSourceMock.getDataSourceQuery(),
+        query: await dataSourceMock.getDataSourceQuery(),
       }
     );
     expect(result.current.feedbackResult).toBe(true);
@@ -119,7 +119,7 @@ describe('useFeedback hook', () => {
         body: JSON.stringify({
           satisfaction: true,
         }),
-        query: dataSourceMock.getDataSourceQuery(),
+        query: await dataSourceMock.getDataSourceQuery(),
       }
     );
     expect(result.current.feedbackResult).toBe(undefined);

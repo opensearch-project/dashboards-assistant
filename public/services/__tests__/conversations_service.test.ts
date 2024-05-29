@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/dom';
 import { HttpHandler } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { ConversationsService } from '../conversations_service';
@@ -21,16 +22,19 @@ const setup = () => {
 };
 
 describe('ConversationsService', () => {
-  it('should emit loading status and call get with conversations API path', () => {
+  it('should emit loading status and call get with conversations API path', async () => {
     const { conversations, http } = setup();
 
     conversations.load();
-    expect(http.get).toHaveBeenCalledWith(
-      '/api/assistant/conversations',
-      expect.objectContaining({
-        signal: expect.anything(),
-      })
-    );
+    await waitFor(() => {
+      expect(http.get).toHaveBeenCalledWith(
+        '/api/assistant/conversations',
+        expect.objectContaining({
+          signal: expect.anything(),
+        })
+      );
+    });
+
     expect(conversations.status$.getValue()).toBe('loading');
   });
 

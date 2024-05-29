@@ -39,12 +39,14 @@ const setup = ({
   http?: HttpStart;
   chatContext?: { flyoutFullScreen?: boolean };
 } = {}) => {
+  const dataSourceMock = new DataSourceServiceMock();
   const useCoreMock = {
     services: {
       ...coreMock.createStart(),
       http,
-      conversations: new ConversationsService(http, new DataSourceServiceMock()),
+      conversations: new ConversationsService(http, dataSourceMock),
       conversationLoad: {},
+      dataSource: dataSourceMock,
     },
   };
   const useChatStateMock = {
@@ -92,10 +94,11 @@ describe('<ChatHistoryPage />', () => {
     expect(useChatStateMock.chatStateDispatch).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-
-    expect(useChatContextMock.setConversationId).toHaveBeenLastCalledWith(undefined);
-    expect(useChatContextMock.setTitle).toHaveBeenLastCalledWith(undefined);
-    expect(useChatStateMock.chatStateDispatch).toHaveBeenLastCalledWith({ type: 'reset' });
+    await waitFor(() => {
+      expect(useChatContextMock.setConversationId).toHaveBeenLastCalledWith(undefined);
+      expect(useChatContextMock.setTitle).toHaveBeenLastCalledWith(undefined);
+      expect(useChatStateMock.chatStateDispatch).toHaveBeenLastCalledWith({ type: 'reset' });
+    });
   });
 
   it('should render empty screen', async () => {

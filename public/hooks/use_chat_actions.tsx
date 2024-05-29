@@ -35,7 +35,7 @@ export const useChatActions = (): AssistantActions => {
           ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
           input,
         }),
-        query: core.services.dataSource.getDataSourceQuery(),
+        query: await core.services.dataSource.getDataSourceQuery(),
       });
       if (abortController.signal.aborted) return;
       // Refresh history list after new conversation created if new conversation saved and history list page visible
@@ -163,7 +163,7 @@ export const useChatActions = (): AssistantActions => {
       // abort agent execution
       await core.services.http.post(`${ASSISTANT_API.ABORT_AGENT_EXECUTION}`, {
         body: JSON.stringify({ conversationId }),
-        query: core.services.dataSource.getDataSourceQuery(),
+        query: await core.services.dataSource.getDataSourceQuery(),
       });
     }
   };
@@ -180,7 +180,7 @@ export const useChatActions = (): AssistantActions => {
             conversationId: chatContext.conversationId,
             interactionId,
           }),
-          query: core.services.dataSource.getDataSourceQuery(),
+          query: await core.services.dataSource.getDataSourceQuery(),
         });
 
         if (abortController.signal.aborted) {

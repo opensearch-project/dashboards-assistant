@@ -26,7 +26,7 @@ export class ConversationLoadService {
         `${ASSISTANT_API.CONVERSATION}/${conversationId}`,
         {
           signal: this.abortController.signal,
-          query: this._dataSource.getDataSourceQuery(),
+          query: await this._dataSource.getDataSourceQuery(),
         }
       );
       this.status$.next('idle');

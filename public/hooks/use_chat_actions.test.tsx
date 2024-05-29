@@ -128,7 +128,7 @@ describe('useChatActions hook', () => {
         messages: [SEND_MESSAGE_RESPONSE.messages[0]],
         input: INPUT_MESSAGE,
       }),
-      query: dataSourceServiceMock.getDataSourceQuery(),
+      query: await dataSourceServiceMock.getDataSourceQuery(),
     });
 
     // it should send dispatch `receive` action to remove the message without messageId
@@ -203,7 +203,7 @@ describe('useChatActions hook', () => {
         messages: [],
         input: { type: 'input', content: 'message that send as input', contentType: 'text' },
       }),
-      query: dataSourceServiceMock.getDataSourceQuery(),
+      query: await dataSourceServiceMock.getDataSourceQuery(),
     });
   });
 
@@ -266,7 +266,7 @@ describe('useChatActions hook', () => {
     expect(chatStateDispatchMock).toHaveBeenCalledWith({ type: 'abort' });
     expect(httpMock.post).toHaveBeenCalledWith(ASSISTANT_API.ABORT_AGENT_EXECUTION, {
       body: JSON.stringify({ conversationId: 'conversation_id_to_abort' }),
-      query: dataSourceServiceMock.getDataSourceQuery(),
+      query: await dataSourceServiceMock.getDataSourceQuery(),
     });
   });
 
@@ -294,7 +294,7 @@ describe('useChatActions hook', () => {
         conversationId: 'conversation_id_mock',
         interactionId: 'interaction_id_mock',
       }),
-      query: dataSourceServiceMock.getDataSourceQuery(),
+      query: await dataSourceServiceMock.getDataSourceQuery(),
     });
     expect(chatStateDispatchMock).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'receive', payload: { messages: [], interactions: [] } })
@@ -330,7 +330,7 @@ describe('useChatActions hook', () => {
         conversationId: 'conversation_id_mock',
         interactionId: 'interaction_id_mock',
       }),
-      query: dataSourceServiceMock.getDataSourceQuery(),
+      query: await dataSourceServiceMock.getDataSourceQuery(),
     });
     expect(chatStateDispatchMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'receive' })

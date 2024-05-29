@@ -38,7 +38,10 @@ export class ConversationsService {
       this.status$.next('loading');
       this.conversations$.next(
         await this._http.get<IConversationFindResponse>(ASSISTANT_API.CONVERSATIONS, {
-          query: { ...this._options, ...this._dataSource.getDataSourceQuery() } as HttpFetchQuery,
+          query: {
+            ...this._options,
+            ...(await this._dataSource.getDataSourceQuery()),
+          } as HttpFetchQuery,
           signal: this.abortController.signal,
         })
       );

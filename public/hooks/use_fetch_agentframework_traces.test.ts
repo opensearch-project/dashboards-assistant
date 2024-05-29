@@ -9,11 +9,17 @@ import { createOpenSearchDashboardsReactContext } from '../../../../src/plugins/
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpHandler } from '../../../../src/core/public';
 import { AbortError } from '../../../../src/plugins/data/common';
+import { DataSourceServiceMock } from '../services/data_source_service.mock';
+import { waitFor } from '@testing-library/dom';
 
 describe('useFetchAgentFrameworkTraces hook', () => {
   const interactionId = 'foo';
   const services = coreMock.createStart();
-  const { Provider } = createOpenSearchDashboardsReactContext(services);
+  const mockServices = {
+    ...services,
+    dataSource: new DataSourceServiceMock(),
+  };
+  const { Provider } = createOpenSearchDashboardsReactContext(mockServices);
   const wrapper = { wrapper: Provider };
 
   it('return undefined when interaction id is not specfied', () => {
@@ -106,14 +112,16 @@ describe('useFetchAgentFrameworkTraces hook', () => {
       unmount();
     });
 
-    expect(services.http.get).toHaveBeenCalledWith(
-      `/api/assistant/trace/${interactionId}`,
-      expect.objectContaining({
-        signal: expect.any(Object),
-      })
-    );
+    await waitFor(() => {
+      expect(services.http.get).toHaveBeenCalledWith(
+        `/api/assistant/trace/${interactionId}`,
+        expect.objectContaining({
+          signal: expect.any(Object),
+        })
+      );
 
-    // expect the mock to be called
-    expect(abortFn).toBeCalledTimes(1);
+      // expect the mock to be called
+      expect(abortFn).toBeCalledTimes(1);
+    });
   });
 });

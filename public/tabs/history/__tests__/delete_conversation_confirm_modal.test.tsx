@@ -127,7 +127,9 @@ describe('<DeleteConversationConfirmModal />', () => {
     expect(useCoreMock.services.http.delete).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    expect(useCoreMock.services.http.delete).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(useCoreMock.services.http.delete).toHaveBeenCalled();
+    });
 
     fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
 
