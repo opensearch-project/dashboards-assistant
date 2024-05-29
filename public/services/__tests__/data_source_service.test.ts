@@ -80,8 +80,9 @@ describe('DataSourceService', () => {
       dataSourceSelection$.next(new Map());
       expect(observerFn).toHaveBeenLastCalledWith('foo');
     });
-    it('should return null for multi data source selection', async () => {
+    it('should return default data source for multi data source selection', async () => {
       const { dataSource, dataSourceSelection$ } = setup({
+        defaultDataSourceId: 'baz',
         dataSourceSelection: new Map([
           [
             'test',
@@ -93,7 +94,7 @@ describe('DataSourceService', () => {
         ]),
       });
 
-      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe(null);
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('baz');
 
       dataSourceSelection$.next(
         new Map([
@@ -101,13 +102,14 @@ describe('DataSourceService', () => {
           ['component2', [{ label: 'Bar', id: 'bar' }]],
         ])
       );
-      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe(null);
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('baz');
     });
-    it('should return null for empty data source selection', async () => {
-      const { dataSource, dataSourceSelection$ } = setup({
+    it('should return default data source for empty data source selection', async () => {
+      const { dataSource } = setup({
+        defaultDataSourceId: 'foo',
         dataSourceSelection: new Map(),
       });
-      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe(null);
+      expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('foo');
     });
   });
 
