@@ -16,10 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { useDebounce, useObservable } from 'react-use';
+import { useDebounce, useObservable, useUpdateEffect } from 'react-use';
 import cs from 'classnames';
+import { skip } from 'rxjs/operators';
+
 import { useChatActions, useChatState } from '../../hooks';
 import { useChatContext, useCore } from '../../contexts';
 import { TAB_ID } from '../../utils/constants';
@@ -61,6 +63,8 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
   const chatHistories = useMemo(() => conversations?.objects || [], [conversations]);
   const hasNoConversations =
     !debouncedSearchName && !!conversations && conversations.total === 0 && !loading;
+  const shouldRefreshRef = useRef(props.shouldRefresh);
+  shouldRefreshRef.current = props.shouldRefresh;
 
   const handleSearchChange = useCallback((e) => {
     setSearchName(e.target.value);
@@ -96,14 +100,29 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     [searchName]
   );
 
-  useEffect(() => {
-    if (props.shouldRefresh) services.conversations.reload();
+  useUpdateEffect(() => {
+    if (!props.shouldRefresh) {
+      return;
+    }
+    services.conversations.reload();
+    return () => {
+      services.conversations.abortController?.abort();
+    };
   }, [props.shouldRefresh, services.conversations]);
 
   useEffect(() => {
     services.conversations.load(bulkGetOptions);
+    const subscription = services.dataSource
+      .getDataSourceId$()
+      .pipe(skip(1))
+      .subscribe(() => {
+        if (shouldRefreshRef.current) {
+          services.conversations.reload();
+        }
+      });
     return () => {
       services.conversations.abortController?.abort();
+      subscription.unsubscribe();
     };
   }, [services.conversations, bulkGetOptions]);
 

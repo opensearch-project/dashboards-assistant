@@ -29,6 +29,7 @@ export type ActionExecutor = (params: Record<string, unknown>) => void;
 export interface AssistantActions {
   send: (input: IMessage) => Promise<void>;
   loadChat: (conversationId?: string, title?: string) => Promise<void>;
+  resetChat: () => void;
   openChatUI: (conversationId?: string) => void;
   executeAction: (suggestedAction: ISuggestedAction, message: IMessage) => Promise<void>;
   abortAction: (conversationId?: string) => Promise<void>;

@@ -106,6 +106,15 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
+  const resetChat = () => {
+    abortControllerRef?.abort();
+    core.services.conversationLoad.abortController?.abort();
+    chatContext.setConversationId(undefined);
+    chatContext.setTitle(undefined);
+    chatContext.setFlyoutComponent(null);
+    chatStateDispatch({ type: 'reset' });
+  };
+
   const openChatUI = () => {
     chatContext.setFlyoutVisible(true);
     chatContext.setSelectedTabId(TAB_ID.CHAT);
@@ -225,5 +234,5 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  return { send, loadChat, executeAction, openChatUI, abortAction, regenerate };
+  return { send, loadChat, resetChat, executeAction, openChatUI, abortAction, regenerate };
 };

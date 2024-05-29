@@ -48,35 +48,44 @@ jest.mock('./services', () => {
   };
 });
 
+let dataSourceId$: BehaviorSubject<string | null>;
 // mock sidecar open,hide and show
-jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
-  overlays: {
-    // @ts-ignore
-    sidecar: () => {
-      const attachElement = document.createElement('div');
-      attachElement.id = 'sidecar-mock-div';
-      return {
-        open: (mountPoint) => {
-          document.body.appendChild(attachElement);
-          render(<MountWrapper mount={mountPoint} />, {
-            container: attachElement,
-          });
-        },
-        hide: () => {
-          const element = document.getElementById('sidecar-mock-div');
-          if (element) {
-            element.style.display = 'none';
-          }
-        },
-        show: () => {
-          const element = document.getElementById('sidecar-mock-div');
-          if (element) {
-            element.style.display = 'block';
-          }
-        },
-      };
+jest.spyOn(coreContextExports, 'useCore').mockImplementation(() => {
+  dataSourceId$ = new BehaviorSubject<string | null>(null);
+  return {
+    services: {
+      dataSource: {
+        getDataSourceId$: jest.fn(() => dataSourceId$),
+      },
     },
-  },
+    overlays: {
+      // @ts-ignore
+      sidecar: () => {
+        const attachElement = document.createElement('div');
+        attachElement.id = 'sidecar-mock-div';
+        return {
+          open: (mountPoint) => {
+            document.body.appendChild(attachElement);
+            render(<MountWrapper mount={mountPoint} />, {
+              container: attachElement,
+            });
+          },
+          hide: () => {
+            const element = document.getElementById('sidecar-mock-div');
+            if (element) {
+              element.style.display = 'none';
+            }
+          },
+          show: () => {
+            const element = document.getElementById('sidecar-mock-div');
+            if (element) {
+              element.style.display = 'block';
+            }
+          },
+        };
+      },
+    },
+  };
 });
 
 describe('<HeaderChatButton />', () => {
@@ -216,5 +225,24 @@ describe('<HeaderChatButton />', () => {
       metaKey: true,
     });
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
+  });
+
+  it('should call resetChat after data source change', () => {
+    const resetChatMock = jest.fn();
+    expect(dataSourceId$).toBeTruthy();
+    dataSourceId$.next('foo');
+    render(
+      <HeaderChatButton
+        application={applicationServiceMock.createStartContract()}
+        userHasAccess={false}
+        messageRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={{ resetChat: resetChatMock } as AssistantActions}
+        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+      />
+    );
+
+    dataSourceId$.next('bar');
+    expect(resetChatMock).toHaveBeenCalled();
   });
 });

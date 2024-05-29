@@ -26,7 +26,14 @@ jest.mock('../services/conversations_service', () => {
 jest.mock('../services/conversation_load_service', () => {
   return {
     ConversationLoadService: jest.fn().mockImplementation(() => {
-      return { load: jest.fn().mockReturnValue({ messages: [], interactions: [] }) };
+      const conversationLoadMock = {
+        abortController: new AbortController(),
+        load: jest.fn().mockImplementation(async () => {
+          conversationLoadMock.abortController = new AbortController();
+          return { messages: [], interactions: [] };
+        }),
+      };
+      return conversationLoadMock;
     }),
   };
 });
@@ -314,6 +321,7 @@ describe('useChatActions hook', () => {
   it('should not handle regenerate response if the regenerate operation has already aborted', async () => {
     const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
       signal: { aborted: true },
+      abort: jest.fn(),
     }));
 
     httpMock.put.mockResolvedValue(SEND_MESSAGE_RESPONSE);
@@ -355,6 +363,7 @@ describe('useChatActions hook', () => {
   it('should not handle regenerate error if the regenerate operation has already aborted', async () => {
     const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
       signal: { aborted: true },
+      abort: jest.fn(),
     }));
     httpMock.put.mockImplementationOnce(() => {
       throw new Error();
@@ -369,6 +378,45 @@ describe('useChatActions hook', () => {
     expect(chatStateDispatchMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'error' })
     );
+    AbortControllerMock.mockRestore();
+  });
+
+  it('should clear chat title, conversation id, flyoutComponent and call reset action', async () => {
+    const { result } = renderHook(() => useChatActions());
+    result.current.resetChat();
+
+    expect(chatContextMock.setConversationId).toHaveBeenLastCalledWith(undefined);
+    expect(chatContextMock.setTitle).toHaveBeenLastCalledWith(undefined);
+    expect(chatContextMock.setFlyoutComponent).toHaveBeenLastCalledWith(null);
+
+    expect(chatStateDispatchMock).toHaveBeenLastCalledWith({ type: 'reset' });
+  });
+
+  it('should abort send action after reset chat', async () => {
+    const abortFn = jest.fn();
+    const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
+      signal: { aborted: true },
+      abort: abortFn,
+    }));
+    const { result } = renderHook(() => useChatActions());
+    await result.current.send(INPUT_MESSAGE);
+    result.current.resetChat();
+
+    expect(abortFn).toHaveBeenCalled();
+    AbortControllerMock.mockRestore();
+  });
+
+  it('should abort load action after reset chat', async () => {
+    const abortFn = jest.fn();
+    const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
+      signal: { aborted: true },
+      abort: abortFn,
+    }));
+    const { result } = renderHook(() => useChatActions());
+    await result.current.loadChat('conversation_id_mock');
+    result.current.resetChat();
+
+    expect(abortFn).toHaveBeenCalled();
     AbortControllerMock.mockRestore();
   });
 });

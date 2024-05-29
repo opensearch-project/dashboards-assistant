@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
@@ -17,6 +17,7 @@ import { ConversationsService } from '../../../services/conversations_service';
 import { DataSourceServiceMock } from '../../../services/data_source_service.mock';
 
 import { ChatHistoryPage } from '../chat_history_page';
+import { BehaviorSubject } from 'rxjs';
 
 const mockGetConversationsHttp = () => {
   const http = coreMock.createStart().http;
@@ -35,11 +36,17 @@ const mockGetConversationsHttp = () => {
 const setup = ({
   http = mockGetConversationsHttp(),
   chatContext = {},
+  shouldRefresh = false,
 }: {
   http?: HttpStart;
   chatContext?: { flyoutFullScreen?: boolean };
+  shouldRefresh?: boolean;
 } = {}) => {
-  const dataSourceMock = new DataSourceServiceMock();
+  const dataSourceId$ = new BehaviorSubject<string | null>('foo');
+  const dataSourceMock = {
+    getDataSourceId$: jest.fn(() => dataSourceId$),
+    getDataSourceQuery: jest.fn(() => ({ dataSourceId: dataSourceId$.getValue() })),
+  };
   const useCoreMock = {
     services: {
       ...coreMock.createStart(),
@@ -65,7 +72,7 @@ const setup = ({
 
   const renderResult = render(
     <I18nProvider>
-      <ChatHistoryPage shouldRefresh={false} />
+      <ChatHistoryPage shouldRefresh={shouldRefresh} />
     </I18nProvider>
   );
 
@@ -74,6 +81,7 @@ const setup = ({
     useChatStateMock,
     useChatContextMock,
     renderResult,
+    dataSourceId$,
   };
 };
 
@@ -239,5 +247,31 @@ describe('<ChatHistoryPage />', () => {
     await waitFor(() => {
       expect(abortMock).toHaveBeenCalled();
     });
+  });
+
+  it('should call conversations.reload after data source changed', async () => {
+    const { useCoreMock, dataSourceId$ } = setup({ shouldRefresh: true });
+
+    jest.spyOn(useCoreMock.services.conversations, 'reload');
+
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+
+    dataSourceId$.next('bar');
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.reload).toHaveBeenCalled();
+    });
+  });
+
+  it('should not call conversations.reload after unmount', async () => {
+    const { useCoreMock, dataSourceId$, renderResult } = setup({ shouldRefresh: true });
+
+    jest.spyOn(useCoreMock.services.conversations, 'reload');
+
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+    renderResult.unmount();
+
+    dataSourceId$.next('bar');
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
   });
 });
