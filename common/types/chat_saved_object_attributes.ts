@@ -43,6 +43,8 @@ export interface IInput {
   content: string;
   context?: {
     appId?: string;
+    content?: string;
+    datasourceId?: string;
   };
   messageId?: string;
 }

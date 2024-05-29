@@ -34,14 +34,14 @@ import {
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
 import { ASSISTANT_API, DEFAULT_USER_NAME } from '../common/constants/llm';
+import { IncontextInsightProps } from './components/incontext_insight';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 // @ts-ignore
 const LazyIncontextInsightComponent = lazy(() => import('./components/incontext_insight'));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const IncontextInsightComponent: React.FC<{ props: any }> = (props) => (
+export const IncontextInsightComponent: React.FC<{ props: IncontextInsightProps }> = (props) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <LazyIncontextInsightComponent {...props} />
   </Suspense>
@@ -154,7 +154,12 @@ export class AssistantPlugin
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderIncontextInsight: (props: any) => {
         if (!this.incontextInsightRegistry?.isEnabled()) return <div {...props} />;
-        return <IncontextInsightComponent {...props} />;
+        return (
+          <IncontextInsightComponent
+            {...props}
+            incontextInsightRegistry={this.incontextInsightRegistry}
+          />
+        );
       },
     };
   }
