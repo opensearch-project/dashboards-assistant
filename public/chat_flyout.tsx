@@ -5,16 +5,13 @@
 
 import { EuiResizableContainer } from '@elastic/eui';
 import cs from 'classnames';
-import React, { useMemo, useRef } from 'react';
-import { useObservable } from 'react-use';
-import { BehaviorSubject } from 'rxjs';
+import React, { useRef } from 'react';
 import { useChatContext } from './contexts/chat_context';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatWindowHeader } from './tabs/chat_window_header';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 import { AgentFrameworkTracesFlyoutBody } from './components/agent_framework_traces_flyout_body';
 import { TAB_ID } from './utils/constants';
-import { useCore } from './contexts';
 
 interface ChatFlyoutProps {
   flyoutVisible: boolean;
@@ -25,17 +22,7 @@ interface ChatFlyoutProps {
 export const ChatFlyout = (props: ChatFlyoutProps) => {
   const chatContext = useChatContext();
   const chatHistoryPageLoadedRef = useRef(false);
-  const core = useCore();
-  const defaultDataSourceSelection$ = new BehaviorSubject(new Map());
 
-  // TODO: use DataSourceService to replace
-  const selectedDS = useObservable(
-    core.services.setupDeps?.dataSourceManagement?.dataSourceSelection?.getSelection$() ??
-      defaultDataSourceSelection$
-  );
-  const currentDS = useMemo(() => {
-    return selectedDS?.values().next().value;
-  }, [selectedDS]);
   let chatPageVisible = false;
   let chatHistoryPageVisible = false;
   let chatTraceVisible = false;
@@ -100,10 +87,6 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
       <>
         <div className={cs('llm-chat-flyout-header')}>
           <ChatWindowHeader />
-          <div>
-            Data Source:
-            {currentDS?.[0]?.label}
-          </div>
         </div>
 
         {props.overrideComponent}
