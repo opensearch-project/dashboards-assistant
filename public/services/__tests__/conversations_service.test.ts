@@ -3,35 +3,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/dom';
 import { HttpHandler } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { ConversationsService } from '../conversations_service';
+import { DataSourceServiceMock } from '../data_source_service.mock';
 
 const setup = () => {
   const http = httpServiceMock.createSetupContract();
-  const conversations = new ConversationsService(http);
+  const dataSourceServiceMock = new DataSourceServiceMock();
+  const conversations = new ConversationsService(http, dataSourceServiceMock);
 
   return {
     conversations,
     http,
+    dataSource: dataSourceServiceMock,
   };
 };
 
 describe('ConversationsService', () => {
-  it('should emit loading status and call get with conversations API path', () => {
+  it('should emit loading status and call get with conversations API path', async () => {
     const { conversations, http } = setup();
 
     conversations.load();
-    expect(http.get).toHaveBeenCalledWith(
-      '/api/assistant/conversations',
-      expect.objectContaining({
-        signal: expect.anything(),
-      })
-    );
     expect(conversations.status$.getValue()).toBe('loading');
+    await waitFor(() => {
+      expect(http.get).toHaveBeenCalledWith(
+        '/api/assistant/conversations',
+        expect.objectContaining({
+          signal: expect.anything(),
+        })
+      );
+    });
   });
 
-  it('should update options property and call get with passed query', () => {
+  it('should update options property and call get with passed query', async () => {
     const { conversations, http } = setup();
 
     expect(conversations.options).toBeFalsy();
@@ -43,16 +49,19 @@ describe('ConversationsService', () => {
       page: 1,
       perPage: 10,
     });
-    expect(http.get).toHaveBeenCalledWith(
-      '/api/assistant/conversations',
-      expect.objectContaining({
-        query: {
-          page: 1,
-          perPage: 10,
-        },
-        signal: expect.anything(),
-      })
-    );
+    await waitFor(() => {
+      expect(http.get).toHaveBeenCalledWith(
+        '/api/assistant/conversations',
+        expect.objectContaining({
+          query: {
+            page: 1,
+            perPage: 10,
+            dataSourceId: '',
+          },
+          signal: expect.anything(),
+        })
+      );
+    });
   });
 
   it('should emit latest conversations and "idle" status', async () => {
@@ -78,17 +87,20 @@ describe('ConversationsService', () => {
     http.get.mockClear();
 
     conversations.reload();
-    expect(http.get).toHaveBeenCalledTimes(1);
-    expect(http.get).toHaveBeenCalledWith(
-      '/api/assistant/conversations',
-      expect.objectContaining({
-        query: {
-          page: 1,
-          perPage: 10,
-        },
-        signal: expect.anything(),
-      })
-    );
+    await waitFor(() => {
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(
+        '/api/assistant/conversations',
+        expect.objectContaining({
+          query: {
+            page: 1,
+            perPage: 10,
+            dataSourceId: '',
+          },
+          signal: expect.anything(),
+        })
+      );
+    });
   });
 
   it('should emit error after loading aborted', async () => {
@@ -104,6 +116,9 @@ describe('ConversationsService', () => {
       });
     }) as HttpHandler);
     const loadResult = conversations.load();
+    await waitFor(() => {
+      expect(http.get).toHaveBeenCalled();
+    });
     conversations.abortController?.abort();
 
     await loadResult;

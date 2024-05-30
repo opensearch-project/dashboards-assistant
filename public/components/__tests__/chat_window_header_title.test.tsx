@@ -17,6 +17,7 @@ import * as coreContextExports from '../../contexts/core_context';
 import { IMessage } from '../../../common/types/chat_saved_object_attributes';
 
 import { ChatWindowHeaderTitle } from '../chat_window_header_title';
+import { DataSourceServiceMock } from '../../services/data_source_service.mock';
 
 const setup = ({
   messages = [],
@@ -37,6 +38,7 @@ const setup = ({
         }),
         reload: jest.fn(),
       },
+      dataSource: new DataSourceServiceMock(),
     },
   };
   useCoreMock.services.http.put.mockImplementation(() => Promise.resolve());

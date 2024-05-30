@@ -12,6 +12,7 @@ import * as chatContextExports from '../../../contexts/chat_context';
 import * as coreContextExports from '../../../contexts/core_context';
 
 import { ChatHistorySearchList, ChatHistorySearchListProps } from '../chat_history_search_list';
+import { DataSourceServiceMock } from '../../../services/data_source_service.mock';
 
 const setup = ({
   loading = false,
@@ -26,8 +27,9 @@ const setup = ({
     conversationId: '1',
     setTitle: jest.fn(),
   };
+  const dataSourceServiceMock = new DataSourceServiceMock();
   const useCoreMock = {
-    services: coreMock.createStart(),
+    services: { ...coreMock.createStart(), dataSource: dataSourceServiceMock },
   };
   useCoreMock.services.http.put.mockImplementation(() => Promise.resolve());
   useCoreMock.services.http.delete.mockImplementation(() => Promise.resolve());
