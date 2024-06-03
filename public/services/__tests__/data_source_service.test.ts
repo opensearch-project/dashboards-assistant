@@ -8,7 +8,7 @@ import { first } from 'rxjs/operators';
 
 import { uiSettingsServiceMock } from '../../../../../src/core/public/mocks';
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
-import { DataSourceManagementPluginSetup } from '../../types';
+import { DataSourceManagementPluginSetup } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceService } from '../data_source_service';
 
 const setup = (options?: {
@@ -24,10 +24,10 @@ const setup = (options?: {
     dataSourceSelection: {
       getSelection$: () => dataSourceSelection$,
     },
+    getDefaultDataSourceId$: jest.fn(() => defaultDataSourceSelection$),
   };
   const dataSource = new DataSourceService();
   const defaultDataSourceSelection$ = new BehaviorSubject(options?.defaultDataSourceId ?? null);
-  uiSettings.get$.mockReturnValue(defaultDataSourceSelection$);
   const setupResult = dataSource.setup({
     uiSettings,
     dataSourceManagement:
