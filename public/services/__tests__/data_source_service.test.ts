@@ -111,6 +111,22 @@ describe('DataSourceService', () => {
       });
       expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('foo');
     });
+
+    it('should not fire change for same data source id', async () => {
+      const { dataSource, defaultDataSourceSelection$ } = setup({
+        dataSourceSelection: new Map(),
+        defaultDataSourceId: 'foo',
+      });
+      const observerFn = jest.fn();
+      dataSource.getDataSourceId$().subscribe(observerFn);
+
+      expect(observerFn).toHaveBeenCalledTimes(1);
+      dataSource.setDataSourceId('foo');
+      expect(observerFn).toHaveBeenCalledTimes(1);
+
+      defaultDataSourceSelection$.next('foo');
+      expect(observerFn).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('isMDSEnabled', () => {

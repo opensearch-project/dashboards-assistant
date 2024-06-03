@@ -114,6 +114,13 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     services.conversations.load(bulkGetOptions);
     const subscription = services.dataSource
       .getDataSourceId$()
+      /**
+       *
+       * Skip the first value to avoid load conversations with same options again.
+       * The conversations has been loaded by above `services.conversations.load`,
+       * we only reload them after data source changed.
+       *
+       * */
       .pipe(skip(1))
       .subscribe(() => {
         if (shouldRefreshRef.current) {

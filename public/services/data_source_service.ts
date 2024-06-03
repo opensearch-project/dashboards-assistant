@@ -4,7 +4,7 @@
  */
 
 import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import type { IUiSettingsClient } from '../../../../src/core/public';
 import type { DataSourceOption } from '../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
@@ -74,9 +74,6 @@ export class DataSourceService {
   }
 
   setDataSourceId(newDataSourceId: string | null) {
-    if (this.dataSourceId$.getValue() === newDataSourceId) {
-      return;
-    }
     this.dataSourceId$.next(newDataSourceId);
   }
 
@@ -84,14 +81,16 @@ export class DataSourceService {
     return combineLatest([
       this.dataSourceId$,
       this.uiSettings?.get$('defaultDataSource', null) ?? of(null),
-    ]).pipe(
-      map(([selectedDataSourceId, defaultDataSourceId]) => {
-        if (selectedDataSourceId !== null) {
-          return selectedDataSourceId;
-        }
-        return defaultDataSourceId;
-      })
-    );
+    ])
+      .pipe(
+        map(([selectedDataSourceId, defaultDataSourceId]) => {
+          if (selectedDataSourceId !== null) {
+            return selectedDataSourceId;
+          }
+          return defaultDataSourceId;
+        })
+      )
+      .pipe(distinctUntilChanged());
   }
 
   setup({
