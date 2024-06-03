@@ -8,7 +8,7 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import type { IUiSettingsClient } from '../../../../src/core/public';
 import type { DataSourceOption } from '../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
-import type { DataSourceManagementPluginSetup } from '../types';
+import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
 
 export enum DataSourceIdFrom {
   UiSettings,
@@ -80,7 +80,7 @@ export class DataSourceService {
   getDataSourceId$() {
     return combineLatest([
       this.dataSourceId$,
-      this.uiSettings?.get$('defaultDataSource', null) ?? of(null),
+      this.dataSourceManagement?.getDefaultDataSourceId$?.(this.uiSettings) ?? of(null),
     ])
       .pipe(
         map(([selectedDataSourceId, defaultDataSourceId]) => {

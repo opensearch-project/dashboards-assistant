@@ -3,21 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { BehaviorSubject } from 'rxjs';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { IMessage, ISuggestedAction } from '../common/types/chat_saved_object_attributes';
 import { IChatContext } from './contexts/chat_context';
 import { MessageContentProps } from './tabs/chat/messages/message_content';
 import { DataSourceServiceContract, IncontextInsightRegistry } from './services';
-import { DataSourceOption } from '../../../src/plugins/data_source_management/public';
-
-// TODO: should replace from DataSourceManagementPluginSetup in DSM plugin after data selection merged
-export interface DataSourceManagementPluginSetup {
-  dataSourceSelection?: {
-    getSelection$: () => BehaviorSubject<Map<string, DataSourceOption[]>>;
-  };
-}
+import { DataSourceManagementPluginSetup } from '../../../src/plugins/data_source_management/public';
 
 export interface RenderProps {
   props: MessageContentProps;
