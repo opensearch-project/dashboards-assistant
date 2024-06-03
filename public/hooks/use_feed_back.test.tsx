@@ -12,11 +12,12 @@ import { httpServiceMock } from '../../../../src/core/public/mocks';
 import * as chatContextHookExports from '../contexts/chat_context';
 import { Interaction, IOutput, IMessage } from '../../common/types/chat_saved_object_attributes';
 import { ASSISTANT_API } from '../../common/constants/llm';
+import { DataSourceServiceMock } from '../services/data_source_service.mock';
 
 describe('useFeedback hook', () => {
   const httpMock = httpServiceMock.createStartContract();
   const chatStateDispatchMock = jest.fn();
-
+  const dataSourceMock = new DataSourceServiceMock();
   const chatContextMock = {
     rootAgentId: 'root_agent_id_mock',
     selectedTabId: 'chat',
@@ -29,6 +30,7 @@ describe('useFeedback hook', () => {
     jest.spyOn(coreHookExports, 'useCore').mockReturnValue({
       services: {
         http: httpMock,
+        dataSource: dataSourceMock,
       },
     });
     jest.spyOn(chatContextHookExports, 'useChatContext').mockReturnValue(chatContextMock);
@@ -82,6 +84,7 @@ describe('useFeedback hook', () => {
         body: JSON.stringify({
           satisfaction: true,
         }),
+        query: await dataSourceMock.getDataSourceQuery(),
       }
     );
     expect(result.current.feedbackResult).toBe(true);
@@ -116,6 +119,7 @@ describe('useFeedback hook', () => {
         body: JSON.stringify({
           satisfaction: true,
         }),
+        query: await dataSourceMock.getDataSourceQuery(),
       }
     );
     expect(result.current.feedbackResult).toBe(undefined);

@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useDeleteConversation, usePatchConversation } from '../use_conversations';
 import { renderHook, act } from '@testing-library/react-hooks';
+
 import { useCore } from '../../contexts/core_context';
 import { HttpHandler } from '../../../../../src/core/public';
+import { useDeleteConversation, usePatchConversation } from '../use_conversations';
 
 jest.mock('../../contexts/core_context');
 const useCoreMocked = useCore as jest.MockedFunction<typeof useCore>;
@@ -74,6 +75,10 @@ describe('useDeleteConversation', () => {
     let deleteConversationPromise: Promise<void>;
     act(() => {
       deleteConversationPromise = result.current.deleteConversation('foo');
+    });
+
+    await waitFor(() => {
+      expect(useCoreMocked.mock.results[0].value.services.http.delete).toHaveBeenCalled();
     });
 
     let deleteConversationError;
@@ -158,6 +163,10 @@ describe('usePatchConversation', () => {
     let patchConversationPromise: Promise<void>;
     act(() => {
       patchConversationPromise = result.current.patchConversation('foo', 'new-title');
+    });
+
+    await waitFor(() => {
+      expect(useCoreMocked.mock.results[0].value.services.http.put).toHaveBeenCalled();
     });
 
     let patchConversationError;

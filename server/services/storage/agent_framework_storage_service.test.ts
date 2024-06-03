@@ -12,17 +12,15 @@ describe('AgentFrameworkStorageService', () => {
     coreMock.createInternalStart(),
     httpServerMock.createOpenSearchDashboardsRequest()
   );
-  const mockedTransport = coreContext.opensearch.client.asCurrentUser.transport
-    .request as jest.Mock;
-  const agentFrameworkService = new AgentFrameworkStorageService(
-    coreContext.opensearch.client.asCurrentUser,
-    []
-  );
+  const mockedTransport = coreContext.opensearch.client.asCurrentUser.transport;
+  const mockedTransportRequest = mockedTransport.request as jest.Mock;
+
+  const agentFrameworkService = new AgentFrameworkStorageService(mockedTransport, []);
   beforeEach(() => {
-    mockedTransport.mockReset();
+    mockedTransportRequest.mockReset();
   });
   it('getConversation', async () => {
-    mockedTransport.mockImplementation(async (params) => {
+    mockedTransportRequest.mockImplementation(async (params) => {
       if (params.path.includes('/messages?max_results=1000')) {
         return {
           body: {
@@ -62,7 +60,7 @@ describe('AgentFrameworkStorageService', () => {
         "updatedTimeMs": 0,
       }
     `);
-    expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
+    expect(mockedTransportRequest.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
@@ -81,14 +79,14 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('should encode id when calls getConversation with non-standard params in request payload', async () => {
-    mockedTransport.mockResolvedValue({
+    mockedTransportRequest.mockResolvedValue({
       body: {
         messages: [],
       },
     });
 
     await agentFrameworkService.getConversation('../non-standard/id');
-    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockedTransportRequest.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "method": "GET",
@@ -99,7 +97,7 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('getConversations', async () => {
-    mockedTransport.mockImplementation(async (params) => {
+    mockedTransportRequest.mockImplementation(async (params) => {
       return {
         body: {
           hits: {
@@ -165,7 +163,7 @@ describe('AgentFrameworkStorageService', () => {
         "total": 10,
       }
     `);
-    expect(mockedTransport.mock.calls).toMatchInlineSnapshot(`
+    expect(mockedTransportRequest.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
@@ -214,7 +212,7 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('deleteConversation', async () => {
-    mockedTransport.mockImplementationOnce(async (params) => ({
+    mockedTransportRequest.mockImplementationOnce(async (params) => ({
       statusCode: 200,
     }));
     expect(agentFrameworkService.deleteConversation('foo')).resolves.toMatchInlineSnapshot(`
@@ -222,7 +220,7 @@ describe('AgentFrameworkStorageService', () => {
         "success": true,
       }
     `);
-    mockedTransport.mockImplementationOnce(async (params) => ({
+    mockedTransportRequest.mockImplementationOnce(async (params) => ({
       statusCode: 404,
       body: {
         message: 'can not find conversation',
@@ -235,18 +233,18 @@ describe('AgentFrameworkStorageService', () => {
         "success": false,
       }
     `);
-    mockedTransport.mockImplementationOnce(async (params) => {
+    mockedTransportRequest.mockImplementationOnce(async (params) => {
       return Promise.reject({ meta: { body: 'error' } });
     });
     expect(agentFrameworkService.deleteConversation('foo')).rejects.toBeDefined();
   });
 
   it('should encode id when calls deleteConversation with non-standard params in request payload', async () => {
-    mockedTransport.mockResolvedValueOnce({
+    mockedTransportRequest.mockResolvedValueOnce({
       statusCode: 200,
     });
     await agentFrameworkService.deleteConversation('../non-standard/id');
-    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockedTransportRequest.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "method": "DELETE",
@@ -257,7 +255,7 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('updateConversation', async () => {
-    mockedTransport.mockImplementationOnce(async (params) => ({
+    mockedTransportRequest.mockImplementationOnce(async (params) => ({
       statusCode: 200,
     }));
     expect(agentFrameworkService.updateConversation('foo', 'title')).resolves
@@ -266,7 +264,7 @@ describe('AgentFrameworkStorageService', () => {
         "success": true,
       }
     `);
-    mockedTransport.mockImplementationOnce(async (params) => ({
+    mockedTransportRequest.mockImplementationOnce(async (params) => ({
       statusCode: 404,
       body: {
         message: 'can not find conversation',
@@ -280,18 +278,18 @@ describe('AgentFrameworkStorageService', () => {
         "success": false,
       }
     `);
-    mockedTransport.mockImplementationOnce(async (params) => {
+    mockedTransportRequest.mockImplementationOnce(async (params) => {
       return Promise.reject({ meta: { body: 'error' } });
     });
     expect(agentFrameworkService.updateConversation('foo', 'title')).rejects.toBeDefined();
   });
 
   it('should encode id when calls updateConversation with non-standard params in request payload', async () => {
-    mockedTransport.mockResolvedValueOnce({
+    mockedTransportRequest.mockResolvedValueOnce({
       statusCode: 200,
     });
     await agentFrameworkService.updateConversation('../non-standard/id', 'title');
-    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockedTransportRequest.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "body": Object {
@@ -305,7 +303,7 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('getTraces', async () => {
-    mockedTransport.mockImplementationOnce(async (params) => ({
+    mockedTransportRequest.mockImplementationOnce(async (params) => ({
       body: {
         traces: [
           {
@@ -331,7 +329,7 @@ describe('AgentFrameworkStorageService', () => {
         },
       ]
     `);
-    mockedTransport.mockImplementationOnce(async (params) => {
+    mockedTransportRequest.mockImplementationOnce(async (params) => {
       return Promise.reject({ meta: { body: 'error' } });
     });
     expect(agentFrameworkService.getTraces('foo')).rejects.toMatchInlineSnapshot(`
@@ -344,7 +342,7 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('should encode id when calls getTraces with non-standard params in request payload', async () => {
-    mockedTransport.mockResolvedValueOnce({
+    mockedTransportRequest.mockResolvedValueOnce({
       body: {
         traces: [
           {
@@ -359,7 +357,7 @@ describe('AgentFrameworkStorageService', () => {
       },
     });
     await agentFrameworkService.getTraces('../non-standard/id');
-    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockedTransportRequest.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "method": "GET",
@@ -370,7 +368,7 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('updateInteraction', async () => {
-    mockedTransport.mockImplementationOnce(async (params) => ({
+    mockedTransportRequest.mockImplementationOnce(async (params) => ({
       statusCode: 200,
     }));
     expect(
@@ -384,7 +382,7 @@ describe('AgentFrameworkStorageService', () => {
         "success": true,
       }
     `);
-    mockedTransport.mockImplementationOnce(async (params) => ({
+    mockedTransportRequest.mockImplementationOnce(async (params) => ({
       statusCode: 404,
       body: {
         message: 'can not find conversation',
@@ -403,7 +401,7 @@ describe('AgentFrameworkStorageService', () => {
         "success": false,
       }
     `);
-    mockedTransport.mockImplementationOnce(async (params) => {
+    mockedTransportRequest.mockImplementationOnce(async (params) => {
       return Promise.reject({ meta: { body: 'error' } });
     });
     expect(
@@ -422,7 +420,7 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('should encode id when calls updateInteraction with non-standard params in request payload', async () => {
-    mockedTransport.mockResolvedValueOnce({
+    mockedTransportRequest.mockResolvedValueOnce({
       statusCode: 200,
     });
     await agentFrameworkService.updateInteraction('../non-standard/id', {
@@ -430,7 +428,7 @@ describe('AgentFrameworkStorageService', () => {
         bar: 'foo',
       },
     });
-    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockedTransportRequest.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "body": Object {
@@ -448,7 +446,7 @@ describe('AgentFrameworkStorageService', () => {
   });
 
   it('getInteraction', async () => {
-    mockedTransport.mockImplementation(async (params) => ({
+    mockedTransportRequest.mockImplementation(async (params) => ({
       body: {
         input: 'input',
         response: 'response',
@@ -460,7 +458,7 @@ describe('AgentFrameworkStorageService', () => {
     expect(agentFrameworkService.getInteraction('_id', '')).rejects.toMatchInlineSnapshot(
       `[Error: interactionId is required]`
     );
-    expect(mockedTransport).toBeCalledTimes(0);
+    expect(mockedTransportRequest).toBeCalledTimes(0);
     expect(agentFrameworkService.getInteraction('_id', 'interaction_id')).resolves
       .toMatchInlineSnapshot(`
       Object {
@@ -470,18 +468,18 @@ describe('AgentFrameworkStorageService', () => {
         "response": "response",
       }
     `);
-    expect(mockedTransport).toBeCalledTimes(1);
+    expect(mockedTransportRequest).toBeCalledTimes(1);
   });
 
   it('should encode id when calls getInteraction with non-standard params in request payload', async () => {
-    mockedTransport.mockResolvedValueOnce({
+    mockedTransportRequest.mockResolvedValueOnce({
       body: {
         input: 'input',
         response: 'response',
       },
     });
     await agentFrameworkService.getInteraction('_id', '../non-standard/id');
-    expect(mockedTransport.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockedTransportRequest.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "method": "GET",
