@@ -5,6 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../src/core/public/mocks';
+import { DataSourceServiceMock } from '../../services/data_source_service.mock';
 
 export const useCore = jest.fn(() => {
   const useCoreMock = {
@@ -24,7 +25,7 @@ export const useCore = jest.fn(() => {
         load: jest.fn(),
       },
       conversationLoad: {},
-      dataSource: {},
+      dataSource: new DataSourceServiceMock(),
     },
   };
   useCoreMock.services.http.delete.mockReturnValue(Promise.resolve());

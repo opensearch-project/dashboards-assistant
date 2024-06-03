@@ -28,12 +28,12 @@ export interface ConversationOptResponse {
 
 export class AgentFrameworkStorageService implements StorageService {
   constructor(
-    private readonly client: OpenSearchClient,
+    private readonly clientTransport: OpenSearchClient['transport'],
     private readonly messageParsers: MessageParser[] = []
   ) {}
   async getConversation(conversationId: string): Promise<IConversation> {
     const [interactionsResp, conversation] = await Promise.all([
-      this.client.transport.request({
+      this.clientTransport.request({
         method: 'GET',
         path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(
           conversationId
@@ -43,7 +43,7 @@ export class AgentFrameworkStorageService implements StorageService {
           messages: InteractionFromAgentFramework[];
         }>
       >,
-      this.client.transport.request({
+      this.clientTransport.request({
         method: 'GET',
         path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
       }) as TransportRequestPromise<
@@ -103,7 +103,7 @@ export class AgentFrameworkStorageService implements StorageService {
       ...(sortField && query.sortOrder && { sort: [{ [sortField]: query.sortOrder }] }),
     };
 
-    const conversations = await this.client.transport.request({
+    const conversations = await this.clientTransport.request({
       method: 'GET',
       path: `${ML_COMMONS_BASE_API}/memory/_search`,
       body: requestParams,
@@ -146,7 +146,7 @@ export class AgentFrameworkStorageService implements StorageService {
   }
 
   async deleteConversation(conversationId: string): Promise<ConversationOptResponse> {
-    const response = await this.client.transport.request({
+    const response = await this.clientTransport.request({
       method: 'DELETE',
       path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
     });
@@ -167,7 +167,7 @@ export class AgentFrameworkStorageService implements StorageService {
     conversationId: string,
     title: string
   ): Promise<ConversationOptResponse> {
-    const response = await this.client.transport.request({
+    const response = await this.clientTransport.request({
       method: 'PUT',
       path: `${ML_COMMONS_BASE_API}/memory/${encodeURIComponent(conversationId)}`,
       body: {
@@ -188,7 +188,7 @@ export class AgentFrameworkStorageService implements StorageService {
   }
 
   async getTraces(interactionId: string): Promise<AgentFrameworkTrace[]> {
-    const response = (await this.client.transport.request({
+    const response = (await this.clientTransport.request({
       method: 'GET',
       path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}/traces`,
     })) as ApiResponse<{
@@ -216,7 +216,7 @@ export class AgentFrameworkStorageService implements StorageService {
     interactionId: string,
     additionalInfo: Record<string, Record<string, boolean | string>>
   ): Promise<ConversationOptResponse> {
-    const response = await this.client.transport.request({
+    const response = await this.clientTransport.request({
       method: 'PUT',
       path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}`,
       body: {
@@ -260,7 +260,7 @@ export class AgentFrameworkStorageService implements StorageService {
     if (!interactionId) {
       throw new Error('interactionId is required');
     }
-    const interactionsResp = (await this.client.transport.request({
+    const interactionsResp = (await this.clientTransport.request({
       method: 'GET',
       path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}`,
     })) as ApiResponse<InteractionFromAgentFramework>;

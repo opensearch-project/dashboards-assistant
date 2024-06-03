@@ -15,10 +15,11 @@ import {
   EditConversationNameModalProps,
 } from '../edit_conversation_name_modal';
 import { HttpHandler } from '../../../../../src/core/public';
+import { DataSourceServiceMock } from '../../services/data_source_service.mock';
 
 const setup = ({ onClose, defaultTitle, conversationId }: EditConversationNameModalProps) => {
   const useCoreMock = {
-    services: coreMock.createStart(),
+    services: { ...coreMock.createStart(), dataSource: new DataSourceServiceMock() },
   };
   jest.spyOn(coreContextExports, 'useCore').mockReturnValue(useCoreMock);
 
@@ -156,7 +157,10 @@ describe('<EditConversationNameModal />', () => {
     expect(useCoreMock.services.http.put).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
-    expect(useCoreMock.services.http.put).toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(useCoreMock.services.http.put).toHaveBeenCalled();
+    });
 
     fireEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
 
