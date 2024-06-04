@@ -32,6 +32,7 @@ import {
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
+import { ASSISTANT_API, DEFAULT_USER_NAME } from '../common/constants/llm';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -46,7 +47,7 @@ export const IncontextInsightComponent: React.FC<{ props: any }> = (props) => (
 );
 
 interface UserAccountResponse {
-  data: { roles: string[]; user_name: string; user_requested_tenant?: string };
+  user_name: string;
 }
 
 export class AssistantPlugin
@@ -75,6 +76,16 @@ export class AssistantPlugin
     const messageRenderers: Record<string, MessageRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
+    /**
+     * Returns {@link UserAccountResponse}. Provides user name.
+     */
+    const getAccount: () => Promise<UserAccountResponse> = async () => {
+      const account = await core.http.get<UserAccountResponse>(ASSISTANT_API.ACCOUNT).catch((e) => {
+        console.error(`Failed to request user account information: ${String(e.body || e)}`);
+        return { user_name: DEFAULT_USER_NAME };
+      });
+      return account;
+    };
 
     const dataSourceSetupResult = this.dataSourceService.setup({
       uiSettings: core.uiSettings,
@@ -93,9 +104,8 @@ export class AssistantPlugin
           conversations: new ConversationsService(coreStart.http, this.dataSourceService),
           dataSource: this.dataSourceService,
         });
-        const account = { data: { user_name: '', user_requested_tenant: '' } };
-        const username = account.data.user_name;
-        const tenant = account.data.user_requested_tenant ?? '';
+        const account = await getAccount();
+        const username = account.user_name;
         this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
 
         coreStart.chrome.navControls.registerRight({
@@ -107,7 +117,7 @@ export class AssistantPlugin
                 messageRenderers={messageRenderers}
                 actionExecutors={actionExecutors}
                 assistantActions={assistantActions}
-                currentAccount={{ username, tenant }}
+                currentAccount={{ username }}
               />
             </CoreContext.Provider>
           ),

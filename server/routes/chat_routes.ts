@@ -12,7 +12,7 @@ import {
   IRouter,
   RequestHandlerContext,
 } from '../../../../src/core/server';
-import { ASSISTANT_API } from '../../common/constants/llm';
+import { ASSISTANT_API, DEFAULT_USER_NAME } from '../../common/constants/llm';
 import { OllyChatService } from '../services/chat/olly_chat_service';
 import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
 import { RoutesOptions } from '../types';
@@ -150,6 +150,11 @@ const feedbackRoute = {
       dataSourceId: schema.maybe(schema.string()),
     }),
   },
+};
+
+const accountRoute = {
+  path: `${ASSISTANT_API.ACCOUNT}`,
+  validate: {},
 };
 
 export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions) {
@@ -426,6 +431,33 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,
+        });
+      }
+    }
+  );
+
+  router.get(
+    accountRoute,
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
+      try {
+        const auth = routeOptions.auth.get<{
+          authInfo?: {
+            user_name?: string;
+          };
+        }>(request);
+        return response.ok({
+          body: {
+            user_name: auth?.state?.authInfo?.user_name ?? DEFAULT_USER_NAME,
+          },
+        });
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
+        return response.ok({
+          body: { user_name: DEFAULT_USER_NAME },
         });
       }
     }

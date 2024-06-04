@@ -79,7 +79,6 @@ describe('useChatActions hook', () => {
     messageRenderers: {},
     currentAccount: {
       username: '',
-      tenant: '',
     },
   };
 

@@ -19,7 +19,7 @@ describe('useChatContext', () => {
       setFlyoutComponent: jest.fn(),
       messageRenderers: {},
       actionExecutors: {},
-      currentAccount: { username: 'foo', tenant: '' },
+      currentAccount: { username: 'foo' },
       setTitle: jest.fn(),
       setInteractionId: jest.fn(),
     };

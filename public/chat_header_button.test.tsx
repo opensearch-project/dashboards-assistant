@@ -95,7 +95,7 @@ describe('<HeaderChatButton />', () => {
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
 
@@ -144,7 +144,7 @@ describe('<HeaderChatButton />', () => {
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
     screen.getByLabelText('chat input').focus();
@@ -167,7 +167,7 @@ describe('<HeaderChatButton />', () => {
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
@@ -187,7 +187,7 @@ describe('<HeaderChatButton />', () => {
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
     expect(screen.getByLabelText('chat input')).toBeDisabled();
@@ -200,7 +200,7 @@ describe('<HeaderChatButton />', () => {
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
