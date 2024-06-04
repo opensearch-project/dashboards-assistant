@@ -92,7 +92,6 @@ describe('<HeaderChatButton />', () => {
     render(
       <HeaderChatButton
         application={applicationStart}
-        userHasAccess={true}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
@@ -142,7 +141,6 @@ describe('<HeaderChatButton />', () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
-        userHasAccess={true}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
@@ -166,7 +164,6 @@ describe('<HeaderChatButton />', () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
-        userHasAccess={true}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
@@ -187,7 +184,6 @@ describe('<HeaderChatButton />', () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
-        userHasAccess={false}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
@@ -201,7 +197,6 @@ describe('<HeaderChatButton />', () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
-        userHasAccess={false}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}

@@ -42,7 +42,6 @@ export interface AssistantPluginStartDependencies {
 
 export interface AssistantPluginSetupDependencies {
   embeddable: EmbeddableSetup;
-  securityDashboards?: {};
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
@@ -54,10 +53,6 @@ export interface AssistantSetup {
    * Returns true if chat UI is enabled.
    */
   chatEnabled: () => boolean;
-  /**
-   * Returns true if current user has permission to use assistant features.
-   */
-  userHasAccess: () => Promise<boolean>;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
   registerIncontextInsight: IncontextInsightRegistry['register'];
   renderIncontextInsight: (component: React.ReactNode) => React.ReactNode;
