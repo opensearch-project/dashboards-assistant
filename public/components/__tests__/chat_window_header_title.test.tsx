@@ -22,7 +22,11 @@ import { DataSourceServiceMock } from '../../services/data_source_service.mock';
 const setup = ({
   messages = [],
   ...rest
-}: { messages?: IMessage[]; conversationId?: string | undefined } = {}) => {
+}: {
+  messages?: IMessage[];
+  conversationId?: string | undefined;
+  dataSource?: DataSourceServiceMock;
+} = {}) => {
   const useCoreMock = {
     services: {
       ...coreMock.createStart(),
@@ -38,7 +42,7 @@ const setup = ({
         }),
         reload: jest.fn(),
       },
-      dataSource: new DataSourceServiceMock(),
+      dataSource: rest.dataSource ?? new DataSourceServiceMock(),
     },
   };
   useCoreMock.services.http.put.mockImplementation(() => Promise.resolve());
@@ -168,6 +172,19 @@ describe('<ChatWindowHeaderTitle />', () => {
         renderResult.queryByText('Please enter a name for your notebook.')
       ).toBeInTheDocument();
     });
+  });
+
+  it('should hide save to notebook button when MDS enabled', async () => {
+    const { renderResult } = setup({
+      messages: [{ type: 'input', contentType: 'text', content: 'foo' }],
+      dataSource: new DataSourceServiceMock(true),
+    });
+
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
+
+    expect(
+      renderResult.queryByRole('button', { name: 'Save to notebook' })
+    ).not.toBeInTheDocument();
   });
 
   it('should disable "Save to notebook" button when message does not include input', async () => {
