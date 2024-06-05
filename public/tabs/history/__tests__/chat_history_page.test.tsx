@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
@@ -14,7 +14,6 @@ import * as useChatStateExports from '../../../hooks/use_chat_state';
 import * as chatContextExports from '../../../contexts/chat_context';
 import * as coreContextExports from '../../../contexts/core_context';
 import { ConversationsService } from '../../../services/conversations_service';
-import { DataSourceServiceMock } from '../../../services/data_source_service.mock';
 
 import { ChatHistoryPage } from '../chat_history_page';
 import { BehaviorSubject } from 'rxjs';
@@ -28,7 +27,7 @@ const mockGetConversationsHttp = () => {
         title: 'foo',
       },
     ],
-    total: 1,
+    total: 100,
   }));
   return http;
 };
@@ -256,7 +255,9 @@ describe('<ChatHistoryPage />', () => {
 
     expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
 
-    dataSourceId$.next('bar');
+    act(() => {
+      dataSourceId$.next('bar');
+    });
 
     await waitFor(() => {
       expect(useCoreMock.services.conversations.reload).toHaveBeenCalled();
@@ -273,5 +274,72 @@ describe('<ChatHistoryPage />', () => {
 
     dataSourceId$.next('bar');
     expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+  });
+
+  it('should load conversations with empty search after data source changed', async () => {
+    const { useCoreMock, dataSourceId$, renderResult } = setup({ shouldRefresh: true });
+
+    jest.spyOn(useCoreMock.services.conversations, 'load');
+
+    fireEvent.change(renderResult.getByPlaceholderText('Search by conversation name'), {
+      target: {
+        value: 'bar',
+      },
+    });
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: 'bar',
+        })
+      );
+    });
+
+    act(() => {
+      dataSourceId$.next('baz');
+    });
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenLastCalledWith({
+        fields: expect.any(Array),
+        page: 1,
+        perPage: 10,
+        sortField: 'updatedTimeMs',
+        sortOrder: 'DESC',
+      });
+      expect(useCoreMock.services.conversations.load).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('should load conversations with first page after data source changed', async () => {
+    const { useCoreMock, dataSourceId$, renderResult } = setup({ shouldRefresh: true });
+
+    jest.spyOn(useCoreMock.services.conversations, 'load');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('pagination-button-1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(renderResult.getByTestId('pagination-button-1'));
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          page: 2,
+        })
+      );
+    });
+
+    act(() => {
+      dataSourceId$.next('baz');
+    });
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          page: 1,
+        })
+      );
+    });
   });
 });

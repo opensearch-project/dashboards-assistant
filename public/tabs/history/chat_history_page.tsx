@@ -91,7 +91,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     [conversationId, setConversationId, setTitle, chatStateDispatch]
   );
 
-  useDebounce(
+  const [, cancelDebounce] = useDebounce(
     () => {
       setPageIndex(0);
       setDebouncedSearchName(searchName);
@@ -124,7 +124,18 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
       .pipe(skip(1))
       .subscribe(() => {
         if (shouldRefreshRef.current) {
-          services.conversations.reload();
+          // Manual reload if bulk get options won't be changed
+          if (!bulkGetOptions.search && bulkGetOptions.page === 1) {
+            services.conversations.reload();
+            return;
+          }
+          if (bulkGetOptions.search) {
+            setSearchName('');
+            setDebouncedSearchName('');
+          }
+          if (bulkGetOptions.page !== 1) {
+            setPageIndex(0);
+          }
         }
       });
     return () => {
@@ -132,6 +143,11 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
       subscription.unsubscribe();
     };
   }, [services.conversations, bulkGetOptions]);
+
+  // Cancel debounce effect for first mount
+  useEffect(() => {
+    cancelDebounce();
+  }, [cancelDebounce]);
 
   return (
     <EuiFlyoutBody className={cs(props.className, 'llm-chat-flyout-body')}>
