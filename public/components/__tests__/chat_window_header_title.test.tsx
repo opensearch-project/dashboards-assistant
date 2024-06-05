@@ -42,7 +42,7 @@ const setup = ({
         }),
         reload: jest.fn(),
       },
-      dataSource: rest.dataSource ?? new DataSourceServiceMock(),
+      dataSource: rest.dataSource ?? new DataSourceServiceMock(false),
     },
   };
   useCoreMock.services.http.put.mockImplementation(() => Promise.resolve());
