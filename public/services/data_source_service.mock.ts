@@ -10,8 +10,11 @@ export class DataSourceServiceMock {
   }
 
   getDataSourceQuery() {
+    const dataSourceId = {
+      dataSourceId: this._isMDSEnabled ? 'data_source_id' : '',
+    };
     return new Promise((resolve) => {
-      resolve({ dataSourceId: '' });
+      resolve(dataSourceId);
     });
   }
 
