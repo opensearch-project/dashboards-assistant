@@ -27,7 +27,6 @@ import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_rea
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
-  userHasAccess: boolean;
   messageRenderers: Record<string, MessageRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   assistantActions: AssistantActions;
@@ -74,7 +73,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       flyoutFullScreen,
       setFlyoutVisible,
       setFlyoutComponent,
-      userHasAccess: props.userHasAccess,
       messageRenderers: props.messageRenderers,
       actionExecutors: props.actionExecutors,
       currentAccount: props.currentAccount,
@@ -92,7 +90,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       flyoutFullScreen,
       selectedTabId,
       preSelectedTabId,
-      props.userHasAccess,
       props.messageRenderers,
       props.actionExecutors,
       props.currentAccount,
@@ -157,9 +154,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   }, []);
 
   useEffect(() => {
-    if (!props.userHasAccess) {
-      return;
-    }
     const onGlobalMouseUp = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === '/') {
         inputRef.current?.focus();
@@ -170,7 +164,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     return () => {
       document.removeEventListener('keydown', onGlobalMouseUp);
     };
-  }, [props.userHasAccess]);
+  }, []);
 
   useEffect(() => {
     const handleSuggestion = (event: { suggestion: string }) => {
@@ -235,7 +229,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
               )}
             </span>
           }
-          disabled={!props.userHasAccess}
         />
         <ChatContext.Provider value={chatContextValue}>
           <ChatStateProvider>

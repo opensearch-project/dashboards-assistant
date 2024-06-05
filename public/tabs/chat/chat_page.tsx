@@ -60,7 +60,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         <EuiSpacer size="xs" />
         <ChatInputControls
           loading={chatState.llmResponding}
-          disabled={messagesLoading || chatState.llmResponding || !chatContext.userHasAccess}
+          disabled={messagesLoading || chatState.llmResponding}
         />
         <EuiSpacer size="s" />
       </EuiFlyoutFooter>

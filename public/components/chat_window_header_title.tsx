@@ -12,7 +12,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useChatContext } from '../contexts';
 import { useChatActions, useChatState, useSaveChat } from '../hooks';
 import { NotebookNameModal } from './notebook/notebook_name_modal';
@@ -57,6 +57,11 @@ export const ChatWindowHeaderTitle = React.memo(() => {
     [chatContext, core.services.conversations]
   );
 
+  const displayNotebookFeature = useMemo(() => {
+    // Notebook dashboard API doesn't support MDS for now, so we hide saving to notebook feature when MDS enabled.
+    return !core.services.dataSource.isMDSEnabled();
+  }, [core.services.dataSource.isMDSEnabled]);
+
   const handleSaveNotebookModalClose = () => {
     setSaveNotebookModalOpen(false);
   };
@@ -87,17 +92,19 @@ export const ChatWindowHeaderTitle = React.memo(() => {
     >
       New conversation
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="save-as-notebook"
-      onClick={() => {
-        closePopover();
-        setSaveNotebookModalOpen(true);
-      }}
-      // User only can save conversation when he send a message at least.
-      disabled={chatState.messages.every((item) => item.type !== 'input')}
-    >
-      Save to notebook
-    </EuiContextMenuItem>,
+    displayNotebookFeature && (
+      <EuiContextMenuItem
+        key="save-as-notebook"
+        onClick={() => {
+          closePopover();
+          setSaveNotebookModalOpen(true);
+        }}
+        // User only can save conversation when he send a message at least.
+        disabled={chatState.messages.every((item) => item.type !== 'input')}
+      >
+        Save to notebook
+      </EuiContextMenuItem>
+    ),
   ];
 
   return (
