@@ -226,23 +226,4 @@ describe('<HeaderChatButton />', () => {
     });
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
   });
-
-  it('should call resetChat after data source change', () => {
-    const resetChatMock = jest.fn();
-    expect(dataSourceId$).toBeTruthy();
-    dataSourceId$.next('foo');
-    render(
-      <HeaderChatButton
-        application={applicationServiceMock.createStartContract()}
-        userHasAccess={false}
-        messageRenderers={{}}
-        actionExecutors={{}}
-        assistantActions={{ resetChat: resetChatMock } as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
-      />
-    );
-
-    dataSourceId$.next('bar');
-    expect(resetChatMock).toHaveBeenCalled();
-  });
 });

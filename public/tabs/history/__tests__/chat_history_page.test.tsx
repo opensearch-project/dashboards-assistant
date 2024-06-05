@@ -6,6 +6,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
+import { BehaviorSubject } from 'rxjs';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { HttpStart } from '../../../../../../src/core/public';
@@ -16,7 +17,6 @@ import * as coreContextExports from '../../../contexts/core_context';
 import { ConversationsService } from '../../../services/conversations_service';
 
 import { ChatHistoryPage } from '../chat_history_page';
-import { BehaviorSubject } from 'rxjs';
 
 const mockGetConversationsHttp = () => {
   const http = coreMock.createStart().http;
@@ -248,32 +248,32 @@ describe('<ChatHistoryPage />', () => {
     });
   });
 
-  it('should call conversations.reload after data source changed', async () => {
+  it('should call conversations.load after data source changed', async () => {
     const { useCoreMock, dataSourceId$ } = setup({ shouldRefresh: true });
 
-    jest.spyOn(useCoreMock.services.conversations, 'reload');
+    jest.spyOn(useCoreMock.services.conversations, 'load');
 
-    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+    expect(useCoreMock.services.conversations.load).not.toHaveBeenCalled();
 
     act(() => {
       dataSourceId$.next('bar');
     });
 
     await waitFor(() => {
-      expect(useCoreMock.services.conversations.reload).toHaveBeenCalled();
+      expect(useCoreMock.services.conversations.load).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('should not call conversations.reload after unmount', async () => {
+  it('should not call conversations.load after unmount', async () => {
     const { useCoreMock, dataSourceId$, renderResult } = setup({ shouldRefresh: true });
 
-    jest.spyOn(useCoreMock.services.conversations, 'reload');
+    jest.spyOn(useCoreMock.services.conversations, 'load');
 
-    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+    expect(useCoreMock.services.conversations.load).not.toHaveBeenCalled();
     renderResult.unmount();
 
     dataSourceId$.next('bar');
-    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+    expect(useCoreMock.services.conversations.load).not.toHaveBeenCalled();
   });
 
   it('should load conversations with empty search after data source changed', async () => {

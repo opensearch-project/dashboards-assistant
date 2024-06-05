@@ -20,7 +20,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FormattedMessage } from '@osd/i18n/react';
 import { useDebounce, useObservable, useUpdateEffect } from 'react-use';
 import cs from 'classnames';
-import { skip } from 'rxjs/operators';
 
 import { useChatActions, useChatState } from '../../hooks';
 import { useChatContext, useCore } from '../../contexts';
@@ -58,6 +57,8 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     }),
     [pageIndex, pageSize, debouncedSearchName]
   );
+  const bulkGetOptionsRef = useRef(bulkGetOptions);
+  bulkGetOptionsRef.current = bulkGetOptions;
   const conversations = useObservable(services.conversations.conversations$);
   const loading = useObservable(services.conversations.status$) === 'loading';
   const chatHistories = useMemo(() => conversations?.objects || [], [conversations]);
@@ -110,39 +111,35 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     };
   }, [props.shouldRefresh, services.conversations]);
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     services.conversations.load(bulkGetOptions);
-    const subscription = services.dataSource
-      .getDataSourceId$()
-      /**
-       *
-       * Skip the first value to avoid load conversations with same options again.
-       * The conversations has been loaded by above `services.conversations.load`,
-       * we only reload them after data source changed.
-       *
-       * */
-      .pipe(skip(1))
-      .subscribe(() => {
-        if (shouldRefreshRef.current) {
-          // Manual reload if bulk get options won't be changed
-          if (!bulkGetOptions.search && bulkGetOptions.page === 1) {
-            services.conversations.reload();
-            return;
-          }
-          if (bulkGetOptions.search) {
-            setSearchName('');
-            setDebouncedSearchName('');
-          }
-          if (bulkGetOptions.page !== 1) {
-            setPageIndex(0);
-          }
-        }
-      });
+    return () => {
+      services.conversations.abortController?.abort();
+    };
+  }, [services.conversations, bulkGetOptions]);
+
+  useEffect(() => {
+    const subscription = services.dataSource.getDataSourceId$().subscribe(() => {
+      const currentOptions = bulkGetOptionsRef.current;
+      // Load conversations directly if options are default values
+      if (!currentOptions.search && currentOptions.page === 1) {
+        services.conversations.load(currentOptions);
+        return;
+      }
+      // Reset changes to default, these operations will trigger load after state updates
+      if (currentOptions.search) {
+        setSearchName('');
+        setDebouncedSearchName('');
+      }
+      if (currentOptions.page !== 1) {
+        setPageIndex(0);
+      }
+    });
     return () => {
       services.conversations.abortController?.abort();
       subscription.unsubscribe();
     };
-  }, [services.conversations, bulkGetOptions]);
+  }, [services.conversations]);
 
   // Cancel debounce effect for first mount
   useEffect(() => {

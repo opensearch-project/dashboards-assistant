@@ -7,7 +7,6 @@ import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
-import { skip } from 'rxjs/operators';
 
 import { ApplicationStart, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
@@ -55,9 +54,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const core = useCore();
   const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
   const flyoutMountPoint = useRef(null);
-
-  const resetChatRef = useRef(props.assistantActions.resetChat);
-  resetChatRef.current = props.assistantActions.resetChat;
 
   useEffectOnce(() => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
@@ -198,18 +194,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       registry.off('onSuggestion', handleSuggestion);
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
-
-  useEffect(() => {
-    const subscription = core.services.dataSource
-      .getDataSourceId$()
-      .pipe(skip(1))
-      .subscribe(() => {
-        resetChatRef.current();
-      });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [core.services.dataSource]);
 
   return (
     <>

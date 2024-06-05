@@ -5,6 +5,7 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
+import { Subscription } from 'rxjs';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../src/core/public';
 import {
   createOpenSearchDashboardsReactContext,
@@ -60,6 +61,7 @@ export class AssistantPlugin
   private config: ConfigSchema;
   incontextInsightRegistry: IncontextInsightRegistry | undefined;
   private dataSourceService: DataSourceService;
+  private resetChatSubscription: Subscription | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -120,6 +122,12 @@ export class AssistantPlugin
         const tenant = account.data.user_requested_tenant ?? '';
         this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
 
+        if (this.dataSourceService.isMDSEnabled()) {
+          this.resetChatSubscription = this.dataSourceService.getDataSourceId$().subscribe(() => {
+            assistantActions.resetChat?.();
+          });
+        }
+
         coreStart.chrome.navControls.registerRight({
           order: 10000,
           mount: toMountPoint(
@@ -177,5 +185,6 @@ export class AssistantPlugin
 
   public stop() {
     this.dataSourceService.stop();
+    this.resetChatSubscription?.unsubscribe();
   }
 }
