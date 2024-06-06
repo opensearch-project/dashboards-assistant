@@ -7,9 +7,6 @@ export class DataSourceServiceMock {
   constructor() {}
 
   getDataSourceQuery() {
-    return new Promise((resolve) => {
-      resolve({ dataSourceId: '' });
-    });
-    // return { dataSourceId: '' };
+    return { dataSourceId: '' };
   }
 }

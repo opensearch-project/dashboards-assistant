@@ -111,27 +111,20 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     };
   }, [props.shouldRefresh, services.conversations]);
 
-  useUpdateEffect(() => {
-    services.conversations.load(bulkGetOptions);
-    return () => {
-      services.conversations.abortController?.abort();
-    };
-  }, [services.conversations, bulkGetOptions]);
-
   useEffect(() => {
-    const subscription = services.dataSource.getDataSourceId$().subscribe(() => {
-      const currentOptions = bulkGetOptionsRef.current;
+    services.conversations.load(bulkGetOptions);
+    const subscription = services.dataSource.dataSourceIdUpdates$.subscribe(() => {
       // Load conversations directly if options are default values
-      if (!currentOptions.search && currentOptions.page === 1) {
-        services.conversations.load(currentOptions);
+      if (!bulkGetOptions.search && bulkGetOptions.page === 1) {
+        services.conversations.reload();
         return;
       }
       // Reset changes to default, these operations will trigger load after state updates
-      if (currentOptions.search) {
+      if (bulkGetOptions.search) {
         setSearchName('');
         setDebouncedSearchName('');
       }
-      if (currentOptions.page !== 1) {
+      if (bulkGetOptions.page !== 1) {
         setPageIndex(0);
       }
     });
@@ -139,7 +132,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
       services.conversations.abortController?.abort();
       subscription.unsubscribe();
     };
-  }, [services.conversations]);
+  }, [services.conversations, bulkGetOptions]);
 
   // Cancel debounce effect for first mount
   useEffect(() => {

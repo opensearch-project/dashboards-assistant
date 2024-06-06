@@ -40,7 +40,7 @@ export class ConversationsService {
         await this._http.get<IConversationFindResponse>(ASSISTANT_API.CONVERSATIONS, {
           query: {
             ...this._options,
-            ...(await this._dataSource.getDataSourceQuery()),
+            ...this._dataSource.getDataSourceQuery(),
           } as HttpFetchQuery,
           signal: this.abortController.signal,
         })

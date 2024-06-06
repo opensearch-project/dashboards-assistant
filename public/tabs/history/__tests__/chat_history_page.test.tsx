@@ -6,7 +6,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { HttpStart } from '../../../../../../src/core/public';
@@ -41,10 +41,9 @@ const setup = ({
   chatContext?: { flyoutFullScreen?: boolean };
   shouldRefresh?: boolean;
 } = {}) => {
-  const dataSourceId$ = new BehaviorSubject<string | null>('foo');
   const dataSourceMock = {
-    getDataSourceId$: jest.fn(() => dataSourceId$),
-    getDataSourceQuery: jest.fn(() => ({ dataSourceId: dataSourceId$.getValue() })),
+    dataSourceIdUpdates$: new Subject<string | null>(),
+    getDataSourceQuery: jest.fn(() => ({ dataSourceId: 'foo' })),
   };
   const useCoreMock = {
     services: {
@@ -79,8 +78,8 @@ const setup = ({
     useCoreMock,
     useChatStateMock,
     useChatContextMock,
+    dataSourceMock,
     renderResult,
-    dataSourceId$,
   };
 };
 
@@ -248,36 +247,36 @@ describe('<ChatHistoryPage />', () => {
     });
   });
 
-  it('should call conversations.load after data source changed', async () => {
-    const { useCoreMock, dataSourceId$ } = setup({ shouldRefresh: true });
+  it('should call conversations.reload after data source changed', async () => {
+    const { useCoreMock, dataSourceMock } = setup({ shouldRefresh: true });
 
-    jest.spyOn(useCoreMock.services.conversations, 'load');
+    jest.spyOn(useCoreMock.services.conversations, 'reload');
 
-    expect(useCoreMock.services.conversations.load).not.toHaveBeenCalled();
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
 
     act(() => {
-      dataSourceId$.next('bar');
+      dataSourceMock.dataSourceIdUpdates$.next('bar');
     });
 
     await waitFor(() => {
-      expect(useCoreMock.services.conversations.load).toHaveBeenCalledTimes(1);
+      expect(useCoreMock.services.conversations.reload).toHaveBeenCalledTimes(1);
     });
   });
 
   it('should not call conversations.load after unmount', async () => {
-    const { useCoreMock, dataSourceId$, renderResult } = setup({ shouldRefresh: true });
+    const { useCoreMock, dataSourceMock, renderResult } = setup({ shouldRefresh: true });
 
-    jest.spyOn(useCoreMock.services.conversations, 'load');
+    jest.spyOn(useCoreMock.services.conversations, 'reload');
 
-    expect(useCoreMock.services.conversations.load).not.toHaveBeenCalled();
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
     renderResult.unmount();
 
-    dataSourceId$.next('bar');
-    expect(useCoreMock.services.conversations.load).not.toHaveBeenCalled();
+    dataSourceMock.dataSourceIdUpdates$.next('bar');
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
   });
 
   it('should load conversations with empty search after data source changed', async () => {
-    const { useCoreMock, dataSourceId$, renderResult } = setup({ shouldRefresh: true });
+    const { useCoreMock, dataSourceMock, renderResult } = setup({ shouldRefresh: true });
 
     jest.spyOn(useCoreMock.services.conversations, 'load');
 
@@ -296,7 +295,7 @@ describe('<ChatHistoryPage />', () => {
     });
 
     act(() => {
-      dataSourceId$.next('baz');
+      dataSourceMock.dataSourceIdUpdates$.next('baz');
     });
 
     await waitFor(() => {
@@ -312,7 +311,7 @@ describe('<ChatHistoryPage />', () => {
   });
 
   it('should load conversations with first page after data source changed', async () => {
-    const { useCoreMock, dataSourceId$, renderResult } = setup({ shouldRefresh: true });
+    const { useCoreMock, dataSourceMock, renderResult } = setup({ shouldRefresh: true });
 
     jest.spyOn(useCoreMock.services.conversations, 'load');
 
@@ -331,7 +330,7 @@ describe('<ChatHistoryPage />', () => {
     });
 
     act(() => {
-      dataSourceId$.next('baz');
+      dataSourceMock.dataSourceIdUpdates$.next('baz');
     });
 
     await waitFor(() => {

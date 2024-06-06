@@ -123,7 +123,7 @@ export class AssistantPlugin
         this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
 
         if (this.dataSourceService.isMDSEnabled()) {
-          this.resetChatSubscription = this.dataSourceService.getDataSourceId$().subscribe(() => {
+          this.resetChatSubscription = this.dataSourceService.dataSourceIdUpdates$.subscribe(() => {
             assistantActions.resetChat?.();
           });
         }
