@@ -16,9 +16,12 @@ export const ASSISTANT_API = {
   ABORT_AGENT_EXECUTION: `${API_BASE}/abort`,
   REGENERATE: `${API_BASE}/regenerate`,
   TRACE: `${API_BASE}/trace`,
+  ACCOUNT: `${API_BASE}/account`,
 } as const;
 
 export const NOTEBOOK_API = {
   CREATE_NOTEBOOK: `${NOTEBOOK_PREFIX}/note`,
   SET_PARAGRAPH: `${NOTEBOOK_PREFIX}/set_paragraphs/`,
 };
+
+export const DEFAULT_USER_NAME = 'User';

@@ -17,10 +17,9 @@ describe('useChatContext', () => {
       flyoutFullScreen: true,
       setFlyoutVisible: jest.fn(),
       setFlyoutComponent: jest.fn(),
-      userHasAccess: true,
       messageRenderers: {},
       actionExecutors: {},
-      currentAccount: { username: 'foo', tenant: '' },
+      currentAccount: { username: 'foo' },
       setTitle: jest.fn(),
       setInteractionId: jest.fn(),
     };

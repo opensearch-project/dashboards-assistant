@@ -4,9 +4,20 @@
  */
 
 export class DataSourceServiceMock {
-  constructor() {}
+  private _isMDSEnabled = true;
+  constructor(isMDSEnabled?: boolean) {
+    this._isMDSEnabled = isMDSEnabled ?? true;
+  }
 
   getDataSourceQuery() {
-    return { dataSourceId: '' };
+    return this._isMDSEnabled
+      ? {
+          dataSourceId: '',
+        }
+      : {};
+  }
+
+  isMDSEnabled() {
+    return this._isMDSEnabled;
   }
 }
