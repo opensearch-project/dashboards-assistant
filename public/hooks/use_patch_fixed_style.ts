@@ -31,8 +31,12 @@ export const usePatchFixedStyle = () => {
     });
     return () => {
       subscription.unsubscribe();
+      document.head.removeChild(style);
+      if (textRef.current) {
+        style.removeChild(textRef.current);
+      }
     };
-  }, []);
+  }, [sidecarConfig$]);
 };
 
 function updateHeadStyle(config: ISidecarConfig, text?: Text) {
