@@ -48,44 +48,35 @@ jest.mock('./services', () => {
   };
 });
 
-let dataSourceId$: BehaviorSubject<string | null>;
 // mock sidecar open,hide and show
-jest.spyOn(coreContextExports, 'useCore').mockImplementation(() => {
-  dataSourceId$ = new BehaviorSubject<string | null>(null);
-  return {
-    services: {
-      dataSource: {
-        getDataSourceId$: jest.fn(() => dataSourceId$),
-      },
+jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
+  overlays: {
+    // @ts-ignore
+    sidecar: () => {
+      const attachElement = document.createElement('div');
+      attachElement.id = 'sidecar-mock-div';
+      return {
+        open: (mountPoint) => {
+          document.body.appendChild(attachElement);
+          render(<MountWrapper mount={mountPoint} />, {
+            container: attachElement,
+          });
+        },
+        hide: () => {
+          const element = document.getElementById('sidecar-mock-div');
+          if (element) {
+            element.style.display = 'none';
+          }
+        },
+        show: () => {
+          const element = document.getElementById('sidecar-mock-div');
+          if (element) {
+            element.style.display = 'block';
+          }
+        },
+      };
     },
-    overlays: {
-      // @ts-ignore
-      sidecar: () => {
-        const attachElement = document.createElement('div');
-        attachElement.id = 'sidecar-mock-div';
-        return {
-          open: (mountPoint) => {
-            document.body.appendChild(attachElement);
-            render(<MountWrapper mount={mountPoint} />, {
-              container: attachElement,
-            });
-          },
-          hide: () => {
-            const element = document.getElementById('sidecar-mock-div');
-            if (element) {
-              element.style.display = 'none';
-            }
-          },
-          show: () => {
-            const element = document.getElementById('sidecar-mock-div');
-            if (element) {
-              element.style.display = 'block';
-            }
-          },
-        };
-      },
-    },
-  };
+  },
 });
 
 describe('<HeaderChatButton />', () => {
