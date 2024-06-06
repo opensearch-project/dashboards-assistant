@@ -4,7 +4,7 @@
  */
 
 import { IMessage, Interaction } from '../common/types/chat_saved_object_attributes';
-import { Logger } from '../../../src/core/server';
+import { Logger, HttpAuth } from '../../../src/core/server';
 
 export interface AssistantPluginSetup {
   registerMessageParser: (message: MessageParser) => void;
@@ -40,6 +40,7 @@ export interface MessageParser {
 
 export interface RoutesOptions {
   messageParsers: MessageParser[];
+  auth: HttpAuth;
 }
 
 declare module '../../../src/core/server' {

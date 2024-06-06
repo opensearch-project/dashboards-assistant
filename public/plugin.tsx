@@ -32,6 +32,7 @@ import {
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
+import { ASSISTANT_API, DEFAULT_USER_NAME } from '../common/constants/llm';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -46,7 +47,7 @@ export const IncontextInsightComponent: React.FC<{ props: any }> = (props) => (
 );
 
 interface UserAccountResponse {
-  data: { roles: string[]; user_name: string; user_requested_tenant?: string };
+  user_name: string;
 }
 
 export class AssistantPlugin
@@ -76,27 +77,15 @@ export class AssistantPlugin
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
     /**
-     * Returns {@link UserAccountResponse}. Provides default roles and user
-     * name if security plugin call fails.
+     * Returns {@link UserAccountResponse}. Provides user name.
      */
-    const getAccount: () => Promise<UserAccountResponse> = (() => {
-      let account: UserAccountResponse;
-      return async () => {
-        if (setupDeps.securityDashboards === undefined)
-          return { data: { roles: ['all_access'], user_name: 'dashboards_user' } };
-        if (account === undefined) {
-          account = await core.http
-            .get<UserAccountResponse>('/api/v1/configuration/account')
-            .catch((e) => {
-              console.error(`Failed to request user account information: ${String(e.body || e)}`);
-              return { data: { roles: [], user_name: '' } };
-            });
-        }
-        return account;
-      };
-    })();
-    const checkAccess = (account: Awaited<ReturnType<typeof getAccount>>) =>
-      account.data.roles.some((role) => ['all_access', 'assistant_user'].includes(role));
+    const getAccount: () => Promise<UserAccountResponse> = async () => {
+      const account = await core.http.get<UserAccountResponse>(ASSISTANT_API.ACCOUNT).catch((e) => {
+        console.error(`Failed to request user account information: ${String(e.body || e)}`);
+        return { user_name: DEFAULT_USER_NAME };
+      });
+      return account;
+    };
 
     const dataSourceSetupResult = this.dataSourceService.setup({
       uiSettings: core.uiSettings,
@@ -116,8 +105,7 @@ export class AssistantPlugin
           dataSource: this.dataSourceService,
         });
         const account = await getAccount();
-        const username = account.data.user_name;
-        const tenant = account.data.user_requested_tenant ?? '';
+        const username = account.user_name;
         this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
 
         coreStart.chrome.navControls.registerRight({
@@ -126,11 +114,10 @@ export class AssistantPlugin
             <CoreContext.Provider>
               <HeaderChatButton
                 application={coreStart.application}
-                userHasAccess={checkAccess(account)}
                 messageRenderers={messageRenderers}
                 actionExecutors={actionExecutors}
                 assistantActions={assistantActions}
-                currentAccount={{ username, tenant }}
+                currentAccount={{ username }}
               />
             </CoreContext.Provider>
           ),
@@ -152,7 +139,6 @@ export class AssistantPlugin
         actionExecutors[actionType] = execute;
       },
       chatEnabled: () => this.config.chat.enabled,
-      userHasAccess: async () => await getAccount().then(checkAccess),
       assistantActions,
       registerIncontextInsight: this.incontextInsightRegistry.register.bind(
         this.incontextInsightRegistry

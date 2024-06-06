@@ -76,11 +76,9 @@ describe('useChatActions hook', () => {
     setInteractionId: setInteractionIdMock,
     flyoutVisible: false,
     flyoutFullScreen: false,
-    userHasAccess: false,
     messageRenderers: {},
     currentAccount: {
       username: '',
-      tenant: '',
     },
   };
 

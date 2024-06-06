@@ -45,7 +45,6 @@ describe('<ChatPageContent />', () => {
       },
       currentAccount: {
         username: 'test_user',
-        tenant: 'private',
       },
     });
 

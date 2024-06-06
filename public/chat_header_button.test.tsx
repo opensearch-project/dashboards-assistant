@@ -92,11 +92,10 @@ describe('<HeaderChatButton />', () => {
     render(
       <HeaderChatButton
         application={applicationStart}
-        userHasAccess={true}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
 
@@ -142,11 +141,10 @@ describe('<HeaderChatButton />', () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
-        userHasAccess={true}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
     screen.getByLabelText('chat input').focus();
@@ -166,11 +164,10 @@ describe('<HeaderChatButton />', () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
-        userHasAccess={true}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
@@ -183,29 +180,14 @@ describe('<HeaderChatButton />', () => {
     expect(screen.getByLabelText('chat input')).toHaveFocus();
   });
 
-  it('should disable chat input when no access', () => {
-    render(
-      <HeaderChatButton
-        application={applicationServiceMock.createStartContract()}
-        userHasAccess={false}
-        messageRenderers={{}}
-        actionExecutors={{}}
-        assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
-      />
-    );
-    expect(screen.getByLabelText('chat input')).toBeDisabled();
-  });
-
   it('should not focus on chat input when no access and pressing global shortcut', () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
-        userHasAccess={false}
         messageRenderers={{}}
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user', tenant: 'test_tenant' }}
+        currentAccount={{ username: 'test_user' }}
       />
     );
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
