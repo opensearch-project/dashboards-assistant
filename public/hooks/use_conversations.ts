@@ -14,13 +14,13 @@ export const useDeleteConversation = () => {
   const abortControllerRef = useRef<AbortController>();
 
   const deleteConversation = useCallback(
-    async (conversationId: string) => {
+    (conversationId: string) => {
       abortControllerRef.current = new AbortController();
       dispatch({ type: 'request' });
       return core.services.http
         .delete(`${ASSISTANT_API.CONVERSATION}/${conversationId}`, {
           signal: abortControllerRef.current.signal,
-          query: await core.services.dataSource.getDataSourceQuery(),
+          query: core.services.dataSource.getDataSourceQuery(),
         })
         .then((payload) => {
           dispatch({ type: 'success', payload });
@@ -53,7 +53,7 @@ export const usePatchConversation = () => {
   const abortControllerRef = useRef<AbortController>();
 
   const patchConversation = useCallback(
-    async (conversationId: string, title: string) => {
+    (conversationId: string, title: string) => {
       abortControllerRef.current = new AbortController();
       dispatch({ type: 'request' });
       return core.services.http
@@ -61,7 +61,7 @@ export const usePatchConversation = () => {
           body: JSON.stringify({
             title,
           }),
-          query: await core.services.dataSource.getDataSourceQuery(),
+          query: core.services.dataSource.getDataSourceQuery(),
           signal: abortControllerRef.current.signal,
         })
         .then((payload) => dispatch({ type: 'success', payload }))

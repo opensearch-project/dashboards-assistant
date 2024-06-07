@@ -6,6 +6,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { HttpStart } from '../../../../../../src/core/public';
@@ -14,7 +15,6 @@ import * as useChatStateExports from '../../../hooks/use_chat_state';
 import * as chatContextExports from '../../../contexts/chat_context';
 import * as coreContextExports from '../../../contexts/core_context';
 import { ConversationsService } from '../../../services/conversations_service';
-import { DataSourceServiceMock } from '../../../services/data_source_service.mock';
 
 import { ChatHistoryPage } from '../chat_history_page';
 
@@ -27,7 +27,7 @@ const mockGetConversationsHttp = () => {
         title: 'foo',
       },
     ],
-    total: 1,
+    total: 100,
   }));
   return http;
 };
@@ -35,11 +35,16 @@ const mockGetConversationsHttp = () => {
 const setup = ({
   http = mockGetConversationsHttp(),
   chatContext = {},
+  shouldRefresh = false,
 }: {
   http?: HttpStart;
   chatContext?: { flyoutFullScreen?: boolean };
+  shouldRefresh?: boolean;
 } = {}) => {
-  const dataSourceMock = new DataSourceServiceMock();
+  const dataSourceMock = {
+    dataSourceIdUpdates$: new Subject<string | null>(),
+    getDataSourceQuery: jest.fn(() => ({ dataSourceId: 'foo' })),
+  };
   const useCoreMock = {
     services: {
       ...coreMock.createStart(),
@@ -65,7 +70,7 @@ const setup = ({
 
   const renderResult = render(
     <I18nProvider>
-      <ChatHistoryPage shouldRefresh={false} />
+      <ChatHistoryPage shouldRefresh={shouldRefresh} />
     </I18nProvider>
   );
 
@@ -73,6 +78,7 @@ const setup = ({
     useCoreMock,
     useChatStateMock,
     useChatContextMock,
+    dataSourceMock,
     renderResult,
   };
 };
@@ -238,6 +244,102 @@ describe('<ChatHistoryPage />', () => {
 
     await waitFor(() => {
       expect(abortMock).toHaveBeenCalled();
+    });
+  });
+
+  it('should call conversations.reload after data source changed', async () => {
+    const { useCoreMock, dataSourceMock } = setup({ shouldRefresh: true });
+
+    jest.spyOn(useCoreMock.services.conversations, 'load');
+
+    expect(useCoreMock.services.conversations.load).not.toHaveBeenCalled();
+
+    act(() => {
+      dataSourceMock.dataSourceIdUpdates$.next('bar');
+    });
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('should not call conversations.load after unmount', async () => {
+    const { useCoreMock, dataSourceMock, renderResult } = setup({ shouldRefresh: true });
+
+    jest.spyOn(useCoreMock.services.conversations, 'reload');
+
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+    renderResult.unmount();
+
+    dataSourceMock.dataSourceIdUpdates$.next('bar');
+    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+  });
+
+  it('should load conversations with empty search after data source changed', async () => {
+    const { useCoreMock, dataSourceMock, renderResult } = setup({ shouldRefresh: true });
+
+    jest.spyOn(useCoreMock.services.conversations, 'load');
+
+    fireEvent.change(renderResult.getByPlaceholderText('Search by conversation name'), {
+      target: {
+        value: 'bar',
+      },
+    });
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: 'bar',
+        })
+      );
+    });
+
+    act(() => {
+      dataSourceMock.dataSourceIdUpdates$.next('baz');
+    });
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenLastCalledWith({
+        fields: expect.any(Array),
+        page: 1,
+        perPage: 10,
+        sortField: 'updatedTimeMs',
+        sortOrder: 'DESC',
+        searchFields: ['title'],
+      });
+      expect(useCoreMock.services.conversations.load).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('should load conversations with first page after data source changed', async () => {
+    const { useCoreMock, dataSourceMock, renderResult } = setup({ shouldRefresh: true });
+
+    jest.spyOn(useCoreMock.services.conversations, 'load');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('pagination-button-1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(renderResult.getByTestId('pagination-button-1'));
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          page: 2,
+        })
+      );
+    });
+
+    act(() => {
+      dataSourceMock.dataSourceIdUpdates$.next('baz');
+    });
+
+    await waitFor(() => {
+      expect(useCoreMock.services.conversations.load).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          page: 1,
+        })
+      );
     });
   });
 });

@@ -22,26 +22,24 @@ export const useFetchAgentFrameworkTraces = (interactionId: string) => {
       return;
     }
 
-    core.services.dataSource.getDataSourceQuery().then((query) => {
-      core.services.http
-        .get<AgentFrameworkTrace[]>(`${ASSISTANT_API.TRACE}/${interactionId}`, {
-          signal: abortController.signal,
-          query,
+    core.services.http
+      .get<AgentFrameworkTrace[]>(`${ASSISTANT_API.TRACE}/${interactionId}`, {
+        signal: abortController.signal,
+        query: core.services.dataSource.getDataSourceQuery(),
+      })
+      .then((payload) =>
+        dispatch({
+          type: 'success',
+          payload,
         })
-        .then((payload) =>
-          dispatch({
-            type: 'success',
-            payload,
-          })
-        )
-        .catch((error) => {
-          if (error.name === 'AbortError') return;
-          dispatch({ type: 'failure', error });
-        });
-    });
+      )
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        dispatch({ type: 'failure', error });
+      });
 
     return () => abortController.abort();
-  }, [core.services.http, interactionId]);
+  }, [core.services.http, interactionId, core.services.dataSource]);
 
   return { ...state };
 };

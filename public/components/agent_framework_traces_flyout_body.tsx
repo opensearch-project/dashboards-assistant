@@ -13,14 +13,26 @@ import {
   EuiButtonIcon,
   EuiPageHeaderSection,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useChatContext } from '../contexts/chat_context';
+import { useCore } from '../../public/contexts';
 import { AgentFrameworkTraces } from './agent_framework_traces';
 import { TAB_ID } from '../utils/constants';
 
 export const AgentFrameworkTracesFlyoutBody: React.FC = () => {
+  const core = useCore();
   const chatContext = useChatContext();
   const interactionId = chatContext.interactionId;
+
+  useEffect(() => {
+    const subscription = core.services.dataSource.dataSourceIdUpdates$.subscribe(() => {
+      chatContext.setSelectedTabId(TAB_ID.CHAT);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [core.services.dataSource, chatContext.setSelectedTabId]);
+
   if (!interactionId) {
     return null;
   }
