@@ -25,6 +25,7 @@ import {
 } from './utils/constants';
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
+import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -53,6 +54,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const core = useCore();
   const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
   const flyoutMountPoint = useRef(null);
+  usePatchFixedStyle();
 
   useEffectOnce(() => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
