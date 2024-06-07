@@ -16,7 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useDebounce, useObservable, useUpdateEffect } from 'react-use';
 import cs from 'classnames';
@@ -57,15 +57,11 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     }),
     [pageIndex, pageSize, debouncedSearchName]
   );
-  const bulkGetOptionsRef = useRef(bulkGetOptions);
-  bulkGetOptionsRef.current = bulkGetOptions;
   const conversations = useObservable(services.conversations.conversations$);
   const loading = useObservable(services.conversations.status$) === 'loading';
   const chatHistories = useMemo(() => conversations?.objects || [], [conversations]);
   const hasNoConversations =
     !debouncedSearchName && !!conversations && conversations.total === 0 && !loading;
-  const shouldRefreshRef = useRef(props.shouldRefresh);
-  shouldRefreshRef.current = props.shouldRefresh;
 
   const handleSearchChange = useCallback((e) => {
     setSearchName(e.target.value);
