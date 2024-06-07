@@ -74,6 +74,9 @@ jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
             element.style.display = 'block';
           }
         },
+        getSidecarConfig$: () => {
+          return new BehaviorSubject(undefined);
+        },
       };
     },
   },
