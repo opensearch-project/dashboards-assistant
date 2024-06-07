@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 import { useCore } from '../contexts/core_context';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../../src/core/public';
@@ -35,7 +35,7 @@ export const usePatchFixedStyle = () => {
 };
 
 function updateHeadStyle(config: ISidecarConfig, text?: Text) {
-  let css = '';
+  let css: string;
   if (!text) return;
 
   if (
@@ -79,9 +79,11 @@ function updateHeadStyle(config: ISidecarConfig, text?: Text) {
       }
         `;
     }
+  } else {
+    // If sidecar closes/hides or docked mode changes to takeover, we will set css empty to remove patch style and update.
+    css = '';
   }
 
-  // If sidecar closes or docked direction change to takeover mode, we will keep css empty to remove patch style and update.
   requestAnimationFrame(() => {
     text.textContent = css;
   });
