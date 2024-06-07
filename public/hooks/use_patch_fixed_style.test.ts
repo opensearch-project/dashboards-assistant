@@ -85,4 +85,25 @@ describe('usePatchFixedStyle hook', () => {
 
     expect(document.head).toMatchSnapshot();
   });
+
+  it('should not subscribe update after unmount', async () => {
+    const { unmount } = renderHook(() => usePatchFixedStyle());
+    act(() =>
+      sidecarConfig$.next({
+        dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+        paddingSize: 300,
+      })
+    );
+    expect(document.head).toMatchSnapshot();
+
+    unmount();
+
+    act(() =>
+      sidecarConfig$.next({
+        dockedMode: SIDECAR_DOCKED_MODE.LEFT,
+        paddingSize: 500,
+      })
+    );
+    expect(document.head).toMatchSnapshot();
+  });
 });
