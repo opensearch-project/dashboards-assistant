@@ -29,7 +29,10 @@ export class ConversationsService {
   }
 
   load = async (
-    query?: Pick<SavedObjectsFindOptions, 'page' | 'perPage' | 'fields' | 'sortField' | 'sortOrder'>
+    query?: Pick<
+      SavedObjectsFindOptions,
+      'page' | 'perPage' | 'fields' | 'sortField' | 'sortOrder' | 'search' | 'searchFields'
+    >
   ) => {
     this.abortController?.abort();
     this.abortController = new AbortController();

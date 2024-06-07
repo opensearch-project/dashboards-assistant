@@ -250,16 +250,16 @@ describe('<ChatHistoryPage />', () => {
   it('should call conversations.reload after data source changed', async () => {
     const { useCoreMock, dataSourceMock } = setup({ shouldRefresh: true });
 
-    jest.spyOn(useCoreMock.services.conversations, 'reload');
+    jest.spyOn(useCoreMock.services.conversations, 'load');
 
-    expect(useCoreMock.services.conversations.reload).not.toHaveBeenCalled();
+    expect(useCoreMock.services.conversations.load).not.toHaveBeenCalled();
 
     act(() => {
       dataSourceMock.dataSourceIdUpdates$.next('bar');
     });
 
     await waitFor(() => {
-      expect(useCoreMock.services.conversations.reload).toHaveBeenCalledTimes(1);
+      expect(useCoreMock.services.conversations.load).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -305,6 +305,7 @@ describe('<ChatHistoryPage />', () => {
         perPage: 10,
         sortField: 'updatedTimeMs',
         sortOrder: 'DESC',
+        searchFields: ['title'],
       });
       expect(useCoreMock.services.conversations.load).toHaveBeenCalledTimes(2);
     });
