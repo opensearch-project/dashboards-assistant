@@ -14,7 +14,6 @@ import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../../src/core/public
 export const usePatchFixedStyle = () => {
   const core = useCore();
   const sidecarConfig$ = core.overlays.sidecar().getSidecarConfig$();
-  const textRef = useRef<Text>();
 
   useEffect(() => {
     const css = '';
@@ -23,18 +22,14 @@ export const usePatchFixedStyle = () => {
     document.head.appendChild(style);
     style.appendChild(text);
 
-    textRef.current = text;
-
     const subscription = sidecarConfig$.subscribe((config) => {
       if (!config) return;
-      updateHeadStyle(config, textRef.current);
+      updateHeadStyle(config, text);
     });
     return () => {
       subscription.unsubscribe();
       document.head.removeChild(style);
-      if (textRef.current) {
-        style.removeChild(textRef.current);
-      }
+      style.removeChild(text);
     };
   }, [sidecarConfig$]);
 };
