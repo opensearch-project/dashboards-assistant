@@ -29,10 +29,12 @@ describe('usePatchFixedStyle hook', () => {
         },
       },
     });
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => cb());
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    window.requestAnimationFrame.mockRestore();
   });
 
   it('should patch corresponding left style when sidecarConfig$ pipe', async () => {
@@ -43,7 +45,6 @@ describe('usePatchFixedStyle hook', () => {
         paddingSize: 300,
       })
     );
-    await new Promise((r) => setTimeout(r, 2000));
 
     expect(document.head).toMatchSnapshot();
   });
@@ -56,7 +57,6 @@ describe('usePatchFixedStyle hook', () => {
         paddingSize: 300,
       })
     );
-    await new Promise((r) => setTimeout(r, 2000));
 
     expect(document.head).toMatchSnapshot();
   });
@@ -70,7 +70,6 @@ describe('usePatchFixedStyle hook', () => {
         isHidden: true,
       })
     );
-    await new Promise((r) => setTimeout(r, 2000));
 
     expect(document.head).toMatchSnapshot();
   });
@@ -83,7 +82,6 @@ describe('usePatchFixedStyle hook', () => {
         paddingSize: 300,
       })
     );
-    await new Promise((r) => setTimeout(r, 2000));
 
     expect(document.head).toMatchSnapshot();
   });
