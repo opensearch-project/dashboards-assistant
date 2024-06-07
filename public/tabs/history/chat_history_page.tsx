@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { useDebounce, useObservable } from 'react-use';
+import { useDebounce, useObservable, useUpdateEffect } from 'react-use';
 import cs from 'classnames';
+
 import { useChatActions, useChatState } from '../../hooks';
 import { useChatContext, useCore } from '../../contexts';
 import { TAB_ID } from '../../utils/constants';
@@ -41,34 +42,36 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     setConversationId,
     setTitle,
   } = useChatContext();
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
   const [searchName, setSearchName] = useState<string>('');
-  const [debouncedSearchName, setDebouncedSearchName] = useState<string>('');
-  const bulkGetOptions = useMemo(
-    () => ({
-      page: pageIndex + 1,
-      perPage: pageSize,
-      fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
-      sortField: 'updatedTimeMs',
-      sortOrder: 'DESC',
-      ...(debouncedSearchName ? { search: debouncedSearchName, searchFields: ['title'] } : {}),
-    }),
-    [pageIndex, pageSize, debouncedSearchName]
-  );
+  const [bulkGetOptions, setBulkGetOptions] = useState<{
+    page: number;
+    perPage: number;
+    fields: string[];
+    sortField: string;
+    sortOrder: string;
+    searchFields: string[];
+    search?: string;
+  }>({
+    page: 1,
+    perPage: 10,
+    fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
+    sortField: 'updatedTimeMs',
+    sortOrder: 'DESC',
+    searchFields: ['title'],
+  });
   const conversations = useObservable(services.conversations.conversations$);
   const loading = useObservable(services.conversations.status$) === 'loading';
   const chatHistories = useMemo(() => conversations?.objects || [], [conversations]);
   const hasNoConversations =
-    !debouncedSearchName && !!conversations && conversations.total === 0 && !loading;
+    !bulkGetOptions.search && !!conversations && conversations.total === 0 && !loading;
+  const dataSourceUpdate = useObservable(services.dataSource.dataSourceIdUpdates$);
 
   const handleSearchChange = useCallback((e) => {
     setSearchName(e.target.value);
   }, []);
 
   const handleItemsPerPageChange = useCallback((itemsPerPage: number) => {
-    setPageIndex(0);
-    setPageSize(itemsPerPage);
+    setBulkGetOptions((prevOptions) => ({ ...prevOptions, page: 1, perPage: itemsPerPage }));
   }, []);
 
   const handleBack = useCallback(() => {
@@ -87,18 +90,48 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
     [conversationId, setConversationId, setTitle, chatStateDispatch]
   );
 
+  const handlePageChange = useCallback((newPage) => {
+    setBulkGetOptions((prevOptions) => ({
+      ...prevOptions,
+      page: newPage + 1,
+    }));
+  }, []);
+
   useDebounce(
     () => {
-      setPageIndex(0);
-      setDebouncedSearchName(searchName);
+      setBulkGetOptions((prevOptions) => {
+        if (prevOptions.search === searchName || (!prevOptions.search && searchName === '')) {
+          return prevOptions;
+        }
+        const { search, ...rest } = prevOptions;
+        return {
+          ...rest,
+          page: 1,
+          ...(searchName ? { search: searchName } : {}),
+        };
+      });
     },
     150,
     [searchName]
   );
 
-  useEffect(() => {
-    if (props.shouldRefresh) services.conversations.reload();
+  useUpdateEffect(() => {
+    if (!props.shouldRefresh) {
+      return;
+    }
+    services.conversations.reload();
+    return () => {
+      services.conversations.abortController?.abort();
+    };
   }, [props.shouldRefresh, services.conversations]);
+
+  useUpdateEffect(() => {
+    setSearchName('');
+    setBulkGetOptions(({ search, page, ...rest }) => ({
+      ...rest,
+      page: 1,
+    }));
+  }, [dataSourceUpdate]);
 
   useEffect(() => {
     services.conversations.load(bulkGetOptions);
@@ -150,11 +183,13 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
               onLoadChat={loadChat}
               onRefresh={services.conversations.reload}
               histories={chatHistories}
-              activePage={pageIndex}
-              itemsPerPage={pageSize}
+              activePage={bulkGetOptions.page - 1}
+              itemsPerPage={bulkGetOptions.perPage}
               onChangeItemsPerPage={handleItemsPerPageChange}
-              onChangePage={setPageIndex}
-              {...(conversations ? { pageCount: Math.ceil(conversations.total / pageSize) } : {})}
+              onChangePage={handlePageChange}
+              {...(conversations
+                ? { pageCount: Math.ceil(conversations.total / bulkGetOptions.perPage) }
+                : {})}
               onHistoryDeleted={handleHistoryDeleted}
             />
           )}

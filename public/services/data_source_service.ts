@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription, combineLatest, of } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import type { IUiSettingsClient } from '../../../../src/core/public';
 import type { DataSourceOption } from '../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
@@ -36,6 +36,9 @@ export class DataSourceService {
   private uiSettings: IUiSettingsClient | undefined;
   private dataSourceManagement: DataSourceManagementPluginSetup | undefined;
   private dataSourceSelectionSubscription: Subscription | undefined;
+  private finalDataSourceId: string | null = null;
+  dataSourceIdUpdates$ = new Subject<string | null>();
+  private getDataSourceIdSubscription: Subscription | undefined;
 
   constructor() {}
 
@@ -54,11 +57,11 @@ export class DataSourceService {
       });
   }
 
-  async getDataSourceQuery() {
+  getDataSourceQuery() {
     if (!this.isMDSEnabled()) {
       return {};
     }
-    const dataSourceId = await this.getDataSourceId$().pipe(first()).toPromise();
+    const dataSourceId = this.finalDataSourceId;
     if (dataSourceId === null) {
       throw new Error('No data source id');
     }
@@ -74,24 +77,24 @@ export class DataSourceService {
   }
 
   setDataSourceId(newDataSourceId: string | null) {
-    if (this.dataSourceId$.getValue() === newDataSourceId) {
-      return;
-    }
     this.dataSourceId$.next(newDataSourceId);
   }
 
   getDataSourceId$() {
     return combineLatest([
       this.dataSourceId$,
-      this.dataSourceManagement?.getDefaultDataSourceId$?.(this.uiSettings) ?? of(null),
-    ]).pipe(
-      map(([selectedDataSourceId, defaultDataSourceId]) => {
-        if (selectedDataSourceId !== null) {
-          return selectedDataSourceId;
-        }
-        return defaultDataSourceId;
-      })
-    );
+      (this.dataSourceManagement?.getDefaultDataSourceId$?.(this.uiSettings) ??
+        of(null)) as Observable<string | null>,
+    ])
+      .pipe(
+        map(([selectedDataSourceId, defaultDataSourceId]) => {
+          if (selectedDataSourceId !== null) {
+            return selectedDataSourceId;
+          }
+          return defaultDataSourceId;
+        })
+      )
+      .pipe(distinctUntilChanged());
   }
 
   setup({
@@ -104,6 +107,10 @@ export class DataSourceService {
     this.uiSettings = uiSettings;
     this.dataSourceManagement = dataSourceManagement;
     this.init();
+    this.getDataSourceIdSubscription = this.getDataSourceId$().subscribe((finalDataSourceId) => {
+      this.finalDataSourceId = finalDataSourceId;
+      this.dataSourceIdUpdates$.next(finalDataSourceId);
+    });
 
     return {
       setDataSourceId: (newDataSourceId: string | null) => {
@@ -122,6 +129,8 @@ export class DataSourceService {
 
   public stop() {
     this.dataSourceSelectionSubscription?.unsubscribe();
+    this.getDataSourceIdSubscription?.unsubscribe();
+    this.dataSourceIdUpdates$.complete();
     this.dataSourceId$.complete();
   }
 }

@@ -29,7 +29,10 @@ export class ConversationsService {
   }
 
   load = async (
-    query?: Pick<SavedObjectsFindOptions, 'page' | 'perPage' | 'fields' | 'sortField' | 'sortOrder'>
+    query?: Pick<
+      SavedObjectsFindOptions,
+      'page' | 'perPage' | 'fields' | 'sortField' | 'sortOrder' | 'search' | 'searchFields'
+    >
   ) => {
     this.abortController?.abort();
     this.abortController = new AbortController();
@@ -40,7 +43,7 @@ export class ConversationsService {
         await this._http.get<IConversationFindResponse>(ASSISTANT_API.CONVERSATIONS, {
           query: {
             ...this._options,
-            ...(await this._dataSource.getDataSourceQuery()),
+            ...this._dataSource.getDataSourceQuery(),
           } as HttpFetchQuery,
           signal: this.abortController.signal,
         })
