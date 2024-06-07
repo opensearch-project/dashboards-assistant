@@ -35,7 +35,7 @@ export const useChatActions = (): AssistantActions => {
           ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
           input,
         }),
-        query: await core.services.dataSource.getDataSourceQuery(),
+        query: core.services.dataSource.getDataSourceQuery(),
       });
       if (abortController.signal.aborted) return;
       // Refresh history list after new conversation created if new conversation saved and history list page visible
@@ -106,6 +106,15 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
+  const resetChat = () => {
+    abortControllerRef?.abort();
+    core.services.conversationLoad.abortController?.abort();
+    chatContext.setConversationId(undefined);
+    chatContext.setTitle(undefined);
+    chatContext.setFlyoutComponent(null);
+    chatStateDispatch({ type: 'reset' });
+  };
+
   const openChatUI = () => {
     chatContext.setFlyoutVisible(true);
     chatContext.setSelectedTabId(TAB_ID.CHAT);
@@ -163,7 +172,7 @@ export const useChatActions = (): AssistantActions => {
       // abort agent execution
       await core.services.http.post(`${ASSISTANT_API.ABORT_AGENT_EXECUTION}`, {
         body: JSON.stringify({ conversationId }),
-        query: await core.services.dataSource.getDataSourceQuery(),
+        query: core.services.dataSource.getDataSourceQuery(),
       });
     }
   };
@@ -180,7 +189,7 @@ export const useChatActions = (): AssistantActions => {
             conversationId: chatContext.conversationId,
             interactionId,
           }),
-          query: await core.services.dataSource.getDataSourceQuery(),
+          query: core.services.dataSource.getDataSourceQuery(),
         });
 
         if (abortController.signal.aborted) {
@@ -225,5 +234,5 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  return { send, loadChat, executeAction, openChatUI, abortAction, regenerate };
+  return { send, loadChat, resetChat, executeAction, openChatUI, abortAction, regenerate };
 };

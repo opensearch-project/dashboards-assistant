@@ -7,6 +7,7 @@ import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
+
 import { ApplicationStart, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';

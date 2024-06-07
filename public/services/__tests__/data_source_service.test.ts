@@ -111,6 +111,22 @@ describe('DataSourceService', () => {
       });
       expect(await dataSource.getDataSourceId$().pipe(first()).toPromise()).toBe('foo');
     });
+
+    it('should not fire change for same data source id', async () => {
+      const { dataSource, defaultDataSourceSelection$ } = setup({
+        dataSourceSelection: new Map(),
+        defaultDataSourceId: 'foo',
+      });
+      const observerFn = jest.fn();
+      dataSource.getDataSourceId$().subscribe(observerFn);
+
+      expect(observerFn).toHaveBeenCalledTimes(1);
+      dataSource.setDataSourceId('foo');
+      expect(observerFn).toHaveBeenCalledTimes(1);
+
+      defaultDataSourceSelection$.next('foo');
+      expect(observerFn).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('isMDSEnabled', () => {
@@ -126,23 +142,23 @@ describe('DataSourceService', () => {
   describe('getDataSourceQuery', () => {
     it('should return empty object if MDS not enabled', async () => {
       const { dataSource } = setup({ dataSourceManagement: undefined });
-      expect(await dataSource.getDataSourceQuery()).toEqual({});
+      expect(dataSource.getDataSourceQuery()).toEqual({});
     });
     it('should return empty object if data source id is empty', async () => {
       const { dataSource } = setup({
         dataSourceSelection: new Map([['test', [{ label: '', id: '' }]]]),
       });
-      expect(await dataSource.getDataSourceQuery()).toEqual({});
+      expect(dataSource.getDataSourceQuery()).toEqual({});
     });
     it('should return query object with provided data source id', async () => {
       const { dataSource } = setup({ defaultDataSourceId: 'foo' });
-      expect(await dataSource.getDataSourceQuery()).toEqual({ dataSourceId: 'foo' });
+      expect(dataSource.getDataSourceQuery()).toEqual({ dataSourceId: 'foo' });
     });
     it('should throw error if data source id not exists', async () => {
       const { dataSource } = setup();
       let error;
       try {
-        await dataSource.getDataSourceQuery();
+        dataSource.getDataSourceQuery();
       } catch (e) {
         error = e;
       }
@@ -208,5 +224,16 @@ describe('DataSourceService', () => {
 
     dataSource.setDataSourceId('bar');
     expect(observerFn).toHaveBeenCalledTimes(3);
+  });
+
+  it('should emit new data source id updates after data source id change', () => {
+    const { dataSource } = setup();
+    const observerFn = jest.fn();
+    dataSource.dataSourceIdUpdates$.subscribe(observerFn);
+    dataSource.setDataSourceId('foo');
+    expect(observerFn).toHaveBeenCalledTimes(1);
+
+    dataSource.setDataSourceId('bar');
+    expect(observerFn).toHaveBeenCalledTimes(2);
   });
 });
