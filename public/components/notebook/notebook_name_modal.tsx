@@ -12,7 +12,7 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
@@ -72,7 +72,7 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
 
         <EuiModalBody>
           <EuiCompressedFormRow label="Please enter a name for your notebook.">
-            <EuiFieldText
+            <EuiCompressedFieldText
               value={name}
               onChange={(e) => setName(e.target.value)}
               aria-label="Notebook name input"
