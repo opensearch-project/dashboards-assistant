@@ -34,6 +34,7 @@ import chatIcon from '../../assets/chat.svg';
 import { ASSISTANT_API } from '../../../common/constants/llm';
 import { HttpSetup } from '../../../../../src/core/public';
 import { Interaction } from '../../../common/types/chat_saved_object_attributes';
+import { getAssistantRole } from '../../../server/services/chat/olly_chat_service';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
@@ -186,6 +187,7 @@ export const IncontextInsight = ({
               content: summarizationQuestion,
               contentType: 'text',
               context: { content: contextContent, dataSourceId: incontextInsight.datasourceId },
+              promptPrefix: getAssistantRole(incontextInsight.key),
             },
           }),
         })

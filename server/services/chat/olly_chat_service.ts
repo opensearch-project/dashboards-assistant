@@ -18,6 +18,18 @@ export enum AssistantRole {
 `,
 }
 
+interface AssistantRoles {
+  [key: string]: AssistantRole;
+}
+
+const AssistantRolesMap: AssistantRoles = {
+  alerts: AssistantRole.ALERT_ANALYSIS,
+};
+
+export function getAssistantRole(key: string, defaultRole?: AssistantRole): AssistantRole | null {
+  return AssistantRolesMap[key] || defaultRole || null;
+}
+
 interface AgentRunPayload {
   question?: string;
   verbose?: boolean;
@@ -63,9 +75,6 @@ export class OllyChatService implements ChatService {
 
   private async callExecuteAgentAPI(payload: AgentRunPayload, rootAgentId: string) {
     try {
-      // set it to alert assistant
-      // FIXME: this need to set a input of this api, remove the hardcode assignment
-      payload['prompt.prefix'] = AssistantRole.ALERT_ANALYSIS;
       const agentFrameworkResponse = (await this.opensearchClientTransport.request(
         {
           method: 'POST',
@@ -126,10 +135,17 @@ export class OllyChatService implements ChatService {
     if (input.context?.content) {
       llmInput = `Based on the context: ${input.context?.content}, answer question: ${input.content}`;
     }
-    const parametersPayload: Pick<AgentRunPayload, 'question' | 'verbose' | 'memory_id'> = {
+    const parametersPayload: Pick<
+      AgentRunPayload,
+      'question' | 'verbose' | 'memory_id' | 'prompt.prefix'
+    > = {
       question: llmInput,
       verbose: false,
     };
+
+    if (input.promptPrefix) {
+      parametersPayload['prompt.prefix'] = input.promptPrefix;
+    }
 
     if (conversationId) {
       parametersPayload.memory_id = conversationId;

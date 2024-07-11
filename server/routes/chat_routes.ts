@@ -34,6 +34,7 @@ const llmRequestRoute = {
         }),
         content: schema.string(),
         contentType: schema.literal('text'),
+        promptPrefix: schema.maybe(schema.string()),
       }),
     }),
     query: schema.object({
