@@ -195,6 +195,25 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
 
+  useEffect(() => {
+    const handleChatContinuation = (event: {
+      conversationId?: string;
+      contextContent: string;
+      datasourceId?: string;
+    }) => {
+      if (!flyoutVisible) {
+        // open chat window
+        setFlyoutVisible(true);
+      }
+      // continue chat with current conversationId
+      props.assistantActions.loadChat(event.conversationId);
+    };
+    registry.on('onChatContinuation', handleChatContinuation);
+    return () => {
+      registry.off('onChatContinuation', handleChatContinuation);
+    };
+  }, [appId, flyoutVisible, props.assistantActions, registry]);
+
   return (
     <>
       <div className={classNames('llm-chat-header-icon-wrapper')}>

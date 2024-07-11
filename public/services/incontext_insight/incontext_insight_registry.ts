@@ -39,6 +39,16 @@ export class IncontextInsightRegistry extends EventEmitter {
     });
   }
 
+  public async continueInChat(item: IncontextInsight, conversationId: string) {
+    const contextContent = item.contextProvider ? await item.contextProvider() : '';
+    const datasourceId = item.datasourceId;
+    this.emit('onChatContinuation', {
+      conversationId,
+      contextContent,
+      datasourceId,
+    });
+  }
+
   public register(item: IncontextInsight | IncontextInsight[]): void;
   public register(item: unknown) {
     if (Array.isArray(item)) {

@@ -26,14 +26,19 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
+import { integer } from '@opensearch-project/opensearch/api/types';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getNotifications, IncontextInsightRegistry } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
+import { ASSISTANT_API } from '../../../common/constants/llm';
+import { HttpSetup } from '../../../../../src/core/public';
+import { Interaction } from '../../../common/types/chat_saved_object_attributes';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
   contextProvider?: () => Promise<string>;
+  httpSetup?: HttpSetup;
   incontextInsightRegistry?: IncontextInsightRegistry;
 }
 
@@ -41,10 +46,15 @@ export interface IncontextInsightProps {
 export const IncontextInsight = ({
   children,
   contextProvider,
+  httpSetup,
   incontextInsightRegistry,
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLlmResponded, setIsLlmResponded] = useState(false);
+  const [summary, setSummary] = useState('');
+  const [conversationId, setConversationId] = useState('');
 
   useEffect(() => {
     // TODO: use animation when not using display: none
@@ -146,6 +156,69 @@ export const IncontextInsight = ({
     }
   };
 
+  const onChatContinuation = (incontextInsight: IncontextInsightInput) => {
+    setIsVisible(false);
+    registry?.continueInChat(incontextInsight, conversationId);
+    if (anchor.current) {
+      const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
+        '.incontextInsightAnchorButton'
+      )?.classList;
+      incontextInsightAnchorButtonClassList?.remove('incontextInsightHoverEffectUnderline');
+    }
+  };
+
+  const onGenerateSummary = (
+    incontextInsight: IncontextInsightInput,
+    summarizationQuestion: string
+  ) => {
+    setIsLoading(true);
+    const summarize = async () => {
+      const contextContent = incontextInsight.contextProvider
+        ? await incontextInsight.contextProvider()
+        : '';
+
+      await httpSetup
+        ?.post(ASSISTANT_API.SEND_MESSAGE, {
+          body: JSON.stringify({
+            messages: [],
+            input: {
+              type: 'input',
+              content: summarizationQuestion,
+              contentType: 'text',
+              context: { content: contextContent, dataSourceId: incontextInsight.datasourceId },
+            },
+          }),
+        })
+        .then((response) => {
+          response.interactions.map(
+            (interaction: Interaction, index: integer, array: Interaction[]) => {
+              if (index === array.length - 1) {
+                setConversationId(interaction.conversation_id);
+              }
+            }
+          );
+
+          response.messages.map((message: { type: string; content: string }) => {
+            if (message.type === 'output') {
+              setSummary(message.content);
+            }
+          });
+        })
+        .catch((error) => {
+          toasts.addDanger(
+            i18n.translate('assistantDashboards.incontextInsight.generateSummaryError', {
+              defaultMessage: 'Generate summary error',
+            })
+          );
+          setIsLoading(false);
+        });
+
+      return;
+    };
+
+    return summarize();
+  };
+
   const SuggestionsPopoverFooter: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
     incontextInsight,
   }) => (
@@ -183,17 +256,86 @@ export const IncontextInsight = ({
     </EuiPopoverFooter>
   );
 
-  const GeneratePopoverBody: React.FC<{}> = ({}) => (
-    <EuiButton onClick={() => toasts.addDanger('To be implemented...')}>Generate summary</EuiButton>
-  );
+  const GeneratePopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
+    incontextInsight,
+  }) => {
+    if (!isLoading)
+      return (
+        <EuiButton
+          onClick={async () => {
+            await onGenerateSummary(
+              incontextInsight,
+              incontextInsight.suggestions && incontextInsight.suggestions.length > 0
+                ? incontextInsight.suggestions[0]
+                : 'Please summarize the input'
+            );
+            setIsLlmResponded(true);
+          }}
+        >
+          {i18n.translate('assistantDashboards.incontextInsight.generateSummary', {
+            defaultMessage: 'Generate summary',
+          })}
+        </EuiButton>
+      );
+    if (isLoading && !isLlmResponded)
+      return (
+        <EuiButton isLoading={isLoading}>
+          {i18n.translate('assistantDashboards.incontextInsight.generatingSummary', {
+            defaultMessage: 'Generating summary...',
+          })}
+        </EuiButton>
+      );
+    if (isLoading && isLlmResponded)
+      return (
+        <>
+          <SummaryPopoverBody incontextInsight={incontextInsight} />
+          <EuiSpacer size={'xs'} />
+          <EuiPanel
+            hasShadow={false}
+            hasBorder={false}
+            element="div"
+            onClick={() => {
+              onChatContinuation(incontextInsight);
+            }}
+            grow={false}
+            paddingSize="none"
+            style={{ width: '120px', float: 'right' }}
+          >
+            <EuiFlexGroup gutterSize="none" style={{ marginTop: 5 }}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={'chatRight'} style={{ marginRight: 5 }} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  {i18n.translate('assistantDashboards.incontextInsight.continueInChat', {
+                    defaultMessage: 'Continue in chat',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </>
+      );
+  };
 
   const SummaryPopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
     incontextInsight,
-  }) => (
-    <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
-      <EuiText size="s">{incontextInsight.summary}</EuiText>
-    </EuiPanel>
-  );
+  }) => {
+    // When there are multiple component objects with different summaries, use summary state as body
+    if (summary !== '') {
+      return (
+        <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
+          <EuiText size="s">{summary}</EuiText>
+        </EuiPanel>
+      );
+    } else {
+      return (
+        <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
+          <EuiText size="s">{incontextInsight.summary}</EuiText>
+        </EuiPanel>
+      );
+    }
+  };
 
   const SummaryWithSuggestionsPopoverBody: React.FC<{
     incontextInsight: IncontextInsightInput;
@@ -281,7 +423,7 @@ export const IncontextInsight = ({
         case 'suggestions':
           return <SuggestionsPopoverFooter incontextInsight={input} />;
         case 'generate':
-          return <GeneratePopoverBody />;
+          return <GeneratePopoverBody incontextInsight={input} />;
         case 'summary':
           return <SummaryPopoverBody incontextInsight={input} />;
         case 'summaryWithSuggestions':
