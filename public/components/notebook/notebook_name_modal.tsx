@@ -7,7 +7,7 @@ import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiLink,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -71,13 +71,13 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow label="Please enter a name for your notebook.">
+          <EuiCompressedFormRow label="Please enter a name for your notebook.">
             <EuiFieldText
               value={name}
               onChange={(e) => setName(e.target.value)}
               aria-label="Notebook name input"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiModalBody>
 
         <EuiModalFooter>
