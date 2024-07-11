@@ -12,7 +12,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopoverTitle,
   EuiText,
   EuiPopoverFooter,
@@ -202,7 +202,7 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
     return (
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={6}>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiFieldText
               placeholder="Ask a question"
               value={userQuestion}
@@ -215,7 +215,7 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
                 }
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSmallButton
