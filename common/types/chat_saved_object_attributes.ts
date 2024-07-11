@@ -29,6 +29,7 @@ export interface IConversation {
   createdTimeMs: number;
   updatedTimeMs: number;
   messages: IMessage[];
+  additionalInfo: { [key: string]: unknown };
   interactions: Interaction[];
 }
 
@@ -45,6 +46,7 @@ export interface IInput {
     appId?: string;
     content?: string;
     datasourceId?: string;
+    agentRole?: string;
   };
   messageId?: string;
   promptPrefix?: string;

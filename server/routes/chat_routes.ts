@@ -31,6 +31,7 @@ const llmRequestRoute = {
           appId: schema.maybe(schema.string()),
           content: schema.maybe(schema.string()),
           datasourceId: schema.maybe(schema.string()),
+          agentRole: schema.maybe(schema.string()),
         }),
         content: schema.string(),
         contentType: schema.literal('text'),
@@ -234,17 +235,6 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
             ? await storageService.getMessagesFromInteractions(resultPayload.interactions)
             : [];
         }
-
-        resultPayload.messages
-          .filter((message) => message.type === 'input')
-          .forEach((msg) => {
-            // hide additional conetxt to how was it generated
-            const index = msg.content.indexOf('answer question:');
-            const len = 'answer question:'.length;
-            if (index !== -1) {
-              msg.content = msg.content.substring(index + len);
-            }
-          });
 
         return response.ok({
           body: resultPayload,
