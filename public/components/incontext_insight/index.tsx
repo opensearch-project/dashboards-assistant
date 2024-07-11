@@ -8,7 +8,7 @@ import './index.scss';
 import { i18n } from '@osd/i18n';
 import {
   EuiWrappingPopover,
-  EuiButton,
+  EuiSmallButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -218,7 +218,7 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             fill
             iconType="returnKey"
             iconSide="right"
@@ -228,7 +228,7 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
             }}
           >
             Go
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
