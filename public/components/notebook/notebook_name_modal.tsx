@@ -5,7 +5,7 @@
 
 import {
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiLink,
   EuiFormRow,
   EuiModal,
@@ -81,9 +81,9 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose} data-test-subj="cancelSaveToNotebookButton">
+          <EuiSmallButtonEmpty onClick={onClose} data-test-subj="cancelSaveToNotebookButton">
             Cancel
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
           <EuiSmallButton
             type="submit"
             fill
