@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 export const InviteMessage: React.FC = () => {
@@ -28,9 +28,9 @@ export const InviteMessage: React.FC = () => {
         </>
       }
       actions={
-        <EuiButton color="primary" fill href={mailtoLink}>
+        <EuiSmallButton color="primary" fill href={mailtoLink}>
           Request invite
-        </EuiButton>
+        </EuiSmallButton>
       }
     />
   );
