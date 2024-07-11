@@ -12,7 +12,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -148,7 +148,7 @@ export const ChatHistoryPage: React.FC<ChatHistoryPageProps> = React.memo((props
             {flyoutFullScreen ? (
               <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
+                  <EuiSmallButtonIcon
                     aria-label="full screen back"
                     iconType="cross"
                     onClick={handleBack}

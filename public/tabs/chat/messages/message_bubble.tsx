@@ -5,7 +5,7 @@
 
 import {
   EuiAvatar,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -184,7 +184,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                   <EuiFlexItem grow={false}>
                     <EuiCopy textToCopy={props.message.content ?? ''}>
                       {(copy) => (
-                        <EuiButtonIcon
+                        <EuiSmallButtonIcon
                           aria-label="copy message"
                           title="copy message"
                           onClick={copy}
@@ -197,7 +197,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                 )}
                 {props.showRegenerate && props.interaction?.interaction_id ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
+                    <EuiSmallButtonIcon
                       aria-label="regenerate message"
                       onClick={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
                       title="regenerate message"
@@ -211,7 +211,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                   <>
                     {feedbackResult !== false ? (
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
+                        <EuiSmallButtonIcon
                           aria-label="feedback thumbs up"
                           color={feedbackResult === true ? 'primary' : 'text'}
                           iconType="thumbsUp"
@@ -221,7 +221,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                     ) : null}
                     {feedbackResult !== true ? (
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
+                        <EuiSmallButtonIcon
                           aria-label="feedback thumbs down"
                           color={feedbackResult === false ? 'primary' : 'text'}
                           iconType="thumbsDown"
@@ -233,7 +233,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                 )}
                 {props.message.interactionId ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
+                    <EuiSmallButtonIcon
                       aria-label="How was this generated?"
                       data-test-subj={`trace-icon-${props.message.interactionId}`}
                       onClick={() => {
