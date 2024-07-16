@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AssistantRole } from '../../server/services/chat/olly_chat_service';
-
 export const CHAT_SAVED_OBJECT = 'assistant-chat';
 export const SAVED_OBJECT_VERSION = 1;
 
@@ -49,7 +47,7 @@ export interface IInput {
     datasourceId?: string;
   };
   messageId?: string;
-  promptPrefix?: AssistantRole;
+  promptPrefix?: string;
 }
 export interface IOutput {
   type: 'output';
