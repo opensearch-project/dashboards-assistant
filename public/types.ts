@@ -10,6 +10,7 @@ import { IChatContext } from './contexts/chat_context';
 import { MessageContentProps } from './tabs/chat/messages/message_content';
 import { DataSourceServiceContract, IncontextInsightRegistry } from './services';
 import { DataSourceManagementPluginSetup } from '../../../src/plugins/data_source_management/public';
+import { TAB_ID } from './utils/constants';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -82,4 +83,4 @@ export type IncontextInsightType =
   | 'chatWithSuggestions'
   | 'error';
 
-export type TabId = 'chat' | 'compose' | 'insights' | 'history' | 'trace';
+export type TabId = TAB_ID;

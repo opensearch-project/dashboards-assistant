@@ -52,19 +52,22 @@ export interface IOutput {
   toolsUsed?: string[];
   contentType: 'error' | 'markdown' | 'visualization' | string;
   content: string;
+  additionalActions?: IAdditionalAction[];
   suggestedActions?: ISuggestedAction[];
   messageId?: string;
   fullWidth?: boolean;
 }
 export type IMessage = IInput | IOutput;
 
-interface ISuggestedActionBase {
+interface IActionBase {
   actionType: string;
   message: string;
 }
-export type ISuggestedAction = ISuggestedActionBase &
+export type ISuggestedAction = IActionBase &
   (
-    | { actionType: 'send_as_input' | 'copy' | 'view_in_dashboards' }
+    | {
+        actionType: 'send_as_input' | 'copy' | 'view_in_dashboards' | 'create_monitor_in_dashboard';
+      }
     | {
         actionType: 'view_ppl_visualization';
         metadata: { query: string; question: string };
@@ -74,6 +77,12 @@ export type ISuggestedAction = ISuggestedActionBase &
         metadata: { interactionId: string };
       }
   );
+
+export type IAdditionalAction = IActionBase & {
+  actionType: 'create_monitor_grid';
+  content: string;
+};
+
 export interface SendFeedbackBody {
   satisfaction: boolean;
 }

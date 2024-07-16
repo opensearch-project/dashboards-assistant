@@ -18,6 +18,8 @@ export interface IChatContext {
   flyoutFullScreen: boolean;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setFlyoutComponent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
+  overrideName?: string;
+  setOverrideName: React.Dispatch<React.SetStateAction<string | undefined>>;
   messageRenderers: Record<string, MessageRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   currentAccount?: UserAccount;
