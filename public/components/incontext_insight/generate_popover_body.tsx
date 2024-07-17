@@ -27,7 +27,6 @@ export const GeneratePopoverBody: React.FC<{
   closePopover: () => void;
 }> = ({ incontextInsight, registry, httpSetup, closePopover }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isLlmResponded, setIsLlmResponded] = useState(false);
   const [summary, setSummary] = useState('');
   const [conversationId, setConversationId] = useState('');
   const toasts = getNotifications().toasts;
@@ -39,7 +38,8 @@ export const GeneratePopoverBody: React.FC<{
 
   const onGenerateSummary = (summarizationQuestion: string) => {
     setIsLoading(true);
-    setIsLlmResponded(false);
+    setSummary('');
+    setConversationId('');
     const summarize = async () => {
       const contextContent = incontextInsight.contextProvider
         ? await incontextInsight.contextProvider()
@@ -68,7 +68,6 @@ export const GeneratePopoverBody: React.FC<{
           if (messageLength > 0 && response.messages[messageLength - 1].type === 'output') {
             setSummary(response.messages[messageLength - 1].content);
           }
-          setIsLlmResponded(true);
         })
         .catch((error) => {
           toasts.addDanger(
@@ -76,6 +75,8 @@ export const GeneratePopoverBody: React.FC<{
               defaultMessage: 'Generate summary error',
             })
           );
+        })
+        .finally(() => {
           setIsLoading(false);
         });
     };
@@ -83,59 +84,54 @@ export const GeneratePopoverBody: React.FC<{
     return summarize();
   };
 
-  if (!isLoading)
-    return (
-      <EuiButton
-        onClick={async () => {
-          await onGenerateSummary(
-            incontextInsight.suggestions && incontextInsight.suggestions.length > 0
-              ? incontextInsight.suggestions[0]
-              : 'Please summarize the input'
-          );
-        }}
+  return summary ? (
+    <>
+      <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
+        <EuiText size="s">{summary}</EuiText>
+      </EuiPanel>
+      <EuiSpacer size={'xs'} />
+      <EuiPanel
+        hasShadow={false}
+        hasBorder={false}
+        element="div"
+        onClick={() => onChatContinuation()}
+        grow={false}
+        paddingSize="none"
+        style={{ width: '120px', float: 'right' }}
       >
-        {i18n.translate('assistantDashboards.incontextInsight.generateSummary', {
-          defaultMessage: 'Generate summary',
-        })}
-      </EuiButton>
-    );
-  if (isLoading && !isLlmResponded)
-    return (
-      <EuiButton isLoading={isLoading}>
-        {i18n.translate('assistantDashboards.incontextInsight.generatingSummary', {
-          defaultMessage: 'Generating summary...',
-        })}
-      </EuiButton>
-    );
-  if (isLoading && isLlmResponded)
-    return (
-      <>
-        <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
-          <EuiText size="s">{summary}</EuiText>
-        </EuiPanel>
-        <EuiSpacer size={'xs'} />
-        <EuiPanel
-          hasShadow={false}
-          hasBorder={false}
-          element="div"
-          onClick={() => onChatContinuation()}
-          grow={false}
-          paddingSize="none"
-          style={{ width: '120px', float: 'right' }}
-        >
-          <EuiFlexGroup gutterSize="none" style={{ marginTop: 5 }}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={'chatRight'} style={{ marginRight: 5 }} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                {i18n.translate('assistantDashboards.incontextInsight.continueInChat', {
-                  defaultMessage: 'Continue in chat',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </>
-    );
+        <EuiFlexGroup gutterSize="none" style={{ marginTop: 5 }}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={'chatRight'} style={{ marginRight: 5 }} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="xs">
+              {i18n.translate('assistantDashboards.incontextInsight.continueInChat', {
+                defaultMessage: 'Continue in chat',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
+  ) : (
+    <EuiButton
+      onClick={async () => {
+        await onGenerateSummary(
+          incontextInsight.suggestions && incontextInsight.suggestions.length > 0
+            ? incontextInsight.suggestions[0]
+            : 'Please summarize the input'
+        );
+      }}
+      isLoading={isLoading}
+      disabled={isLoading}
+    >
+      {isLoading
+        ? i18n.translate('assistantDashboards.incontextInsight.generatingSummary', {
+            defaultMessage: 'Generating summary...',
+          })
+        : i18n.translate('assistantDashboards.incontextInsight.generateSummary', {
+            defaultMessage: 'Generate summary',
+          })}
+    </EuiButton>
+  );
 };
