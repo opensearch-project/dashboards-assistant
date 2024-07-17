@@ -4,7 +4,6 @@
  */
 
 import React, { useState } from 'react';
-import { integer } from '@opensearch-project/opensearch/api/types';
 import { i18n } from '@osd/i18n';
 import {
   EuiButton,
@@ -19,8 +18,7 @@ import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getNotifications, IncontextInsightRegistry } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
 import { ASSISTANT_API } from '../../../common/constants/llm';
-import { getAssistantRole } from '../../../server/types';
-import { Interaction } from '../../../common/types/chat_saved_object_attributes';
+import { getAssistantRole } from '../../utils/constants';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
@@ -41,6 +39,7 @@ export const GeneratePopoverBody: React.FC<{
 
   const onGenerateSummary = (summarizationQuestion: string) => {
     setIsLoading(true);
+    setIsLlmResponded(false);
     const summarize = async () => {
       const contextContent = incontextInsight.contextProvider
         ? await incontextInsight.contextProvider()
@@ -60,19 +59,16 @@ export const GeneratePopoverBody: React.FC<{
           }),
         })
         .then((response) => {
-          response.interactions.map(
-            (interaction: Interaction, index: integer, array: Interaction[]) => {
-              if (index === array.length - 1) {
-                setConversationId(interaction.conversation_id);
-              }
-            }
-          );
+          const interactionLength = response.interactions.length;
+          if (interactionLength > 0) {
+            setConversationId(response.interactions[interactionLength - 1].conversation_id);
+          }
 
-          response.messages.map((message: { type: string; content: string }) => {
-            if (message.type === 'output') {
-              setSummary(message.content);
-            }
-          });
+          const messageLength = response.messages.length;
+          if (messageLength > 0 && response.messages[messageLength - 1].type === 'output') {
+            setSummary(response.messages[messageLength - 1].content);
+          }
+          setIsLlmResponded(true);
         })
         .catch((error) => {
           toasts.addDanger(
@@ -96,7 +92,6 @@ export const GeneratePopoverBody: React.FC<{
               ? incontextInsight.suggestions[0]
               : 'Please summarize the input'
           );
-          setIsLlmResponded(true);
         }}
       >
         {i18n.translate('assistantDashboards.incontextInsight.generateSummary', {
