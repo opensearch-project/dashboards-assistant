@@ -23,7 +23,7 @@ export const Text2VizEmpty = () => {
           <p>
             {i18n.translate('dashboardAssistant.feature.text2viz.body', {
               defaultMessage:
-                'Use the Natural Language Query form field to automatically generate visualizations using simple conversational prompts or from the chat panel.',
+                'Use the Natural Language Query form field to automatically generate visualizations using simple conversational prompts.',
             })}
           </p>
         </>

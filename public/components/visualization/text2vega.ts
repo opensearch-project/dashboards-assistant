@@ -7,33 +7,9 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { debounceTime, switchMap, tap, filter, catchError } from 'rxjs/operators';
 import { TEXT2VIZ_API } from '.../../../common/constants/llm';
 import { HttpSetup } from '../../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const createPrompt = (input: string, ppl: string, sample: any) => {
-  return `
-You're an expert at creating vega-lite visualization. No matter what the user asks, you should reply with a valid vega-lite specification in json.
-Your task is to generate Vega-Lite specification in json based on the given sample data, the schema of the data, the PPL query to get the data and the user's input.
-
-Besides, here are some requirements:
-1. Do not contain the key called 'data' in vega-lite specification.
-2. If mark.type = point and shape.field is a field of the data, the definition of the shape should be inside the root "encoding" object, NOT in the "mark" object, for example, {"encoding": {"shape": {"field": "field_name"}}}
-3. Please also generate title and description
-
-The sample data in json format:
-${JSON.stringify(sample.jsonData, null, 4)}
-
-This is the schema of the data:
-${JSON.stringify(sample.schema, null, 4)}
-
-The user used this PPL query to get the data: ${ppl}
-
-The user's input is: ${input}
-
-Now please reply a valid vega-lite specification in json based on above instructions.
-`;
-};
 
 export class Text2Vega {
   input$ = new BehaviorSubject({ prompt: '', index: '' });
@@ -41,9 +17,11 @@ export class Text2Vega {
   result$: Observable<Record<string, any> | { error: any }>;
   status$ = new BehaviorSubject<'RUNNING' | 'STOPPED'>('STOPPED');
   http: HttpSetup;
+  searchClient: DataPublicPluginStart['search'];
 
-  constructor(http: HttpSetup) {
+  constructor(http: HttpSetup, searchClient: DataPublicPluginStart['search']) {
     this.http = http;
+    this.searchClient = searchClient;
     this.result$ = this.input$
       .pipe(
         filter((v) => v.prompt.length > 0),
@@ -65,19 +43,24 @@ export class Text2Vega {
             // query sample data with ppl
             switchMap(async (value) => {
               const ppl = topN(value.ppl, 2);
-              const sample = await this.http.post('/api/ppl/search', {
-                body: JSON.stringify({ query: ppl, format: 'jdbc' }),
-              });
-              return { ...value, sample };
+              const res = await this.searchClient
+                .search({ params: { body: { query: ppl } } }, { strategy: 'pplraw' })
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .toPromise<any>();
+              return { ...value, sample: res.rawResponse };
             }),
             // call llm to generate vega
             switchMap(async (value) => {
-              const prompt = createPrompt(value.prompt, value.ppl, value.sample);
-              const result = await this.text2vega(prompt);
+              const result = await this.text2vega({
+                input: value.prompt,
+                ppl: value.ppl,
+                sampleData: JSON.stringify(value.sample.jsonData),
+                dataSchema: JSON.stringify(value.sample.schema),
+              });
               result.data = {
                 url: {
                   '%type%': 'ppl',
-                  query: value.ppl,
+                  body: { query: value.ppl },
                 },
               };
               return result;
@@ -89,7 +72,17 @@ export class Text2Vega {
       .pipe(tap(() => this.status$.next('STOPPED')));
   }
 
-  async text2vega(query: string) {
+  async text2vega({
+    input,
+    ppl,
+    sampleData,
+    dataSchema,
+  }: {
+    input: string;
+    ppl: string;
+    sampleData: string;
+    dataSchema: string;
+  }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const escapeField = (json: any, field: string) => {
       if (json[field]) {
@@ -104,21 +97,17 @@ export class Text2Vega {
       }
     };
     const res = await this.http.post(TEXT2VIZ_API.TEXT2VEGA, {
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({
+        input,
+        ppl,
+        sampleData: JSON.stringify(sampleData),
+        dataSchema: JSON.stringify(dataSchema),
+      }),
     });
-    let result = res.body.inference_results[0].output[0].dataAsMap;
-    // sometimes llm returns {response: <schema>} instead of <schema>
-    if (result.response) {
-      result = JSON.parse(result.response);
-    }
-
-    // Sometimes the response contains width and height which is not needed, here delete the these fields
-    delete result.width;
-    delete result.height;
 
     // need to escape field: geo.city -> field: geo\\.city
-    escapeField(result, 'encoding');
-    return result;
+    escapeField(res, 'encoding');
+    return res;
   }
 
   async text2ppl(query: string, index: string) {
@@ -128,8 +117,7 @@ export class Text2Vega {
         index,
       }),
     });
-    const result = JSON.parse(pplResponse.body.inference_results[0].output[0].result);
-    return result.ppl;
+    return pplResponse.ppl;
   }
 
   invoke(value: { prompt: string; index: string }) {

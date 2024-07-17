@@ -9,6 +9,7 @@ import React, { lazy, Suspense } from 'react';
 import { Subscription } from 'rxjs';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -122,10 +123,15 @@ export class AssistantPlugin
         title: i18n.translate('dashboardAssistant.feature.text2viz', {
           defaultMessage: 'Natural language previewer',
         }),
+        navLinkStatus: AppNavLinkStatus.hidden,
         mount: async (params: AppMountParameters) => {
           const [coreStart, pluginsStart] = await core.getStartServices();
           const { renderText2VizApp } = await import('./text2viz');
-          return renderText2VizApp(params, { ...coreStart, ...pluginsStart });
+          return renderText2VizApp(params, {
+            ...coreStart,
+            ...pluginsStart,
+            setHeaderActionMenu: params.setHeaderActionMenu,
+          });
         },
       });
     }

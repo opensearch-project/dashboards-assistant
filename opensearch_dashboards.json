@@ -16,6 +16,7 @@
     "dataSource",
     "dataSourceManagement"
   ],
+  "requiredBundles": ["savedObjects"],
   "configPath": [
     "assistant"
   ]

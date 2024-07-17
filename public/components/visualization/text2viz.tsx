@@ -7,7 +7,6 @@ import {
   EuiPageBody,
   EuiPage,
   EuiPageContent,
-  EuiPageHeader,
   EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +14,8 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiButton,
-  EuiSpacer,
+  EuiBreadcrumb,
+  EuiHeaderLinks,
 } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
@@ -27,25 +27,45 @@ import { SourceSelector } from './source_selector';
 import type { DataSourceOption } from '../../../../../src/plugins/data/public';
 import chatIcon from '../../assets/chat.svg';
 import { EmbeddableRenderer } from '../../../../../src/plugins/embeddable/public';
-import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import {
+  useOpenSearchDashboards,
+  MountPointPortal,
+  toMountPoint,
+} from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { StartServices } from '../../types';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
+  VisSavedObject,
   VisualizeInput,
 } from '../../../../../src/plugins/visualizations/public';
 import './text2viz.scss';
 import { Text2VizEmpty } from './text2viz_empty';
 import { Text2VizLoading } from './text2viz_loading';
 import { Text2Vega } from './text2vega';
+import {
+  OnSaveProps,
+  SavedObjectSaveModalOrigin,
+} from '../../../../../src/plugins/saved_objects/public';
 
 export const Text2Viz = () => {
   const [selectedSource, setSelectedSource] = useState<DataSourceOption>();
   const {
-    services: { embeddable, visualizations, http, notifications },
+    services: {
+      application,
+      chrome,
+      embeddable,
+      visualizations,
+      http,
+      notifications,
+      setHeaderActionMenu,
+      overlays,
+      data,
+    },
   } = useOpenSearchDashboards<StartServices>();
   const [input, setInput] = useState('');
-  const [vegaSpec, setVegaSpec] = useState('');
-  const text2vegaRef = useRef(new Text2Vega(http));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [vegaSpec, setVegaSpec] = useState<Record<string, any>>();
+  const text2vegaRef = useRef(new Text2Vega(http, data.search));
   const status = useObservable(text2vegaRef.current.status$);
 
   useEffect(() => {
@@ -59,7 +79,7 @@ export const Text2Viz = () => {
             }),
           });
         } else {
-          setVegaSpec(JSON.stringify(result, null, 4));
+          setVegaSpec(result);
         }
       }
     });
@@ -85,23 +105,108 @@ export const Text2Viz = () => {
 
   const factory = embeddable.getEmbeddableFactory<VisualizeInput>(VISUALIZE_EMBEDDABLE_TYPE);
   const vis = useMemo(() => {
-    return visualizations.convertToSerializedVis({
-      title: 'vega',
-      visState: {
-        title: 'vega',
-        type: 'vega',
+    return vegaSpec
+      ? visualizations.convertToSerializedVis({
+          title: vegaSpec?.title ?? 'vega',
+          description: vegaSpec?.description ?? '',
+          visState: {
+            title: vegaSpec?.title ?? 'vega',
+            type: 'vega',
+            aggs: [],
+            params: {
+              spec: JSON.stringify(vegaSpec, null, 4),
+            },
+          },
+        })
+      : null;
+  }, [vegaSpec]);
+
+  const onSaveClick = useCallback(async () => {
+    if (!vis) return;
+
+    const doSave = async (onSaveProps: OnSaveProps) => {
+      const savedVis: VisSavedObject = await visualizations.savedVisualizationsLoader.get(); // .createVis('vega', vis)
+      savedVis.visState = {
+        title: onSaveProps.newTitle,
+        type: vis.type,
+        params: vis.params,
         aggs: [],
-        params: {
-          spec: vegaSpec,
+      };
+      savedVis.title = onSaveProps.newTitle;
+      savedVis.description = onSaveProps.newDescription;
+      savedVis.copyOnSave = onSaveProps.newCopyOnSave;
+      try {
+        const id = await savedVis.save({
+          isTitleDuplicateConfirmed: onSaveProps.isTitleDuplicateConfirmed,
+          onTitleDuplicate: onSaveProps.onTitleDuplicate,
+        });
+        if (id) {
+          notifications.toasts.addSuccess({
+            title: i18n.translate('dashboardAssistant.feature.text2viz.saveSuccess', {
+              defaultMessage: `Saved '{title}'`,
+              values: {
+                title: savedVis.title,
+              },
+            }),
+          });
+          dialog.close();
+        }
+      } catch (e) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('dashboardAssistant.feature.text2viz.saveFail', {
+            defaultMessage: `Error on saving '{title}'`,
+            values: {
+              title: savedVis.title,
+            },
+          }),
+        });
+      }
+    };
+
+    const dialog = overlays.openModal(
+      toMountPoint(
+        <SavedObjectSaveModalOrigin
+          documentInfo={{ title: vis.title, description: vis.description }}
+          objectType={'visualization'}
+          onClose={() => dialog.close()}
+          onSave={doSave}
+        />
+      )
+    );
+  }, [vis, visualizations, notifications]);
+
+  useEffect(() => {
+    const breadcrumbs: EuiBreadcrumb[] = [
+      {
+        text: 'Visualize',
+        onClick: () => {
+          application.navigateToApp('visualize');
         },
       },
-    });
-  }, [vegaSpec]);
+      {
+        text: 'Create',
+      },
+    ];
+    chrome.setBreadcrumbs(breadcrumbs);
+  }, [chrome, application]);
 
   return (
     <EuiPage className="text2viz__page">
+      <MountPointPortal setMountPoint={setHeaderActionMenu}>
+        <EuiHeaderLinks data-test-subj="text2viz-top-nav">
+          <EuiButton
+            size="s"
+            color="primary"
+            onClick={onSaveClick}
+            isDisabled={!vis || status === 'RUNNING'}
+          >
+            {i18n.translate('dashboardAssistant.feature.text2viz.save', {
+              defaultMessage: 'Save',
+            })}
+          </EuiButton>
+        </EuiHeaderLinks>
+      </MountPointPortal>
       <EuiPageBody>
-        <EuiPageHeader pageTitle="New visualization" />
         <EuiPageContent
           hasBorder={false}
           hasShadow={false}
@@ -152,24 +257,15 @@ export const Text2Viz = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
-            {status === 'STOPPED' && Boolean(vegaSpec) && (
+            {status === 'STOPPED' && Boolean(vis) && (
               <EuiFlexGroup alignItems="stretch" gutterSize="s" direction="column">
                 <EuiFlexItem grow={1}>
-                  {factory && (
+                  {factory && vis && (
                     <EmbeddableRenderer
                       factory={factory}
                       input={{ id: 'text2viz', savedVis: vis }}
                     />
                   )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <div className="text2viz__right" style={{ height: '100%' }}>
-                    <EuiButton fill color="success">
-                      {i18n.translate('dashboardAssistant.feature.text2viz.save', {
-                        defaultMessage: 'Save',
-                      })}
-                    </EuiButton>
-                  </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}

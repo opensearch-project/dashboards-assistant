@@ -15,7 +15,7 @@ import {
   VisualizationsStart,
 } from '../../../src/plugins/visualizations/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
-import { CoreStart } from '../../../src/core/public';
+import { AppMountParameters, CoreStart } from '../../../src/core/public';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -69,7 +69,10 @@ export interface AssistantStart {
   dataSource: DataSourceServiceContract;
 }
 
-export type StartServices = CoreStart & AssistantPluginStartDependencies;
+export type StartServices = CoreStart &
+  AssistantPluginStartDependencies & {
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  };
 
 export interface UserAccount {
   username: string;
