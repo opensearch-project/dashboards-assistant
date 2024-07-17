@@ -34,34 +34,14 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
           <EuiMarkdownFormat>{props.message.content}</EuiMarkdownFormat>
           {props.message.additionalActions &&
             props.message.additionalActions.map((action, index) => (
-              <EuiFlexGroup key={'action' + index} justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={() => {
-                      if (chatContext) {
-                        if (chatContext.selectedTabId !== TAB_ID.OVERRIDE) {
-                          chatContext.setSelectedTabId(TAB_ID.OVERRIDE);
-                        }
-                        const actionMessage: IMessage = {
-                          type: 'output',
-                          contentType: action.actionType,
-                          content: action.content,
-                        };
-                        const component = chatContext.messageRenderers[
-                          action.actionType
-                        ]?.(actionMessage, { props: { message: actionMessage }, chatContext });
-                        chatContext.setFlyoutComponent(component);
-                        chatContext.setOverrideName('Create Alert');
-                      }
-                    }}
-                    fill
-                    isLoading={false}
-                    disabled={false}
-                  >
-                    Create monitor
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <div key={'action-' + index}>
+                {chatContext.messageRenderers[action.actionType]?.(
+                  {
+                    ...{ type: 'output', contentType: action.actionType, content: action.content },
+                  },
+                  { props, chatContext }
+                ) ?? null}
+              </div>
             ))}
         </>
       );

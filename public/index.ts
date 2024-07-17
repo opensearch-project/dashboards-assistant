@@ -23,3 +23,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { AssistantSetup, RenderProps } from './types';
 export { IMessage } from '../common/types/chat_saved_object_attributes';
+export { TAB_ID } from './utils/constants';

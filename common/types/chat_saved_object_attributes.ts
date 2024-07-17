@@ -79,7 +79,7 @@ export type ISuggestedAction = IActionBase &
   );
 
 export type IAdditionalAction = IActionBase & {
-  actionType: 'create_monitor_grid';
+  actionType: 'create_monitor_grid' | 'create_alert_button';
   content: string;
 };
 

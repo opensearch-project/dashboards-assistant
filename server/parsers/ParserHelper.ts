@@ -39,7 +39,7 @@ export const CreateMonitorParserHelper = (interaction: Interaction): IAdditional
   return [...new Set(monitorParameters)]
     .filter((parameters) => parameters)
     .map((parameters) => ({
-      actionType: 'create_monitor_grid',
+      actionType: 'create_alert_button',
       message: 'Create Alert',
       content: Qs.stringify(parameters),
     }));
