@@ -11,6 +11,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     chat: true,
     incontextInsight: true,
+    next: true,
   },
   schema: configSchema,
 };
