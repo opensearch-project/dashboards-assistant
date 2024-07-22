@@ -9,10 +9,28 @@ import { TEXT2VIZ_API } from '.../../../common/constants/llm';
 import { HttpSetup } from '../../../../../src/core/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
+const DATA_SOURCE_DELIMITER = '::';
+
 const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
 
+const getDataSourceAndIndexFromLabel = (label: string) => {
+  if (label.includes(DATA_SOURCE_DELIMITER)) {
+    return [
+      label.slice(0, label.indexOf(DATA_SOURCE_DELIMITER)),
+      label.slice(label.indexOf(DATA_SOURCE_DELIMITER) + DATA_SOURCE_DELIMITER.length),
+    ] as const;
+  }
+  return [, label] as const;
+};
+
+interface Input {
+  prompt: string;
+  index: string;
+  dataSourceId?: string;
+}
+
 export class Text2Vega {
-  input$ = new BehaviorSubject({ prompt: '', index: '' });
+  input$ = new BehaviorSubject<Input>({ prompt: '', index: '' });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   result$: Observable<Record<string, any> | { error: any }>;
   status$ = new BehaviorSubject<'RUNNING' | 'STOPPED'>('STOPPED');
@@ -33,8 +51,9 @@ export class Text2Vega {
           of(v).pipe(
             // text to ppl
             switchMap(async (value) => {
+              const [, indexName] = getDataSourceAndIndexFromLabel(value.index);
               const pplQuestion = value.prompt.split('//')[0];
-              const ppl = await this.text2ppl(pplQuestion, value.index);
+              const ppl = await this.text2ppl(pplQuestion, indexName, value.dataSourceId);
               return {
                 ...value,
                 ppl,
@@ -44,7 +63,10 @@ export class Text2Vega {
             switchMap(async (value) => {
               const ppl = topN(value.ppl, 2);
               const res = await this.searchClient
-                .search({ params: { body: { query: ppl } } }, { strategy: 'pplraw' })
+                .search(
+                  { params: { body: { query: ppl } }, dataSourceId: value.dataSourceId },
+                  { strategy: 'pplraw' }
+                )
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .toPromise<any>();
               return { ...value, sample: res.rawResponse };
@@ -56,11 +78,14 @@ export class Text2Vega {
                 ppl: value.ppl,
                 sampleData: JSON.stringify(value.sample.jsonData),
                 dataSchema: JSON.stringify(value.sample.schema),
+                dataSourceId: value.dataSourceId,
               });
+              const [dataSourceName] = getDataSourceAndIndexFromLabel(value.index);
               result.data = {
                 url: {
                   '%type%': 'ppl',
                   body: { query: value.ppl },
+                  data_source_name: dataSourceName,
                 },
               };
               return result;
@@ -77,11 +102,13 @@ export class Text2Vega {
     ppl,
     sampleData,
     dataSchema,
+    dataSourceId,
   }: {
     input: string;
     ppl: string;
     sampleData: string;
     dataSchema: string;
+    dataSourceId?: string;
   }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const escapeField = (json: any, field: string) => {
@@ -103,6 +130,7 @@ export class Text2Vega {
         sampleData: JSON.stringify(sampleData),
         dataSchema: JSON.stringify(dataSchema),
       }),
+      query: { dataSourceId },
     });
 
     // need to escape field: geo.city -> field: geo\\.city
@@ -110,17 +138,18 @@ export class Text2Vega {
     return res;
   }
 
-  async text2ppl(query: string, index: string) {
+  async text2ppl(query: string, index: string, dataSourceId?: string) {
     const pplResponse = await this.http.post(TEXT2VIZ_API.TEXT2PPL, {
       body: JSON.stringify({
         question: query,
         index,
       }),
+      query: { dataSourceId },
     });
     return pplResponse.ppl;
   }
 
-  invoke(value: { prompt: string; index: string }) {
+  invoke(value: Input) {
     this.input$.next(value);
   }
 

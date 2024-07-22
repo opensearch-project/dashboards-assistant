@@ -89,17 +89,22 @@ export const Text2Viz = () => {
     };
   }, [http, notifications]);
 
-  const onInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setInput(e.target.value);
-    },
-    [selectedSource]
-  );
+  const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  }, []);
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
+    setVegaSpec(undefined);
     const text2vega = text2vegaRef.current;
     if (selectedSource?.label) {
-      text2vega.invoke({ index: selectedSource?.label, prompt: input });
+      const dataSource = (await selectedSource.ds.getDataSet()).dataSets.find(
+        (ds) => ds.title === selectedSource.label
+      );
+      text2vega.invoke({
+        index: selectedSource.label,
+        prompt: input,
+        dataSourceId: dataSource?.dataSourceId,
+      });
     }
   }, [selectedSource, input]);
 
@@ -257,10 +262,10 @@ export const Text2Viz = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
-            {status === 'STOPPED' && Boolean(vis) && (
+            {status === 'STOPPED' && vis && (
               <EuiFlexGroup alignItems="stretch" gutterSize="s" direction="column">
                 <EuiFlexItem grow={1}>
-                  {factory && vis && (
+                  {factory && (
                     <EmbeddableRenderer
                       factory={factory}
                       input={{ id: 'text2viz', savedVis: vis }}
