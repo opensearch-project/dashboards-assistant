@@ -15,21 +15,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getNotifications, IncontextInsightRegistry } from '../../services';
+import {
+  getIncontextInsightRegistry,
+  getNotifications,
+  IncontextInsightRegistry,
+} from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
 import { ASSISTANT_API } from '../../../common/constants/llm';
 import { getAssistantRole } from '../../utils/constants';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
-  registry?: IncontextInsightRegistry;
   httpSetup?: HttpSetup;
   closePopover: () => void;
-}> = ({ incontextInsight, registry, httpSetup, closePopover }) => {
+}> = ({ incontextInsight, httpSetup, closePopover }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [conversationId, setConversationId] = useState('');
   const toasts = getNotifications().toasts;
+  const registry = getIncontextInsightRegistry();
 
   const onChatContinuation = () => {
     registry?.continueInChat(incontextInsight, conversationId);
@@ -44,6 +48,13 @@ export const GeneratePopoverBody: React.FC<{
       const contextContent = incontextInsight.contextProvider
         ? await incontextInsight.contextProvider()
         : '';
+      let incontextInsightType: string;
+      const endIndex = incontextInsight.key.indexOf('_', 0);
+      if (endIndex !== -1) {
+        incontextInsightType = incontextInsight.key.substring(0, endIndex);
+      } else {
+        incontextInsightType = incontextInsight.key;
+      }
 
       await httpSetup
         ?.post(ASSISTANT_API.SEND_MESSAGE, {
@@ -54,7 +65,7 @@ export const GeneratePopoverBody: React.FC<{
               content: summarizationQuestion,
               contentType: 'text',
               context: { content: contextContent, dataSourceId: incontextInsight.datasourceId },
-              promptPrefix: getAssistantRole(incontextInsight.key),
+              promptPrefix: getAssistantRole(incontextInsightType),
             },
           }),
         })

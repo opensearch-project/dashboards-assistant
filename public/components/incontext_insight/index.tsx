@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getNotifications, IncontextInsightRegistry } from '../../services';
+import { getIncontextInsightRegistry, getNotifications } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
 import { HttpSetup } from '../../../../../src/core/public';
@@ -35,18 +35,11 @@ import { GeneratePopoverBody } from './generate_popover_body';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
-  contextProvider?: () => Promise<string>;
   httpSetup?: HttpSetup;
-  incontextInsightRegistry?: IncontextInsightRegistry;
 }
 
 // TODO: add saved objects / config to store seed suggestions
-export const IncontextInsight = ({
-  children,
-  contextProvider,
-  httpSetup,
-  incontextInsightRegistry,
-}: IncontextInsightProps) => {
+export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -85,7 +78,7 @@ export const IncontextInsight = ({
     }
   }, []);
 
-  const registry = incontextInsightRegistry;
+  const registry = getIncontextInsightRegistry();
   const toasts = getNotifications().toasts;
   let target: React.ReactNode;
   let input: IncontextInsightInput;
@@ -95,9 +88,6 @@ export const IncontextInsight = ({
       if (!isValidElement(node)) return;
       if (node.key && registry?.get(node.key as string)) {
         input = registry.get(node.key as string);
-        if (contextProvider) {
-          input.contextProvider = contextProvider;
-        }
         target = node;
         return;
       }

@@ -17,6 +17,7 @@ export class IncontextInsightRegistry extends EventEmitter {
       type: incontextInsight.type,
       summary: incontextInsight.summary,
       suggestions: incontextInsight.suggestions,
+      contextProvider: incontextInsight.contextProvider,
     };
   };
 
