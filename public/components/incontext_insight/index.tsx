@@ -278,7 +278,6 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
             <GeneratePopoverBody
               incontextInsight={input}
               httpSetup={httpSetup}
-              registry={registry}
               closePopover={closePopover}
             />
           );

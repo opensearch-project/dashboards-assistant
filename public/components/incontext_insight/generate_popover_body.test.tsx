@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, cleanup, fireEvent, waitFor } from '@testing-library/react';
-import { getNotifications } from '../../services';
+import { getConfigSchema, getNotifications } from '../../services';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { HttpSetup } from '../../../../../src/core/public';
 import { ASSISTANT_API } from '../../../common/constants/llm';
@@ -20,6 +20,9 @@ beforeEach(() => {
   (getNotifications as jest.Mock).mockImplementation(() => ({
     toasts: mockToasts,
   }));
+  (getConfigSchema as jest.Mock).mockReturnValue({
+    chat: { enabled: true },
+  });
 });
 
 afterEach(cleanup);
@@ -44,7 +47,6 @@ describe('GeneratePopoverBody', () => {
       <GeneratePopoverBody
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
-        registry={undefined}
         closePopover={closePopoverMock}
       />
     );
@@ -62,7 +64,6 @@ describe('GeneratePopoverBody', () => {
       <GeneratePopoverBody
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
-        registry={undefined}
         closePopover={closePopoverMock}
       />
     );
@@ -84,7 +85,6 @@ describe('GeneratePopoverBody', () => {
       <GeneratePopoverBody
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
-        registry={undefined}
         closePopover={closePopoverMock}
       />
     );
@@ -103,7 +103,6 @@ describe('GeneratePopoverBody', () => {
       <GeneratePopoverBody
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
-        registry={undefined}
         closePopover={closePopoverMock}
       />
     );
@@ -126,7 +125,6 @@ describe('GeneratePopoverBody', () => {
       <GeneratePopoverBody
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
-        registry={undefined}
         closePopover={closePopoverMock}
       />
     );
@@ -153,7 +151,6 @@ describe('GeneratePopoverBody', () => {
       <GeneratePopoverBody
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
-        registry={undefined}
         closePopover={closePopoverMock}
       />
     );
@@ -170,5 +167,33 @@ describe('GeneratePopoverBody', () => {
 
     expect(mockPost).toHaveBeenCalledTimes(1);
     expect(closePopoverMock).toHaveBeenCalled();
+  });
+
+  it("continue in chat button doesn't appear when chat is disabled", async () => {
+    mockPost.mockResolvedValue({
+      interactions: [{ conversation_id: 'test-conversation' }],
+      messages: [{ type: 'output', content: 'Generated summary content' }],
+    });
+    (getConfigSchema as jest.Mock).mockReturnValue({
+      chat: { enabled: false },
+    });
+
+    const { getByText, queryByText } = render(
+      <GeneratePopoverBody
+        incontextInsight={incontextInsightMock}
+        httpSetup={mockHttpSetup}
+        closePopover={closePopoverMock}
+      />
+    );
+
+    const button = getByText('Generate summary');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(getByText('Generated summary content')).toBeInTheDocument();
+    });
+
+    expect(queryByText('Continue in chat')).toBeNull();
+    expect(mockPost).toHaveBeenCalledTimes(1);
   });
 });

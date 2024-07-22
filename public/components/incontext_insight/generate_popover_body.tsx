@@ -15,11 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import {
-  getIncontextInsightRegistry,
-  getNotifications,
-  IncontextInsightRegistry,
-} from '../../services';
+import { getConfigSchema, getIncontextInsightRegistry, getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
 import { ASSISTANT_API } from '../../../common/constants/llm';
 import { getAssistantRole } from '../../utils/constants';
@@ -101,28 +97,30 @@ export const GeneratePopoverBody: React.FC<{
         <EuiText size="s">{summary}</EuiText>
       </EuiPanel>
       <EuiSpacer size={'xs'} />
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        element="div"
-        onClick={() => onChatContinuation()}
-        grow={false}
-        paddingSize="none"
-        style={{ width: '120px', float: 'right' }}
-      >
-        <EuiFlexGroup gutterSize="none" style={{ marginTop: 5 }}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={'chatRight'} style={{ marginRight: 5 }} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs">
-              {i18n.translate('assistantDashboards.incontextInsight.continueInChat', {
-                defaultMessage: 'Continue in chat',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      {getConfigSchema().chat.enabled && (
+        <EuiPanel
+          hasShadow={false}
+          hasBorder={false}
+          element="div"
+          onClick={() => onChatContinuation()}
+          grow={false}
+          paddingSize="none"
+          style={{ width: '120px', float: 'right' }}
+        >
+          <EuiFlexGroup gutterSize="none" style={{ marginTop: 5 }}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={'chatRight'} style={{ marginRight: 5 }} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="xs">
+                {i18n.translate('assistantDashboards.incontextInsight.continueInChat', {
+                  defaultMessage: 'Continue in chat',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
     </>
   ) : (
     <EuiButton
