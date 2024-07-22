@@ -48,17 +48,21 @@ export function registerText2VizRoutes(router: IRouter) {
         },
       });
 
-      // let result = response.body.inference_results[0].output[0].dataAsMap;
-      let result = JSON.parse(response.body.inference_results[0].output[0].result);
-      // sometimes llm returns {response: <schema>} instead of <schema>
-      if (result.response) {
-        result = JSON.parse(result.response);
-      }
-      // Sometimes the response contains width and height which is not needed, here delete the these fields
-      delete result.width;
-      delete result.height;
+      try {
+        // let result = response.body.inference_results[0].output[0].dataAsMap;
+        let result = JSON.parse(response.body.inference_results[0].output[0].result);
+        // sometimes llm returns {response: <schema>} instead of <schema>
+        if (result.response) {
+          result = JSON.parse(result.response);
+        }
+        // Sometimes the response contains width and height which is not needed, here delete the these fields
+        delete result.width;
+        delete result.height;
 
-      return res.ok({ body: result });
+        return res.ok({ body: result });
+      } catch (e) {
+        return res.internalError();
+      }
     })
   );
 
@@ -91,8 +95,12 @@ export function registerText2VizRoutes(router: IRouter) {
           },
         },
       });
-      const result = JSON.parse(response.body.inference_results[0].output[0].result);
-      return res.ok({ body: result });
+      try {
+        const result = JSON.parse(response.body.inference_results[0].output[0].result);
+        return res.ok({ body: result });
+      } catch (e) {
+        return res.internalError();
+      }
     })
   );
 }
