@@ -107,14 +107,22 @@ export class AssistantPlugin
         name: 'text2viz',
         aliasPath: '#/',
         aliasApp: 'text2viz',
-        title: 'Natural language',
-        description: 'Generate visualization with a natural language question.',
+        title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
+          defaultMessage: 'Natural language',
+        }),
+        description: i18n.translate('dashboardAssistant.feature.text2viz.description', {
+          defaultMessage: 'Generate visualization with a natural language question.',
+        }),
         icon: 'chatRight',
         stage: 'experimental',
         promotion: {
-          buttonText: 'Natural language previewer',
-          description:
-            'Not sure which visualization to choose? Generate visualization previews with a natural language question.',
+          buttonText: i18n.translate('dashboardAssistant.feature.text2viz.promotion.buttonText', {
+            defaultMessage: 'Natural language previewer',
+          }),
+          description: i18n.translate('dashboardAssistant.feature.text2viz.promotion.description', {
+            defaultMessage:
+              'Not sure which visualization to choose? Generate visualization previews with a natural language question.',
+          }),
         },
       });
 
