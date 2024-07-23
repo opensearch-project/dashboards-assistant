@@ -11,6 +11,12 @@ import { MessageContentProps } from './tabs/chat/messages/message_content';
 import { DataSourceServiceContract, IncontextInsightRegistry } from './services';
 import { DataSourceManagementPluginSetup } from '../../../src/plugins/data_source_management/public';
 import { TAB_ID } from './utils/constants';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../src/plugins/visualizations/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
+import { AppMountParameters, CoreStart } from '../../../src/core/public';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -30,11 +36,15 @@ export interface AssistantActions {
 }
 
 export interface AssistantPluginStartDependencies {
+  data: DataPublicPluginStart;
+  visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   dashboard: DashboardStart;
 }
 
 export interface AssistantPluginSetupDependencies {
+  data: DataPublicPluginSetup;
+  visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
@@ -47,6 +57,10 @@ export interface AssistantSetup {
    * Returns true if chat UI is enabled.
    */
   chatEnabled: () => boolean;
+  /**
+   * Returns true if contextual assistant is enabled.
+   */
+  nextEnabled: () => boolean;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
   registerIncontextInsight: IncontextInsightRegistry['register'];
   renderIncontextInsight: (component: React.ReactNode) => React.ReactNode;
@@ -55,6 +69,11 @@ export interface AssistantSetup {
 export interface AssistantStart {
   dataSource: DataSourceServiceContract;
 }
+
+export type StartServices = CoreStart &
+  AssistantPluginStartDependencies & {
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  };
 
 export interface UserAccount {
   username: string;

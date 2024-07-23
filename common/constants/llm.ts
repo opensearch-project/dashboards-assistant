@@ -19,6 +19,11 @@ export const ASSISTANT_API = {
   ACCOUNT: `${API_BASE}/account`,
 } as const;
 
+export const TEXT2VIZ_API = {
+  TEXT2PPL: `${API_BASE}/text2ppl`,
+  TEXT2VEGA: `${API_BASE}/text2vega`,
+};
+
 export const NOTEBOOK_API = {
   CREATE_NOTEBOOK: `${NOTEBOOK_PREFIX}/note`,
   SET_PARAGRAPH: `${NOTEBOOK_PREFIX}/set_paragraphs/`,
