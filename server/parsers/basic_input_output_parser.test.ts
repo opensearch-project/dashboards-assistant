@@ -28,6 +28,7 @@ describe('BasicInputOutputParser', () => {
         type: 'output',
         contentType: 'markdown',
         content: 'response',
+        additionalActions: [],
         interactionId: 'interaction_id',
         suggestedActions: [],
       },
@@ -59,6 +60,7 @@ describe('BasicInputOutputParser', () => {
         type: 'output',
         contentType: 'markdown',
         content: 'response',
+        additionalActions: [],
         interactionId: 'interaction_id',
         suggestedActions: [
           {
@@ -70,6 +72,44 @@ describe('BasicInputOutputParser', () => {
             message: 'Bar',
           },
         ],
+      },
+    ]);
+  });
+
+  it('return additional actions when additional_info has related info', async () => {
+    const item = {
+      input: 'input',
+      response: 'response',
+      conversation_id: '',
+      interaction_id: 'interaction_id',
+      create_time: '',
+      additional_info: {
+        'CreateAlertTool.output': ['{"name": "Test name"}'],
+      },
+    };
+    expect(
+      await BasicInputOutputParser.parserProvider(item, {
+        interactions: [item],
+      })
+    ).toEqual([
+      {
+        type: 'input',
+        contentType: 'text',
+        content: 'input',
+      },
+      {
+        type: 'output',
+        contentType: 'markdown',
+        content: 'response',
+        additionalActions: [
+          {
+            actionType: 'create_alert_button',
+            message: 'Create Alert',
+            content: 'name=Test%20name&triggers=',
+          },
+        ],
+        interactionId: 'interaction_id',
+        suggestedActions: [],
       },
     ]);
   });
@@ -105,6 +145,7 @@ describe('BasicInputOutputParser', () => {
         type: 'output',
         contentType: 'markdown',
         content: 'response',
+        additionalActions: [],
         interactionId: 'interaction_id',
         suggestedActions: [],
       },
@@ -133,6 +174,7 @@ describe('BasicInputOutputParser', () => {
       {
         content:
           'normal text<b></b>  [](http://evil.com/) [image](http://evil.com/) [good link](https://link)',
+        additionalActions: [],
         contentType: 'markdown',
         interactionId: 'interaction_id',
         type: 'output',

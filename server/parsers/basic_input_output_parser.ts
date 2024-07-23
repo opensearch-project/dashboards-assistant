@@ -7,7 +7,7 @@ import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { IInput, IOutput } from '../../common/types/chat_saved_object_attributes';
 import { MessageParser } from '../types';
-import { CreateMonitorParserHelper } from './ParserHelper';
+import { parseAdditionalActions } from './ParserHelper';
 
 const sanitize = (content: string) => {
   const window = new JSDOM('').window;
@@ -93,16 +93,13 @@ export const BasicInputOutputParser: MessageParser = {
     };
 
     // TODO: make it more general by using registration of all internal parsers.
-    const alertActions =
-      interaction.additional_info && 'CreateAlertTool.output' in interaction.additional_info
-        ? CreateMonitorParserHelper(interaction)
-        : undefined;
+    const additionalActions = parseAdditionalActions(interaction);
     const outputItems: IOutput[] = [
       {
         type: 'output',
         contentType: 'markdown',
         content: sanitize(interaction.response),
-        additionalActions: alertActions,
+        additionalActions,
         interactionId: interaction.interaction_id,
         suggestedActions: suggestedActions
           .filter((item) => item)
