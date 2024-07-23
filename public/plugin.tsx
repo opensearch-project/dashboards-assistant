@@ -197,6 +197,7 @@ export class AssistantPlugin
         actionExecutors[actionType] = execute;
       },
       chatEnabled: () => this.config.chat.enabled,
+      nextEnabled: () => this.config.next.enabled,
       assistantActions,
       registerIncontextInsight: this.incontextInsightRegistry.register.bind(
         this.incontextInsightRegistry
