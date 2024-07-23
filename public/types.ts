@@ -46,6 +46,10 @@ export interface AssistantSetup {
    * Returns true if chat UI is enabled.
    */
   chatEnabled: () => boolean;
+  /**
+   * Returns true if contextual assistant is enabled.
+   */
+  nextEnabled: () => boolean;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
   registerIncontextInsight: IncontextInsightRegistry['register'];
   renderIncontextInsight: (component: React.ReactNode) => React.ReactNode;
