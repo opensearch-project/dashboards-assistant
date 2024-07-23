@@ -233,7 +233,7 @@ describe('OllyChatService', () => {
         interactionId: 'interactionId',
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: get root agent failed, reason: Error: cannot get root agent by calling the api: /_plugins/_ml/config/os_chat]`
+      `[Error: get agent os_chat failed, reason: Error: cannot get agent os_chat by calling the api: /_plugins/_ml/config/os_chat]`
     );
   });
 });
