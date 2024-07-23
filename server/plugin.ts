@@ -49,7 +49,9 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     });
 
     // Register router for text to visualization
-    registerText2VizRoutes(router);
+    if (config.next.enabled) {
+      registerText2VizRoutes(router);
+    }
 
     core.capabilities.registerProvider(() => ({
       observability: {
