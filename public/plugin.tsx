@@ -3,10 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import { Subscription } from 'rxjs';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../src/core/public';
+import {
+  AppMountParameters,
+  AppNavLinkStatus,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../src/core/public';
 import {
   createOpenSearchDashboardsReactContext,
   toMountPoint,
@@ -95,6 +103,48 @@ export class AssistantPlugin
       uiSettings: core.uiSettings,
       dataSourceManagement: setupDeps.dataSourceManagement,
     });
+
+    if (this.config.next.enabled) {
+      setupDeps.visualizations.registerAlias({
+        name: 'text2viz',
+        aliasPath: '#/',
+        aliasApp: 'text2viz',
+        title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
+          defaultMessage: 'Natural language',
+        }),
+        description: i18n.translate('dashboardAssistant.feature.text2viz.description', {
+          defaultMessage: 'Generate visualization with a natural language question.',
+        }),
+        icon: 'chatRight',
+        stage: 'experimental',
+        promotion: {
+          buttonText: i18n.translate('dashboardAssistant.feature.text2viz.promotion.buttonText', {
+            defaultMessage: 'Natural language previewer',
+          }),
+          description: i18n.translate('dashboardAssistant.feature.text2viz.promotion.description', {
+            defaultMessage:
+              'Not sure which visualization to choose? Generate visualization previews with a natural language question.',
+          }),
+        },
+      });
+
+      core.application.register({
+        id: 'text2viz',
+        title: i18n.translate('dashboardAssistant.feature.text2viz', {
+          defaultMessage: 'Natural language previewer',
+        }),
+        navLinkStatus: AppNavLinkStatus.hidden,
+        mount: async (params: AppMountParameters) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          const { renderText2VizApp } = await import('./text2viz');
+          return renderText2VizApp(params, {
+            ...coreStart,
+            ...pluginsStart,
+            setHeaderActionMenu: params.setHeaderActionMenu,
+          });
+        },
+      });
+    }
 
     if (this.config.chat.enabled) {
       const setupChat = async () => {

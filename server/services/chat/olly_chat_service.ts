@@ -8,6 +8,7 @@ import { OpenSearchClient } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
 import { ML_COMMONS_BASE_API, ROOT_AGENT_CONFIG_ID } from '../../utils/constants';
+import { getAgent } from '../../routes/get_agent';
 
 interface AgentRunPayload {
   question?: string;
@@ -26,21 +27,7 @@ export class OllyChatService implements ChatService {
   constructor(private readonly opensearchClientTransport: OpenSearchClient['transport']) {}
 
   private async getRootAgent(): Promise<string> {
-    try {
-      const path = `${ML_COMMONS_BASE_API}/config/${ROOT_AGENT_CONFIG_ID}`;
-      const response = await this.opensearchClientTransport.request({
-        method: 'GET',
-        path,
-      });
-
-      if (!response || !response.body.configuration?.agent_id) {
-        throw new Error(`cannot get root agent by calling the api: ${path}`);
-      }
-      return response.body.configuration.agent_id;
-    } catch (error) {
-      const errorMessage = JSON.stringify(error.meta?.body) || error;
-      throw new Error('get root agent failed, reason: ' + errorMessage);
-    }
+    return await getAgent(ROOT_AGENT_CONFIG_ID, this.opensearchClientTransport);
   }
 
   private async requestAgentRun(payload: AgentRunPayload) {

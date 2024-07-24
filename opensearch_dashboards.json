@@ -5,15 +5,19 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "data",
     "dashboard",
     "embeddable",
     "opensearchDashboardsReact",
-    "opensearchDashboardsUtils"
+    "opensearchDashboardsUtils",
+    "visualizations",
+    "savedObjects"
   ],
   "optionalPlugins": [
     "dataSource",
     "dataSourceManagement"
   ],
+  "requiredBundles": [],
   "configPath": [
     "assistant"
   ]
