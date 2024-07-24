@@ -68,6 +68,8 @@
 
 .llm-chat-flyout {
   height: 100%;
+  display: flex;
+  flex-direction: column;
   .euiFlyoutFooter {
     background: transparent;
   }
@@ -93,7 +95,6 @@
 }
 
 .llm-chat-flyout-footer {
-  padding-bottom: 24px;
 }
 
 .llm-chat-bubble-wrapper {

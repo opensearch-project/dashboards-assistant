@@ -10,9 +10,11 @@ export enum TAB_ID {
   INSIGHTS = 'insights',
   HISTORY = 'history',
   TRACE = 'trace',
+  OVERRIDE = 'override',
 }
 
 export const DEFAULT_SIDECAR_DOCKED_MODE = SIDECAR_DOCKED_MODE.RIGHT;
 export const DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE = 460;
+export const OVERRIDE_SIDECAR_LEFT_OR_RIGHT_SIZE = 570;
 // this is a default padding top size for sidecar when switching to takeover
 export const DEFAULT_SIDECAR_TAKEOVER_PADDING_TOP_SIZE = 136;

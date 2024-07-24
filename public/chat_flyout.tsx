@@ -12,6 +12,7 @@ import { ChatWindowHeader } from './tabs/chat_window_header';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 import { AgentFrameworkTracesFlyoutBody } from './components/agent_framework_traces_flyout_body';
 import { TAB_ID } from './utils/constants';
+import { ChatOverrideHeader } from './tabs/chat_override_header';
 
 interface ChatFlyoutProps {
   flyoutVisible: boolean;
@@ -86,52 +87,55 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
     >
       <>
         <div className={cs('llm-chat-flyout-header')}>
-          <ChatWindowHeader />
+          {props.overrideComponent ? <ChatOverrideHeader /> : <ChatWindowHeader />}
         </div>
 
-        {props.overrideComponent}
-        <EuiResizableContainer style={{ height: '100%', overflow: 'hidden' }}>
-          {(Panel, Resizer) => (
-            <>
-              <Panel
-                aria-label="chat panel"
-                className={cs('llm-chat-horizontal-resize-panel', {
-                  'llm-chat-hidden': leftPanelSize === 0,
-                })}
-                scrollable={false}
-                size={leftPanelSize}
-                initialSize={resizable ? 70 : undefined}
-                paddingSize="none"
-              >
-                <ChatPage />
-              </Panel>
+        {props.overrideComponent ? (
+          props.overrideComponent
+        ) : (
+          <EuiResizableContainer style={{ height: '100%', overflow: 'hidden' }}>
+            {(Panel, Resizer) => (
               <>
-                {resizable && <Resizer />}
                 <Panel
-                  aria-label="history panel"
+                  aria-label="chat panel"
                   className={cs('llm-chat-horizontal-resize-panel', {
-                    'llm-chat-hidden': leftPanelSize === 100,
+                    'llm-chat-hidden': leftPanelSize === 0,
                   })}
                   scrollable={false}
-                  size={rightPanelSize}
-                  initialSize={resizable ? 30 : undefined}
+                  size={leftPanelSize}
+                  initialSize={resizable ? 70 : undefined}
                   paddingSize="none"
                 >
-                  {chatHistoryPageLoadedRef.current && (
-                    <ChatHistoryPage
-                      // refresh data when user switched to table from another tab
-                      shouldRefresh={chatHistoryPageVisible}
-                      className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
-                    />
-                  )}
-                  {chatTraceVisible && chatContext.interactionId && (
-                    <AgentFrameworkTracesFlyoutBody />
-                  )}
+                  {<ChatPage />}
                 </Panel>
+                <>
+                  {resizable && <Resizer />}
+                  <Panel
+                    aria-label="history panel"
+                    className={cs('llm-chat-horizontal-resize-panel', {
+                      'llm-chat-hidden': leftPanelSize === 100,
+                    })}
+                    scrollable={false}
+                    size={rightPanelSize}
+                    initialSize={resizable ? 30 : undefined}
+                    paddingSize="none"
+                  >
+                    {chatHistoryPageLoadedRef.current && (
+                      <ChatHistoryPage
+                        // refresh data when user switched to table from another tab
+                        shouldRefresh={chatHistoryPageVisible}
+                        className={cs({ 'llm-chat-hidden': !chatHistoryPageVisible })}
+                      />
+                    )}
+                    {chatTraceVisible && chatContext.interactionId && (
+                      <AgentFrameworkTracesFlyoutBody />
+                    )}
+                  </Panel>
+                </>
               </>
-            </>
-          )}
-        </EuiResizableContainer>
+            )}
+          </EuiResizableContainer>
+        )}
       </>
     </div>
   );
