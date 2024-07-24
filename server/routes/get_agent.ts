@@ -14,10 +14,13 @@ export const getAgent = async (id: string, client: OpenSearchClient['transport']
       path,
     });
 
-    if (!response || !response.body.ml_configuration?.agent_id) {
+    if (
+      !response ||
+      !(response.body.ml_configuration?.agent_id || response.body.configuration?.agent_id)
+    ) {
       throw new Error(`cannot get agent ${id} by calling the api: ${path}`);
     }
-    return response.body.ml_configuration.agent_id;
+    return response.body.ml_configuration.agent_id || response.body.configuration.agent_id;
   } catch (error) {
     const errorMessage = JSON.stringify(error.meta?.body) || error;
     throw new Error(`get agent ${id} failed, reason: ${errorMessage}`);
