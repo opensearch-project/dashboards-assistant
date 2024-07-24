@@ -10,7 +10,8 @@
     "embeddable",
     "opensearchDashboardsReact",
     "opensearchDashboardsUtils",
-    "visualizations"
+    "visualizations",
+    "savedObjects"
   ],
   "optionalPlugins": [
     "dataSource",
