@@ -31,7 +31,24 @@ describe('IncontextInsightRegistry', () => {
 
     registry.open(insight, 'test suggestion');
 
-    expect(mockFn).toHaveBeenCalledWith({ suggestion: 'test suggestion' });
+    expect(mockFn).toHaveBeenCalledWith({
+      contextContent: '',
+      dataSourceId: undefined,
+      suggestion: 'test suggestion',
+    });
+  });
+
+  it('emits "onChatContinuation" event when continueInChat is called', () => {
+    const mockFn = jest.fn();
+    registry.on('onChatContinuation', mockFn);
+
+    registry.continueInChat(insight, 'test conversationId');
+
+    expect(mockFn).toHaveBeenCalledWith({
+      contextContent: '',
+      dataSourceId: undefined,
+      conversationId: 'test conversationId',
+    });
   });
 
   it('adds item to registry when register is called with a single item', () => {

@@ -15,6 +15,7 @@ interface AgentRunPayload {
   verbose?: boolean;
   memory_id?: string;
   regenerate_interaction_id?: string;
+  'prompt.prefix'?: string;
 }
 
 const MEMORY_ID_FIELD = 'memory_id';
@@ -96,10 +97,21 @@ export class OllyChatService implements ChatService {
   }> {
     const { input, conversationId } = payload;
 
-    const parametersPayload: Pick<AgentRunPayload, 'question' | 'verbose' | 'memory_id'> = {
-      question: input.content,
+    let llmInput = input.content;
+    if (input.context?.content) {
+      llmInput = `Based on the context: ${input.context?.content}, answer question: ${input.content}`;
+    }
+    const parametersPayload: Pick<
+      AgentRunPayload,
+      'question' | 'verbose' | 'memory_id' | 'prompt.prefix'
+    > = {
+      question: llmInput,
       verbose: false,
     };
+
+    if (input.promptPrefix) {
+      parametersPayload['prompt.prefix'] = input.promptPrefix;
+    }
 
     if (conversationId) {
       parametersPayload.memory_id = conversationId;

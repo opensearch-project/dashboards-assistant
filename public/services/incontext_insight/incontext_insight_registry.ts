@@ -17,6 +17,7 @@ export class IncontextInsightRegistry extends EventEmitter {
       type: incontextInsight.type,
       summary: incontextInsight.summary,
       suggestions: incontextInsight.suggestions,
+      contextProvider: incontextInsight.contextProvider,
     };
   };
 
@@ -28,10 +29,24 @@ export class IncontextInsightRegistry extends EventEmitter {
     this.enabled = enabled;
   }
 
-  public open(item: IncontextInsight, suggestion: string) {
+  public async open(item: IncontextInsight, suggestion: string) {
     // TODO: passing incontextInsight for future usage
+    const contextContent = item.contextProvider ? await item.contextProvider() : '';
+    const datasourceId = item.datasourceId;
     this.emit('onSuggestion', {
       suggestion,
+      contextContent,
+      datasourceId,
+    });
+  }
+
+  public async continueInChat(item: IncontextInsight, conversationId: string) {
+    const contextContent = item.contextProvider ? await item.contextProvider() : '';
+    const datasourceId = item.datasourceId;
+    this.emit('onChatContinuation', {
+      conversationId,
+      contextContent,
+      datasourceId,
     });
   }
 
