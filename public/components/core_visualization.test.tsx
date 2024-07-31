@@ -9,6 +9,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import * as coreContextExports from '../contexts/core_context';
 import { CoreVisualization } from './core_visualization';
 
+jest.mock('../../../../src/plugins/embeddable/public', () => ({
+  ViewMode: jest.requireActual('../../../../src/plugins/embeddable/public/lib').ViewMode,
+}));
+
 describe('<CoreVisualization />', () => {
   beforeEach(() => {
     jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
