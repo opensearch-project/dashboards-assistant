@@ -8,11 +8,11 @@ import './index.scss';
 import { i18n } from '@osd/i18n';
 import {
   EuiWrappingPopover,
-  EuiButton,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopoverTitle,
   EuiText,
   EuiPopoverFooter,
@@ -23,7 +23,7 @@ import {
   EuiPanel,
   keys,
   EuiIcon,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
@@ -202,8 +202,8 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
     return (
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={6}>
-          <EuiFormRow>
-            <EuiFieldText
+          <EuiCompressedFormRow>
+            <EuiCompressedFieldText
               placeholder="Ask a question"
               value={userQuestion}
               autoFocus
@@ -215,10 +215,10 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
                 }
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             fill
             iconType="returnKey"
             iconSide="right"
@@ -228,7 +228,7 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
             }}
           >
             Go
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -318,7 +318,7 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   title={i18n.translate('assistantDashboards.incontextInsight.closeAssistant', {
                     defaultMessage: 'Close assistant popover',
                   })}

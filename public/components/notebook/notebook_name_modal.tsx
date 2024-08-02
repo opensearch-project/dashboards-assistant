@@ -4,15 +4,15 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiLink,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
@@ -71,20 +71,20 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow label="Please enter a name for your notebook.">
-            <EuiFieldText
+          <EuiCompressedFormRow label="Please enter a name for your notebook.">
+            <EuiCompressedFieldText
               value={name}
               onChange={(e) => setName(e.target.value)}
               aria-label="Notebook name input"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose} data-test-subj="cancelSaveToNotebookButton">
+          <EuiSmallButtonEmpty onClick={onClose} data-test-subj="cancelSaveToNotebookButton">
             Cancel
-          </EuiButtonEmpty>
-          <EuiButton
+          </EuiSmallButtonEmpty>
+          <EuiSmallButton
             type="submit"
             fill
             isLoading={loading}
@@ -93,7 +93,7 @@ export const NotebookNameModal = ({ onClose, saveChat }: NotebookNameModalProps)
             data-test-subj="confirmSaveToNotebookButton"
           >
             Confirm name
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     </>

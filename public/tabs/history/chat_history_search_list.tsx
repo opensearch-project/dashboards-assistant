@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFieldSearchProps,
   EuiPanel,
   EuiSpacer,
@@ -81,7 +81,7 @@ export const ChatHistorySearchList = ({
   );
   return (
     <>
-      <EuiFieldSearch
+      <EuiCompressedFieldSearch
         placeholder="Search by conversation name"
         value={search}
         onChange={onSearchChange}

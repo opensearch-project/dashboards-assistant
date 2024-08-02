@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -69,14 +69,14 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           body={props.messagesLoadingError.message}
           titleSize="l"
           actions={
-            <EuiButton
+            <EuiSmallButton
               className="llm-chat-error-refresh-button"
               fill
               iconType="refresh"
               onClick={props.onRefresh}
             >
               Refresh
-            </EuiButton>
+            </EuiSmallButton>
           }
         />
       </>
