@@ -185,24 +185,47 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   }, []);
 
   useEffect(() => {
-    const handleSuggestion = (event: { suggestion: string }) => {
+    const handleSuggestion = (event: {
+      suggestion: string;
+      contextContent: string;
+      datasourceId?: string;
+    }) => {
       if (!flyoutVisible) {
         // open chat window
         setFlyoutVisible(true);
-        // start a new chat
-        props.assistantActions.loadChat();
       }
+      // start a new chat
+      props.assistantActions.loadChat();
       // send message
       props.assistantActions.send({
         type: 'input',
         contentType: 'text',
         content: event.suggestion,
-        context: { appId },
+        context: { appId, content: event.contextContent, datasourceId: event.datasourceId },
       });
     };
     registry.on('onSuggestion', handleSuggestion);
     return () => {
       registry.off('onSuggestion', handleSuggestion);
+    };
+  }, [appId, flyoutVisible, props.assistantActions, registry]);
+
+  useEffect(() => {
+    const handleChatContinuation = (event: {
+      conversationId?: string;
+      contextContent: string;
+      datasourceId?: string;
+    }) => {
+      if (!flyoutVisible) {
+        // open chat window
+        setFlyoutVisible(true);
+      }
+      // continue chat with current conversationId
+      props.assistantActions.loadChat(event.conversationId);
+    };
+    registry.on('onChatContinuation', handleChatContinuation);
+    return () => {
+      registry.off('onChatContinuation', handleChatContinuation);
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
 

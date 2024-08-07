@@ -38,18 +38,19 @@ import {
   setChrome,
   setNotifications,
   setIncontextInsightRegistry,
+  setConfigSchema,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
 import { ASSISTANT_API, DEFAULT_USER_NAME } from '../common/constants/llm';
+import { IncontextInsightProps } from './components/incontext_insight';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 // @ts-ignore
 const LazyIncontextInsightComponent = lazy(() => import('./components/incontext_insight'));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const IncontextInsightComponent: React.FC<{ props: any }> = (props) => (
+export const IncontextInsightComponent: React.FC<{ props: IncontextInsightProps }> = (props) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <LazyIncontextInsightComponent {...props} />
   </Suspense>
@@ -82,6 +83,7 @@ export class AssistantPlugin
     setupDeps: AssistantPluginSetupDependencies
   ): AssistantSetup {
     this.incontextInsightRegistry = new IncontextInsightRegistry();
+    this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
     setIncontextInsightRegistry(this.incontextInsightRegistry);
     const messageRenderers: Record<string, MessageRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
@@ -158,7 +160,6 @@ export class AssistantPlugin
         });
         const account = await getAccount();
         const username = account.user_name;
-        this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
 
         if (this.dataSourceService.isMDSEnabled()) {
           this.resetChatSubscription = this.dataSourceService.dataSourceIdUpdates$.subscribe(() => {
@@ -205,7 +206,8 @@ export class AssistantPlugin
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderIncontextInsight: (props: any) => {
         if (!this.incontextInsightRegistry?.isEnabled()) return <div {...props} />;
-        return <IncontextInsightComponent {...props} />;
+        const httpSetup = core.http;
+        return <IncontextInsightComponent {...props} httpSetup={httpSetup} />;
       },
     };
   }
@@ -214,6 +216,7 @@ export class AssistantPlugin
     setCoreStart(core);
     setChrome(core.chrome);
     setNotifications(core.notifications);
+    setConfigSchema(this.config);
 
     return {
       dataSource: this.dataSourceService.start(),

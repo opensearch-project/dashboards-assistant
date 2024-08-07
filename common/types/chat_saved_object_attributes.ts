@@ -43,8 +43,11 @@ export interface IInput {
   content: string;
   context?: {
     appId?: string;
+    content?: string;
+    datasourceId?: string;
   };
   messageId?: string;
+  promptPrefix?: string;
 }
 export interface IOutput {
   type: 'output';
