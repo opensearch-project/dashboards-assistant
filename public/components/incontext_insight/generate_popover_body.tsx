@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import cx from 'classnames';
 import { i18n } from '@osd/i18n';
 import {
   EuiButton,
@@ -13,7 +14,14 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiAvatar,
+  EuiButtonIcon,
+  EuiCopy,
+  EuiLoadingContent,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { MessageActions } from '../../tabs/chat/messages/message_action';
+
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getConfigSchema, getIncontextInsightRegistry, getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
@@ -97,30 +105,55 @@ export const GeneratePopoverBody: React.FC<{
         <EuiText size="s">{summary}</EuiText>
       </EuiPanel>
       <EuiSpacer size={'xs'} />
-      {getConfigSchema().chat.enabled && (
+      {
         <EuiPanel
-          hasShadow={false}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+          paddingSize="s"
           hasBorder={false}
-          element="div"
-          onClick={() => onChatContinuation()}
-          grow={false}
-          paddingSize="none"
-          style={{ width: '120px', float: 'right' }}
+          hasShadow={false}
+          color="plain"
         >
-          <EuiFlexGroup gutterSize="none" style={{ marginTop: 5 }}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={'chatRight'} style={{ marginRight: 5 }} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                {i18n.translate('assistantDashboards.incontextInsight.continueInChat', {
-                  defaultMessage: 'Continue in chat',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <MessageActions
+            contentToCopy={summary}
+            showRegenerate
+            onRegenerate={() => {
+              onGenerateSummary(
+                incontextInsight.suggestions && incontextInsight.suggestions.length > 0
+                  ? incontextInsight.suggestions[0]
+                  : 'Please summarize the input'
+              );
+            }}
+            feedbackResult={false}
+            showFeedback
+            onFeedback={(correct) => console.log(`Feedback: ${correct}`)}
+            showTraceIcon={false}
+          />
+          {getConfigSchema().chat.enabled && (
+            <EuiPanel
+              hasShadow={false}
+              hasBorder={false}
+              element="div"
+              onClick={() => onChatContinuation()}
+              grow={false}
+              paddingSize="none"
+              style={{ width: '120px', float: 'right' }}
+            >
+              <EuiFlexGroup gutterSize="none" style={{ marginTop: 5 }}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={'chatRight'} style={{ marginRight: 5 }} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="xs">
+                    {i18n.translate('assistantDashboards.incontextInsight.continueInChat', {
+                      defaultMessage: 'Continue in chat',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          )}
         </EuiPanel>
-      )}
+      }
     </>
   ) : (
     <EuiButton

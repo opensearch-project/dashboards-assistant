@@ -18,6 +18,8 @@ import {
 import React, { useCallback } from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import cx from 'classnames';
+import { MessageActions } from './message_action';
+
 // TODO: Replace with getChrome().logos.Chat.url
 import { useChatActions } from '../../../hooks';
 import chatIcon from '../../../assets/chat.svg';
@@ -169,92 +171,29 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
           {props.showActionBar && (
             <>
               <EuiSpacer size="xs" />
-              <EuiFlexGroup
-                aria-label="message actions"
-                className={cx({
-                  'llm-chat-action-buttons-hidden': props.shouldActionBarVisibleOnHover,
-                })}
-                responsive={false}
-                gutterSize="s"
-                alignItems="center"
-                justifyContent="flexStart"
-                style={{ paddingLeft: 10 }}
-              >
-                {!fullWidth && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCopy textToCopy={props.message.content ?? ''}>
-                      {(copy) => (
-                        <EuiButtonIcon
-                          aria-label="copy message"
-                          title="copy message"
-                          onClick={copy}
-                          color="text"
-                          iconType="copy"
-                        />
-                      )}
-                    </EuiCopy>
-                  </EuiFlexItem>
-                )}
-                {props.showRegenerate && props.interaction?.interaction_id ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      aria-label="regenerate message"
-                      onClick={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
-                      title="regenerate message"
-                      color="text"
-                      iconType="refresh"
-                    />
-                  </EuiFlexItem>
-                ) : null}
-                {showFeedback && (
-                  // After feedback, only corresponding thumb icon will be kept and disabled.
-                  <>
-                    {feedbackResult !== false ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label="feedback thumbs up"
-                          color={feedbackResult === true ? 'primary' : 'text'}
-                          iconType="thumbsUp"
-                          onClick={() => feedbackOutput(true, feedbackResult)}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
-                    {feedbackResult !== true ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label="feedback thumbs down"
-                          color={feedbackResult === false ? 'primary' : 'text'}
-                          iconType="thumbsDown"
-                          onClick={() => feedbackOutput(false, feedbackResult)}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
-                  </>
-                )}
-                {props.message.interactionId ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      aria-label="How was this generated?"
-                      data-test-subj={`trace-icon-${props.message.interactionId}`}
-                      onClick={() => {
-                        const message = props.message as IOutput;
-
-                        const viewTraceAction: ISuggestedAction = {
-                          actionType: 'view_trace',
-                          metadata: {
-                            interactionId: message.interactionId || '',
-                          },
-                          message: 'How was this generated?',
-                        };
-                        executeAction(viewTraceAction, message);
-                      }}
-                      title="How was this generated?"
-                      color="text"
-                      iconType="iInCircle"
-                    />
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
+              <MessageActions
+                contentToCopy={props.message.content ?? ''}
+                showRegenerate={props.showRegenerate}
+                onRegenerate={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
+                feedbackResult={feedbackResult}
+                showFeedback={showFeedback}
+                onFeedback={(correct) => feedbackOutput(correct, feedbackResult)}
+                showTraceIcon={!!props.message.interactionId}
+                traceInteractionId={props.message.interactionId || ''}
+                onViewTrace={() => {
+                  const message = props.message as IOutput;
+                  const viewTraceAction: ISuggestedAction = {
+                    actionType: 'view_trace',
+                    metadata: {
+                      interactionId: message.interactionId || '',
+                    },
+                    message: 'How was this generated?',
+                  };
+                  executeAction(viewTraceAction, message);
+                }}
+                shouldActionBarVisibleOnHover={props.shouldActionBarVisibleOnHover}
+                isFullWidth={fullWidth}
+              />
             </>
           )}
         </EuiFlexItem>
