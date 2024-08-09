@@ -26,6 +26,9 @@ import {
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
+import { IOutput } from '../common/types/chat_saved_object_attributes';
+import { SendFeedbackBody } from '../common/types/chat_saved_object_attributes';
+import { ASSISTANT_API } from '../common/constants/llm';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -213,6 +216,25 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       registry.off('onChatContinuation', handleChatContinuation);
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
+
+  useEffect(() => {
+    const handleFeedback = async (event: { message: IOutput; body: SendFeedbackBody }) => {
+      console.log('send feedback', event.message);
+      try {
+        await core.services.http.put(`${ASSISTANT_API.FEEDBACK}/${event.message.interactionId}`, {
+          body: JSON.stringify(event.body),
+          query: core.services.dataSource.getDataSourceQuery(),
+        });
+        console.log(`Feedback sent: ${event.body}`);
+      } catch (error) {
+        console.log('send feedback error');
+      }
+    };
+    registry.on('onSendFeedback', handleFeedback);
+    return () => {
+      registry.off('onSendFeedback', handleFeedback);
+    };
+  }, [core.services.http, core.services.dataSource, registry]);
 
   return (
     <>

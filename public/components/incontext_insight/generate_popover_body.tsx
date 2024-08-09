@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import cx from 'classnames';
 import { i18n } from '@osd/i18n';
 import {
@@ -20,8 +20,9 @@ import {
   EuiLoadingContent,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { IMessage, Interaction, IOutput } from 'common/types/chat_saved_object_attributes';
 import { MessageActions } from '../../tabs/chat/messages/message_action';
-
+import { useFeedback } from '../../hooks/use_feed_back';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getConfigSchema, getIncontextInsightRegistry, getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
@@ -36,8 +37,12 @@ export const GeneratePopoverBody: React.FC<{
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [conversationId, setConversationId] = useState('');
+  const [interaction, setInteraction] = useState<Interaction | null>(null);
+  const [message, setMessage] = useState<IMessage | null>(null);
+
   const toasts = getNotifications().toasts;
   const registry = getIncontextInsightRegistry();
+  const { sendFeedback, feedbackResult } = useFeedback(interaction, false);
 
   const onChatContinuation = () => {
     registry?.continueInChat(incontextInsight, conversationId);
@@ -77,11 +82,13 @@ export const GeneratePopoverBody: React.FC<{
           const interactionLength = response.interactions.length;
           if (interactionLength > 0) {
             setConversationId(response.interactions[interactionLength - 1].conversation_id);
+            setInteraction(response.interactions[interactionLength - 1]);
           }
 
           const messageLength = response.messages.length;
           if (messageLength > 0 && response.messages[messageLength - 1].type === 'output') {
             setSummary(response.messages[messageLength - 1].content);
+            setMessage(response.messages[messageLength - 1]);
           }
         })
         .catch((error) => {
@@ -98,6 +105,17 @@ export const GeneratePopoverBody: React.FC<{
 
     return summarize();
   };
+
+  const onFeedback = useCallback(
+    (correct: boolean) => {
+      if (feedbackResult !== undefined || !message) {
+        return;
+      }
+      console.log('message', message);
+      sendFeedback(message as IOutput, correct);
+    },
+    [message, sendFeedback]
+  );
 
   return summary ? (
     <>
@@ -116,16 +134,16 @@ export const GeneratePopoverBody: React.FC<{
           <MessageActions
             contentToCopy={summary}
             showRegenerate
-            onRegenerate={() => {
-              onGenerateSummary(
+            onRegenerate={async () => {
+              await onGenerateSummary(
                 incontextInsight.suggestions && incontextInsight.suggestions.length > 0
                   ? incontextInsight.suggestions[0]
                   : 'Please summarize the input'
               );
             }}
-            feedbackResult={false}
+            feedbackResult={feedbackResult}
             showFeedback
-            onFeedback={(correct) => console.log(`Feedback: ${correct}`)}
+            onFeedback={onFeedback}
             showTraceIcon={false}
           />
           {getConfigSchema().chat.enabled && (
