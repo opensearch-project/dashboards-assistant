@@ -59,6 +59,9 @@ export function registerText2VizRoutes(router: IRouter) {
         delete result.width;
         delete result.height;
 
+        // make sure $schema field always been added, sometimes, LLM 'forgot' to add this field
+        result.$schema = 'https://vega.github.io/schema/vega-lite/v5.json';
+
         return res.ok({ body: result });
       } catch (e) {
         return res.internalError();
