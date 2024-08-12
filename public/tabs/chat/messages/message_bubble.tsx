@@ -5,8 +5,6 @@
 
 import {
   EuiAvatar,
-  EuiButtonIcon,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -15,9 +13,8 @@ import {
   EuiSpacer,
   EuiIcon,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import cx from 'classnames';
 import { MessageActions } from './message_action';
 
 // TODO: Replace with getChrome().logos.Chat.url
@@ -29,7 +26,6 @@ import {
   ISuggestedAction,
   Interaction,
 } from '../../../../common/types/chat_saved_object_attributes';
-import { useFeedback } from '../../../hooks/use_feed_back';
 
 type MessageBubbleProps = {
   showActionBar: boolean;
@@ -47,10 +43,6 @@ type MessageBubbleProps = {
 );
 
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
-  const { feedbackResult, sendFeedback } = useFeedback(
-    'interaction' in props ? props.interaction : null
-  );
-
   const { executeAction } = useChatActions();
 
   // According to the design of the feedback, only markdown type output is supported.
@@ -58,17 +50,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     'message' in props &&
     props.message.type === 'output' &&
     props.message.contentType === 'markdown';
-
-  const feedbackOutput = useCallback(
-    (correct: boolean, result: boolean | undefined) => {
-      // No repeated feedback.
-      if (result !== undefined || !('message' in props)) {
-        return;
-      }
-      sendFeedback(props.message as IOutput, correct);
-    },
-    [props, sendFeedback]
-  );
 
   const createAvatar = (iconType?: IconType) => {
     if (iconType) {
@@ -175,9 +156,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                 contentToCopy={props.message.content ?? ''}
                 showRegenerate={props.showRegenerate}
                 onRegenerate={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
-                feedbackResult={feedbackResult}
+                interaction={props.interaction}
+                message={props.message as IOutput}
                 showFeedback={showFeedback}
-                onFeedback={(correct) => feedbackOutput(correct, feedbackResult)}
                 showTraceIcon={!!props.message.interactionId}
                 traceInteractionId={props.message.interactionId || ''}
                 onViewTrace={() => {

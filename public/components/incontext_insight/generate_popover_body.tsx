@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState } from 'react';
-import cx from 'classnames';
+import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiButton,
@@ -14,15 +13,9 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiAvatar,
-  EuiButtonIcon,
-  EuiCopy,
-  EuiLoadingContent,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { IMessage, Interaction, IOutput } from 'common/types/chat_saved_object_attributes';
 import { MessageActions } from '../../tabs/chat/messages/message_action';
-import { useFeedback } from '../../hooks/use_feed_back';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getConfigSchema, getIncontextInsightRegistry, getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
@@ -42,7 +35,6 @@ export const GeneratePopoverBody: React.FC<{
 
   const toasts = getNotifications().toasts;
   const registry = getIncontextInsightRegistry();
-  const { sendFeedback, feedbackResult } = useFeedback(interaction, false);
 
   const onChatContinuation = () => {
     registry?.continueInChat(incontextInsight, conversationId);
@@ -106,17 +98,6 @@ export const GeneratePopoverBody: React.FC<{
     return summarize();
   };
 
-  const onFeedback = useCallback(
-    (correct: boolean) => {
-      if (feedbackResult !== undefined || !message) {
-        return;
-      }
-      console.log('message', message);
-      sendFeedback(message as IOutput, correct);
-    },
-    [message, sendFeedback]
-  );
-
   return summary ? (
     <>
       <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
@@ -141,9 +122,9 @@ export const GeneratePopoverBody: React.FC<{
                   : 'Please summarize the input'
               );
             }}
-            feedbackResult={feedbackResult}
+            interaction={interaction}
             showFeedback
-            onFeedback={onFeedback}
+            message={message as IOutput}
             showTraceIcon={false}
           />
           {getConfigSchema().chat.enabled && (

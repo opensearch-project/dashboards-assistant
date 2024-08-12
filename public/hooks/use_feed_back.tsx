@@ -3,12 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { IOutput, Interaction } from '../../common/types/chat_saved_object_attributes';
-import { useCore } from '../contexts/core_context';
 import { useChatState } from './use_chat_state';
-import { SendFeedbackBody } from '../../common/types/chat_saved_object_attributes';
 import { getIncontextInsightRegistry } from '../services';
 
 export const useFeedback = (interaction?: Interaction | null, hasChatState: boolean = true) => {
@@ -33,16 +31,20 @@ export const useFeedback = (interaction?: Interaction | null, hasChatState: bool
         return;
       }
     }
-
-    const body: SendFeedbackBody = {
-      satisfaction: correct,
-    };
-
-    console.log('use message', message);
-
-    registry.emit('onSendFeedback', { message, body });
-    setFeedbackResult(correct);
+    registry.sendFeedbackRequest(message.interactionId, correct);
   };
+
+  useEffect(() => {
+    const successFeedback = (event: { correct: boolean }) => {
+      setFeedbackResult(event.correct);
+    };
+    if (interaction && interaction.interaction_id) {
+      registry.on(`feedbackSuccess:${interaction.interaction_id}`, successFeedback);
+      return () => {
+        registry.off(`feedbackSuccess:${interaction.interaction_id}`, successFeedback);
+      };
+    }
+  }, [interaction]);
 
   return { sendFeedback, feedbackResult };
 };

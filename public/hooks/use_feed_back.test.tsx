@@ -4,36 +4,24 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-
 import { useFeedback } from './use_feed_back';
 import * as chatStateHookExports from './use_chat_state';
-import * as coreHookExports from '../contexts/core_context';
-import { httpServiceMock } from '../../../../src/core/public/mocks';
-import * as chatContextHookExports from '../contexts/chat_context';
 import { Interaction, IOutput, IMessage } from '../../common/types/chat_saved_object_attributes';
-import { ASSISTANT_API } from '../../common/constants/llm';
-import { DataSourceServiceMock } from '../services/data_source_service.mock';
+import { getIncontextInsightRegistry } from '../services';
+
+jest.mock('../services');
 
 describe('useFeedback hook', () => {
-  const httpMock = httpServiceMock.createStartContract();
+  let registryMock: unknown;
   const chatStateDispatchMock = jest.fn();
-  const dataSourceMock = new DataSourceServiceMock();
-  const chatContextMock = {
-    rootAgentId: 'root_agent_id_mock',
-    selectedTabId: 'chat',
-    setConversationId: jest.fn(),
-    setTitle: jest.fn(),
-    currentAccount: { username: 'admin' },
-  };
 
   beforeEach(() => {
-    jest.spyOn(coreHookExports, 'useCore').mockReturnValue({
-      services: {
-        http: httpMock,
-        dataSource: dataSourceMock,
-      },
-    });
-    jest.spyOn(chatContextHookExports, 'useChatContext').mockReturnValue(chatContextMock);
+    registryMock = {
+      sendFeedbackRequest: jest.fn(),
+      on: jest.fn(),
+    };
+
+    (getIncontextInsightRegistry as jest.Mock).mockReturnValue(registryMock);
 
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
       chatState: { messages: [], interactions: [], llmResponding: false },
@@ -59,6 +47,9 @@ describe('useFeedback hook', () => {
   });
 
   it('should call feedback api regularly with passed correct value and set feedback state if call API success', async () => {
+    const mockInteraction = {
+      interaction_id: 'interactionId',
+    } as Interaction;
     const mockInputMessage = {
       type: 'input',
     } as IMessage;
@@ -67,32 +58,33 @@ describe('useFeedback hook', () => {
       interactionId: 'interactionId',
     } as IOutput;
     const mockMessages = [mockInputMessage, mockOutputMessage];
+    const correct = true;
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
       chatState: { messages: mockMessages, interactions: [], llmResponding: false },
       chatStateDispatch: chatStateDispatchMock,
     });
-    const { result } = renderHook(() => useFeedback());
+    const { result } = renderHook(() => useFeedback(mockInteraction));
     expect(result.current.feedbackResult).toBe(undefined);
 
     const sendFeedback = result.current.sendFeedback;
     await act(async () => {
-      await sendFeedback(mockOutputMessage, true);
+      await sendFeedback(mockOutputMessage, correct);
     });
-    expect(httpMock.put).toHaveBeenCalledWith(
-      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
-      {
-        body: JSON.stringify({
-          satisfaction: true,
-        }),
-        query: dataSourceMock.getDataSourceQuery(),
-      }
+    act(() => {
+      registryMock.on.mock.calls.forEach(([event, handler]) => {
+        if (event === `feedbackSuccess:${mockOutputMessage.interactionId}`) {
+          handler({ correct });
+        }
+      });
+    });
+    expect(registryMock.sendFeedbackRequest).toHaveBeenCalledWith(
+      mockOutputMessage.interactionId,
+      correct
     );
-    expect(result.current.feedbackResult).toBe(true);
+    expect(result.current.feedbackResult).toBe(correct);
   });
 
   it('should not update feedback state if API fail', async () => {
-    httpMock.put.mockRejectedValueOnce(new Error(''));
-
     const mockInputMessage = {
       type: 'input',
     } as IMessage;
@@ -113,43 +105,36 @@ describe('useFeedback hook', () => {
       await sendFeedback(mockOutputMessage, true);
     });
 
-    expect(httpMock.put).toHaveBeenCalledWith(
-      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
-      {
-        body: JSON.stringify({
-          satisfaction: true,
-        }),
-        query: dataSourceMock.getDataSourceQuery(),
-      }
-    );
     expect(result.current.feedbackResult).toBe(undefined);
   });
 
-  it('should not call API to feedback if there is no input message before passed output message', async () => {
+  it('should call feedback request on registry without checking for input message if hasChatState is false', async () => {
     const mockOutputMessage = {
       type: 'output',
       interactionId: 'interactionId',
     } as IOutput;
-    const mockMessages = [mockOutputMessage];
-    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
-      chatState: { messages: mockMessages, interactions: [], llmResponding: false },
-      chatStateDispatch: chatStateDispatchMock,
-    });
-    const { result } = renderHook(() => useFeedback());
+    const mockInteraction = {
+      interaction_id: 'interactionId',
+    } as Interaction;
+
+    const { result } = renderHook(() => useFeedback(mockInteraction, false));
     expect(result.current.feedbackResult).toBe(undefined);
 
     const sendFeedback = result.current.sendFeedback;
     await act(async () => {
-      await sendFeedback(mockOutputMessage, true);
+      await sendFeedback(mockOutputMessage, false);
     });
-
-    expect(httpMock.put).not.toHaveBeenCalledWith(
-      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
-      {
-        body: JSON.stringify({
-          satisfaction: true,
-        }),
-      }
+    act(() => {
+      registryMock.on.mock.calls.forEach(([event, handler]) => {
+        if (event === `feedbackSuccess:${mockOutputMessage.interactionId}`) {
+          handler({ correct: false });
+        }
+      });
+    });
+    expect(registryMock.sendFeedbackRequest).toHaveBeenCalledWith(
+      mockOutputMessage.interactionId,
+      false
     );
+    expect(result.current.feedbackResult).toBe(false);
   });
 });

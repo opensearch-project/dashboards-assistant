@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { IOutput, Interaction } from '../../../../common/types/chat_saved_object_attributes';
+import { useFeedback } from '../../../hooks/use_feed_back';
 
 interface MessageActionsProps {
   contentToCopy?: string;
   showRegenerate?: boolean;
   onRegenerate?: () => void;
-  feedbackResult?: boolean;
+  interaction?: Interaction | null;
+  message?: IOutput | null;
   showFeedback?: boolean;
-  onFeedback?: (correct: boolean) => void;
   showTraceIcon?: boolean;
   traceInteractionId?: string;
   onViewTrace?: () => void;
@@ -24,15 +26,27 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   contentToCopy = '',
   showRegenerate = false,
   onRegenerate,
-  feedbackResult,
+  interaction,
+  message,
   showFeedback = false,
-  onFeedback,
   showTraceIcon = false,
   traceInteractionId = null,
   onViewTrace = null,
   shouldActionBarVisibleOnHover = false,
   isFullWidth = false,
 }) => {
+  const { feedbackResult, sendFeedback } = useFeedback(interaction);
+
+  const handleFeedback = useCallback(
+    (correct: boolean) => {
+      if (feedbackResult !== undefined || !message) {
+        return;
+      }
+      sendFeedback(message, correct);
+    },
+    [feedbackResult, message, sendFeedback]
+  );
+
   return (
     <EuiFlexGroup
       aria-label="message actions"
@@ -69,7 +83,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           />
         </EuiFlexItem>
       )}
-      {showFeedback && onFeedback && (
+      {showFeedback && (
         <>
           {feedbackResult !== false && (
             <EuiFlexItem grow={false}>
@@ -77,7 +91,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                 aria-label="feedback thumbs up"
                 color={feedbackResult === true ? 'primary' : 'text'}
                 iconType="thumbsUp"
-                onClick={() => onFeedback(true)}
+                onClick={() => handleFeedback(true)}
               />
             </EuiFlexItem>
           )}
@@ -87,7 +101,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
                 aria-label="feedback thumbs down"
                 color={feedbackResult === false ? 'primary' : 'text'}
                 iconType="thumbsDown"
-                onClick={() => onFeedback(false)}
+                onClick={() => handleFeedback(false)}
               />
             </EuiFlexItem>
           )}

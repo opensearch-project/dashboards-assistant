@@ -51,6 +51,21 @@ describe('IncontextInsightRegistry', () => {
     });
   });
 
+  it('emits "onSendFeedback" event when sendFeedbackRequest is called', () => {
+    const mockFn = jest.fn();
+    const correct = true;
+    registry.on('onSendFeedback', mockFn);
+
+    registry.sendFeedbackRequest('test interactionId', correct);
+
+    expect(mockFn).toHaveBeenCalledWith({
+      interactionId: 'test interactionId',
+      body: {
+        satisfaction: correct,
+      },
+    });
+  });
+
   it('adds item to registry when register is called with a single item', () => {
     registry.register(insight);
 
