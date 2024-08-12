@@ -85,6 +85,11 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
 
   const firstInputIndex = chatState.messages.findIndex((msg) => msg.type === 'input');
   const lastInputIndex = findLastIndex(chatState.messages, (msg) => msg.type === 'input');
+  // From UX, provide manual-provided suggestions for alerting analysis agent.
+  const suggestionsForAlerting = [
+    'Ask Olly to provide more data related to this alert?',
+    'Create new alert based on the last response?',
+  ];
 
   return (
     <>
@@ -137,7 +142,24 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
             >
               <MessageContent message={message} />
             </MessageBubble>
-            {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}
+            {showSuggestions && (
+              <Suggestions
+                message={
+                  chatContext.appId === 'alerting'
+                    ? {
+                        content: '',
+                        contentType: 'markdown',
+                        type: 'output',
+                        suggestedActions: suggestionsForAlerting.map((suggestion) => ({
+                          message: suggestion,
+                          actionType: 'send_as_input',
+                        })),
+                      }
+                    : message
+                }
+                inputDisabled={loading}
+              />
+            )}
             <EuiSpacer />
           </React.Fragment>
         );
