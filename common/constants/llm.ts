@@ -24,6 +24,10 @@ export const TEXT2VIZ_API = {
   TEXT2VEGA: `${API_BASE}/text2vega`,
 };
 
+export const SUMMARY_ASSISTANT_API = {
+  SUMMARIZE_VIZ: `${API_BASE}/summarize_viz`,
+};
+
 export const NOTEBOOK_API = {
   CREATE_NOTEBOOK: `${NOTEBOOK_PREFIX}/note`,
   SET_PARAGRAPH: `${NOTEBOOK_PREFIX}/set_paragraphs/`,

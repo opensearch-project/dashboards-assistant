@@ -23,6 +23,7 @@ import { i18n } from '@osd/i18n';
 import { useCallback } from 'react';
 import { useObservable } from 'react-use';
 import { useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { SourceSelector } from './source_selector';
 import type { DataSourceOption } from '../../../../../src/plugins/data/public';
 import chatIcon from '../../assets/chat.svg';
@@ -41,11 +42,12 @@ import {
 import './text2viz.scss';
 import { Text2VizEmpty } from './text2viz_empty';
 import { Text2VizLoading } from './text2viz_loading';
-import { Text2Vega } from './text2vega';
+import { Text2Vega, topN } from './text2vega';
 import {
   OnSaveProps,
   SavedObjectSaveModalOrigin,
 } from '../../../../../src/plugins/saved_objects/public';
+import { VizSummary } from './viz_summary';
 
 export const Text2Viz = () => {
   const [selectedSource, setSelectedSource] = useState<DataSourceOption>();
@@ -67,6 +69,10 @@ export const Text2Viz = () => {
   const [vegaSpec, setVegaSpec] = useState<Record<string, any>>();
   const text2vegaRef = useRef(new Text2Vega(http, data.search));
   const status = useObservable(text2vegaRef.current.status$);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sampleData$ = useRef(new BehaviorSubject<any>(null));
+  const [dataSourceId, setDataSourceId] = useState<string | undefined>(undefined);
+  const [showVizSummary, setShowVizSummary] = useState<boolean>(false);
 
   useEffect(() => {
     const text2vega = text2vegaRef.current;
@@ -89,17 +95,44 @@ export const Text2Viz = () => {
     };
   }, [http, notifications]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (vegaSpec) {
+        // Today's ppl query could return at most 10000 rows, make a safe limit to avoid data explosion of llm input for now
+        const ppl = topN(vegaSpec.data.url.body.query, 200);
+
+        try {
+          const sampleData = await data.search
+            .search({ params: { body: { query: ppl } }, dataSourceId }, { strategy: 'pplraw' })
+            .toPromise();
+
+          sampleData$.current.next(sampleData.rawResponse);
+        } catch (error) {
+          notifications.toasts.addError(error, {
+            title: i18n.translate('dashboardAssistant.feature.vizSummary.fetchData.error', {
+              defaultMessage: 'Error while fetching data to summarize visualization',
+            }),
+          });
+        }
+      }
+    };
+
+    fetchData();
+  }, [data.search, vegaSpec]);
+
   const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   }, []);
 
   const onSubmit = useCallback(async () => {
     setVegaSpec(undefined);
+    setDataSourceId(undefined);
     const text2vega = text2vegaRef.current;
     if (selectedSource?.label) {
       const dataSource = (await selectedSource.ds.getDataSet()).dataSets.find(
         (ds) => ds.title === selectedSource.label
       );
+      setDataSourceId(dataSource?.dataSourceId);
       text2vega.invoke({
         index: selectedSource.label,
         prompt: input,
@@ -247,7 +280,23 @@ export const Text2Viz = () => {
                   iconType="returnKey"
                 />
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType={showVizSummary ? 'starFilled' : 'starEmpty'} // TODO: use the same customized icon as UI mockup
+                  onClick={() => {
+                    setShowVizSummary((isOn) => !isOn);
+                  }}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
+            {showVizSummary && (
+              <VizSummary
+                http={http}
+                sampleData$={sampleData$.current}
+                vizParams={vegaSpec}
+                dataSourceId={dataSourceId}
+              />
+            )}
             {status === 'STOPPED' && !vegaSpec && (
               <EuiFlexGroup>
                 <EuiFlexItem>
