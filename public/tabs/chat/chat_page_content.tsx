@@ -87,8 +87,8 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const lastInputIndex = findLastIndex(chatState.messages, (msg) => msg.type === 'input');
   // From UX, provide manual-provided suggestions for alerting analysis agent.
   const suggestionsForAlerting = [
-    'Ask Olly to provide more data related to this alert?',
-    'Create new alert based on the last response?',
+    'Provide more data related to this alert.',
+    'Create an alert to identify similar issues.',
   ];
 
   return (
@@ -145,6 +145,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
             {showSuggestions && (
               <Suggestions
                 message={
+                  // show manual suggestions for alerting analysis agent instead of the LLM generated ones
                   chatContext.appId === 'alerting'
                     ? {
                         content: '',
