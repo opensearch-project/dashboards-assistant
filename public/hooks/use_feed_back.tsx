@@ -4,20 +4,28 @@
  */
 
 import { useState, useEffect } from 'react';
-
-import { IOutput, Interaction } from '../../common/types/chat_saved_object_attributes';
+import { ASSISTANT_API } from '../../common/constants/llm';
+import {
+  IOutput,
+  Interaction,
+  SendFeedbackBody,
+} from '../../common/types/chat_saved_object_attributes';
 import { useChatState } from './use_chat_state';
-import { getIncontextInsightRegistry } from '../services';
+import { HttpSetup } from '../../../../src/core/public';
+import { DataSourceService } from '../services/data_source_service';
 
-export const useFeedback = (interaction?: Interaction | null, hasChatState: boolean = true) => {
-  const registry = getIncontextInsightRegistry();
+export const useFeedback = (
+  interaction?: Interaction | null,
+  httpSetup?: HttpSetup,
+  dataSourceService?: DataSourceService
+) => {
   const chatStateContext = useChatState();
   const [feedbackResult, setFeedbackResult] = useState<undefined | boolean>(
     interaction?.additional_info?.feedback?.satisfaction ?? undefined
   );
 
   const sendFeedback = async (message: IOutput, correct: boolean) => {
-    if (hasChatState && chatStateContext?.chatState) {
+    if (chatStateContext?.chatState) {
       const chatState = chatStateContext.chatState;
       // Markdown type output all has interactionId. The interactionId of message is equal to interaction id.
       const outputMessageIndex = chatState.messages.findIndex((item) => {
@@ -31,20 +39,20 @@ export const useFeedback = (interaction?: Interaction | null, hasChatState: bool
         return;
       }
     }
-    registry.sendFeedbackRequest(message.interactionId, correct);
-  };
 
-  useEffect(() => {
-    const successFeedback = (event: { correct: boolean }) => {
-      setFeedbackResult(event.correct);
+    const body: SendFeedbackBody = {
+      satisfaction: correct,
     };
-    if (interaction && interaction.interaction_id) {
-      registry.on(`feedbackSuccess:${interaction.interaction_id}`, successFeedback);
-      return () => {
-        registry.off(`feedbackSuccess:${interaction.interaction_id}`, successFeedback);
-      };
+    try {
+      await httpSetup?.put(`${ASSISTANT_API.FEEDBACK}/${message.interactionId}`, {
+        body: JSON.stringify(body),
+        query: dataSourceService?.getDataSourceQuery(),
+      });
+      setFeedbackResult(correct);
+    } catch (error) {
+      console.error('send feedback error', error);
     }
-  }, [interaction]);
+  };
 
   return { sendFeedback, feedbackResult };
 };

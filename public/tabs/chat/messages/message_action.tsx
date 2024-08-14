@@ -7,6 +7,8 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import { IOutput, Interaction } from '../../../../common/types/chat_saved_object_attributes';
 import { useFeedback } from '../../../hooks/use_feed_back';
+import { HttpSetup } from '../../../../../../src/core/public';
+import { DataSourceService } from '../../../services/data_source_service';
 
 interface MessageActionsProps {
   contentToCopy?: string;
@@ -20,6 +22,8 @@ interface MessageActionsProps {
   onViewTrace?: () => void;
   shouldActionBarVisibleOnHover?: boolean;
   isFullWidth?: boolean;
+  httpSetup?: HttpSetup;
+  dataSourceService?: DataSourceService;
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
@@ -34,8 +38,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   onViewTrace = null,
   shouldActionBarVisibleOnHover = false,
   isFullWidth = false,
+  httpSetup,
+  dataSourceService,
 }) => {
-  const { feedbackResult, sendFeedback } = useFeedback(interaction);
+  const { feedbackResult, sendFeedback } = useFeedback(interaction, httpSetup, dataSourceService);
 
   const handleFeedback = useCallback(
     (correct: boolean) => {

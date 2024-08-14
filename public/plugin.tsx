@@ -207,7 +207,14 @@ export class AssistantPlugin
       renderIncontextInsight: (props: any) => {
         if (!this.incontextInsightRegistry?.isEnabled()) return <div {...props} />;
         const httpSetup = core.http;
-        return <IncontextInsightComponent {...props} httpSetup={httpSetup} />;
+        const dataSourceService = this.dataSourceService;
+        return (
+          <IncontextInsightComponent
+            {...props}
+            httpSetup={httpSetup}
+            dataSourceService={dataSourceService}
+          />
+        );
       },
     };
   }

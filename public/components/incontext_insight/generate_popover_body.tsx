@@ -19,14 +19,16 @@ import { MessageActions } from '../../tabs/chat/messages/message_action';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getConfigSchema, getIncontextInsightRegistry, getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
+import { DataSourceService } from '../../services/data_source_service';
 import { ASSISTANT_API } from '../../../common/constants/llm';
 import { getAssistantRole } from '../../utils/constants';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
   httpSetup?: HttpSetup;
+  dataSourceService?: DataSourceService;
   closePopover: () => void;
-}> = ({ incontextInsight, httpSetup, closePopover }) => {
+}> = ({ incontextInsight, httpSetup, dataSourceService, closePopover }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [conversationId, setConversationId] = useState('');
@@ -35,6 +37,21 @@ export const GeneratePopoverBody: React.FC<{
 
   const toasts = getNotifications().toasts;
   const registry = getIncontextInsightRegistry();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSummaryResponse = (response: any) => {
+    const interactionLength = response.interactions.length;
+    if (interactionLength > 0) {
+      setConversationId(response.interactions[interactionLength - 1].conversation_id);
+      setInteraction(response.interactions[interactionLength - 1]);
+    }
+
+    const messageLength = response.messages.length;
+    if (messageLength > 0 && response.messages[messageLength - 1].type === 'output') {
+      setSummary(response.messages[messageLength - 1].content);
+      setMessage(response.messages[messageLength - 1]);
+    }
+  };
 
   const onChatContinuation = () => {
     registry?.continueInChat(incontextInsight, conversationId);
@@ -57,8 +74,8 @@ export const GeneratePopoverBody: React.FC<{
         incontextInsightType = incontextInsight.key;
       }
 
-      await httpSetup
-        ?.post(ASSISTANT_API.SEND_MESSAGE, {
+      try {
+        const response = await httpSetup?.post(ASSISTANT_API.SEND_MESSAGE, {
           body: JSON.stringify({
             messages: [],
             input: {
@@ -69,33 +86,44 @@ export const GeneratePopoverBody: React.FC<{
               promptPrefix: getAssistantRole(incontextInsightType),
             },
           }),
-        })
-        .then((response) => {
-          const interactionLength = response.interactions.length;
-          if (interactionLength > 0) {
-            setConversationId(response.interactions[interactionLength - 1].conversation_id);
-            setInteraction(response.interactions[interactionLength - 1]);
-          }
-
-          const messageLength = response.messages.length;
-          if (messageLength > 0 && response.messages[messageLength - 1].type === 'output') {
-            setSummary(response.messages[messageLength - 1].content);
-            setMessage(response.messages[messageLength - 1]);
-          }
-        })
-        .catch((error) => {
-          toasts.addDanger(
-            i18n.translate('assistantDashboards.incontextInsight.generateSummaryError', {
-              defaultMessage: 'Generate summary error',
-            })
-          );
-        })
-        .finally(() => {
-          setIsLoading(false);
         });
+        handleSummaryResponse(response);
+      } catch (error) {
+        toasts.addDanger(
+          i18n.translate('assistantDashboards.incontextInsight.generateSummaryError', {
+            defaultMessage: 'Generate summary error',
+          })
+        );
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     return summarize();
+  };
+
+  const onRegenerateSummary = async (interactionId: string) => {
+    setIsLoading(true);
+    setSummary('');
+    if (conversationId) {
+      try {
+        const response = await httpSetup?.put(`${ASSISTANT_API.REGENERATE}`, {
+          body: JSON.stringify({
+            conversationId,
+            interactionId,
+          }),
+          query: dataSourceService?.getDataSourceQuery(),
+        });
+        handleSummaryResponse(response);
+      } catch (error) {
+        toasts.addDanger(
+          i18n.translate('assistantDashboards.incontextInsight.generateSummaryError', {
+            defaultMessage: 'Regenerate summary error',
+          })
+        );
+      }
+    }
+    setIsLoading(false);
   };
 
   return summary ? (
@@ -115,17 +143,13 @@ export const GeneratePopoverBody: React.FC<{
           <MessageActions
             contentToCopy={summary}
             showRegenerate
-            onRegenerate={async () => {
-              await onGenerateSummary(
-                incontextInsight.suggestions && incontextInsight.suggestions.length > 0
-                  ? incontextInsight.suggestions[0]
-                  : 'Please summarize the input'
-              );
-            }}
+            onRegenerate={async () => onRegenerateSummary(interaction?.interaction_id || '')}
             interaction={interaction}
             showFeedback
             message={message as IOutput}
             showTraceIcon={false}
+            httpSetup={httpSetup}
+            dataSourceService={dataSourceService}
           />
           {getConfigSchema().chat.enabled && (
             <EuiPanel

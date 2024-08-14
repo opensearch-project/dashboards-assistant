@@ -31,15 +31,21 @@ import { getIncontextInsightRegistry, getNotifications } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
 import { HttpSetup } from '../../../../../src/core/public';
+import { DataSourceService } from '../../services/data_source_service';
 import { GeneratePopoverBody } from './generate_popover_body';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
   httpSetup?: HttpSetup;
+  dataSourceService?: DataSourceService;
 }
 
 // TODO: add saved objects / config to store seed suggestions
-export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps) => {
+export const IncontextInsight = ({
+  children,
+  httpSetup,
+  dataSourceService,
+}: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -278,6 +284,7 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
             <GeneratePopoverBody
               incontextInsight={input}
               httpSetup={httpSetup}
+              dataSourceService={dataSourceService}
               closePopover={closePopover}
             />
           );

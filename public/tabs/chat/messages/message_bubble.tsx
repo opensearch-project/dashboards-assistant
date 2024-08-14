@@ -16,6 +16,7 @@ import {
 import React from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { MessageActions } from './message_action';
+import { useCore } from '../../../contexts';
 
 // TODO: Replace with getChrome().logos.Chat.url
 import { useChatActions } from '../../../hooks';
@@ -44,6 +45,7 @@ type MessageBubbleProps = {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
   const { executeAction } = useChatActions();
+  const core = useCore();
 
   // According to the design of the feedback, only markdown type output is supported.
   const showFeedback =
@@ -174,6 +176,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                 }}
                 shouldActionBarVisibleOnHover={props.shouldActionBarVisibleOnHover}
                 isFullWidth={fullWidth}
+                httpSetup={core.services.http}
+                dataSourceService={core.services.dataSource}
               />
             </>
           )}

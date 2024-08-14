@@ -7,22 +7,23 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useFeedback } from './use_feed_back';
 import * as chatStateHookExports from './use_chat_state';
 import { Interaction, IOutput, IMessage } from '../../common/types/chat_saved_object_attributes';
-import { getIncontextInsightRegistry } from '../services';
+import { DataSourceService } from '../services';
+import { HttpSetup } from '../../../../src/core/public';
+import { ASSISTANT_API } from '../../common/constants/llm';
 
 jest.mock('../services');
 
 describe('useFeedback hook', () => {
-  let registryMock: unknown;
+  const httpMock: jest.Mocked<HttpSetup> = ({
+    put: jest.fn(),
+  } as unknown) as jest.Mocked<HttpSetup>;
+
+  const dataSourceServiceMock = ({
+    getDataSourceQuery: jest.fn(),
+  } as unknown) as DataSourceService;
   const chatStateDispatchMock = jest.fn();
 
   beforeEach(() => {
-    registryMock = {
-      sendFeedbackRequest: jest.fn(),
-      on: jest.fn(),
-    };
-
-    (getIncontextInsightRegistry as jest.Mock).mockReturnValue(registryMock);
-
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
       chatState: { messages: [], interactions: [], llmResponding: false },
       chatStateDispatch: chatStateDispatchMock,
@@ -63,28 +64,29 @@ describe('useFeedback hook', () => {
       chatState: { messages: mockMessages, interactions: [], llmResponding: false },
       chatStateDispatch: chatStateDispatchMock,
     });
-    const { result } = renderHook(() => useFeedback(mockInteraction));
+    const { result } = renderHook(() =>
+      useFeedback(mockInteraction, httpMock, dataSourceServiceMock)
+    );
     expect(result.current.feedbackResult).toBe(undefined);
 
     const sendFeedback = result.current.sendFeedback;
     await act(async () => {
       await sendFeedback(mockOutputMessage, correct);
     });
-    act(() => {
-      registryMock.on.mock.calls.forEach(([event, handler]) => {
-        if (event === `feedbackSuccess:${mockOutputMessage.interactionId}`) {
-          handler({ correct });
-        }
-      });
-    });
-    expect(registryMock.sendFeedbackRequest).toHaveBeenCalledWith(
-      mockOutputMessage.interactionId,
-      correct
+    expect(httpMock.put).toHaveBeenCalledWith(
+      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
+      {
+        body: JSON.stringify({ satisfaction: correct }),
+        query: dataSourceServiceMock.getDataSourceQuery(),
+      }
     );
     expect(result.current.feedbackResult).toBe(correct);
   });
 
   it('should not update feedback state if API fail', async () => {
+    const mockInteraction = {
+      interaction_id: 'interactionId',
+    } as Interaction;
     const mockInputMessage = {
       type: 'input',
     } as IMessage;
@@ -97,7 +99,11 @@ describe('useFeedback hook', () => {
       chatState: { messages: mockMessages, interactions: [], llmResponding: false },
       chatStateDispatch: chatStateDispatchMock,
     });
-    const { result } = renderHook(() => useFeedback());
+
+    httpMock.put.mockRejectedValueOnce(new Error('API error'));
+    const { result } = renderHook(() =>
+      useFeedback(mockInteraction, httpMock, dataSourceServiceMock)
+    );
     expect(result.current.feedbackResult).toBe(undefined);
 
     const sendFeedback = result.current.sendFeedback;
@@ -106,35 +112,5 @@ describe('useFeedback hook', () => {
     });
 
     expect(result.current.feedbackResult).toBe(undefined);
-  });
-
-  it('should call feedback request on registry without checking for input message if hasChatState is false', async () => {
-    const mockOutputMessage = {
-      type: 'output',
-      interactionId: 'interactionId',
-    } as IOutput;
-    const mockInteraction = {
-      interaction_id: 'interactionId',
-    } as Interaction;
-
-    const { result } = renderHook(() => useFeedback(mockInteraction, false));
-    expect(result.current.feedbackResult).toBe(undefined);
-
-    const sendFeedback = result.current.sendFeedback;
-    await act(async () => {
-      await sendFeedback(mockOutputMessage, false);
-    });
-    act(() => {
-      registryMock.on.mock.calls.forEach(([event, handler]) => {
-        if (event === `feedbackSuccess:${mockOutputMessage.interactionId}`) {
-          handler({ correct: false });
-        }
-      });
-    });
-    expect(registryMock.sendFeedbackRequest).toHaveBeenCalledWith(
-      mockOutputMessage.interactionId,
-      false
-    );
-    expect(result.current.feedbackResult).toBe(false);
   });
 });

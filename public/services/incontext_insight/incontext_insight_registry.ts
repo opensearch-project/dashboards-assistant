@@ -5,12 +5,7 @@
 
 import EventEmitter from 'events';
 import { IncontextInsight, IncontextInsights } from '../../types';
-import {
-  ISuggestedAction,
-  Interaction,
-  IOutput,
-  SendFeedbackBody,
-} from '../../../common/types/chat_saved_object_attributes';
+import { ISuggestedAction, Interaction } from '../../../common/types/chat_saved_object_attributes';
 
 export class IncontextInsightRegistry extends EventEmitter {
   private registry: IncontextInsights = new Map();
@@ -53,21 +48,6 @@ export class IncontextInsightRegistry extends EventEmitter {
       contextContent,
       datasourceId,
     });
-  }
-
-  public sendFeedbackRequest(interactionId: string | undefined, correct: boolean) {
-    if (interactionId === undefined || interactionId === '') return;
-    const body: SendFeedbackBody = {
-      satisfaction: correct,
-    };
-    this.emit('onSendFeedback', {
-      interactionId,
-      body,
-    });
-  }
-
-  public feedbackSuccess(interactionId: string, correct: boolean) {
-    this.emit(`feedbackSuccess:${interactionId}`, { correct });
   }
 
   public register(item: IncontextInsight | IncontextInsight[]): void;
