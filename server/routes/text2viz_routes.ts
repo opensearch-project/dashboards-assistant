@@ -17,7 +17,8 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
       path: TEXT2VIZ_API.TEXT2VEGA,
       validate: {
         body: schema.object({
-          input: schema.string(),
+          input_question: schema.string(),
+          input_instruction: schema.maybe(schema.string()),
           ppl: schema.string(),
           dataSchema: schema.string(),
           sampleData: schema.string(),
@@ -31,7 +32,8 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
       const assistantClient = assistantService.getScopedClient(req, context);
       try {
         const response = await assistantClient.executeAgentByName(TEXT2VEGA_AGENT_CONFIG_ID, {
-          input: req.body.input,
+          input_question: req.body.input_question,
+          input_instruction: req.body.input_instruction,
           ppl: req.body.ppl,
           dataSchema: req.body.dataSchema,
           sampleData: req.body.sampleData,
