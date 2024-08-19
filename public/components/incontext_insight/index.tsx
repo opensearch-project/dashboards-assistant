@@ -175,7 +175,9 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   );
 
   const GeneratePopoverBody: React.FC<{}> = ({}) => (
-    <EuiButton onClick={() => toasts.addDanger('To be implemented...')}>Generate summary</EuiButton>
+    <EuiSmallButton onClick={() => toasts.addDanger('To be implemented...')}>
+      Generate summary
+    </EuiSmallButton>
   );
 
   const SummaryPopoverBody: React.FC<{ incontextInsight: IncontextInsightInput }> = ({
