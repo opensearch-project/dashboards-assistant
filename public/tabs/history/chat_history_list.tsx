@@ -5,7 +5,7 @@
 
 import React, { useCallback } from 'react';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -75,7 +75,7 @@ export const ChatHistoryListItem = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 onClick={handleEditClick}
                 iconType="pencil"
                 aria-label="Edit conversation name"
@@ -83,7 +83,7 @@ export const ChatHistoryListItem = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 onClick={handleDeleteClick}
                 iconType="trash"
                 color="danger"
