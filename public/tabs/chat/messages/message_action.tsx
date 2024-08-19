@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSmallButtonIcon, EuiCopy } from '@elastic/eui';
 import { IOutput, Interaction } from '../../../../common/types/chat_saved_object_attributes';
 import { useFeedback } from '../../../hooks/use_feed_back';
 import { HttpSetup } from '../../../../../../src/core/public';
@@ -67,7 +67,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={contentToCopy}>
             {(copy) => (
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label="copy message"
                 title="copy message"
                 onClick={copy}
@@ -80,7 +80,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       )}
       {showRegenerate && onRegenerate && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             aria-label="regenerate message"
             onClick={onRegenerate}
             title="regenerate message"
@@ -93,7 +93,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         <>
           {feedbackResult !== false && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label="feedback thumbs up"
                 color={feedbackResult === true ? 'primary' : 'text'}
                 iconType="thumbsUp"
@@ -103,7 +103,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           )}
           {feedbackResult !== true && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label="feedback thumbs down"
                 color={feedbackResult === false ? 'primary' : 'text'}
                 iconType="thumbsDown"
@@ -115,7 +115,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       )}
       {showTraceIcon && traceInteractionId && onViewTrace && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             aria-label="How was this generated?"
             data-test-subj={`trace-icon-${traceInteractionId}`}
             onClick={onViewTrace}
