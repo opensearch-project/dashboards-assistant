@@ -8,11 +8,11 @@ import './index.scss';
 import { i18n } from '@osd/i18n';
 import {
   EuiWrappingPopover,
-  EuiButton,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopoverTitle,
   EuiText,
   EuiPopoverFooter,
@@ -23,7 +23,7 @@ import {
   EuiPanel,
   keys,
   EuiIcon,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
@@ -198,19 +198,19 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
   const ChatPopoverBody: React.FC<{}> = ({}) => (
     <EuiFlexGroup>
       <EuiFlexItem grow={6}>
-        <EuiFormRow>
-          <EuiFieldText placeholder="Ask a question" />
-        </EuiFormRow>
+        <EuiCompressedFormRow>
+          <EuiCompressedFieldText placeholder="Ask a question" />
+        </EuiCompressedFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <EuiSmallButton
           fill
           iconType="returnKey"
           iconSide="right"
           onClick={() => toasts.addDanger('To be implemented...')}
         >
           Go
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -293,7 +293,7 @@ export const IncontextInsight = ({ children }: IncontextInsightProps) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   title={i18n.translate('assistantDashboards.incontextInsight.closeAssistant', {
                     defaultMessage: 'Close assistant popover',
                   })}
