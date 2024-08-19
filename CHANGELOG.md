@@ -2,6 +2,9 @@
 
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+### Unreleased
+- fix: make sure $schema always added to LLM generated vega json object([252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
+
 ### 📈 Features/Enhancements
 
 - Add support for registerMessageParser ([#5](https://github.com/opensearch-project/dashboards-assistant/pull/5))
@@ -22,3 +25,4 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add experimental feature to support text to visualization ([#218](https://github.com/opensearch-project/dashboards-assistant/pull/218))
 - Be compatible with ML configuration index mapping change ([#239](https://github.com/opensearch-project/dashboards-assistant/pull/239))
 - Support context aware alert analysis by reusing incontext insight component([#215](https://github.com/opensearch-project/dashboards-assistant/pull/215))
+Use smaller and compressed variants of buttons and form components ([#250](https://github.com/opensearch-project/dashboards-assistant/pull/250))
