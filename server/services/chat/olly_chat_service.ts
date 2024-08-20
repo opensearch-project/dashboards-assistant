@@ -8,7 +8,8 @@ import { OpenSearchClient } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
 import { ML_COMMONS_BASE_API, ROOT_AGENT_CONFIG_ID } from '../../utils/constants';
-import { getAgent } from '../../routes/get_agent';
+import { getAgent, getAgentDetail } from '../../routes/get_agent';
+import { AgentRoles } from '../../../server/types';
 
 interface AgentRunPayload {
   question?: string;
@@ -16,6 +17,9 @@ interface AgentRunPayload {
   memory_id?: string;
   regenerate_interaction_id?: string;
   'prompt.prefix'?: string;
+  agentRole?: string;
+  context?: string;
+  index?: string;
 }
 
 const MEMORY_ID_FIELD = 'memory_id';
@@ -30,21 +34,116 @@ export class OllyChatService implements ChatService {
     return await getAgent(ROOT_AGENT_CONFIG_ID, this.opensearchClientTransport);
   }
 
+  /**
+   * @param conversationId conversation/memory Id
+   * @returns additional information associated with the conversation/memory
+   */
+  private async getAdditionalInfoForConversation(
+    conversationId: string
+  ): Promise<Record<string, string> | undefined> {
+    try {
+      const response = await this.opensearchClientTransport.request({
+        method: 'GET',
+        path: `${ML_COMMONS_BASE_API}/memory/${conversationId}`,
+      });
+
+      return response?.body?.additional_info;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  private async createNewConversation(
+    title?: string,
+    applicationType?: string,
+    additionalInfo?: Record<string, string>
+  ): Promise<string | undefined> {
+    try {
+      const response = (await this.opensearchClientTransport.request({
+        method: 'POST',
+        path: `${ML_COMMONS_BASE_API}/memory`,
+        body: {
+          name: title,
+          application_type: applicationType,
+          additional_info: {
+            ...additionalInfo,
+          },
+        },
+      })) as ApiResponse<{
+        memory_id: string;
+      }>;
+
+      return response.body.memory_id;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
   private async requestAgentRun(payload: AgentRunPayload) {
     if (payload.memory_id) {
       OllyChatService.abortControllers.set(payload.memory_id, new AbortController());
     }
 
-    const rootAgentId = await this.getRootAgent();
-    return await this.callExecuteAgentAPI(payload, rootAgentId);
+    let memoryId = payload.memory_id;
+    let agentConfigId = ROOT_AGENT_CONFIG_ID;
+    let agentId;
+    let promptPrefix;
+
+    // follow up questions
+    if (memoryId) {
+      const additionalInfo = await this.getAdditionalInfoForConversation(memoryId);
+      if (additionalInfo) {
+        agentConfigId = additionalInfo.agent_config_id;
+        payload.agentRole = payload.agentRole || additionalInfo.agentRole;
+        payload.context = additionalInfo.context;
+        payload.index = additionalInfo.index;
+      }
+    }
+
+    if (payload.agentRole) {
+      const agentRole = AgentRoles.find((role) => role.id === payload.agentRole);
+      if (agentRole) {
+        agentConfigId = agentRole?.agentConfigId;
+        promptPrefix = agentRole.description;
+
+        if (promptPrefix && promptPrefix.length) {
+          payload['prompt.prefix'] = promptPrefix;
+        }
+
+        agentId = await getAgent(agentConfigId, this.opensearchClientTransport);
+
+        // start with a new conversation
+        if (!memoryId) {
+          const agentDetail = await getAgentDetail(agentId, this.opensearchClientTransport);
+
+          memoryId = await this.createNewConversation(payload.question, agentDetail.app_type, {
+            agent_config_id: agentRole?.agentConfigId || ROOT_AGENT_CONFIG_ID,
+            ...(agentRole ? { agentRole: agentRole.id } : {}),
+            ...(payload.context ? { context: payload.context } : {}),
+            ...(payload.index ? { index: payload.index } : {}),
+          });
+          // set memory id
+          payload.memory_id = memoryId;
+        }
+      }
+    }
+
+    if (!agentId) {
+      agentId = await getAgent(
+        agentConfigId || ROOT_AGENT_CONFIG_ID,
+        this.opensearchClientTransport
+      );
+    }
+
+    return await this.callExecuteAgentAPI(payload, agentId);
   }
 
-  private async callExecuteAgentAPI(payload: AgentRunPayload, rootAgentId: string) {
+  private async callExecuteAgentAPI(payload: AgentRunPayload, agentId: string) {
     try {
       const agentFrameworkResponse = (await this.opensearchClientTransport.request(
         {
           method: 'POST',
-          path: `${ML_COMMONS_BASE_API}/agents/${rootAgentId}/_execute`,
+          path: `${ML_COMMONS_BASE_API}/agents/${agentId}/_execute`,
           body: {
             parameters: payload,
           },
@@ -95,27 +194,16 @@ export class OllyChatService implements ChatService {
     conversationId: string;
     interactionId: string;
   }> {
-    const { input, conversationId } = payload;
+    const { input } = payload;
 
-    let llmInput = input.content;
-    if (input.context?.content) {
-      llmInput = `Based on the context: ${input.context?.content}, answer question: ${input.content}`;
-    }
-    const parametersPayload: Pick<
-      AgentRunPayload,
-      'question' | 'verbose' | 'memory_id' | 'prompt.prefix'
-    > = {
-      question: llmInput,
+    const parametersPayload: AgentRunPayload = {
+      question: input.content,
+      context: input.context?.content,
       verbose: false,
+      agentRole: input.context?.agentRole,
+      memory_id: payload.conversationId,
+      index: input.context?.index,
     };
-
-    if (input.promptPrefix) {
-      parametersPayload['prompt.prefix'] = input.promptPrefix;
-    }
-
-    if (conversationId) {
-      parametersPayload.memory_id = conversationId;
-    }
 
     return await this.requestAgentRun(parametersPayload);
   }

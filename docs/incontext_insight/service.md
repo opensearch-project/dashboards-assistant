@@ -26,12 +26,16 @@ class AlertingPlugin implements Plugin<{}, {}, AlertingSetupDeps> {
           summary:
             'Per query monitors are a type of alert monitor that can be used to identify and alert on specific queries that are run against an OpenSearch index; for example, queries that detect and respond to anomalies in specific queries. Per query monitors only trigger one alert at a time.',
           suggestions: ['How to better configure my monitor?'],
+          agentRole: 'alerts',
+          contextProvider: () => { return 'some additional context'},
         },
         {
           key: 'content_panel_Data source',
           summary:
             'OpenSearch data sources are the applications that OpenSearch can connect to and ingest data from.',
           suggestions: ['What are the indices in my cluster?'],
+          agentRole: 'alerts',
+          contextProvider: () => { return 'some additional context'},
         },
       ]);
     }

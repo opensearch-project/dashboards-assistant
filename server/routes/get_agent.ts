@@ -26,3 +26,18 @@ export const getAgent = async (id: string, client: OpenSearchClient['transport']
     throw new Error(`get agent ${id} failed, reason: ${errorMessage}`);
   }
 };
+
+export const getAgentDetail = async (agentId: string, client: OpenSearchClient['transport']) => {
+  try {
+    const path = `${ML_COMMONS_BASE_API}/agents/${agentId}`;
+    const response = await client.request({
+      method: 'GET',
+      path,
+    });
+
+    return response.body;
+  } catch (error) {
+    const errorMessage = JSON.stringify(error.meta?.body) || error;
+    throw new Error(`get agent ${agentId} failed, reason: ${errorMessage}`);
+  }
+};

@@ -186,7 +186,11 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
         type: 'input',
         contentType: 'text',
         content: event.suggestion,
-        context: { appId, content: event.contextContent, datasourceId: event.datasourceId },
+        context: {
+          appId,
+          content: event.contextContent,
+          datasourceId: event.datasourceId,
+        },
       });
     };
     registry.on('onSuggestion', handleSuggestion);

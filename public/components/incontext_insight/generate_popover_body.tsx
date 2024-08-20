@@ -18,7 +18,6 @@ import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getConfigSchema, getIncontextInsightRegistry, getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
 import { ASSISTANT_API } from '../../../common/constants/llm';
-import { getAssistantRole } from '../../utils/constants';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
@@ -60,8 +59,12 @@ export const GeneratePopoverBody: React.FC<{
               type: 'input',
               content: summarizationQuestion,
               contentType: 'text',
-              context: { content: contextContent, dataSourceId: incontextInsight.datasourceId },
-              promptPrefix: getAssistantRole(incontextInsightType),
+              context: {
+                content: contextContent,
+                agentRole: incontextInsightType,
+                dataSourceId: incontextInsight.datasourceId,
+                index: incontextInsight.index,
+              },
             },
           }),
         })

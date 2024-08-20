@@ -50,3 +50,12 @@ declare module '../../../src/core/server' {
     };
   }
 }
+
+export const AgentRoles = [
+  {
+    id: 'alerts',
+    agentConfigId: 'alert_analysis',
+    description:
+      'Assistant is an advanced alert summarization and analysis agent.For each alert, we will provide a comprehensive detail of the alert, including relevant information. Here is the detail of alert ${parameters.context}',
+  },
+];

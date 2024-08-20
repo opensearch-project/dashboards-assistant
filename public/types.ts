@@ -92,6 +92,7 @@ export interface IncontextInsight {
   interactionId?: string;
   contextProvider?: () => Promise<string>;
   datasourceId?: string;
+  index?: string;
 }
 
 export type IncontextInsightType =
