@@ -19,6 +19,7 @@ interface AgentRunPayload {
   'prompt.prefix'?: string;
   agentRole?: string;
   context?: string;
+  index?: string;
 }
 
 const MEMORY_ID_FIELD = 'memory_id';
@@ -95,6 +96,7 @@ export class OllyChatService implements ChatService {
         agentConfigId = additionalInfo.agent_config_id;
         payload.agentRole = payload.agentRole || additionalInfo.agentRole;
         payload.context = additionalInfo.context;
+        payload.index = additionalInfo.index;
       }
     }
 
@@ -118,6 +120,7 @@ export class OllyChatService implements ChatService {
             agent_config_id: agentRole?.agentConfigId || ROOT_AGENT_CONFIG_ID,
             ...(agentRole ? { agentRole: agentRole.id } : {}),
             ...(payload.context ? { context: payload.context } : {}),
+            ...(payload.index ? { index: payload.index } : {}),
           });
           // set memory id
           payload.memory_id = memoryId;
@@ -199,6 +202,7 @@ export class OllyChatService implements ChatService {
       verbose: false,
       agentRole: input.context?.agentRole,
       memory_id: payload.conversationId,
+      index: input.context?.index,
     };
 
     return await this.requestAgentRun(parametersPayload);

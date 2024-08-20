@@ -102,6 +102,7 @@ describe('OllyChatService', () => {
               "parameters": Object {
                 "agentRole": undefined,
                 "context": undefined,
+                "index": undefined,
                 "memory_id": "conversationId",
                 "question": "content",
                 "verbose": false,
@@ -175,6 +176,7 @@ describe('OllyChatService', () => {
               "parameters": Object {
                 "agentRole": "alerts",
                 "context": undefined,
+                "index": undefined,
                 "memory_id": "conversationId",
                 "prompt.prefix": "Assistant is an advanced alert summarization and analysis agent.For each alert, we will provide a comprehensive detail of the alert, including relevant information. Here is the detail of alert \${parameters.context}",
                 "question": "content",
@@ -230,6 +232,7 @@ describe('OllyChatService', () => {
               "parameters": Object {
                 "agentRole": undefined,
                 "context": undefined,
+                "index": undefined,
                 "memory_id": undefined,
                 "question": "content",
                 "verbose": false,
@@ -313,6 +316,7 @@ describe('OllyChatService', () => {
               "parameters": Object {
                 "agentRole": "alerts",
                 "context": undefined,
+                "index": undefined,
                 "memory_id": "2qjZaZEBYcKe8A3Pyut4",
                 "prompt.prefix": "Assistant is an advanced alert summarization and analysis agent.For each alert, we will provide a comprehensive detail of the alert, including relevant information. Here is the detail of alert \${parameters.context}",
                 "question": "content",

@@ -63,6 +63,7 @@ export const GeneratePopoverBody: React.FC<{
                 content: contextContent,
                 agentRole: incontextInsightType,
                 dataSourceId: incontextInsight.datasourceId,
+                index: incontextInsight.index,
               },
             },
           }),

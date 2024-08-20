@@ -47,6 +47,7 @@ export interface IInput {
     content?: string;
     datasourceId?: string;
     agentRole?: string;
+    index?: string;
   };
   messageId?: string;
   promptPrefix?: string;
