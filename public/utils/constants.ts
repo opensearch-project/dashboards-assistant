@@ -27,7 +27,7 @@ export enum AssistantRole {
   VIZ_SUMMARY = 'Human: You are an expert that helps to summarize the visualization data.' +
     ' You will be given context of sample data and visualization parameters to generate its summary.\\n\\n' +
     ' SAMPLE DATA:\\n${parameters.vizData}\\n\\nVISUALIZATION PARAMETERS:\\n${parameters.vizParams}\\n\\n' +
-    ' Please provide a summary of sample data.\\n\\n------------------\\n\\nAssistant:',
+    ' Please provide a summary of sample data and tell its insights in at most 200 words.\\n\\n------------------\\n\\nAssistant:',
 }
 
 interface AssistantRoles {

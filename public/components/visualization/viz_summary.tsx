@@ -31,7 +31,9 @@ export const VizSummary: React.FC<VizSummaryProps> = React.memo(
 
     useEffect(() => {
       const subscription = sampleData$.subscribe(async (sampleData) => {
-        if (sampleData) {
+        setSummary(null);
+        setSampleSize(0);
+        if (sampleData && vizParams) {
           setIsGenerating(true);
           setSampleSize(sampleData.size);
 
@@ -44,7 +46,7 @@ export const VizSummary: React.FC<VizSummaryProps> = React.memo(
               }),
               query: { dataSourceId },
             });
-            setSummary(response.completion ? response.completion : response);
+            setSummary(response);
           } catch (error) {
             getNotifications().toasts.addDanger({
               title: i18n.translate(
@@ -104,6 +106,7 @@ export const VizSummary: React.FC<VizSummaryProps> = React.memo(
                           <EuiButtonIcon
                             iconType={'iInCircle'}
                             title={'Generated summary of visualization sample data'}
+                            aria-label="The summary is based on a sample data size"
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -120,6 +123,9 @@ export const VizSummary: React.FC<VizSummaryProps> = React.memo(
                 </EuiFlexGroup>
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner paddingSize={'s'}>
+                {!summary && !isGenerating && (
+                  <EuiText size="s">Ask a question to generate a summary.</EuiText>
+                )}
                 {isGenerating && <EuiText size="s">Generating response...</EuiText>}
                 {summary && <EuiText size="s">{summary}</EuiText>}
               </EuiSplitPanel.Inner>

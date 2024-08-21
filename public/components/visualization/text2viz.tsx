@@ -72,7 +72,7 @@ export const Text2Viz = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sampleData$ = useRef(new BehaviorSubject<any>(null));
   const [dataSourceId, setDataSourceId] = useState<string | undefined>(undefined);
-  const [showVizSummary, setShowVizSummary] = useState<boolean>(false);
+  const [showVizSummary, setShowVizSummary] = useState<boolean>(true); // By default, we enable to show the visualization summary.
 
   useEffect(() => {
     const text2vega = text2vegaRef.current;
@@ -127,6 +127,7 @@ export const Text2Viz = () => {
   const onSubmit = useCallback(async () => {
     setVegaSpec(undefined);
     setDataSourceId(undefined);
+    sampleData$.current.next(undefined);
     const text2vega = text2vegaRef.current;
     if (selectedSource?.label) {
       const dataSource = (await selectedSource.ds.getDataSet()).dataSets.find(
@@ -282,6 +283,7 @@ export const Text2Viz = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
+                  aria-label="show visualization summary"
                   iconType={showVizSummary ? 'starFilled' : 'starEmpty'} // TODO: use the same customized icon as UI mockup
                   onClick={() => {
                     setShowVizSummary((isOn) => !isOn);

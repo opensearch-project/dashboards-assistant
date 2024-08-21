@@ -45,7 +45,10 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
         },
       });
       try {
-        const result = JSON.parse(response.body.inference_results[0].output[0].result);
+        let result = response.body.inference_results[0].output[0].result;
+        if (result.response) {
+          result = result.response;
+        }
         return res.ok({ body: result });
       } catch (e) {
         return res.internalError();
