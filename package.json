@@ -23,7 +23,7 @@
     "dompurify": "^3.0.11",
     "jsdom": "^21.1.2",
     "postinstall": "^0.7.4",
-    "uuid": "^10.0.0"
+    "uuid": "3.3.2"
   },
   "devDependencies": {
     "@types/autosize": "^4.0.1",
