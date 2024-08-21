@@ -19,6 +19,7 @@ import React, { useCallback } from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import cx from 'classnames';
 // TODO: Replace with getChrome().logos.Chat.url
+import { v4 as uuidv4 } from 'uuid';
 import { useChatActions } from '../../../hooks';
 import chatIcon from '../../../assets/chat.svg';
 import {
@@ -28,6 +29,7 @@ import {
   Interaction,
 } from '../../../../common/types/chat_saved_object_attributes';
 import { useFeedback } from '../../../hooks/use_feed_back';
+import { useCore } from '../../../contexts';
 
 type MessageBubbleProps = {
   showActionBar: boolean;
@@ -57,6 +59,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     props.message.type === 'output' &&
     props.message.contentType === 'markdown';
 
+  const usageCollection = useCore()?.services?.setupDeps?.usageCollection || null;
+
+  const reportMetric = usageCollection
+    ? (metric: string) => {
+        usageCollection.reportUiStats(
+          `chat`,
+          usageCollection.METRIC_TYPE.CLICK,
+          metric + '-' + uuidv4()
+        );
+      }
+    : () => {};
+
   const feedbackOutput = useCallback(
     (correct: boolean, result: boolean | undefined) => {
       // No repeated feedback.
@@ -64,6 +78,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
         return;
       }
       sendFeedback(props.message as IOutput, correct);
+      reportMetric(correct ? 'thumbup' : 'thumbdown');
     },
     [props, sendFeedback]
   );
