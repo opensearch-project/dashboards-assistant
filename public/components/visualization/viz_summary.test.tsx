@@ -11,6 +11,16 @@ import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import { VizSummary } from './viz_summary';
 import { getAssistantRole } from '../../utils/constants';
+import { getNotifications } from '../../services';
+
+// Mock necessary functions and modules
+jest.mock('../../services', () => ({
+  getNotifications: jest.fn().mockReturnValue({
+    toasts: {
+      addDanger: jest.fn(),
+    },
+  }),
+}));
 
 const mockHttpPost = jest.fn();
 const mockEscape = jest.fn((text) => text);
@@ -33,28 +43,20 @@ describe('VizSummary', () => {
     mockHttpPost.mockClear();
   });
 
-  it('renders correctly and shows the "generating response..." message', () => {
+  it('renders correctly when there is no summary and not generating', () => {
     render(<VizSummary http={http} sampleData$={sampleData$} />);
-
-    expect(screen.getByText('Response')).toBeInTheDocument();
-    expect(screen.queryByText('generating response...')).not.toBeInTheDocument();
+    expect(screen.getByText('Ask a question to generate a summary.')).toBeInTheDocument();
   });
 
-  it('displays the summary when data is available', async () => {
-    const mockSummary = 'Mock summary text';
-    const mockResponse = { completion: mockSummary };
+  it('renders correctly and firstly shows the "Generating response..." message and then show summary', async () => {
+    sampleData$.next({ size: 100 });
+    mockHttpPost.mockResolvedValue('Summary text');
+    render(<VizSummary http={http} sampleData$={sampleData$} vizParams={{}} />);
 
-    mockHttpPost.mockResolvedValue(mockResponse);
-
-    sampleData$.next({});
-
-    render(<VizSummary http={http} sampleData$={sampleData$} />);
-
-    expect(screen.getByText('Generating response...')).toBeInTheDocument();
-
+    expect(screen.queryByText('Generating response...')).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText(mockSummary)).toBeInTheDocument();
-      expect(screen.queryByText('generating response...')).not.toBeInTheDocument();
+      expect(screen.queryByText('Generating response...')).not.toBeInTheDocument();
+      expect(screen.getByText('Summary text')).toBeInTheDocument();
     });
   });
 
@@ -75,5 +77,32 @@ describe('VizSummary', () => {
       }),
       query: { dataSourceId: undefined },
     });
+  });
+
+  it('handles API errors gracefully', async () => {
+    sampleData$.next({ size: 100 });
+    mockHttpPost.mockRejectedValue(new Error('API Error'));
+
+    render(<VizSummary http={http} sampleData$={sampleData$} vizParams={{}} />);
+
+    // Wait for the error handling logic to be executed
+    await waitFor(() => {
+      expect(getNotifications().toasts.addDanger).toHaveBeenCalled();
+      expect(screen.getByText('Ask a question to generate a summary.')).toBeInTheDocument();
+    });
+  });
+
+  it('does not make API call if sampleData is undefined', () => {
+    sampleData$.next(undefined);
+    render(<VizSummary http={http} sampleData$={sampleData$} vizParams={{}} />);
+
+    expect(mockHttpPost).not.toHaveBeenCalled();
+  });
+
+  it('does not make API call if vizParams is undefined', () => {
+    sampleData$.next({ size: 100 });
+    render(<VizSummary http={http} sampleData$={sampleData$} />);
+
+    expect(mockHttpPost).not.toHaveBeenCalled();
   });
 });
