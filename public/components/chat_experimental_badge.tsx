@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import {
   EuiPopover,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiTitle,
   EuiHorizontalRule,
   EuiText,
@@ -32,7 +32,7 @@ export const ChatExperimentalBadge = ({ onClick }: ChatExperimentalBadgeProps) =
     <EuiPopover
       isOpen={visible}
       button={
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           color="text"
           iconType="beaker"
           onClick={handleIconClick}

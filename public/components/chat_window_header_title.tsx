@@ -9,7 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -125,7 +125,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
           <EuiPopover
             id="conversationTitle"
             button={
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 onClick={onButtonClick}
                 aria-label="toggle chat context menu"
                 color="text"
