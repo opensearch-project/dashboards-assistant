@@ -5,7 +5,7 @@
 
 import React, { useCallback, useRef } from 'react';
 
-import { EuiConfirmModal, EuiFieldText, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiCompressedFieldText, EuiSpacer, EuiText } from '@elastic/eui';
 import { useCore } from '../contexts/core_context';
 import { usePatchConversation } from '../hooks';
 
@@ -65,7 +65,7 @@ export const EditConversationNameModal = ({
         <p>Please enter a new name for your conversation.</p>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiFieldText
+      <EuiCompressedFieldText
         inputRef={titleInputRef}
         defaultValue={defaultTitle}
         aria-label="Conversation name input"
