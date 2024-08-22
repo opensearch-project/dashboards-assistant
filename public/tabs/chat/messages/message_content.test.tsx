@@ -77,6 +77,50 @@ describe('<MessageContent />', () => {
     expect(screen.queryAllByText('title')).toHaveLength(1);
   });
 
+  it('should display message(markdown + additionalAction)', () => {
+    render(
+      <MessageContent
+        message={{
+          type: 'output',
+          contentType: 'markdown',
+          additionalActions: [
+            {
+              actionType: 'customized_content_type',
+              message: 'customized title',
+              content: 'mock customized content',
+            },
+          ],
+          content: '# title',
+        }}
+      />
+    );
+    expect(screen.queryAllByText('title')).toHaveLength(1);
+    expect(customizedRenderMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "content": "mock customized content",
+        "contentType": "customized_content_type",
+        "type": "output",
+      }
+    `);
+    expect(customizedRenderMock.mock.calls[0][1].props).toMatchInlineSnapshot(`
+      Object {
+        "message": Object {
+          "additionalActions": Array [
+            Object {
+              "actionType": "customized_content_type",
+              "content": "mock customized content",
+              "message": "customized title",
+            },
+          ],
+          "content": "# title",
+          "contentType": "markdown",
+          "type": "output",
+        },
+      }
+    `);
+    expect(customizedRenderMock.mock.calls[0][1].chatContext).not.toBeUndefined();
+  });
+
   it('should render customized render content', () => {
     render(
       <MessageContent

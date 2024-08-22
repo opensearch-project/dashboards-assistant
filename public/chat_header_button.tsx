@@ -19,9 +19,10 @@ import { ChatStateProvider } from './hooks';
 import './index.scss';
 import { ActionExecutor, AssistantActions, MessageRenderer, TabId, UserAccount } from './types';
 import {
-  TAB_ID,
   DEFAULT_SIDECAR_DOCKED_MODE,
   DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+  OVERRIDE_SIDECAR_LEFT_OR_RIGHT_SIZE,
+  TAB_ID,
 } from './utils/constants';
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
@@ -42,6 +43,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
+  const [overrideName, setOverrideName] = useState<string>();
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
@@ -76,6 +78,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       flyoutFullScreen,
       setFlyoutVisible,
       setFlyoutComponent,
+      overrideName,
+      setOverrideName,
       messageRenderers: props.messageRenderers,
       actionExecutors: props.actionExecutors,
       currentAccount: props.currentAccount,
@@ -155,6 +159,17 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const setMountPoint = useCallback((mountPoint) => {
     flyoutMountPoint.current = mountPoint;
   }, []);
+
+  useEffect(() => {
+    if (flyoutLoaded && flyoutVisible) {
+      core.overlays.sidecar().setSidecarConfig({
+        paddingSize:
+          selectedTabId === TAB_ID.OVERRIDE
+            ? OVERRIDE_SIDECAR_LEFT_OR_RIGHT_SIZE
+            : DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+      });
+    }
+  }, [selectedTabId === TAB_ID.OVERRIDE]);
 
   useEffect(() => {
     const onGlobalMouseUp = (e: KeyboardEvent) => {
