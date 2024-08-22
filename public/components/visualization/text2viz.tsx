@@ -48,6 +48,8 @@ import {
   SavedObjectSaveModalOrigin,
 } from '../../../../../src/plugins/saved_objects/public';
 import { VizSummary } from './viz_summary';
+import sparkleSvg from '../../assets/sparkle.svg';
+import shinySparkleSvg from '../../assets/shiny_sparkle.svg';
 
 export const Text2Viz = () => {
   const [selectedSource, setSelectedSource] = useState<DataSourceOption>();
@@ -99,7 +101,7 @@ export const Text2Viz = () => {
     const fetchData = async () => {
       if (vegaSpec) {
         // Today's ppl query could return at most 10000 rows, make a safe limit to avoid data explosion of llm input for now
-        const ppl = topN(vegaSpec.data.url.body.query, 200);
+        const ppl = topN(vegaSpec.data.url.body.query, 50);
 
         try {
           const sampleData = await data.search
@@ -284,7 +286,8 @@ export const Text2Viz = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   aria-label="show visualization summary"
-                  iconType={showVizSummary ? 'starFilled' : 'starEmpty'} // TODO: use the same customized icon as UI mockup
+                  iconSize={'l'}
+                  iconType={showVizSummary ? shinySparkleSvg : sparkleSvg}
                   onClick={() => {
                     setShowVizSummary((isOn) => !isOn);
                   }}

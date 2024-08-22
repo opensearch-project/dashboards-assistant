@@ -7,12 +7,19 @@ import { BehaviorSubject } from 'rxjs';
 import React, { useEffect, useState } from 'react';
 import { escape } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { EuiSplitPanel } from '@elastic/eui';
+import {
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiSplitPanel,
+} from '@elastic/eui';
 import { getNotifications } from '../../services';
 import { getAssistantRole } from '../../utils/constants';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import { HttpSetup } from '../../../../../src/core/public';
+import sparkleSvg from '../../assets/sparkle.svg';
 
 interface VizSummaryProps {
   http: HttpSetup;
@@ -74,17 +81,11 @@ export const VizSummary: React.FC<VizSummaryProps> = React.memo(
           <EuiFlexItem>
             <EuiSplitPanel.Outer>
               <EuiSplitPanel.Inner
-                style={{ background: 'linear-gradient(to left, #E9F5F8, #EBEBFA)', padding: '6px' }}
+                style={{ background: 'linear-gradient(to left, #EDF7FF, #F9F4FF)', padding: '6px' }}
               >
                 <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
                   <EuiFlexItem grow={false}>
-                    {/* TODO: may use a local svg icon instead*/}
-                    <EuiIcon
-                      type={
-                        'https://upload.wikimedia.org/wikipedia/commons/c/c8/Ionicons_sparkles-outline.svg'
-                      }
-                      size={'m'}
-                    />
+                    <EuiIcon type={sparkleSvg} size="l" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
@@ -103,10 +104,15 @@ export const VizSummary: React.FC<VizSummaryProps> = React.memo(
                         gutterSize={'xs'}
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            iconType={'iInCircle'}
-                            title={'Generated summary of visualization sample data'}
-                            aria-label="The summary is based on a sample data size"
+                          <EuiIconTip
+                            type={'iInCircle'}
+                            content={'Generated summary of the first 50 ppl sample data'}
+                            aria-label={i18n.translate(
+                              'assistantDashboards.vizSummary.sampleDataTip',
+                              {
+                                defaultMessage: 'Generated summary of the first 50 ppl sample data',
+                              }
+                            )}
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
