@@ -11,7 +11,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 const DATA_SOURCE_DELIMITER = '::';
 
-const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
+export const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
 
 const getDataSourceAndIndexFromLabel = (label: string) => {
   if (label.includes(DATA_SOURCE_DELIMITER)) {

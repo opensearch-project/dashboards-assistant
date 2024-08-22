@@ -17,6 +17,7 @@ import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
 import { VisualizationCardParser } from './parsers/visualization_card_parser';
 import { registerChatRoutes } from './routes/chat_routes';
 import { registerText2VizRoutes } from './routes/text2viz_routes';
+import { registerSummaryAssistantRoutes } from './routes/summary_assistant_routes';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
@@ -51,6 +52,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     // Register router for text to visualization
     if (config.next.enabled) {
       registerText2VizRoutes(router);
+      registerSummaryAssistantRoutes(router);
     }
 
     core.capabilities.registerProvider(() => ({
