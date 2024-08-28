@@ -84,13 +84,18 @@ export interface ChatConfig {
 
 export type IncontextInsights = Map<string, IncontextInsight>;
 
+export interface ContextObj {
+  context: string;
+  additionalInfo: Record<string, string>;
+}
+
 export interface IncontextInsight {
   key: string;
   type?: IncontextInsightType;
   summary?: string;
   suggestions?: string[];
   interactionId?: string;
-  contextProvider?: () => Promise<string>;
+  contextProvider?: () => Promise<ContextObj>;
   datasourceId?: string;
 }
 
