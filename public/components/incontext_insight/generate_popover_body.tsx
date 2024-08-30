@@ -141,18 +141,13 @@ export const GeneratePopoverBody: React.FC<{
     const content = showInsight && insightAvailable ? insight : summary;
     return content ? (
       <>
-        <EuiPanel
-          className="incontextInsightGeneratePopoverContent"
-          paddingSize="s"
-          hasBorder
-          hasShadow={false}
-          color="subdued"
-        >
-          <EuiText size="s">
+        <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="subdued">
+          <EuiText className="incontextInsightGeneratePopoverContent" size="s">
             <EuiMarkdownFormat>{content}</EuiMarkdownFormat>
           </EuiText>
+          <EuiSpacer size={'xs'} />
+          {renderInnerFooter()}
         </EuiPanel>
-        <EuiSpacer size={'xs'} />
       </>
     ) : (
       <EuiLoadingContent aria-label="loading_content" />
@@ -232,7 +227,6 @@ export const GeneratePopoverBody: React.FC<{
     <>
       {renderInnerTitle()}
       {renderContent()}
-      {renderInnerFooter()}
     </>
   );
 };
