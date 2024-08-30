@@ -149,7 +149,6 @@ export class AssistantPlugin
     if (this.config.chat.enabled) {
       const setupChat = async () => {
         const [coreStart, startDeps] = await core.getStartServices();
-
         const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
           ...coreStart,
           setupDeps,
@@ -207,12 +206,14 @@ export class AssistantPlugin
       renderIncontextInsight: (props: any) => {
         if (!this.incontextInsightRegistry?.isEnabled()) return <div {...props} />;
         const httpSetup = core.http;
+        const usageCollection = setupDeps.usageCollection || null;
         const dataSourceService = this.dataSourceService;
         return (
           <IncontextInsightComponent
             {...props}
             httpSetup={httpSetup}
             dataSourceService={dataSourceService}
+            usageCollection={usageCollection}
           />
         );
       },

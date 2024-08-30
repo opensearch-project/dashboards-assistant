@@ -22,13 +22,15 @@ import { HttpSetup } from '../../../../../src/core/public';
 import { DataSourceService } from '../../services/data_source_service';
 import { ASSISTANT_API } from '../../../common/constants/llm';
 import { getAssistantRole } from '../../utils/constants';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
   httpSetup?: HttpSetup;
   dataSourceService?: DataSourceService;
+  usageCollection?: UsageCollectionSetup;
   closePopover: () => void;
-}> = ({ incontextInsight, httpSetup, dataSourceService, closePopover }) => {
+}> = ({ incontextInsight, httpSetup, dataSourceService, usageCollection, closePopover }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const [conversationId, setConversationId] = useState('');
@@ -146,10 +148,8 @@ export const GeneratePopoverBody: React.FC<{
             onRegenerate={async () => onRegenerateSummary(interaction?.interaction_id || '')}
             interaction={interaction}
             showFeedback
-            message={message as IOutput}
             showTraceIcon={false}
-            httpSetup={httpSetup}
-            dataSourceService={dataSourceService}
+            usageCollection={usageCollection}
           />
           {getConfigSchema().chat.enabled && (
             <EuiPanel

@@ -71,7 +71,7 @@ describe('useFeedback hook', () => {
 
     const sendFeedback = result.current.sendFeedback;
     await act(async () => {
-      await sendFeedback(mockOutputMessage, correct);
+      await sendFeedback(correct, mockOutputMessage);
     });
     expect(httpMock.put).toHaveBeenCalledWith(
       `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
@@ -108,7 +108,7 @@ describe('useFeedback hook', () => {
 
     const sendFeedback = result.current.sendFeedback;
     await act(async () => {
-      await sendFeedback(mockOutputMessage, true);
+      await sendFeedback(true, mockOutputMessage);
     });
 
     expect(result.current.feedbackResult).toBe(undefined);

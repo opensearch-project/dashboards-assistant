@@ -9,6 +9,7 @@ import { IOutput, Interaction } from '../../../../common/types/chat_saved_object
 import { useFeedback } from '../../../hooks/use_feed_back';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { DataSourceService } from '../../../services/data_source_service';
+import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/public';
 
 interface MessageActionsProps {
   contentToCopy?: string;
@@ -24,6 +25,7 @@ interface MessageActionsProps {
   isFullWidth?: boolean;
   httpSetup?: HttpSetup;
   dataSourceService?: DataSourceService;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
@@ -31,7 +33,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   showRegenerate = false,
   onRegenerate,
   interaction,
-  message,
+  message = null,
   showFeedback = false,
   showTraceIcon = false,
   traceInteractionId = null,
@@ -40,15 +42,21 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   isFullWidth = false,
   httpSetup,
   dataSourceService,
+  usageCollection,
 }) => {
-  const { feedbackResult, sendFeedback } = useFeedback(interaction, httpSetup, dataSourceService);
+  const { feedbackResult, sendFeedback } = useFeedback(
+    interaction,
+    httpSetup,
+    dataSourceService,
+    usageCollection
+  );
 
   const handleFeedback = useCallback(
     (correct: boolean) => {
-      if (feedbackResult !== undefined || !message) {
+      if (feedbackResult !== undefined) {
         return;
       }
-      sendFeedback(message, correct);
+      sendFeedback(correct, message);
     },
     [feedbackResult, message, sendFeedback]
   );

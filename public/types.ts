@@ -16,6 +16,7 @@ import {
 } from '../../../src/plugins/visualizations/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
+import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -46,6 +47,7 @@ export interface AssistantPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface AssistantSetup {

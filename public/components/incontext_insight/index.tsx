@@ -33,11 +33,13 @@ import chatIcon from '../../assets/chat.svg';
 import { HttpSetup } from '../../../../../src/core/public';
 import { DataSourceService } from '../../services/data_source_service';
 import { GeneratePopoverBody } from './generate_popover_body';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
   httpSetup?: HttpSetup;
   dataSourceService?: DataSourceService;
+  usageCollection?: UsageCollectionSetup;
 }
 
 // TODO: add saved objects / config to store seed suggestions
@@ -45,6 +47,7 @@ export const IncontextInsight = ({
   children,
   httpSetup,
   dataSourceService,
+  usageCollection,
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -285,6 +288,7 @@ export const IncontextInsight = ({
               incontextInsight={input}
               httpSetup={httpSetup}
               dataSourceService={dataSourceService}
+              usageCollection={usageCollection}
               closePopover={closePopover}
             />
           );

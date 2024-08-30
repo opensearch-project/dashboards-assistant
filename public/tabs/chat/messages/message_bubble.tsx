@@ -46,7 +46,6 @@ type MessageBubbleProps = {
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
   const { executeAction } = useChatActions();
   const core = useCore();
-
   // According to the design of the feedback, only markdown type output is supported.
   const showFeedback =
     'message' in props &&
@@ -178,6 +177,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                 isFullWidth={fullWidth}
                 httpSetup={core.services.http}
                 dataSourceService={core.services.dataSource}
+                usageCollection={core.services.setupDeps.usageCollection}
               />
             </>
           )}
