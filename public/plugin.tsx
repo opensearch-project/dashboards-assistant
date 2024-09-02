@@ -104,7 +104,7 @@ export class AssistantPlugin
       dataSourceManagement: setupDeps.dataSourceManagement,
     });
 
-    if (this.config.next.enabled) {
+    if (this.config.text2viz.enabled) {
       setupDeps.visualizations.registerAlias({
         name: 'text2viz',
         aliasPath: '#/',
@@ -199,6 +199,15 @@ export class AssistantPlugin
       },
       chatEnabled: () => this.config.chat.enabled,
       nextEnabled: () => this.config.next.enabled,
+      getFeatureStatus: () => {
+        return {
+          chat: this.config.chat.enabled,
+          next: this.config.next.enabled,
+          text2viz: this.config.text2viz.enabled,
+          alertInsight: this.config.alertInsight.enabled,
+          smartAnomalyDetector: this.config.smartAnomalyDetector.enabled,
+        };
+      },
       assistantActions,
       registerIncontextInsight: this.incontextInsightRegistry.register.bind(
         this.incontextInsightRegistry

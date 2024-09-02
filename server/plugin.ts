@@ -17,6 +17,7 @@ import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
 import { VisualizationCardParser } from './parsers/visualization_card_parser';
 import { registerChatRoutes } from './routes/chat_routes';
 import { registerText2VizRoutes } from './routes/text2viz_routes';
+import { capabilitiesProvider, capabilitiesSwitcher } from './capabilities';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
@@ -53,11 +54,8 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
       registerText2VizRoutes(router);
     }
 
-    core.capabilities.registerProvider(() => ({
-      observability: {
-        show: true,
-      },
-    }));
+    core.capabilities.registerProvider(capabilitiesProvider);
+    core.capabilities.registerSwitcher(capabilitiesSwitcher);
 
     const registerMessageParser = (messageParser: MessageParser) => {
       const findItem = this.messageParsers.find((item) => item.id === messageParser.id);
