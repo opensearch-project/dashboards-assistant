@@ -12,6 +12,9 @@ import { ML_COMMONS_BASE_API } from '../utils/constants';
 import { InsightType, SummaryType } from '../types';
 
 const SUMMARY_AGENT_CONFIG_ID = 'summary';
+const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
+let osInsightAgentId: string | undefined;
+let userInsightAgentId: string | undefined;
 
 export function registerSummaryAssistantRoutes(router: IRouter) {
   router.post(
@@ -48,17 +51,23 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
         },
       });
       let summary;
-      let insightAgentId;
+      let insightAgentIdExists = false;
       try {
         if (req.body.insightType) {
           // We have separate agent for os_insight and user_insight. And for user_insight, we can
           // only get it by searching on name since it is not stored in agent config.
           if (req.body.insightType === 'os_insight') {
-            insightAgentId = await getAgent(req.body.insightType, client);
+            if (!osInsightAgentId) {
+              osInsightAgentId = await getAgent(OS_INSIGHT_AGENT_CONFIG_ID, client);
+            }
+            insightAgentIdExists = !!osInsightAgentId;
           } else if (req.body.insightType === 'user_insight') {
             if (req.body.type === 'alerts') {
-              insightAgentId = await searchAgentByName('KB_For_Alert_Insight', client);
+              if (!userInsightAgentId) {
+                userInsightAgentId = await searchAgentByName('KB_For_Alert_Insight', client);
+              }
             }
+            insightAgentIdExists = !!userInsightAgentId;
           }
         }
       } catch (e) {
@@ -66,7 +75,7 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
       }
       try {
         summary = response.body.inference_results[0].output[0].result;
-        return res.ok({ body: { summary, insightAgentId } });
+        return res.ok({ body: { summary, insightAgentIdExists } });
       } catch (e) {
         return res.internalError();
       }
@@ -77,7 +86,7 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
       path: SUMMARY_ASSISTANT_API.INSIGHT,
       validate: {
         body: schema.object({
-          insightAgentId: schema.string(),
+          summaryType: schema.string(),
           insightType: schema.string(),
           summary: schema.string(),
           context: schema.string(),
@@ -93,10 +102,12 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
         context,
         dataSourceId: req.query.dataSourceId,
       });
-      const prompt = InsightType.find((type) => type.id === req.body.insightType)?.prompt;
+      const prompt = InsightType.find((type) => type.id === req.body.summaryType)?.prompt;
+      const insightAgentId =
+        req.body.insightType === 'os_insight' ? osInsightAgentId : userInsightAgentId;
       const response = await client.request({
         method: 'POST',
-        path: `${ML_COMMONS_BASE_API}/agents/${req.body.insightAgentId}/_execute`,
+        path: `${ML_COMMONS_BASE_API}/agents/${insightAgentId}/_execute`,
         body: {
           parameters: {
             text: prompt,
@@ -112,6 +123,9 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
         return res.ok({ body: result });
       } catch (e) {
         return res.internalError();
+      } finally {
+        // Reset userInsightAgentId in case users update their insight agent.
+        userInsightAgentId = undefined;
       }
     })
   );

@@ -77,12 +77,12 @@ export const GeneratePopoverBody: React.FC<{
         .then((response) => {
           const summaryContent = response.summary;
           setSummary(summaryContent);
-          const insightAgentIdExists = !!response.insightAgentId;
+          const insightAgentIdExists = insightType !== undefined && response.insightAgentIdExists;
           setInsightAvailable(insightAgentIdExists);
           if (insightAgentIdExists) {
             onGenerateInsightBasedOnSummary(
-              response.insightAgentId,
               summaryType,
+              insightType,
               summaryContent,
               contextContent,
               `Please provide your insight on this ${summaryType}.`
@@ -103,7 +103,7 @@ export const GeneratePopoverBody: React.FC<{
   };
 
   const onGenerateInsightBasedOnSummary = (
-    insightAgentId: string,
+    summaryType: string,
     insightType: string,
     summaryContent: string,
     context: string,
@@ -113,7 +113,7 @@ export const GeneratePopoverBody: React.FC<{
       httpSetup
         ?.post(SUMMARY_ASSISTANT_API.INSIGHT, {
           body: JSON.stringify({
-            insightAgentId,
+            summaryType,
             insightType,
             summary: summaryContent,
             context,
