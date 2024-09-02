@@ -85,7 +85,7 @@ export const GeneratePopoverBody: React.FC<{
               summaryType,
               summaryContent,
               contextContent,
-              'Please provide your insight on this alert to help users understand this alert, find potential causes and give feasible solutions to address this alert'
+              `Please provide your insight on this ${summaryType}.`
             );
           }
         })
