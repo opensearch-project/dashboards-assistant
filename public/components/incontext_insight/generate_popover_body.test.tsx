@@ -8,7 +8,7 @@ import { render, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { getConfigSchema, getNotifications } from '../../services';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { HttpSetup } from '../../../../../src/core/public';
-import { ASSISTANT_API } from '../../../common/constants/llm';
+import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 
 jest.mock('../../services');
 
@@ -42,25 +42,28 @@ describe('GeneratePopoverBody', () => {
 
   const closePopoverMock = jest.fn();
 
-  it('renders the generate summary button', () => {
-    const { getByText } = render(
-      <GeneratePopoverBody
-        incontextInsight={incontextInsightMock}
-        httpSetup={mockHttpSetup}
-        closePopover={closePopoverMock}
-      />
-    );
+  it('auto generates summary and insight', async () => {
+    mockPost.mockImplementation((path: string, body) => {
+      let value;
+      switch (path) {
+        case SUMMARY_ASSISTANT_API.SUMMARIZE:
+          value = {
+            summary: 'Generated summary content',
+            insightAgentId: 'insight_agent_id',
+          };
+          break;
 
-    expect(getByText('Generate summary')).toBeInTheDocument();
-  });
+        case SUMMARY_ASSISTANT_API.INSIGHT:
+          value = 'Generated insight content';
+          break;
 
-  it('calls onGenerateSummary when button is clicked', async () => {
-    mockPost.mockResolvedValue({
-      interactions: [{ conversation_id: 'test-conversation' }],
-      messages: [{ type: 'output', content: 'Generated summary content' }],
+        default:
+          return null;
+      }
+      return Promise.resolve(value);
     });
 
-    const { getByText } = render(
+    const { getByText, getByLabelText, queryByText, queryByLabelText } = render(
       <GeneratePopoverBody
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
@@ -68,20 +71,72 @@ describe('GeneratePopoverBody', () => {
       />
     );
 
-    const button = getByText('Generate summary');
-    fireEvent.click(button);
+    // 1. Auto generate summary
+    // title is assistant icon + 'Summary'
+    expect(getByLabelText('alert-assistant')).toBeInTheDocument();
+    expect(getByText('Summary')).toBeInTheDocument();
+    // content is loading
+    expect(getByLabelText('loading_content')).toBeInTheDocument();
 
     // Wait for loading to complete and summary to render
     await waitFor(() => {
       expect(getByText('Generated summary content')).toBeInTheDocument();
     });
-
-    expect(mockPost).toHaveBeenCalledWith(ASSISTANT_API.SEND_MESSAGE, expect.any(Object));
+    // loading content disappeared
+    expect(queryByLabelText('loading_content')).toBeNull();
+    expect(mockPost).toHaveBeenCalledWith(SUMMARY_ASSISTANT_API.SUMMARIZE, expect.any(Object));
     expect(mockToasts.addDanger).not.toHaveBeenCalled();
+
+    // insight tip icon is visible
+    const insightTipIcon = getByLabelText('Insight');
+    expect(insightTipIcon).toBeInTheDocument();
+
+    // 2. Click insight tip icon to view insight
+    fireEvent.click(insightTipIcon);
+    // title is back button + 'Insight With RAG'
+    const backButton = getByLabelText('back-to-summary');
+    expect(backButton).toBeInTheDocument();
+    expect(getByText('Insight With RAG')).toBeInTheDocument();
+
+    // Wait for loading to complete and insight to render
+    await waitFor(() => {
+      expect(getByText('Generated insight content')).toBeInTheDocument();
+    });
+    expect(queryByText('Generated summary content')).toBeNull();
+
+    // loading content disappeared
+    expect(queryByLabelText('loading_content')).toBeNull();
+    expect(mockPost).toHaveBeenCalledWith(SUMMARY_ASSISTANT_API.INSIGHT, expect.any(Object));
+    expect(mockToasts.addDanger).not.toHaveBeenCalled();
+
+    // 3. Click back button to view summary
+    fireEvent.click(backButton);
+    expect(queryByText('Generated insight content')).toBeNull();
+    expect(queryByText('Generated summary content')).toBeInTheDocument();
   });
 
-  it('shows loading state while generating summary', async () => {
-    const { getByText } = render(
+  it('auto generates summary without insight agent id', async () => {
+    mockPost.mockImplementation((path: string, body) => {
+      let value;
+      switch (path) {
+        case SUMMARY_ASSISTANT_API.SUMMARIZE:
+          value = {
+            summary: 'Generated summary content',
+            insightAgentId: undefined,
+          };
+          break;
+
+        case SUMMARY_ASSISTANT_API.INSIGHT:
+          value = 'Generated insight content';
+          break;
+
+        default:
+          return null;
+      }
+      return Promise.resolve(value);
+    });
+
+    const { getByText, getByLabelText, queryByLabelText } = render(
       <GeneratePopoverBody
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
@@ -89,111 +144,84 @@ describe('GeneratePopoverBody', () => {
       />
     );
 
-    const button = getByText('Generate summary');
-    fireEvent.click(button);
+    // title is assistant icon + 'Summary'
+    expect(getByLabelText('alert-assistant')).toBeInTheDocument();
+    expect(getByText('Summary')).toBeInTheDocument();
+    // content is loading
+    expect(getByLabelText('loading_content')).toBeInTheDocument();
 
-    // Wait for loading state to appear
-    expect(getByText('Generating summary...')).toBeInTheDocument();
+    // Wait for loading to complete and summary to render
+    await waitFor(() => {
+      expect(getByText('Generated summary content')).toBeInTheDocument();
+    });
+    // loading content disappeared
+    expect(queryByLabelText('loading_content')).toBeNull();
+    expect(mockPost).toHaveBeenCalledWith(SUMMARY_ASSISTANT_API.SUMMARIZE, expect.any(Object));
+    expect(mockToasts.addDanger).not.toHaveBeenCalled();
+
+    // insight tip icon is not visible
+    expect(queryByLabelText('Insight')).toBeNull();
+    // Only call http post 1 time.
+    expect(mockPost).toHaveBeenCalledTimes(1);
   });
 
   it('handles error during summary generation', async () => {
     mockPost.mockRejectedValue(new Error('Network Error'));
 
-    const { getByText } = render(
+    const { queryByText } = render(
       <GeneratePopoverBody
+        aria-label="test-generated-popover"
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
         closePopover={closePopoverMock}
       />
     );
 
-    const button = getByText('Generate summary');
-    fireEvent.click(button);
+    // Auto close popover window if error occurs
+    expect(queryByText('test-generated-popover')).toBeNull();
 
     await waitFor(() => {
       expect(mockToasts.addDanger).toHaveBeenCalledWith('Generate summary error');
     });
   });
 
-  it('renders the continue in chat button after summary is generated', async () => {
-    mockPost.mockResolvedValue({
-      interactions: [{ conversation_id: 'test-conversation' }],
-      messages: [{ type: 'output', content: 'Generated summary content' }],
+  it('handles error during insight generation', async () => {
+    mockPost.mockImplementation((path: string, body) => {
+      let value;
+      switch (path) {
+        case SUMMARY_ASSISTANT_API.SUMMARIZE:
+          value = {
+            summary: 'Generated summary content',
+            insightAgentId: 'insight_agent_id',
+          };
+          break;
+
+        case SUMMARY_ASSISTANT_API.INSIGHT:
+          return Promise.reject(new Error('Network Error'));
+
+        default:
+          return null;
+      }
+      return Promise.resolve(value);
     });
 
-    const { getByText } = render(
+    const { getByText, queryByLabelText } = render(
       <GeneratePopoverBody
+        aria-label="test-generated-popover"
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
         closePopover={closePopoverMock}
       />
     );
 
-    const button = getByText('Generate summary');
-    fireEvent.click(button);
-
-    // Wait for the summary to be displayed
+    expect(getByText('Summary')).toBeInTheDocument();
+    // Wait for loading to complete and summary to render
     await waitFor(() => {
-      expect(getByText('Generated summary content')).toBeInTheDocument();
+      expect(mockToasts.addDanger).toHaveBeenCalledWith('Generate insight error');
     });
-
-    // Check for continue in chat button
-    expect(getByText('Continue in chat')).toBeInTheDocument();
-  });
-
-  it('calls onChatContinuation when continue in chat button is clicked', async () => {
-    mockPost.mockResolvedValue({
-      interactions: [{ conversation_id: 'test-conversation' }],
-      messages: [{ type: 'output', content: 'Generated summary content' }],
-    });
-
-    const { getByText } = render(
-      <GeneratePopoverBody
-        incontextInsight={incontextInsightMock}
-        httpSetup={mockHttpSetup}
-        closePopover={closePopoverMock}
-      />
-    );
-
-    const button = getByText('Generate summary');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(getByText('Generated summary content')).toBeInTheDocument();
-    });
-
-    const continueButton = getByText('Continue in chat');
-    fireEvent.click(continueButton);
-
-    expect(mockPost).toHaveBeenCalledTimes(1);
-    expect(closePopoverMock).toHaveBeenCalled();
-  });
-
-  it("continue in chat button doesn't appear when chat is disabled", async () => {
-    mockPost.mockResolvedValue({
-      interactions: [{ conversation_id: 'test-conversation' }],
-      messages: [{ type: 'output', content: 'Generated summary content' }],
-    });
-    (getConfigSchema as jest.Mock).mockReturnValue({
-      chat: { enabled: false },
-    });
-
-    const { getByText, queryByText } = render(
-      <GeneratePopoverBody
-        incontextInsight={incontextInsightMock}
-        httpSetup={mockHttpSetup}
-        closePopover={closePopoverMock}
-      />
-    );
-
-    const button = getByText('Generate summary');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(getByText('Generated summary content')).toBeInTheDocument();
-    });
-
-    expect(queryByText('Continue in chat')).toBeNull();
-    expect(mockPost).toHaveBeenCalledTimes(1);
+    // Show summary content although insight generation failed
+    expect(getByText('Generated summary content')).toBeInTheDocument();
+    // insight tip icon is not visible for this alert
+    expect(queryByLabelText('Insight')).toBeNull();
   });
 });

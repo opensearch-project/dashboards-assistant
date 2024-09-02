@@ -107,8 +107,73 @@
 }
 
 .incontextInsightPopoverBody {
-  max-width: 400px;
+  max-width: 486px;
+  min-width: 486px;
   width: 100%;
+}
+
+.incontextInsightGeneratePopoverTitle {
+  // TODO: Remove this one paddingSize is fixed
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+  min-height: 30px;
+  max-height: 30px;
+  border: none;
+
+  :first-child {
+    border: none;
+  }
+
+  .euiBadge__text {
+    text-transform: none;
+    font-weight: bold;
+    font-size: 15px;
+  }
+
+  .euiBadge__icon {
+    margin: 2px 0 2px 0;
+  }
+
+  .euiIcon--small {
+    height: 100%;
+    width: 22px;
+    padding: 2px 0;
+  }
+
+  .euiButtonEmpty{
+    padding-inline: 8px;
+
+    .euiButtonEmpty__content {
+      margin-block: 2px;
+      padding-block: 2px;
+
+      .euiIcon--small {
+        height: 100%;
+        width: 16px;
+        padding: 2px 0;
+      }
+
+      .euiButtonEmpty__text {
+        margin-inline-start: 4px;
+        text-transform: none;
+        font-weight: bold;
+        font-size: 15px;
+      }
+    }
+  }
+}
+
+.incontextInsightGeneratePopoverFooter{
+  padding-block: 0 !important;
+  margin: 0 !important;
+  border: none;
+}
+
+.incontextInsightGeneratePopoverContent {
+  display: flex;
+  overflow: auto;
+  max-height: 300px;
+  scrollbar-width: thin;
 }
 
 .incontextInsightSummary {

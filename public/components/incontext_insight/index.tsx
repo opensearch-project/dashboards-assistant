@@ -7,29 +7,30 @@ import './index.scss';
 
 import { i18n } from '@osd/i18n';
 import {
-  EuiWrappingPopover,
-  EuiSmallButton,
+  EuiBadge,
   EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCompressedFormRow,
-  EuiPopoverTitle,
-  EuiText,
-  EuiPopoverFooter,
-  EuiBadge,
-  EuiSpacer,
+  EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
-  keys,
-  EuiIcon,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSmallButton,
   EuiSmallButtonIcon,
+  EuiSpacer,
+  EuiText,
+  EuiWrappingPopover,
+  keys,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getIncontextInsightRegistry, getNotifications } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
+import sparkle from '../../assets/sparkle.svg';
 import { HttpSetup } from '../../../../../src/core/public';
 import { DataSourceService } from '../../services/data_source_service';
 import { GeneratePopoverBody } from './generate_popover_body';
@@ -269,7 +270,7 @@ export const IncontextInsight = ({
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <div className="incontextInsightAnchorIcon">
-            <EuiIcon type={chatIcon} size="l" />
+            <EuiIcon type={input.type === 'generate' ? sparkle : chatIcon} size="l" />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -316,37 +317,42 @@ export const IncontextInsight = ({
         offset={6}
         panelPaddingSize="s"
       >
-        <EuiPopoverTitle className="incontextInsightPopoverTitle" paddingSize="none">
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem>
-              <div>
-                <EuiBadge color="hollow" iconType={chatIcon} iconSide="left">
-                  {i18n.translate('assistantDashboards.incontextInsight.assistant', {
-                    defaultMessage: 'OpenSearch Assistant',
-                  })}
-                </EuiBadge>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiSmallButtonIcon
-                  title={i18n.translate('assistantDashboards.incontextInsight.closeAssistant', {
-                    defaultMessage: 'Close assistant popover',
-                  })}
-                  aria-label={i18n.translate(
-                    'assistantDashboards.incontextInsight.closeAssistant',
-                    {
-                      defaultMessage: 'Close assistant popover',
-                    }
-                  )}
-                  iconType="cross"
-                  onClick={closePopover}
-                  color="subdued"
-                />
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
+        {
+          // For 'generate' type insights, we don't want to show this title but its own inner title
+          input.type !== 'generate' && (
+            <EuiPopoverTitle className="incontextInsightPopoverTitle" paddingSize="none">
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem>
+                  <div>
+                    <EuiBadge color="hollow" iconType={chatIcon} iconSide="left">
+                      {i18n.translate('assistantDashboards.incontextInsight.assistant', {
+                        defaultMessage: 'OpenSearch Assistant',
+                      })}
+                    </EuiBadge>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div>
+                    <EuiSmallButtonIcon
+                      title={i18n.translate('assistantDashboards.incontextInsight.closeAssistant', {
+                        defaultMessage: 'Close assistant popover',
+                      })}
+                      aria-label={i18n.translate(
+                        'assistantDashboards.incontextInsight.closeAssistant',
+                        {
+                          defaultMessage: 'Close assistant popover',
+                        }
+                      )}
+                      iconType="cross"
+                      onClick={closePopover}
+                      color="subdued"
+                    />
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverTitle>
+          )
+        }
         <div className="incontextInsightPopoverBody">{popoverBody()}</div>
       </EuiWrappingPopover>
     );
