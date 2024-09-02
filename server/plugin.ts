@@ -50,7 +50,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     });
 
     // Register router for text to visualization
-    if (config.next.enabled) {
+    if (config.text2viz.enabled) {
       registerText2VizRoutes(router);
     }
 
