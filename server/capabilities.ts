@@ -14,7 +14,7 @@ export const capabilitiesProvider = () => ({
   },
 });
 
-// Users can customize the assistant feature UI capabilities here
+// Users can customize the logic of flipping assistant feature UI capabilities here
 export const capabilitiesSwitcher: CapabilitiesSwitcher = (request, capabilities) => {
   return {
     assistant: {

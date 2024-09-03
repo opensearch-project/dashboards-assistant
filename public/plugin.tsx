@@ -105,28 +105,42 @@ export class AssistantPlugin
     });
 
     if (this.config.text2viz.enabled) {
-      setupDeps.visualizations.registerAlias({
-        name: 'text2viz',
-        aliasPath: '#/',
-        aliasApp: 'text2viz',
-        title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
-          defaultMessage: 'Natural language',
-        }),
-        description: i18n.translate('dashboardAssistant.feature.text2viz.description', {
-          defaultMessage: 'Generate visualization with a natural language question.',
-        }),
-        icon: 'chatRight',
-        stage: 'experimental',
-        promotion: {
-          buttonText: i18n.translate('dashboardAssistant.feature.text2viz.promotion.buttonText', {
-            defaultMessage: 'Natural language previewer',
-          }),
-          description: i18n.translate('dashboardAssistant.feature.text2viz.promotion.description', {
-            defaultMessage:
-              'Not sure which visualization to choose? Generate visualization previews with a natural language question.',
-          }),
-        },
-      });
+      const checkSubscriptionAndRegisterText2VizButton = async () => {
+        const [coreStart] = await core.getStartServices();
+        const isSubscriptionActive =
+          coreStart.application.capabilities?.assistant?.isSubscriptionActive === true;
+        if (isSubscriptionActive) {
+          setupDeps.visualizations.registerAlias({
+            name: 'text2viz',
+            aliasPath: '#/',
+            aliasApp: 'text2viz',
+            title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
+              defaultMessage: 'Natural language',
+            }),
+            description: i18n.translate('dashboardAssistant.feature.text2viz.description', {
+              defaultMessage: 'Generate visualization with a natural language question.',
+            }),
+            icon: 'chatRight',
+            stage: 'experimental',
+            promotion: {
+              buttonText: i18n.translate(
+                'dashboardAssistant.feature.text2viz.promotion.buttonText',
+                {
+                  defaultMessage: 'Natural language previewer',
+                }
+              ),
+              description: i18n.translate(
+                'dashboardAssistant.feature.text2viz.promotion.description',
+                {
+                  defaultMessage:
+                    'Not sure which visualization to choose? Generate visualization previews with a natural language question.',
+                }
+              ),
+            },
+          });
+        }
+      };
+      checkSubscriptionAndRegisterText2VizButton();
 
       core.application.register({
         id: 'text2viz',
@@ -136,12 +150,18 @@ export class AssistantPlugin
         navLinkStatus: AppNavLinkStatus.hidden,
         mount: async (params: AppMountParameters) => {
           const [coreStart, pluginsStart] = await core.getStartServices();
-          const { renderText2VizApp } = await import('./text2viz');
-          return renderText2VizApp(params, {
-            ...coreStart,
-            ...pluginsStart,
-            setHeaderActionMenu: params.setHeaderActionMenu,
-          });
+          const isSubscriptionActive =
+            coreStart.application.capabilities?.assistant?.isSubscriptionActive === true;
+          if (isSubscriptionActive) {
+            const { renderText2VizApp } = await import('./text2viz');
+            return renderText2VizApp(params, {
+              ...coreStart,
+              ...pluginsStart,
+              setHeaderActionMenu: params.setHeaderActionMenu,
+            });
+          } else {
+            return () => {};
+          }
         },
       });
     }
