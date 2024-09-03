@@ -11,7 +11,7 @@ import { getAgent, searchAgentByName } from './get_agent';
 import { ML_COMMONS_BASE_API } from '../utils/constants';
 import { InsightType, SummaryType } from '../types';
 
-const SUMMARY_AGENT_CONFIG_ID = 'summary';
+const SUMMARY_AGENT_CONFIG_ID = 'os_general_llm';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 let osInsightAgentId: string | undefined;
 let userInsightAgentId: string | undefined;
