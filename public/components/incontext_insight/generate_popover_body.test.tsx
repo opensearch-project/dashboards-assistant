@@ -37,7 +37,7 @@ describe('GeneratePopoverBody', () => {
     contextProvider: jest.fn(),
     suggestions: ['Test summarization question'],
     datasourceId: 'test-datasource',
-    key: 'test-key',
+    key: 'alerts',
   };
 
   const closePopoverMock = jest.fn();
@@ -49,7 +49,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: 'insight_agent_id',
+            insightAgentIdExists: true,
           };
           break;
 
@@ -122,7 +122,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: undefined,
+            insightAgentIdExists: false,
           };
           break;
 
@@ -192,7 +192,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: 'insight_agent_id',
+            insightAgentIdExists: true,
           };
           break;
 
