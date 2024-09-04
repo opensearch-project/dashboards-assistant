@@ -71,7 +71,9 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
           }
         }
       } catch (e) {
-        console.log(`Cannot find insight agent for ${req.body.insightType}`);
+        context.assistant_plugin.logger.info(
+          `Cannot find insight agent for ${req.body.insightType}`
+        );
       }
       try {
         summary = response.body.inference_results[0].output[0].result;
