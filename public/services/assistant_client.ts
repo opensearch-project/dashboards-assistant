@@ -14,12 +14,22 @@ export class AssistantClient {
   constructor(private http: HttpSetup) {}
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  executeAgent = (agentName: string, parameters: Record<string, any>, options?: Options) => {
+  executeAgent = (agentId: string, parameters: Record<string, any>, options?: Options) => {
     return this.http.fetch({
       method: 'POST',
-      path: `${API_BASE}/agents/${agentName}/_execute`,
+      path: `${API_BASE}/agent/_execute`,
       body: JSON.stringify(parameters),
-      query: { dataSourceId: options?.dataSourceId },
+      query: { dataSourceId: options?.dataSourceId, agentId },
+    });
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  executeAgentByName = (agentName: string, parameters: Record<string, any>, options?: Options) => {
+    return this.http.fetch({
+      method: 'POST',
+      path: `${API_BASE}/agent/_execute`,
+      body: JSON.stringify(parameters),
+      query: { dataSourceId: options?.dataSourceId, agentName },
     });
   };
 }
