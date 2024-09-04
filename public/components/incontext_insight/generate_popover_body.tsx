@@ -10,7 +10,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiLoadingContent,
   EuiMarkdownFormat,
   EuiPanel,
@@ -20,7 +19,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useEffectOnce } from 'react-use';
-import { IMessage, Interaction, IOutput } from 'common/types/chat_saved_object_attributes';
 import { MessageActions } from '../../tabs/chat/messages/message_action';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getNotifications } from '../../services';
@@ -28,8 +26,6 @@ import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import shiny_sparkle from '../../assets/shiny_sparkle.svg';
 import { DataSourceService } from '../../services/data_source_service';
-import { ASSISTANT_API } from '../../../common/constants/llm';
-import { getAssistantRole } from '../../utils/constants';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 
 export const GeneratePopoverBody: React.FC<{
@@ -53,21 +49,6 @@ export const GeneratePopoverBody: React.FC<{
         : 'Please summarize the input'
     );
   });
-
-  // // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // const handleSummaryResponse = (response: any) => {
-  //   const interactionLength = response.interactions.length;
-  //   if (interactionLength > 0) {
-  //     setConversationId(response.interactions[interactionLength - 1].conversation_id);
-  //     setInteraction(response.interactions[interactionLength - 1]);
-  //   }
-
-  //   const messageLength = response.messages.length;
-  //   if (messageLength > 0 && response.messages[messageLength - 1].type === 'output') {
-  //     setSummary(response.messages[messageLength - 1].content);
-  //     setMessage(response.messages[messageLength - 1]);
-  //   }
-  // };
 
   const onGenerateSummary = (summarizationQuestion: string) => {
     const summarize = async () => {
@@ -226,32 +207,16 @@ export const GeneratePopoverBody: React.FC<{
   const renderInnerFooter = () => {
     return (
       <EuiPopoverFooter className="incontextInsightGeneratePopoverFooter" paddingSize="none">
-        <EuiFlexGroup gutterSize="none" direction={'rowReverse'}>
-          {/* <MessageActions
-            contentToCopy={summary}
-            showRegenerate
-            onRegenerate={async () => onRegenerateSummary(interaction?.interaction_id || '')}
-            interaction={interaction}
-            showFeedback
-            showTraceIcon={false}
-            usageCollection={usageCollection}
-          /> */}
-          {insightAvailable && (
-            <EuiFlexItem
-              grow={false}
-              onClick={() => {
-                setShowInsight(true);
-              }}
-            >
-              <EuiIconTip
-                aria-label="Insight"
-                type="iInCircle"
-                content="Insight with RAG"
-                color={showInsight ? 'blue' : 'black'}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <MessageActions
+          contentToCopy={showInsight ? insight : summary}
+          showFeedback
+          showTraceIcon={insightAvailable}
+          onViewTrace={() => {
+            setShowInsight(true);
+          }}
+          usageCollection={usageCollection}
+          isOnTrace={showInsight}
+        />
       </EuiPopoverFooter>
     );
   };

@@ -4,7 +4,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSmallButtonIcon, EuiCopy } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSmallButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { IOutput, Interaction } from '../../../../common/types/chat_saved_object_attributes';
 import { useFeedback } from '../../../hooks/use_feed_back';
 import { HttpSetup } from '../../../../../../src/core/public';
@@ -19,6 +20,7 @@ interface MessageActionsProps {
   message?: IOutput | null;
   showFeedback?: boolean;
   showTraceIcon?: boolean;
+  isOnTrace?: boolean;
   traceInteractionId?: string;
   onViewTrace?: () => void;
   shouldActionBarVisibleOnHover?: boolean;
@@ -26,7 +28,10 @@ interface MessageActionsProps {
   httpSetup?: HttpSetup;
   dataSourceService?: DataSourceService;
   usageCollection?: UsageCollectionSetup;
+  buttonOrder?: string[];
 }
+
+type ButtonKey = 'copy' | 'regenerate' | 'thumbUp' | 'thumbDown' | 'trace';
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
   contentToCopy = '',
@@ -36,13 +41,15 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   message = null,
   showFeedback = false,
   showTraceIcon = false,
+  isOnTrace = false,
   traceInteractionId = null,
-  onViewTrace = null,
+  onViewTrace,
   shouldActionBarVisibleOnHover = false,
   isFullWidth = false,
   httpSetup,
   dataSourceService,
   usageCollection,
+  buttonOrder = ['trace', 'regenerate', 'thumbUp', 'thumbDown', 'copy'],
 }) => {
   const { feedbackResult, sendFeedback } = useFeedback(
     interaction,
@@ -61,77 +68,105 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     [feedbackResult, message, sendFeedback]
   );
 
+  const renderButtonWithTooltip = (content: string, button: JSX.Element, key: string) => (
+    <EuiToolTip
+      key={key}
+      delay="long"
+      content={i18n.translate(`assistantDashboards.messageActions.${key}`, {
+        defaultMessage: content,
+      })}
+    >
+      {button}
+    </EuiToolTip>
+  );
+
+  const feedbackTip =
+    'Thank you for the feedback. Try again by adjusting your prompt so that I have the opportunity to better assist you.';
+
+  const buttonConfigs = {
+    copy: {
+      show: !isFullWidth,
+      component: renderButtonWithTooltip(
+        'Copy to clipboard',
+        <EuiCopy textToCopy={contentToCopy}>
+          {(copy) => <EuiSmallButtonIcon onClick={copy} color="text" iconType="copy" />}
+        </EuiCopy>,
+        'copy'
+      ),
+    },
+    regenerate: {
+      show: showRegenerate && onRegenerate,
+      component: renderButtonWithTooltip(
+        'Regenerate message',
+        <EuiSmallButtonIcon
+          aria-label="regenerate message"
+          onClick={onRegenerate}
+          color="text"
+          iconType="refresh"
+        />,
+        'regenerate'
+      ),
+    },
+    thumbUp: {
+      show: showFeedback && feedbackResult !== false,
+      component: renderButtonWithTooltip(
+        feedbackResult === true ? feedbackTip : 'Good response',
+        <EuiSmallButtonIcon
+          aria-label="feedback thumbs up"
+          color={feedbackResult === true ? 'primary' : 'text'}
+          iconType="thumbsUp"
+          onClick={() => handleFeedback(true)}
+        />,
+        'thumbUp'
+      ),
+    },
+    thumbDown: {
+      show: showFeedback && feedbackResult !== true,
+      component: renderButtonWithTooltip(
+        feedbackResult === false ? feedbackTip : 'Bad response',
+        <EuiSmallButtonIcon
+          aria-label="feedback thumbs down"
+          color={feedbackResult === false ? 'primary' : 'text'}
+          iconType="thumbsDown"
+          onClick={() => handleFeedback(false)}
+        />,
+        'thumbDown'
+      ),
+    },
+    trace: {
+      show: showTraceIcon && onViewTrace,
+      component: renderButtonWithTooltip(
+        'Insight with RAG',
+        <EuiSmallButtonIcon
+          aria-label="How was this generated?"
+          {...(traceInteractionId && {
+            'data-test-subj': `trace-icon-${traceInteractionId}`,
+          })}
+          onClick={onViewTrace}
+          color={isOnTrace ? 'primary' : 'text'}
+          iconType="iInCircle"
+        />,
+        'trace'
+      ),
+    },
+  };
+
   return (
     <EuiFlexGroup
       aria-label="message actions"
       className={shouldActionBarVisibleOnHover ? 'llm-chat-action-buttons-hidden' : ''}
       responsive={false}
-      gutterSize="s"
+      gutterSize="none"
       alignItems="center"
-      justifyContent="flexStart"
-      style={{ paddingLeft: 10 }}
+      justifyContent="flexEnd"
     >
-      {!isFullWidth && (
-        <EuiFlexItem grow={false}>
-          <EuiCopy textToCopy={contentToCopy}>
-            {(copy) => (
-              <EuiSmallButtonIcon
-                aria-label="copy message"
-                title="copy message"
-                onClick={copy}
-                color="text"
-                iconType="copy"
-              />
-            )}
-          </EuiCopy>
-        </EuiFlexItem>
-      )}
-      {showRegenerate && onRegenerate && (
-        <EuiFlexItem grow={false}>
-          <EuiSmallButtonIcon
-            aria-label="regenerate message"
-            onClick={onRegenerate}
-            title="regenerate message"
-            color="text"
-            iconType="refresh"
-          />
-        </EuiFlexItem>
-      )}
-      {showFeedback && (
-        <>
-          {feedbackResult !== false && (
-            <EuiFlexItem grow={false}>
-              <EuiSmallButtonIcon
-                aria-label="feedback thumbs up"
-                color={feedbackResult === true ? 'primary' : 'text'}
-                iconType="thumbsUp"
-                onClick={() => handleFeedback(true)}
-              />
+      {buttonOrder.map(
+        (key) =>
+          buttonConfigs[key as ButtonKey].show && (
+            <EuiFlexItem grow={false} key={key}>
+              {buttonConfigs[key as ButtonKey].component}
             </EuiFlexItem>
-          )}
-          {feedbackResult !== true && (
-            <EuiFlexItem grow={false}>
-              <EuiSmallButtonIcon
-                aria-label="feedback thumbs down"
-                color={feedbackResult === false ? 'primary' : 'text'}
-                iconType="thumbsDown"
-                onClick={() => handleFeedback(false)}
-              />
-            </EuiFlexItem>
-          )}
-        </>
-      )}
-      {showTraceIcon && traceInteractionId && onViewTrace && (
-        <EuiFlexItem grow={false}>
-          <EuiSmallButtonIcon
-            aria-label="How was this generated?"
-            data-test-subj={`trace-icon-${traceInteractionId}`}
-            onClick={onViewTrace}
-            title="How was this generated?"
-            color="text"
-            iconType="iInCircle"
-          />
-        </EuiFlexItem>
+          )
       )}
     </EuiFlexGroup>
   );
