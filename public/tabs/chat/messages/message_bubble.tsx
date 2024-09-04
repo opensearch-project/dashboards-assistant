@@ -149,38 +149,38 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
             className="llm-chat-bubble-panel llm-chat-bubble-panel-output"
           >
             {props.children}
+            {props.showActionBar && (
+              <>
+                <EuiSpacer size="xs" />
+                <MessageActions
+                  contentToCopy={props.message.content ?? ''}
+                  showRegenerate={props.showRegenerate}
+                  onRegenerate={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
+                  interaction={props.interaction}
+                  message={props.message as IOutput}
+                  showFeedback={showFeedback}
+                  showTraceIcon={!!props.message.interactionId}
+                  traceInteractionId={props.message.interactionId || ''}
+                  onViewTrace={() => {
+                    const message = props.message as IOutput;
+                    const viewTraceAction: ISuggestedAction = {
+                      actionType: 'view_trace',
+                      metadata: {
+                        interactionId: message.interactionId || '',
+                      },
+                      message: 'How was this generated?',
+                    };
+                    executeAction(viewTraceAction, message);
+                  }}
+                  shouldActionBarVisibleOnHover={props.shouldActionBarVisibleOnHover}
+                  isFullWidth={fullWidth}
+                  httpSetup={core.services.http}
+                  dataSourceService={core.services.dataSource}
+                  usageCollection={core.services.setupDeps.usageCollection}
+                />
+              </>
+            )}
           </EuiPanel>
-          {props.showActionBar && (
-            <>
-              <EuiSpacer size="xs" />
-              <MessageActions
-                contentToCopy={props.message.content ?? ''}
-                showRegenerate={props.showRegenerate}
-                onRegenerate={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
-                interaction={props.interaction}
-                message={props.message as IOutput}
-                showFeedback={showFeedback}
-                showTraceIcon={!!props.message.interactionId}
-                traceInteractionId={props.message.interactionId || ''}
-                onViewTrace={() => {
-                  const message = props.message as IOutput;
-                  const viewTraceAction: ISuggestedAction = {
-                    actionType: 'view_trace',
-                    metadata: {
-                      interactionId: message.interactionId || '',
-                    },
-                    message: 'How was this generated?',
-                  };
-                  executeAction(viewTraceAction, message);
-                }}
-                shouldActionBarVisibleOnHover={props.shouldActionBarVisibleOnHover}
-                isFullWidth={fullWidth}
-                httpSetup={core.services.http}
-                dataSourceService={core.services.dataSource}
-                usageCollection={core.services.setupDeps.usageCollection}
-              />
-            </>
-          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
