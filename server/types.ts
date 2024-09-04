@@ -5,8 +5,10 @@
 
 import { IMessage, Interaction } from '../common/types/chat_saved_object_attributes';
 import { Logger, HttpAuth } from '../../../src/core/server';
+import { AssistantServiceSetup } from './services/assistant_service';
 
 export interface AssistantPluginSetup {
+  assistantService: AssistantServiceSetup;
   registerMessageParser: (message: MessageParser) => void;
   removeMessageParser: (parserId: MessageParser['id']) => void;
 }
