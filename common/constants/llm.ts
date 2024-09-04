@@ -25,7 +25,7 @@ export const TEXT2VIZ_API = {
 };
 
 export const AGENT_API = {
-  EXECUTE: `${API_BASE}/agents/{agentId}/_execute`,
+  EXECUTE: `${API_BASE}/agent/_execute`,
 };
 
 export const NOTEBOOK_API = {

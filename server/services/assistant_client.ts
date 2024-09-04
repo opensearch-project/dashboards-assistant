@@ -28,6 +28,8 @@ const isDataSourceQuery = (query: any): query is { dataSourceId: string } => {
 };
 
 export class AssistantClient {
+  private client?: OpenSearchClient;
+
   constructor(
     private request: OpenSearchDashboardsRequest,
     private context: RequestHandlerContext & {
@@ -40,16 +42,12 @@ export class AssistantClient {
   ) {}
 
   executeAgent = async (
-    agentName: string,
+    agentId: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parameters: Record<string, any>
   ): Promise<ApiResponse<AgentExecuteResponse>> => {
-    let client = this.context.core.opensearch.client.asCurrentUser;
-    if (isDataSourceQuery(this.request.query) && this.context.dataSource) {
-      client = await this.context.dataSource.opensearch.getClient(this.request.query.dataSourceId);
-    }
+    const client = await this.getOpenSearchClient();
 
-    const agentId = await getAgent(agentName, client.transport);
     const response = await client.transport.request({
       method: 'POST',
       path: `${ML_COMMONS_BASE_API}/agents/${agentId}/_execute`,
@@ -60,4 +58,28 @@ export class AssistantClient {
 
     return response as ApiResponse<AgentExecuteResponse>;
   };
+
+  executeAgentByName = async (
+    agentName: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parameters: Record<string, any>
+  ) => {
+    const client = await this.getOpenSearchClient();
+    const agentId = await getAgent(agentName, client.transport);
+    return this.executeAgent(agentId, parameters);
+  };
+
+  private async getOpenSearchClient() {
+    if (!this.client) {
+      let client = this.context.core.opensearch.client.asCurrentUser;
+      if (isDataSourceQuery(this.request.query) && this.context.dataSource) {
+        client = await this.context.dataSource.opensearch.getClient(
+          this.request.query.dataSourceId
+        );
+      }
+      this.client = client;
+    }
+
+    return this.client;
+  }
 }
