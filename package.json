@@ -1,6 +1,6 @@
 {
   "name": "assistant-dashboards",
-  "version": "2.16.0.0",
+  "version": "2.17.0.0",
   "main": "index.ts",
   "license": "Apache-2.0",
   "scripts": {
@@ -39,5 +39,9 @@
   "eslintIgnore": [
     "node_modules/*",
     "target/*"
-  ]
+  ],
+  "resolutions": {
+    "braces": "^3.0.3",
+    "micromatch": "^4.0.8"
+  }
 }
