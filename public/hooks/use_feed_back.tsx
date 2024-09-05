@@ -20,7 +20,8 @@ export const useFeedback = (
   interaction?: Interaction | null,
   httpSetup?: HttpSetup,
   dataSourceService?: DataSourceService,
-  usageCollection?: UsageCollectionSetup
+  usageCollection?: UsageCollectionSetup,
+  metricAppName: string = 'chat'
 ) => {
   const chatStateContext = useChatState();
   const [feedbackResult, setFeedbackResult] = useState<undefined | boolean>(
@@ -46,7 +47,7 @@ export const useFeedback = (
     const reportMetric = usageCollection
       ? (metric: string) => {
           usageCollection.reportUiStats(
-            `chat`,
+            metricAppName,
             usageCollection.METRIC_TYPE.CLICK,
             metric + '-' + uuidv4()
           );

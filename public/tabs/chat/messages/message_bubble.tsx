@@ -177,6 +177,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                   httpSetup={core.services.http}
                   dataSourceService={core.services.dataSource}
                   usageCollection={core.services.setupDeps.usageCollection}
+                  metricAppName="chat"
                 />
               </>
             )}

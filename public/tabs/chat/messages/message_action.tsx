@@ -28,6 +28,7 @@ interface MessageActionsProps {
   httpSetup?: HttpSetup;
   dataSourceService?: DataSourceService;
   usageCollection?: UsageCollectionSetup;
+  metricAppName?: string;
   buttonOrder?: string[];
 }
 
@@ -49,13 +50,15 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   httpSetup,
   dataSourceService,
   usageCollection,
+  metricAppName = 'chat',
   buttonOrder = ['trace', 'regenerate', 'thumbUp', 'thumbDown', 'copy'],
 }) => {
   const { feedbackResult, sendFeedback } = useFeedback(
     interaction,
     httpSetup,
     dataSourceService,
-    usageCollection
+    usageCollection,
+    metricAppName
   );
 
   const handleFeedback = useCallback(

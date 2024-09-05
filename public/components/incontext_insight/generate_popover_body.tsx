@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -39,8 +40,19 @@ export const GeneratePopoverBody: React.FC<{
   const [insight, setInsight] = useState('');
   const [insightAvailable, setInsightAvailable] = useState(false);
   const [showInsight, setShowInsight] = useState(false);
+  const metricAppName = 'alertSumm';
 
   const toasts = getNotifications().toasts;
+
+  const reportGeneratedMetric = usageCollection
+    ? (metric: string) => {
+        usageCollection.reportUiStats(
+          metricAppName,
+          usageCollection.METRIC_TYPE.CLICK,
+          metric + '-' + uuidv4()
+        );
+      }
+    : () => {};
 
   useEffectOnce(() => {
     onGenerateSummary(
@@ -93,6 +105,7 @@ export const GeneratePopoverBody: React.FC<{
               `Please provide your insight on this ${summaryType}.`
             );
           }
+          reportGeneratedMetric('generated');
         })
         .catch((error) => {
           toasts.addDanger(
@@ -216,6 +229,7 @@ export const GeneratePopoverBody: React.FC<{
           }}
           usageCollection={usageCollection}
           isOnTrace={showInsight}
+          metricAppName={metricAppName}
         />
       </EuiPopoverFooter>
     );
