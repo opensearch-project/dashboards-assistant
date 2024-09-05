@@ -3,7 +3,8 @@
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Unreleased
-- fix: make sure $schema always added to LLM generated vega json object([252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
+- fix: make sure $schema always added to LLM generated vega json object([#252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
+- Fix CVE-2024-4067 ([#269](https://github.com/opensearch-project/dashboards-assistant/pull/269))
 
 ### 📈 Features/Enhancements
 
@@ -27,5 +28,3 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Support context aware alert analysis by reusing incontext insight component([#215](https://github.com/opensearch-project/dashboards-assistant/pull/215))
 - Use smaller and compressed variants of buttons and form components ([#250](https://github.com/opensearch-project/dashboards-assistant/pull/250))
 - Add the message action bar module and refactor the original code([#253](https://github.com/opensearch-project/dashboards-assistant/pull/253))
-
-
