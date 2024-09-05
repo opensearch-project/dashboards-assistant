@@ -64,10 +64,10 @@ describe('MessageActions', () => {
     const thumbsDownButton = screen.getByLabelText('feedback thumbs down');
 
     fireEvent.click(thumbsUpButton);
-    expect(sendFeedback).toHaveBeenCalledWith(message, true);
+    expect(sendFeedback).toHaveBeenCalledWith(true, message);
 
     fireEvent.click(thumbsDownButton);
-    expect(sendFeedback).toHaveBeenCalledWith(message, false);
+    expect(sendFeedback).toHaveBeenCalledWith(false, message);
   });
 
   it('should render trace icon and call onViewTrace function when clicked', () => {

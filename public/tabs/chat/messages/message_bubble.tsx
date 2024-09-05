@@ -176,7 +176,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                   isFullWidth={fullWidth}
                   httpSetup={core.services.http}
                   dataSourceService={core.services.dataSource}
-                  usageCollection={core.services.setupDeps.usageCollection}
+                  usageCollection={core.services.setupDeps?.usageCollection}
                 />
               </>
             )}
