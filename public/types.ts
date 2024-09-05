@@ -17,6 +17,8 @@ import {
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
+import { AssistantClient } from './services/assistant_client';
+
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -69,6 +71,7 @@ export interface AssistantSetup {
 
 export interface AssistantStart {
   dataSource: DataSourceServiceContract;
+  assistantClient: AssistantClient;
 }
 
 export type StartServices = CoreStart &
