@@ -92,6 +92,8 @@ export interface IncontextInsight {
   summary?: string;
   suggestions?: string[];
   interactionId?: string;
+  contextProvider?: () => Promise<string>;
+  datasourceId?: string;
 }
 
 export type IncontextInsightType =
