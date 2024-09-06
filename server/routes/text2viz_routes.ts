@@ -6,14 +6,12 @@
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../src/core/server';
 import { TEXT2VIZ_API } from '../../common/constants/llm';
-import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
-import { ML_COMMONS_BASE_API } from '../utils/constants';
-import { getAgent } from './get_agent';
+import { AssistantServiceSetup } from '../services/assistant_service';
 
 const TEXT2VEGA_AGENT_CONFIG_ID = 'text2vega';
 const TEXT2PPL_AGENT_CONFIG_ID = 'text2ppl';
 
-export function registerText2VizRoutes(router: IRouter) {
+export function registerText2VizRoutes(router: IRouter, assistantService: AssistantServiceSetup) {
   router.post(
     {
       path: TEXT2VIZ_API.TEXT2VEGA,
@@ -30,25 +28,15 @@ export function registerText2VizRoutes(router: IRouter) {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const client = await getOpenSearchClientTransport({
-        context,
-        dataSourceId: req.query.dataSourceId,
-      });
-      const agentId = await getAgent(TEXT2VEGA_AGENT_CONFIG_ID, client);
-      const response = await client.request({
-        method: 'POST',
-        path: `${ML_COMMONS_BASE_API}/agents/${agentId}/_execute`,
-        body: {
-          parameters: {
-            input: req.body.input,
-            ppl: req.body.ppl,
-            dataSchema: req.body.dataSchema,
-            sampleData: req.body.sampleData,
-          },
-        },
-      });
-
+      const assistantClient = assistantService.getScopedClient(req, context);
       try {
+        const response = await assistantClient.executeAgentByName(TEXT2VEGA_AGENT_CONFIG_ID, {
+          input: req.body.input,
+          ppl: req.body.ppl,
+          dataSchema: req.body.dataSchema,
+          sampleData: req.body.sampleData,
+        });
+
         // let result = response.body.inference_results[0].output[0].dataAsMap;
         let result = JSON.parse(response.body.inference_results[0].output[0].result);
         // sometimes llm returns {response: <schema>} instead of <schema>
@@ -83,22 +71,13 @@ export function registerText2VizRoutes(router: IRouter) {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const client = await getOpenSearchClientTransport({
-        context,
-        dataSourceId: req.query.dataSourceId,
-      });
-      const agentId = await getAgent(TEXT2PPL_AGENT_CONFIG_ID, client);
-      const response = await client.request({
-        method: 'POST',
-        path: `${ML_COMMONS_BASE_API}/agents/${agentId}/_execute`,
-        body: {
-          parameters: {
-            question: req.body.question,
-            index: req.body.index,
-          },
-        },
-      });
+      const assistantClient = assistantService.getScopedClient(req, context);
       try {
+        const response = await assistantClient.executeAgentByName(TEXT2PPL_AGENT_CONFIG_ID, {
+          question: req.body.question,
+          index: req.body.index,
+        });
+
         const result = JSON.parse(response.body.inference_results[0].output[0].result);
         return res.ok({ body: result });
       } catch (e) {

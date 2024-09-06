@@ -39,5 +39,9 @@
   "eslintIgnore": [
     "node_modules/*",
     "target/*"
-  ]
+  ],
+  "resolutions": {
+    "braces": "^3.0.3",
+    "micromatch": "^4.0.8"
+  }
 }
