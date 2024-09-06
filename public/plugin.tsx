@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import { Subscription } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import {
   AppMountParameters,
   AppNavLinkStatus,
@@ -39,12 +39,16 @@ import {
   setNotifications,
   setIncontextInsightRegistry,
   setConfigSchema,
+  setUiActions,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
 import { ASSISTANT_API, DEFAULT_USER_NAME } from '../common/constants/llm';
 import { IncontextInsightProps } from './components/incontext_insight';
 import { AssistantService } from './services/assistant_service';
+import { ActionContextMenu } from './components/ui_action_context_menu';
+import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER, bootstrap } from './ui_triggers';
+import { TEXT2VIZ_APP_ID } from './text2viz';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -102,6 +106,9 @@ export class AssistantPlugin
       return account;
     };
 
+    // setup ui trigger
+    bootstrap(setupDeps.uiActions);
+
     const dataSourceSetupResult = this.dataSourceService.setup({
       uiSettings: core.uiSettings,
       dataSourceManagement: setupDeps.dataSourceManagement,
@@ -146,7 +153,7 @@ export class AssistantPlugin
       checkSubscriptionAndRegisterText2VizButton();
 
       core.application.register({
-        id: 'text2viz',
+        id: TEXT2VIZ_APP_ID,
         title: i18n.translate('dashboardAssistant.feature.text2viz', {
           defaultMessage: 'Natural language previewer',
         }),
@@ -208,6 +215,19 @@ export class AssistantPlugin
       setupChat();
     }
 
+    setupDeps.data.__enhance({
+      editor: {
+        queryEditorExtension: {
+          id: 'assistant-query-actions',
+          order: 2000,
+          isEnabled$: () => of(true),
+          getComponent: () => {
+            return <ActionContextMenu />;
+          },
+        },
+      },
+    });
+
     return {
       dataSource: dataSourceSetupResult,
       registerMessageRenderer: (contentType, render) => {
@@ -232,6 +252,9 @@ export class AssistantPlugin
         };
       },
       assistantActions,
+      assistantTriggers: {
+        AI_ASSISTANT_QUERY_EDITOR_TRIGGER,
+      },
       registerIncontextInsight: this.incontextInsightRegistry.register.bind(
         this.incontextInsightRegistry
       ),
@@ -244,12 +267,28 @@ export class AssistantPlugin
     };
   }
 
-  public start(core: CoreStart): AssistantStart {
+  public start(
+    core: CoreStart,
+    { data, uiActions }: AssistantPluginStartDependencies
+  ): AssistantStart {
     const assistantServiceStart = this.assistantService.start(core.http);
     setCoreStart(core);
     setChrome(core.chrome);
     setNotifications(core.notifications);
     setConfigSchema(this.config);
+    setUiActions(uiActions);
+
+    if (this.config.next.enabled) {
+      uiActions.addTriggerAction(AI_ASSISTANT_QUERY_EDITOR_TRIGGER, {
+        id: 'assistant_generate_visualization_action',
+        order: 1,
+        getDisplayName: () => 'Generate visualization',
+        getIconType: () => 'visLine' as const,
+        execute: async () => {
+          core.application.navigateToApp(TEXT2VIZ_APP_ID);
+        },
+      });
+    }
 
     return {
       dataSource: this.dataSourceService.start(),
