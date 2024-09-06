@@ -9,7 +9,7 @@ import { TEXT2VIZ_API } from '../../common/constants/llm';
 import { AssistantServiceSetup } from '../services/assistant_service';
 
 const TEXT2VEGA_AGENT_CONFIG_ID = 'text2vega';
-const TEXT2PPL_AGENT_CONFIG_ID = 'text2ppl';
+const TEXT2PPL_AGENT_CONFIG_ID = 'os_query_assist_ppl';
 
 export function registerText2VizRoutes(router: IRouter, assistantService: AssistantServiceSetup) {
   router.post(
