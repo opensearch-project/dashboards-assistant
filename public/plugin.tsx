@@ -42,6 +42,8 @@ import {
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
 import { ASSISTANT_API, DEFAULT_USER_NAME } from '../common/constants/llm';
+import { IncontextInsightProps } from './components/incontext_insight';
+import { AssistantService } from './services/assistant_service';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -71,6 +73,7 @@ export class AssistantPlugin
   incontextInsightRegistry: IncontextInsightRegistry | undefined;
   private dataSourceService: DataSourceService;
   private resetChatSubscription: Subscription | undefined;
+  private assistantService = new AssistantService();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -81,6 +84,7 @@ export class AssistantPlugin
     core: CoreSetup<AssistantPluginStartDependencies>,
     setupDeps: AssistantPluginSetupDependencies
   ): AssistantSetup {
+    this.assistantService.setup();
     this.incontextInsightRegistry = new IncontextInsightRegistry();
     setIncontextInsightRegistry(this.incontextInsightRegistry);
     const messageRenderers: Record<string, MessageRenderer> = {};
@@ -211,17 +215,20 @@ export class AssistantPlugin
   }
 
   public start(core: CoreStart): AssistantStart {
+    const assistantServiceStart = this.assistantService.start(core.http);
     setCoreStart(core);
     setChrome(core.chrome);
     setNotifications(core.notifications);
 
     return {
       dataSource: this.dataSourceService.start(),
+      assistantClient: assistantServiceStart.client,
     };
   }
 
   public stop() {
     this.dataSourceService.stop();
+    this.assistantService.stop();
     this.resetChatSubscription?.unsubscribe();
   }
 }
