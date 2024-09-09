@@ -48,6 +48,7 @@ import { NLQVisualizationInput } from './embeddable/types';
 import { EditorPanel } from './editor_panel';
 import { VIS_NLQ_SAVED_OBJECT } from '../../../common/constants/vis_type_nlq';
 import { HeaderVariant } from '../../../../../src/core/public';
+import { TEXT2VEGA_INPUT_SIZE_LIMIT } from '../../../common/constants/llm';
 
 export const Text2Viz = () => {
   const { savedObjectId } = useParams<{ savedObjectId?: string }>();
@@ -164,6 +165,24 @@ export const Text2Viz = () => {
    */
   const onSubmit = useCallback(async () => {
     if (status === 'RUNNING' || !selectedSource) return;
+
+    const [inputQuestion = '', inputInstruction = ''] = input.split('//');
+    if (
+      inputQuestion.trim().length > TEXT2VEGA_INPUT_SIZE_LIMIT ||
+      inputInstruction.trim().length > TEXT2VEGA_INPUT_SIZE_LIMIT
+    ) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('dashboardAssistant.feature.text2viz.invalidInput', {
+          defaultMessage: `Input size exceed limit: {limit}. Actual size: question({inputQuestionLength}), instruction({inputInstructionLength})`,
+          values: {
+            limit: TEXT2VEGA_INPUT_SIZE_LIMIT,
+            inputQuestionLength: inputQuestion.trim().length,
+            inputInstructionLength: inputInstruction.trim().length,
+          },
+        }),
+      });
+      return;
+    }
 
     setSubmitting(true);
 
@@ -332,7 +351,7 @@ export const Text2Viz = () => {
           <EuiButtonIcon
             aria-label="submit"
             onClick={onSubmit}
-            isDisabled={loading}
+            isDisabled={loading || input.trim().length === 0}
             display="base"
             size="s"
             iconType="returnKey"
