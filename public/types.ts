@@ -18,6 +18,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugi
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
 import { AssistantClient } from './services/assistant_client';
+import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
 
 
 export interface RenderProps {
@@ -42,6 +43,7 @@ export interface AssistantPluginStartDependencies {
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   dashboard: DashboardStart;
+  uiActions: UiActionsStart;
 }
 
 export interface AssistantPluginSetupDependencies {
@@ -50,6 +52,7 @@ export interface AssistantPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface AssistantSetup {
@@ -65,6 +68,7 @@ export interface AssistantSetup {
    */
   nextEnabled: () => boolean;
   assistantActions: Omit<AssistantActions, 'executeAction'>;
+  assistantTriggers: { AI_ASSISTANT_QUERY_EDITOR_TRIGGER: string };
   registerIncontextInsight: IncontextInsightRegistry['register'];
   renderIncontextInsight: (component: React.ReactNode) => React.ReactNode;
 }
