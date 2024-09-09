@@ -12,15 +12,14 @@
     "opensearchDashboardsReact",
     "opensearchDashboardsUtils",
     "visualizations",
+    "savedObjects",
     "uiActions"
   ],
   "optionalPlugins": [
     "dataSource",
     "dataSourceManagement"
   ],
-  "requiredBundles": [
-    "savedObjects"
-  ],
+  "requiredBundles": [],
   "configPath": [
     "assistant"
   ]
