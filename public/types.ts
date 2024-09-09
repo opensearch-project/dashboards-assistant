@@ -19,6 +19,7 @@ import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { AssistantClient } from './services/assistant_client';
 import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../src/plugins/expressions/public';
+import { SavedObjectsStart } from '../../../src/plugins/saved_objects/public';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -44,6 +45,7 @@ export interface AssistantPluginStartDependencies {
   dashboard: DashboardStart;
   uiActions: UiActionsStart;
   expressions: ExpressionsStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export interface AssistantPluginSetupDependencies {
@@ -88,7 +90,7 @@ export interface AssistantStart {
 }
 
 export type StartServices = CoreStart &
-  AssistantPluginStartDependencies & {
+  Omit<AssistantPluginStartDependencies, 'savedObjects'> & {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   };
 

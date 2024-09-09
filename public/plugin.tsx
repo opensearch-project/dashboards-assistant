@@ -181,8 +181,8 @@ export class AssistantPlugin
           params.element.classList.add('text2viz-wrapper');
           const { renderText2VizApp } = await import('./text2viz');
           const unmount = renderText2VizApp(params, {
-            ...coreStart,
             ...pluginsStart,
+            ...coreStart,
             setHeaderActionMenu: params.setHeaderActionMenu,
           });
 
