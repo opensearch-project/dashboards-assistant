@@ -294,7 +294,7 @@ export class AssistantPlugin
     setConfigSchema(this.config);
     setUiActions(uiActions);
 
-    if (this.config.next.enabled) {
+    if (this.config.text2viz.enabled) {
       uiActions.addTriggerAction(AI_ASSISTANT_QUERY_EDITOR_TRIGGER, {
         id: 'assistant_generate_visualization_action',
         order: 1,
@@ -304,19 +304,19 @@ export class AssistantPlugin
           core.application.navigateToApp(TEXT2VIZ_APP_ID);
         },
       });
+      const savedVisNLQLoader = createVisNLQSavedObjectLoader({
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: data.indexPatterns,
+        search: data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      });
+      setVisNLQSavedObjectLoader(savedVisNLQLoader);
     }
+
     setIndexPatterns(data.indexPatterns);
     setExpressions(expressions);
     setHttp(core.http);
-
-    const savedVisNLQLoader = createVisNLQSavedObjectLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
-    });
-    setVisNLQSavedObjectLoader(savedVisNLQLoader);
 
     return {
       dataSource: this.dataSourceService.start(),
