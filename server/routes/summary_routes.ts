@@ -10,13 +10,17 @@ import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_tra
 import { getAgent, searchAgentByName } from './get_agent';
 import { ML_COMMONS_BASE_API } from '../utils/constants';
 import { InsightType, SummaryType } from '../types';
+import { AssistantServiceSetup } from '../services/assistant_service';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_general_llm';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 let osInsightAgentId: string | undefined;
 let userInsightAgentId: string | undefined;
 
-export function registerSummaryAssistantRoutes(router: IRouter) {
+export function registerSummaryAssistantRoutes(
+  router: IRouter,
+  assistantService: AssistantServiceSetup
+) {
   router.post(
     {
       path: SUMMARY_ASSISTANT_API.SUMMARIZE,
@@ -37,18 +41,12 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
         context,
         dataSourceId: req.query.dataSourceId,
       });
-      const agentId = await getAgent(SUMMARY_AGENT_CONFIG_ID, client);
       const prompt = SummaryType.find((type) => type.id === req.body.type)?.prompt;
-      const response = await client.request({
-        method: 'POST',
-        path: `${ML_COMMONS_BASE_API}/agents/${agentId}/_execute`,
-        body: {
-          parameters: {
-            prompt,
-            context: req.body.context,
-            question: req.body.question,
-          },
-        },
+      const assistantClient = assistantService.getScopedClient(req, context);
+      const response = await assistantClient.executeAgentByName(SUMMARY_AGENT_CONFIG_ID, {
+        prompt,
+        context: req.body.context,
+        question: req.body.question,
       });
       let summary;
       let insightAgentIdExists = false;
@@ -107,17 +105,18 @@ export function registerSummaryAssistantRoutes(router: IRouter) {
       const prompt = InsightType.find((type) => type.id === req.body.summaryType)?.prompt;
       const insightAgentId =
         req.body.insightType === 'os_insight' ? osInsightAgentId : userInsightAgentId;
-      const response = await client.request({
-        method: 'POST',
-        path: `${ML_COMMONS_BASE_API}/agents/${insightAgentId}/_execute`,
-        body: {
-          parameters: {
-            text: prompt,
-            context: req.body.context,
-            summary: req.body.summary,
-            question: req.body.question,
-          },
-        },
+      if (!insightAgentId) {
+        context.assistant_plugin.logger.info(
+          `Cannot find insight agent for ${req.body.insightType}`
+        );
+        return res.internalError();
+      }
+      const assistantClient = assistantService.getScopedClient(req, context);
+      const response = await assistantClient.executeAgent(insightAgentId, {
+        text: prompt,
+        context: req.body.context,
+        summary: req.body.summary,
+        question: req.body.question,
       });
       try {
         let result = response.body.inference_results[0].output[0].result;

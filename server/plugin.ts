@@ -59,7 +59,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     // Register router for text to visualization
     if (config.next.enabled) {
       registerText2VizRoutes(router, assistantServiceSetup);
-      registerSummaryAssistantRoutes(router);
+      registerSummaryAssistantRoutes(router, assistantServiceSetup);
     }
 
     core.capabilities.registerProvider(() => ({
