@@ -47,9 +47,19 @@ export const GeneratePopoverBody: React.FC<{
 
   const onGenerateSummary = (summarizationQuestion: string) => {
     const summarize = async () => {
-      const contextObj = incontextInsight.contextProvider
-        ? await incontextInsight.contextProvider()
-        : undefined;
+      let contextObj;
+      try {
+        contextObj = (await incontextInsight.contextProvider?.()) ?? undefined;
+      } catch (e) {
+        console.error('Error executing contextProvider:', e);
+        toasts.addDanger(
+          i18n.translate('assistantDashboards.incontextInsight.generateSummaryError', {
+            defaultMessage: 'Generate summary error',
+          })
+        );
+        closePopover();
+        return;
+      }
       const contextContent = contextObj?.context || '';
       let summaryType: string;
       const endIndex = incontextInsight.key.indexOf('_', 0);

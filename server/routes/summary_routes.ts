@@ -8,11 +8,9 @@ import { IRouter } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
 import { getAgent, searchAgentByName } from './get_agent';
-import { ML_COMMONS_BASE_API } from '../utils/constants';
-import { InsightType, SummaryType } from '../types';
 import { AssistantServiceSetup } from '../services/assistant_service';
 
-const SUMMARY_AGENT_CONFIG_ID = 'os_general_llm';
+const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 let osInsightAgentId: string | undefined;
 let userInsightAgentId: string | undefined;
@@ -41,10 +39,8 @@ export function registerSummaryAssistantRoutes(
         context,
         dataSourceId: req.query.dataSourceId,
       });
-      const prompt = SummaryType.find((type) => type.id === req.body.type)?.prompt;
       const assistantClient = assistantService.getScopedClient(req, context);
       const response = await assistantClient.executeAgentByName(SUMMARY_AGENT_CONFIG_ID, {
-        prompt,
         context: req.body.context,
         question: req.body.question,
       });
@@ -102,7 +98,6 @@ export function registerSummaryAssistantRoutes(
         context,
         dataSourceId: req.query.dataSourceId,
       });
-      const prompt = InsightType.find((type) => type.id === req.body.summaryType)?.prompt;
       const insightAgentId =
         req.body.insightType === 'os_insight' ? osInsightAgentId : userInsightAgentId;
       if (!insightAgentId) {
@@ -113,7 +108,6 @@ export function registerSummaryAssistantRoutes(
       }
       const assistantClient = assistantService.getScopedClient(req, context);
       const response = await assistantClient.executeAgent(insightAgentId, {
-        text: prompt,
         context: req.body.context,
         summary: req.body.summary,
         question: req.body.question,
