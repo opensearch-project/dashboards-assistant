@@ -170,7 +170,8 @@ export class AssistantPlugin
               setHeaderActionMenu: params.setHeaderActionMenu,
             });
           } else {
-            return () => {};
+            const { renderAppNotActivated } = await import('./text2viz');
+            return renderAppNotActivated(params);
           }
         },
       });
