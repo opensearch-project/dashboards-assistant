@@ -6,10 +6,9 @@
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiLoadingContent,
   EuiMarkdownFormat,
@@ -18,6 +17,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { useEffectOnce } from 'react-use';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
@@ -167,44 +167,34 @@ export const GeneratePopoverBody: React.FC<{
   const renderInnerTitle = () => {
     return (
       <EuiPopoverTitle className="incontextInsightGeneratePopoverTitle" paddingSize="l">
-        {showInsight ? (
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {showInsight ? (
+              <EuiIcon
                 aria-label="back-to-summary"
-                flush="left"
-                size="xs"
+                size="m"
                 onClick={() => {
                   setShowInsight(false);
                 }}
-                iconType="arrowLeft"
-                iconSide={'left'}
+                type="arrowLeft"
                 color={'text'}
-              >
-                {i18n.translate('assistantDashboards.incontextInsight.InsightWithRAG', {
-                  defaultMessage: 'Insight With RAG',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem>
-              <div>
-                <EuiBadge
-                  aria-label="alert-assistant"
-                  color="hollow"
-                  iconType={shiny_sparkle}
-                  iconSide="left"
-                >
+              />
+            ) : (
+              <EuiIcon aria-label="alert-assistant" color="hollow" size="l" type={shiny_sparkle} />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <EuiTitle size="xxs">
+                <h6>
                   {i18n.translate('assistantDashboards.incontextInsight.Summary', {
-                    defaultMessage: 'Summary',
+                    defaultMessage: showInsight ? 'Insight With RAG' : 'Summary',
                   })}
-                </EuiBadge>
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+                </h6>
+              </EuiTitle>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverTitle>
     );
   };
