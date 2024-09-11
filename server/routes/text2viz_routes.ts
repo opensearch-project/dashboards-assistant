@@ -27,7 +27,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
       validate: {
         body: schema.object({
           input_question: inputSchema,
-          input_instruction: schema.maybe(inputSchema),
+          input_instruction: schema.maybe(schema.string({ maxLength: TEXT2VEGA_INPUT_SIZE_LIMIT })),
           ppl: schema.string(),
           dataSchema: schema.string(),
           sampleData: schema.string(),
