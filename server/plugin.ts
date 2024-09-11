@@ -19,6 +19,7 @@ import { registerChatRoutes } from './routes/chat_routes';
 import { registerText2VizRoutes } from './routes/text2viz_routes';
 import { AssistantService } from './services/assistant_service';
 import { registerAgentRoutes } from './routes/agent_routes';
+import { registerSummaryAssistantRoutes } from './routes/summary_routes';
 import { capabilitiesProvider } from './vis_type_nlq/capabilities_provider';
 import { visNLQSavedObjectType } from './vis_type_nlq/saved_object_type';
 
@@ -60,6 +61,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     // Register router for text to visualization
     if (config.text2viz.enabled) {
       registerText2VizRoutes(router, assistantServiceSetup);
+      registerSummaryAssistantRoutes(router, assistantServiceSetup);
       core.capabilities.registerProvider(capabilitiesProvider);
       core.savedObjects.registerType(visNLQSavedObjectType);
     }
