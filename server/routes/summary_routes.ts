@@ -12,6 +12,7 @@ import { AssistantServiceSetup } from '../services/assistant_service';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
+const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
 let osInsightAgentId: string | undefined;
 let userInsightAgentId: string | undefined;
 
@@ -121,6 +122,42 @@ export function registerSummaryAssistantRoutes(
       } finally {
         // Reset userInsightAgentId in case users update their insight agent.
         userInsightAgentId = undefined;
+      }
+    })
+  );
+}
+
+export function registerData2SummaryRoutes(router: IRouter, assistantService: AssistantServiceSetup) {
+  router.post(
+    {
+      path: SUMMARY_ASSISTANT_API.DATA2SUMMARY,
+      validate: {
+        body: schema.object({
+          sample_data: schema.string(),
+          sample_count: schema.maybe(schema.number()),
+          total_count: schema.maybe(schema.number()),
+          question: schema.maybe(schema.string()),
+          ppl: schema.maybe(schema.string()),
+        }),
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const assistantClient = assistantService.getScopedClient(req, context);
+      try {
+        const response = await assistantClient.executeAgentByName(DATA2SUMMARY_AGENT_CONFIG_ID, {
+          sample_data: req.body.sample_data,
+          total_count: req.body.total_count,
+          sample_count: req.body.sample_count,
+          ppl: req.body.ppl,
+          question: req.body.question,
+        });
+        const result = response.body.inference_results[0].output[0].result;
+        return res.ok({ body: result });
+      } catch (e) {
+        return res.internalError();
       }
     })
   );

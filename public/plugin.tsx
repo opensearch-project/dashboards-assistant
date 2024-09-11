@@ -252,18 +252,18 @@ export class AssistantPlugin
       setupChat();
     }
 
-    setupDeps.data.__enhance({
-      editor: {
-        queryEditorExtension: {
-          id: 'assistant-query-actions',
-          order: 2000,
-          isEnabled$: () => of(true),
-          getComponent: () => {
-            return <ActionContextMenu />;
-          },
-        },
-      },
-    });
+    // setupDeps.data.__enhance({
+    //   editor: {
+    //     queryEditorExtension: {
+    //       id: 'assistant-query-actions',
+    //       order: 2000,
+    //       isEnabled$: () => of(true),
+    //       getComponent: () => {
+    //         return <ActionContextMenu />;
+    //       },
+    //     },
+    //   },
+    // });
 
     return {
       dataSource: dataSourceSetupResult,
