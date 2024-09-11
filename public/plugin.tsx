@@ -37,9 +37,12 @@ import {
   ConversationsService,
   setChrome,
   setNotifications,
+  setIndexPatterns,
   setIncontextInsightRegistry,
   setConfigSchema,
   setUiActions,
+  setExpressions,
+  setHttp,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
@@ -49,6 +52,13 @@ import { AssistantService } from './services/assistant_service';
 import { ActionContextMenu } from './components/ui_action_context_menu';
 import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER, bootstrap } from './ui_triggers';
 import { TEXT2VIZ_APP_ID } from './text2viz';
+import { VIS_NLQ_APP_ID, VIS_NLQ_SAVED_OBJECT } from '../common/constants/vis_type_nlq';
+import {
+  createVisNLQSavedObjectLoader,
+  setVisNLQSavedObjectLoader,
+} from './vis_nlq/saved_object_loader';
+import { NLQVisualizationEmbeddableFactory } from './components/visualization/embeddable/nlq_vis_embeddable_factory';
+import { NLQ_VISUALIZATION_EMBEDDABLE_TYPE } from './components/visualization/embeddable/nlq_vis_embeddable';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -114,11 +124,16 @@ export class AssistantPlugin
       dataSourceManagement: setupDeps.dataSourceManagement,
     });
 
-    if (this.config.next.enabled) {
+    if (this.config.text2viz.enabled) {
+      setupDeps.embeddable.registerEmbeddableFactory(
+        NLQ_VISUALIZATION_EMBEDDABLE_TYPE,
+        new NLQVisualizationEmbeddableFactory()
+      );
+
       setupDeps.visualizations.registerAlias({
         name: 'text2viz',
         aliasPath: '#/',
-        aliasApp: 'text2viz',
+        aliasApp: VIS_NLQ_APP_ID,
         title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
           defaultMessage: 'Natural language',
         }),
@@ -136,6 +151,23 @@ export class AssistantPlugin
               'Not sure which visualization to choose? Generate visualization previews with a natural language question.',
           }),
         },
+        appExtensions: {
+          visualizations: {
+            docTypes: [VIS_NLQ_SAVED_OBJECT],
+            toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
+              description: attributes?.description,
+              editApp: VIS_NLQ_APP_ID,
+              editUrl: `/edit/${encodeURIComponent(id)}`,
+              icon: 'chatRight',
+              id,
+              savedObjectType: VIS_NLQ_SAVED_OBJECT,
+              title: attributes?.title,
+              typeTitle: 'NLQ',
+              updated_at: updatedAt,
+              stage: 'experimental',
+            }),
+          },
+        },
       });
 
       core.application.register({
@@ -146,12 +178,18 @@ export class AssistantPlugin
         navLinkStatus: AppNavLinkStatus.hidden,
         mount: async (params: AppMountParameters) => {
           const [coreStart, pluginsStart] = await core.getStartServices();
+          params.element.classList.add('text2viz-wrapper');
           const { renderText2VizApp } = await import('./text2viz');
-          return renderText2VizApp(params, {
-            ...coreStart,
+          const unmount = renderText2VizApp(params, {
             ...pluginsStart,
+            ...coreStart,
             setHeaderActionMenu: params.setHeaderActionMenu,
           });
+
+          return () => {
+            unmount();
+            params.element.classList.remove('text2viz-wrapper');
+          };
         },
       });
     }
@@ -221,6 +259,13 @@ export class AssistantPlugin
       },
       chatEnabled: () => this.config.chat.enabled,
       nextEnabled: () => this.config.next.enabled,
+      getFeatureStatus: () => ({
+        chat: this.config.chat.enabled,
+        next: this.config.next.enabled,
+        text2viz: this.config.text2viz.enabled,
+        alertInsight: this.config.alertInsight.enabled,
+        smartAnomalyDetector: this.config.smartAnomalyDetector.enabled,
+      }),
       assistantActions,
       assistantTriggers: {
         AI_ASSISTANT_QUERY_EDITOR_TRIGGER,
@@ -248,7 +293,7 @@ export class AssistantPlugin
 
   public start(
     core: CoreStart,
-    { data, uiActions }: AssistantPluginStartDependencies
+    { data, expressions, uiActions }: AssistantPluginStartDependencies
   ): AssistantStart {
     const assistantServiceStart = this.assistantService.start(core.http);
     setCoreStart(core);
@@ -257,7 +302,7 @@ export class AssistantPlugin
     setConfigSchema(this.config);
     setUiActions(uiActions);
 
-    if (this.config.next.enabled) {
+    if (this.config.text2viz.enabled) {
       uiActions.addTriggerAction(AI_ASSISTANT_QUERY_EDITOR_TRIGGER, {
         id: 'assistant_generate_visualization_action',
         order: 1,
@@ -267,7 +312,19 @@ export class AssistantPlugin
           core.application.navigateToApp(TEXT2VIZ_APP_ID);
         },
       });
+      const savedVisNLQLoader = createVisNLQSavedObjectLoader({
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: data.indexPatterns,
+        search: data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      });
+      setVisNLQSavedObjectLoader(savedVisNLQLoader);
     }
+
+    setIndexPatterns(data.indexPatterns);
+    setExpressions(expressions);
+    setHttp(core.http);
 
     return {
       dataSource: this.dataSourceService.start(),

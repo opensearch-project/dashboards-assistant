@@ -10,6 +10,7 @@ import { i18n } from '@osd/i18n';
 export const Text2VizEmpty = () => {
   return (
     <EuiEmptyPrompt
+      style={{ marginTop: 40 }}
       iconType="editorCodeBlock"
       title={
         <h2>
