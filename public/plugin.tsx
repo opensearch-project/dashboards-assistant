@@ -206,8 +206,8 @@ export class AssistantPlugin
               params.element.classList.remove('text2viz-wrapper');
             };
           } else {
-            const { renderAppNotActivated } = await import('./text2viz');
-            return renderAppNotActivated(params);
+            const { renderAppNotFound } = await import('./text2viz');
+            return renderAppNotFound(params);
           }
         },
       });

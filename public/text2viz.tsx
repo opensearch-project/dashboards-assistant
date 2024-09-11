@@ -32,7 +32,7 @@ export const renderText2VizApp = (params: AppMountParameters, services: StartSer
   };
 };
 
-export const renderAppNotActivated = (params: AppMountParameters) => {
+export const renderAppNotFound = (params: AppMountParameters) => {
   ReactDOM.render(
     <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
       <EuiPageBody component="main">
@@ -40,12 +40,12 @@ export const renderAppNotActivated = (params: AppMountParameters) => {
           <EuiEmptyPrompt
             iconType="alert"
             iconColor="danger"
-            title={<h2>Application Not Activated</h2>}
+            title={<h2>Application Not Found</h2>}
             body={
               <EuiText size="s">
                 <p>
-                  No application was found at this URL. Please check your subscription to enable
-                  this feature.
+                  No application was found at this URL. Please check your app status to enable this
+                  feature.
                 </p>
               </EuiText>
             }
