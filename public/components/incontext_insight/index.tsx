@@ -288,7 +288,6 @@ export const IncontextInsight = ({
             <GeneratePopoverBody
               incontextInsight={input}
               httpSetup={httpSetup}
-              dataSourceService={dataSourceService}
               usageCollection={usageCollection}
               closePopover={closePopover}
             />

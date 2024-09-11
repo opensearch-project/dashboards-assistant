@@ -26,16 +26,14 @@ import { getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import shiny_sparkle from '../../assets/shiny_sparkle.svg';
-import { DataSourceService } from '../../services/data_source_service';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
   httpSetup?: HttpSetup;
-  dataSourceService?: DataSourceService;
   usageCollection?: UsageCollectionSetup;
   closePopover: () => void;
-}> = ({ incontextInsight, httpSetup, dataSourceService, usageCollection, closePopover }) => {
+}> = ({ incontextInsight, httpSetup, usageCollection, closePopover }) => {
   const [summary, setSummary] = useState('');
   const [insight, setInsight] = useState('');
   const [insightAvailable, setInsightAvailable] = useState(false);
@@ -220,17 +218,34 @@ export const GeneratePopoverBody: React.FC<{
   const renderInnerFooter = () => {
     return (
       <EuiPopoverFooter className="incontextInsightGeneratePopoverFooter" paddingSize="none">
-        <MessageActions
-          contentToCopy={showInsight ? insight : summary}
-          showFeedback
-          showTraceIcon={insightAvailable}
-          onViewTrace={() => {
-            setShowInsight(true);
-          }}
-          usageCollection={usageCollection}
-          isOnTrace={showInsight}
-          metricAppName={metricAppName}
-        />
+        {
+          <div style={{ display: showInsight ? 'none' : 'block' }}>
+            <MessageActions
+              contentToCopy={summary}
+              showFeedback
+              showTraceIcon={insightAvailable}
+              onViewTrace={() => {
+                setShowInsight(true);
+              }}
+              usageCollection={usageCollection}
+              isOnTrace={showInsight}
+              metricAppName={metricAppName}
+            />
+          </div>
+        }
+        {
+          <div style={{ display: showInsight && insightAvailable ? 'block' : 'none' }}>
+            <MessageActions
+              contentToCopy={insight}
+              showFeedback
+              showTraceIcon={true}
+              onViewTrace={() => {}}
+              usageCollection={usageCollection}
+              isOnTrace={showInsight}
+              metricAppName={metricAppName}
+            />
+          </div>
+        }
       </EuiPopoverFooter>
     );
   };
