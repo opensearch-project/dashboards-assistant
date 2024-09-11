@@ -35,6 +35,7 @@ export const searchAgentByName = async (name: string, client: OpenSearchClient['
           'name.keyword': name,
         },
       },
+      _source: ['_id'],
       sort: {
         created_time: 'desc',
       },
@@ -48,7 +49,7 @@ export const searchAgentByName = async (name: string, client: OpenSearchClient['
     });
 
     if (!response || response.body.hits.total.value === 0) {
-      throw new Error(`cannot find any agent by name: ${name}`);
+      return undefined;
     }
     return response.body.hits.hits[0]._id;
   } catch (error) {

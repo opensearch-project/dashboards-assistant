@@ -17,11 +17,14 @@ import { BasicInputOutputParser } from './parsers/basic_input_output_parser';
 import { VisualizationCardParser } from './parsers/visualization_card_parser';
 import { registerChatRoutes } from './routes/chat_routes';
 import { registerText2VizRoutes } from './routes/text2viz_routes';
+import { AssistantService } from './services/assistant_service';
+import { registerAgentRoutes } from './routes/agent_routes';
 import { registerSummaryAssistantRoutes } from './routes/summary_routes';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
   private messageParsers: MessageParser[] = [];
+  private assistantService = new AssistantService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -34,6 +37,8 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
       .pipe(first())
       .toPromise();
 
+    const assistantServiceSetup = this.assistantService.setup();
+
     const router = core.http.createRouter();
 
     core.http.registerRouteHandlerContext('assistant_plugin', () => {
@@ -43,6 +48,8 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
       };
     });
 
+    registerAgentRoutes(router, assistantServiceSetup);
+
     // Register server side APIs
     registerChatRoutes(router, {
       messageParsers: this.messageParsers,
@@ -51,8 +58,8 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
 
     // Register router for text to visualization
     if (config.next.enabled) {
-      registerText2VizRoutes(router);
-      registerSummaryAssistantRoutes(router);
+      registerText2VizRoutes(router, assistantServiceSetup);
+      registerSummaryAssistantRoutes(router, assistantServiceSetup);
     }
 
     core.capabilities.registerProvider(() => ({
@@ -74,6 +81,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     registerMessageParser(VisualizationCardParser);
 
     return {
+      assistantService: assistantServiceSetup,
       registerMessageParser,
       removeMessageParser: (parserId: MessageParser['id']) => {
         const findIndex = this.messageParsers.findIndex((item) => item.id === parserId);
@@ -88,8 +96,11 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
 
   public start(core: CoreStart) {
     this.logger.debug('Assistant: Started');
+    this.assistantService.start();
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.assistantService.stop();
+  }
 }

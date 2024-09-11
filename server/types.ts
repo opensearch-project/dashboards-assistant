@@ -5,8 +5,10 @@
 
 import { IMessage, Interaction } from '../common/types/chat_saved_object_attributes';
 import { Logger, HttpAuth } from '../../../src/core/server';
+import { AssistantServiceSetup } from './services/assistant_service';
 
 export interface AssistantPluginSetup {
+  assistantService: AssistantServiceSetup;
   registerMessageParser: (message: MessageParser) => void;
   removeMessageParser: (parserId: MessageParser['id']) => void;
 }
@@ -50,17 +52,3 @@ declare module '../../../src/core/server' {
     };
   }
 }
-
-export const SummaryType = [
-  {
-    id: 'alerts',
-    prompt: `You are an OpenSearch Alert Assistant to help summarize the alerts.\n Here is the detail of alert: $\{parameters.context};\n The question is: $\{parameters.question}`,
-  },
-];
-
-export const InsightType = [
-  {
-    id: 'alerts',
-    prompt: `You are an OpenSearch Alert Assistant to provide your insight on this alert to help users understand the alert, find potential causes and give feasible solutions to address it.\n Here is the detail of alert: $\{parameters.context};\n The alert summary is: $\{parameters.summary};\n The question is: $\{parameters.question}`,
-  },
-];

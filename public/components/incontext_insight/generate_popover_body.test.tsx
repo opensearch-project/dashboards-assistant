@@ -37,7 +37,7 @@ describe('GeneratePopoverBody', () => {
     contextProvider: jest.fn(),
     suggestions: ['Test summarization question'],
     datasourceId: 'test-datasource',
-    key: 'test-key',
+    key: 'alerts',
   };
 
   const closePopoverMock = jest.fn();
@@ -49,7 +49,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: 'insight_agent_id',
+            insightAgentIdExists: true,
           };
           break;
 
@@ -94,7 +94,7 @@ describe('GeneratePopoverBody', () => {
     // 2. Click insight tip icon to view insight
     fireEvent.click(insightTipIcon);
     // title is back button + 'Insight With RAG'
-    const backButton = getByLabelText('back-to-summary');
+    let backButton = getByLabelText('back-to-summary');
     expect(backButton).toBeInTheDocument();
     expect(getByText('Insight With RAG')).toBeInTheDocument();
 
@@ -110,6 +110,7 @@ describe('GeneratePopoverBody', () => {
     expect(mockToasts.addDanger).not.toHaveBeenCalled();
 
     // 3. Click back button to view summary
+    backButton = getByLabelText('back-to-summary');
     fireEvent.click(backButton);
     expect(queryByText('Generated insight content')).toBeNull();
     expect(queryByText('Generated summary content')).toBeInTheDocument();
@@ -122,7 +123,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: undefined,
+            insightAgentIdExists: false,
           };
           break;
 
@@ -192,7 +193,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: 'insight_agent_id',
+            insightAgentIdExists: true,
           };
           break;
 
