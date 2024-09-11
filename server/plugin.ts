@@ -22,7 +22,7 @@ import { registerAgentRoutes } from './routes/agent_routes';
 import { registerSummaryAssistantRoutes } from './routes/summary_routes';
 import { capabilitiesProvider as visNLQCapabilitiesProvider } from './vis_type_nlq/capabilities_provider';
 import { visNLQSavedObjectType } from './vis_type_nlq/saved_object_type';
-import { capabilitiesProvider, capabilitiesSwitcher } from './capabilities';
+import { capabilitiesProvider } from './capabilities';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
@@ -72,7 +72,6 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     }
 
     core.capabilities.registerProvider(capabilitiesProvider);
-    core.capabilities.registerSwitcher(capabilitiesSwitcher);
 
     const registerMessageParser = (messageParser: MessageParser) => {
       const findItem = this.messageParsers.find((item) => item.id === messageParser.id);
