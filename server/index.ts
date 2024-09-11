@@ -12,6 +12,9 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     chat: true,
     incontextInsight: true,
     next: true,
+    text2viz: true,
+    alertInsight: true,
+    smartAnomalyDetector: true,
   },
   schema: configSchema,
 };

@@ -8,6 +8,7 @@
     "data",
     "dashboard",
     "embeddable",
+    "expressions",
     "opensearchDashboardsReact",
     "opensearchDashboardsUtils",
     "visualizations",

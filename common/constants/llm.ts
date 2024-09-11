@@ -39,3 +39,5 @@ export const NOTEBOOK_API = {
 };
 
 export const DEFAULT_USER_NAME = 'User';
+
+export const TEXT2VEGA_INPUT_SIZE_LIMIT = 400;
