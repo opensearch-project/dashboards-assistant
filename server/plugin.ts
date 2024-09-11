@@ -19,6 +19,7 @@ import { registerChatRoutes } from './routes/chat_routes';
 import { registerText2VizRoutes } from './routes/text2viz_routes';
 import { AssistantService } from './services/assistant_service';
 import { registerAgentRoutes } from './routes/agent_routes';
+import { registerSummaryAssistantRoutes } from './routes/summary_routes';
 import { capabilitiesProvider as visNLQCapabilitiesProvider } from './vis_type_nlq/capabilities_provider';
 import { visNLQSavedObjectType } from './vis_type_nlq/saved_object_type';
 import { capabilitiesProvider, capabilitiesSwitcher } from './capabilities';
@@ -63,6 +64,11 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
       registerText2VizRoutes(router, assistantServiceSetup);
       core.capabilities.registerProvider(visNLQCapabilitiesProvider);
       core.savedObjects.registerType(visNLQSavedObjectType);
+    }
+
+    // Register router for alert insight
+    if (config.alertInsight.enabled) {
+      registerSummaryAssistantRoutes(router, assistantServiceSetup);
     }
 
     core.capabilities.registerProvider(capabilitiesProvider);
