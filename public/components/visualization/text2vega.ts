@@ -6,22 +6,11 @@
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { debounceTime, switchMap, tap, filter, catchError } from 'rxjs/operators';
 import { TEXT2VIZ_API } from '.../../../common/constants/llm';
-import { HttpSetup } from '../../../../../src/core/public';
+import { HttpSetup, SavedObjectsStart } from '../../../../../src/core/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-
-const DATA_SOURCE_DELIMITER = '::';
+import { DataSourceAttributes } from '../../../../../src/plugins/data_source/common/data_sources';
 
 const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
-
-const getDataSourceAndIndexFromLabel = (label: string) => {
-  if (label.includes(DATA_SOURCE_DELIMITER)) {
-    return [
-      label.slice(0, label.indexOf(DATA_SOURCE_DELIMITER)),
-      label.slice(label.indexOf(DATA_SOURCE_DELIMITER) + DATA_SOURCE_DELIMITER.length),
-    ] as const;
-  }
-  return [, label] as const;
-};
 
 interface Input {
   prompt: string;
@@ -36,10 +25,16 @@ export class Text2Vega {
   status$ = new BehaviorSubject<'RUNNING' | 'STOPPED'>('STOPPED');
   http: HttpSetup;
   searchClient: DataPublicPluginStart['search'];
+  savedObjects: SavedObjectsStart;
 
-  constructor(http: HttpSetup, searchClient: DataPublicPluginStart['search']) {
+  constructor(
+    http: HttpSetup,
+    searchClient: DataPublicPluginStart['search'],
+    savedObjects: SavedObjectsStart
+  ) {
     this.http = http;
     this.searchClient = searchClient;
+    this.savedObjects = savedObjects;
     this.result$ = this.input$
       .pipe(
         filter((v) => v.prompt.length > 0),
@@ -51,9 +46,8 @@ export class Text2Vega {
           of(v).pipe(
             // text to ppl
             switchMap(async (value) => {
-              const [, indexName] = getDataSourceAndIndexFromLabel(value.index);
               const pplQuestion = value.prompt.split('//')[0];
-              const ppl = await this.text2ppl(pplQuestion, indexName, value.dataSourceId);
+              const ppl = await this.text2ppl(pplQuestion, value.index, value.dataSourceId);
               return {
                 ...value,
                 ppl,
@@ -80,7 +74,8 @@ export class Text2Vega {
                 dataSchema: JSON.stringify(value.sample.schema),
                 dataSourceId: value.dataSourceId,
               });
-              const [dataSourceName] = getDataSourceAndIndexFromLabel(value.index);
+              const dataSource = await this.getDataSourceById(value.dataSourceId);
+              const dataSourceName = dataSource?.attributes.title;
               result.data = {
                 url: {
                   '%type%': 'ppl',
@@ -123,9 +118,11 @@ export class Text2Vega {
         }
       }
     };
+    const [inputQuestion, inputInstruction = ''] = input.split('//');
     const res = await this.http.post(TEXT2VIZ_API.TEXT2VEGA, {
       body: JSON.stringify({
-        input,
+        input_question: inputQuestion.trim(),
+        input_instruction: inputInstruction.trim(),
         ppl,
         sampleData: JSON.stringify(sampleData),
         dataSchema: JSON.stringify(dataSchema),
@@ -147,6 +144,18 @@ export class Text2Vega {
       query: { dataSourceId },
     });
     return pplResponse.ppl;
+  }
+
+  async getDataSourceById(id?: string) {
+    if (!id) {
+      return null;
+    }
+
+    const res = await this.savedObjects.client.get<DataSourceAttributes>('data-source', id);
+    if (res.error) {
+      return null;
+    }
+    return res;
   }
 
   invoke(value: Input) {
