@@ -5,11 +5,20 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../src/core/server';
-import { TEXT2VIZ_API } from '../../common/constants/llm';
+import { TEXT2VEGA_INPUT_SIZE_LIMIT, TEXT2VIZ_API } from '../../common/constants/llm';
 import { AssistantServiceSetup } from '../services/assistant_service';
 
-const TEXT2VEGA_AGENT_CONFIG_ID = 'text2vega';
-const TEXT2PPL_AGENT_CONFIG_ID = 'text2ppl';
+const TEXT2VEGA_AGENT_CONFIG_ID = 'os_text2vega';
+const TEXT2PPL_AGENT_CONFIG_ID = 'os_query_assist_ppl';
+
+const inputSchema = schema.string({
+  maxLength: TEXT2VEGA_INPUT_SIZE_LIMIT,
+  validate(value) {
+    if (!value || value.trim().length === 0) {
+      return "can't be empty or blank.";
+    }
+  },
+});
 
 export function registerText2VizRoutes(router: IRouter, assistantService: AssistantServiceSetup) {
   router.post(
@@ -17,7 +26,8 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
       path: TEXT2VIZ_API.TEXT2VEGA,
       validate: {
         body: schema.object({
-          input: schema.string(),
+          input_question: inputSchema,
+          input_instruction: schema.maybe(inputSchema),
           ppl: schema.string(),
           dataSchema: schema.string(),
           sampleData: schema.string(),
@@ -31,7 +41,8 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
       const assistantClient = assistantService.getScopedClient(req, context);
       try {
         const response = await assistantClient.executeAgentByName(TEXT2VEGA_AGENT_CONFIG_ID, {
-          input: req.body.input,
+          input_question: req.body.input_question,
+          input_instruction: req.body.input_instruction,
           ppl: req.body.ppl,
           dataSchema: req.body.dataSchema,
           sampleData: req.body.sampleData,
@@ -63,7 +74,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
       validate: {
         body: schema.object({
           index: schema.string(),
-          question: schema.string(),
+          question: inputSchema,
         }),
         query: schema.object({
           dataSourceId: schema.maybe(schema.string()),
