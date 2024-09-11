@@ -127,9 +127,8 @@ export class AssistantPlugin
     if (this.config.text2viz.enabled) {
       const checkSubscriptionAndRegisterText2VizButton = async () => {
         const [coreStart] = await core.getStartServices();
-        const isSubscriptionActive =
-          coreStart.application.capabilities?.assistant?.isSubscriptionActive === true;
-        if (isSubscriptionActive) {
+        const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+        if (assistantEnabled) {
           setupDeps.embeddable.registerEmbeddableFactory(
             NLQ_VISUALIZATION_EMBEDDABLE_TYPE,
             new NLQVisualizationEmbeddableFactory()
@@ -192,9 +191,8 @@ export class AssistantPlugin
         navLinkStatus: AppNavLinkStatus.hidden,
         mount: async (params: AppMountParameters) => {
           const [coreStart, pluginsStart] = await core.getStartServices();
-          const isSubscriptionActive =
-            coreStart.application.capabilities?.assistant?.isSubscriptionActive === true;
-          if (isSubscriptionActive) {
+          const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+          if (assistantEnabled) {
             params.element.classList.add('text2viz-wrapper');
             const { renderText2VizApp } = await import('./text2viz');
             const unmount = renderText2VizApp(params, {

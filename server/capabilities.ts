@@ -10,7 +10,7 @@ export const capabilitiesProvider = () => ({
     show: true,
   },
   assistant: {
-    isSubscriptionActive: true,
+    enabled: true,
   },
 });
 
@@ -18,7 +18,7 @@ export const capabilitiesProvider = () => ({
 export const capabilitiesSwitcher: CapabilitiesSwitcher = (request, capabilities) => {
   return {
     assistant: {
-      isSubscriptionActive: true,
+      enabled: true,
     },
   };
 };
