@@ -7,6 +7,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - feat: expose a general function for agent execution([268](https://github.com/opensearch-project/dashboards-assistant/pull/268))
 - Fix CVE-2024-4067 ([#269](https://github.com/opensearch-project/dashboards-assistant/pull/269))
 - feat: add a dashboards-assistant trigger in query editor([265](https://github.com/opensearch-project/dashboards-assistant/pull/265))
+- fix: make sure $schema always added to LLM generated vega json object([#252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
+- feat: added a new visualization type visualization-nlq to support creating visualization from natural language([#264](https://github.com/opensearch-project/dashboards-assistant/pull/264))
 
 ### 📈 Features/Enhancements
 

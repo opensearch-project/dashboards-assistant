@@ -18,6 +18,8 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugi
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { AssistantClient } from './services/assistant_client';
 import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import { ExpressionsSetup, ExpressionsStart } from '../../../src/plugins/expressions/public';
+import { SavedObjectsStart } from '../../../src/plugins/saved_objects/public';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -42,6 +44,8 @@ export interface AssistantPluginStartDependencies {
   embeddable: EmbeddableStart;
   dashboard: DashboardStart;
   uiActions: UiActionsStart;
+  expressions: ExpressionsStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export interface AssistantPluginSetupDependencies {
@@ -50,6 +54,7 @@ export interface AssistantPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   uiActions: UiActionsSetup;
+  expressions: ExpressionsSetup;
 }
 
 export interface AssistantSetup {
@@ -57,10 +62,12 @@ export interface AssistantSetup {
   registerMessageRenderer: (contentType: string, render: MessageRenderer) => void;
   registerActionExecutor: (actionType: string, execute: ActionExecutor) => void;
   /**
+   * @deprecated please use `getFeatureStatus()`
    * Returns true if chat UI is enabled.
    */
   chatEnabled: () => boolean;
   /**
+   * @deprecated please use `getFeatureStatus()`
    * Returns true if contextual assistant is enabled.
    */
   nextEnabled: () => boolean;
@@ -83,7 +90,7 @@ export interface AssistantStart {
 }
 
 export type StartServices = CoreStart &
-  AssistantPluginStartDependencies & {
+  Omit<AssistantPluginStartDependencies, 'savedObjects'> & {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   };
 

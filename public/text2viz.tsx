@@ -5,6 +5,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Route, Router, Switch } from 'react-router-dom';
+
 import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiText } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
 import { Text2Viz } from './components/visualization/text2viz';
@@ -16,7 +18,11 @@ export const TEXT2VIZ_APP_ID = 'text2viz';
 export const renderText2VizApp = (params: AppMountParameters, services: StartServices) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <Text2Viz />
+      <Router history={params.history}>
+        <Switch>
+          <Route path={['/edit/:savedObjectId', '/']} component={Text2Viz} />
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
 
     params.element
