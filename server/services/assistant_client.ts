@@ -11,7 +11,7 @@ import {
   RequestHandlerContext,
 } from '../../../../src/core/server';
 import { ML_COMMONS_BASE_API } from '../utils/constants';
-import { getAgent } from '../routes/get_agent';
+import { getAgentIdByConfigName } from '../routes/get_agent';
 
 interface AgentExecuteResponse {
   inference_results: Array<{
@@ -59,14 +59,19 @@ export class AssistantClient {
     return response as ApiResponse<AgentExecuteResponse>;
   };
 
-  executeAgentByName = async (
-    agentName: string,
+  executeAgentByConfigName = async (
+    agentConfigName: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parameters: Record<string, any>
   ) => {
-    const client = await this.getOpenSearchClient();
-    const agentId = await getAgent(agentName, client.transport);
+    const agentId = await this.getAgentIdByConfigName(agentConfigName);
     return this.executeAgent(agentId, parameters);
+  };
+
+  getAgentIdByConfigName = async (agentConfigName: string) => {
+    const client = await this.getOpenSearchClient();
+    const agentId = await getAgentIdByConfigName(agentConfigName, client.transport);
+    return agentId;
   };
 
   private async getOpenSearchClient() {
