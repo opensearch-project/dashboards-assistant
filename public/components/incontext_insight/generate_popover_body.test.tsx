@@ -11,6 +11,7 @@ import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 
+
 jest.mock('../../services');
 
 const mockToasts = {

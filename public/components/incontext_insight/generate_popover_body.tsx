@@ -29,6 +29,7 @@ import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import shiny_sparkle from '../../assets/shiny_sparkle.svg';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 
+
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
   httpSetup?: HttpSetup;
@@ -52,7 +53,6 @@ export const GeneratePopoverBody: React.FC<{
         );
       }
     : () => {};
-
   useEffectOnce(() => {
     onGenerateSummary(
       incontextInsight.suggestions && incontextInsight.suggestions.length > 0
