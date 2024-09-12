@@ -107,8 +107,32 @@
 }
 
 .incontextInsightPopoverBody {
-  max-width: 400px;
+  max-width: 486px;
+  min-width: 486px;
   width: 100%;
+}
+
+.incontextInsightGeneratePopoverTitle {
+  // TODO: Remove this one paddingSize is fixed
+  padding: 0 !important;
+  padding-left: 5px !important;
+  margin-bottom: 0 !important;
+  min-height: 30px;
+  max-height: 30px;
+  border: none;
+}
+
+.incontextInsightGeneratePopoverFooter{
+  padding-block: 0 !important;
+  margin: 0 !important;
+  border: none;
+}
+
+.incontextInsightGeneratePopoverContent {
+  display: flex;
+  overflow: auto;
+  max-height: 300px;
+  scrollbar-width: thin;
 }
 
 .incontextInsightSummary {

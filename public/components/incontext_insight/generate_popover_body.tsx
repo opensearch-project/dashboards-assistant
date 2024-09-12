@@ -6,74 +6,97 @@
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
+  EuiLoadingContent,
+  EuiMarkdownFormat,
   EuiPanel,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { useEffectOnce } from 'react-use';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getConfigSchema, getIncontextInsightRegistry, getNotifications } from '../../services';
+import { getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
-import { ASSISTANT_API } from '../../../common/constants/llm';
-import { getAssistantRole } from '../../utils/constants';
+import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
+import shiny_sparkle from '../../assets/shiny_sparkle.svg';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
   httpSetup?: HttpSetup;
   closePopover: () => void;
 }> = ({ incontextInsight, httpSetup, closePopover }) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
-  const [conversationId, setConversationId] = useState('');
+  const [insight, setInsight] = useState('');
+  const [insightAvailable, setInsightAvailable] = useState(false);
+  const [showInsight, setShowInsight] = useState(false);
   const toasts = getNotifications().toasts;
-  const registry = getIncontextInsightRegistry();
 
-  const onChatContinuation = () => {
-    registry?.continueInChat(incontextInsight, conversationId);
-    closePopover();
-  };
+  useEffectOnce(() => {
+    onGenerateSummary(
+      incontextInsight.suggestions && incontextInsight.suggestions.length > 0
+        ? incontextInsight.suggestions[0]
+        : 'Please summarize the input'
+    );
+  });
 
   const onGenerateSummary = (summarizationQuestion: string) => {
-    setIsLoading(true);
-    setSummary('');
-    setConversationId('');
     const summarize = async () => {
-      const contextContent = incontextInsight.contextProvider
-        ? await incontextInsight.contextProvider()
-        : '';
-      let incontextInsightType: string;
+      let contextObj;
+      try {
+        contextObj = (await incontextInsight.contextProvider?.()) ?? undefined;
+      } catch (e) {
+        console.error('Error executing contextProvider:', e);
+        toasts.addDanger(
+          i18n.translate('assistantDashboards.incontextInsight.generateSummaryError', {
+            defaultMessage: 'Generate summary error',
+          })
+        );
+        closePopover();
+        return;
+      }
+      const contextContent = contextObj?.context || '';
+      let summaryType: string;
       const endIndex = incontextInsight.key.indexOf('_', 0);
       if (endIndex !== -1) {
-        incontextInsightType = incontextInsight.key.substring(0, endIndex);
+        summaryType = incontextInsight.key.substring(0, endIndex);
       } else {
-        incontextInsightType = incontextInsight.key;
+        summaryType = incontextInsight.key;
       }
+      const insightType =
+        summaryType === 'alerts'
+          ? contextObj?.additionalInfo.monitorType === 'cluster_metrics_monitor'
+            ? 'os_insight'
+            : 'user_insight'
+          : undefined;
 
       await httpSetup
-        ?.post(ASSISTANT_API.SEND_MESSAGE, {
+        ?.post(SUMMARY_ASSISTANT_API.SUMMARIZE, {
           body: JSON.stringify({
-            messages: [],
-            input: {
-              type: 'input',
-              content: summarizationQuestion,
-              contentType: 'text',
-              context: { content: contextContent, dataSourceId: incontextInsight.datasourceId },
-              promptPrefix: getAssistantRole(incontextInsightType),
-            },
+            type: summaryType,
+            insightType,
+            question: summarizationQuestion,
+            context: contextContent,
           }),
         })
         .then((response) => {
-          const interactionLength = response.interactions.length;
-          if (interactionLength > 0) {
-            setConversationId(response.interactions[interactionLength - 1].conversation_id);
-          }
-
-          const messageLength = response.messages.length;
-          if (messageLength > 0 && response.messages[messageLength - 1].type === 'output') {
-            setSummary(response.messages[messageLength - 1].content);
+          const summaryContent = response.summary;
+          setSummary(summaryContent);
+          const insightAgentIdExists = insightType !== undefined && response.insightAgentIdExists;
+          setInsightAvailable(insightAgentIdExists);
+          if (insightAgentIdExists) {
+            onGenerateInsightBasedOnSummary(
+              summaryType,
+              insightType,
+              summaryContent,
+              contextContent,
+              `Please provide your insight on this ${summaryType}.`
+            );
           }
         })
         .catch((error) => {
@@ -82,65 +105,128 @@ export const GeneratePopoverBody: React.FC<{
               defaultMessage: 'Generate summary error',
             })
           );
-        })
-        .finally(() => {
-          setIsLoading(false);
+          closePopover();
         });
     };
 
     return summarize();
   };
 
-  return summary ? (
-    <>
-      <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="plain">
-        <EuiText size="s">{summary}</EuiText>
-      </EuiPanel>
-      <EuiSpacer size={'xs'} />
-      {getConfigSchema().chat.enabled && (
-        <EuiPanel
-          hasShadow={false}
-          hasBorder={false}
-          element="div"
-          onClick={() => onChatContinuation()}
-          grow={false}
-          paddingSize="none"
-          style={{ width: '120px', float: 'right' }}
-        >
-          <EuiFlexGroup gutterSize="none" style={{ marginTop: 5 }}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={'chatRight'} style={{ marginRight: 5 }} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                {i18n.translate('assistantDashboards.incontextInsight.continueInChat', {
-                  defaultMessage: 'Continue in chat',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+  const onGenerateInsightBasedOnSummary = (
+    summaryType: string,
+    insightType: string,
+    summaryContent: string,
+    context: string,
+    insightQuestion: string
+  ) => {
+    const generateInsight = async () => {
+      httpSetup
+        ?.post(SUMMARY_ASSISTANT_API.INSIGHT, {
+          body: JSON.stringify({
+            summaryType,
+            insightType,
+            summary: summaryContent,
+            context,
+            question: insightQuestion,
+          }),
+        })
+        .then((response) => {
+          setInsight(response);
+        })
+        .catch((error) => {
+          toasts.addDanger(
+            i18n.translate('assistantDashboards.incontextInsight.generateSummaryError', {
+              defaultMessage: 'Generate insight error',
+            })
+          );
+          setInsightAvailable(false);
+          setShowInsight(false);
+        });
+    };
+
+    return generateInsight();
+  };
+
+  const renderContent = () => {
+    const content = showInsight && insightAvailable ? insight : summary;
+    return content ? (
+      <>
+        <EuiPanel paddingSize="s" hasBorder hasShadow={false} color="subdued">
+          <EuiText className="incontextInsightGeneratePopoverContent" size="s">
+            <EuiMarkdownFormat>{content}</EuiMarkdownFormat>
+          </EuiText>
+          <EuiSpacer size={'xs'} />
+          {renderInnerFooter()}
         </EuiPanel>
-      )}
+      </>
+    ) : (
+      <EuiLoadingContent aria-label="loading_content" />
+    );
+  };
+
+  const renderInnerTitle = () => {
+    return (
+      <EuiPopoverTitle className="incontextInsightGeneratePopoverTitle" paddingSize="l">
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {showInsight ? (
+              <EuiIcon
+                aria-label="back-to-summary"
+                size="m"
+                onClick={() => {
+                  setShowInsight(false);
+                }}
+                type="arrowLeft"
+                color={'text'}
+              />
+            ) : (
+              <EuiIcon aria-label="alert-assistant" color="hollow" size="l" type={shiny_sparkle} />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <EuiTitle size="xxs">
+                <h6>
+                  {i18n.translate('assistantDashboards.incontextInsight.Summary', {
+                    defaultMessage: showInsight ? 'Insight With RAG' : 'Summary',
+                  })}
+                </h6>
+              </EuiTitle>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
+    );
+  };
+
+  const renderInnerFooter = () => {
+    return (
+      <EuiPopoverFooter className="incontextInsightGeneratePopoverFooter" paddingSize="none">
+        <EuiFlexGroup gutterSize="none" direction={'rowReverse'}>
+          {insightAvailable && (
+            <EuiFlexItem
+              grow={false}
+              onClick={() => {
+                setShowInsight(true);
+              }}
+            >
+              <EuiIconTip
+                aria-label="Insight"
+                type="iInCircle"
+                content="Insight with RAG"
+                color={showInsight ? 'blue' : 'black'}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
+    );
+  };
+
+  return (
+    <>
+      {renderInnerTitle()}
+      {renderContent()}
     </>
-  ) : (
-    <EuiButton
-      onClick={async () => {
-        await onGenerateSummary(
-          incontextInsight.suggestions && incontextInsight.suggestions.length > 0
-            ? incontextInsight.suggestions[0]
-            : 'Please summarize the input'
-        );
-      }}
-      isLoading={isLoading}
-      disabled={isLoading}
-    >
-      {isLoading
-        ? i18n.translate('assistantDashboards.incontextInsight.generatingSummary', {
-            defaultMessage: 'Generating summary...',
-          })
-        : i18n.translate('assistantDashboards.incontextInsight.generateSummary', {
-            defaultMessage: 'Generate summary',
-          })}
-    </EuiButton>
   );
 };

@@ -28,6 +28,11 @@ export const AGENT_API = {
   EXECUTE: `${API_BASE}/agent/_execute`,
 };
 
+export const SUMMARY_ASSISTANT_API = {
+  SUMMARIZE: `${API_BASE}/summary`,
+  INSIGHT: `${API_BASE}/insight`,
+};
+
 export const NOTEBOOK_API = {
   CREATE_NOTEBOOK: `${NOTEBOOK_PREFIX}/note`,
   SET_PARAGRAPH: `${NOTEBOOK_PREFIX}/set_paragraphs/`,
