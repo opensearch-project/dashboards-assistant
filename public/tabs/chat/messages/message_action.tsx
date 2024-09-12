@@ -92,7 +92,14 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       component: renderButtonWithTooltip(
         'Copy to clipboard',
         <EuiCopy textToCopy={contentToCopy}>
-          {(copy) => <EuiSmallButtonIcon onClick={copy} color="text" iconType="copy" />}
+          {(copy) => (
+            <EuiSmallButtonIcon
+              aria-label="copy message"
+              onClick={copy}
+              color="text"
+              iconType="copy"
+            />
+          )}
         </EuiCopy>,
         'copy'
       ),

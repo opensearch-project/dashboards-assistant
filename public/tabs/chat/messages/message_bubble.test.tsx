@@ -10,10 +10,12 @@ import { MessageBubble } from './message_bubble';
 import { IOutput } from '../../../../common/types/chat_saved_object_attributes';
 import * as useFeedbackHookExports from '../../../hooks/use_feed_back';
 import * as useChatActionsExports from '../../../hooks/use_chat_actions';
+import * as coreHookExports from '../../../contexts/core_context';
 
 describe('<MessageBubble />', () => {
   const sendFeedbackMock = jest.fn();
   const executeActionMock = jest.fn();
+  const reportUiStatsMock = jest.fn();
 
   beforeEach(() => {
     jest
@@ -27,6 +29,18 @@ describe('<MessageBubble />', () => {
       executeAction: executeActionMock,
       abortAction: jest.fn(),
       regenerate: jest.fn(),
+    });
+    jest.spyOn(coreHookExports, 'useCore').mockReturnValue({
+      services: {
+        setupDeps: {
+          usageCollection: {
+            reportUiStats: reportUiStatsMock,
+            METRIC_TYPE: {
+              CLICK: 'click',
+            },
+          },
+        },
+      },
     });
   });
 

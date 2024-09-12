@@ -4,11 +4,12 @@
  */
 
 import React from 'react';
-import { render, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render, cleanup, fireEvent, waitFor, screen } from '@testing-library/react';
 import { getConfigSchema, getNotifications } from '../../services';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 
 jest.mock('../../services');
 
@@ -26,7 +27,13 @@ beforeEach(() => {
 });
 
 afterEach(cleanup);
-
+const reportUiStatsMock = jest.fn();
+const mockUsageCollection: UsageCollectionSetup = {
+  reportUiStats: reportUiStatsMock,
+  METRIC_TYPE: {
+    CLICK: 'click',
+  },
+};
 const mockPost = jest.fn();
 const mockHttpSetup: HttpSetup = ({
   post: mockPost,
@@ -68,6 +75,7 @@ describe('GeneratePopoverBody', () => {
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
         closePopover={closePopoverMock}
+        usageCollection={mockUsageCollection}
       />
     );
 
@@ -86,9 +94,15 @@ describe('GeneratePopoverBody', () => {
     expect(queryByLabelText('loading_content')).toBeNull();
     expect(mockPost).toHaveBeenCalledWith(SUMMARY_ASSISTANT_API.SUMMARIZE, expect.any(Object));
     expect(mockToasts.addDanger).not.toHaveBeenCalled();
+    // generated metric is sent
+    expect(reportUiStatsMock).toHaveBeenCalledWith(
+      'alertSumm',
+      'click',
+      expect.stringMatching(/^generated/)
+    );
 
     // insight tip icon is visible
-    const insightTipIcon = getByLabelText('Insight');
+    const insightTipIcon = screen.getAllByLabelText('How was this generated?')[0];
     expect(insightTipIcon).toBeInTheDocument();
 
     // 2. Click insight tip icon to view insight
@@ -142,6 +156,7 @@ describe('GeneratePopoverBody', () => {
         incontextInsight={incontextInsightMock}
         httpSetup={mockHttpSetup}
         closePopover={closePopoverMock}
+        usageCollection={mockUsageCollection}
       />
     );
 
@@ -159,9 +174,15 @@ describe('GeneratePopoverBody', () => {
     expect(queryByLabelText('loading_content')).toBeNull();
     expect(mockPost).toHaveBeenCalledWith(SUMMARY_ASSISTANT_API.SUMMARIZE, expect.any(Object));
     expect(mockToasts.addDanger).not.toHaveBeenCalled();
+    // generated metric is sent
+    expect(reportUiStatsMock).toHaveBeenCalledWith(
+      'alertSumm',
+      'click',
+      expect.stringMatching(/^generated/)
+    );
 
     // insight tip icon is not visible
-    expect(queryByLabelText('Insight')).toBeNull();
+    expect(screen.queryAllByLabelText('How was this generated?')).toHaveLength(0);
     // Only call http post 1 time.
     expect(mockPost).toHaveBeenCalledTimes(1);
   });
@@ -223,6 +244,6 @@ describe('GeneratePopoverBody', () => {
     // Show summary content although insight generation failed
     expect(getByText('Generated summary content')).toBeInTheDocument();
     // insight tip icon is not visible for this alert
-    expect(queryByLabelText('Insight')).toBeNull();
+    expect(screen.queryAllByLabelText('How was this generated?')).toHaveLength(0);
   });
 });

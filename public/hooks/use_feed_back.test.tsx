@@ -10,6 +10,8 @@ import { Interaction, IOutput, IMessage } from '../../common/types/chat_saved_ob
 import { DataSourceService } from '../services';
 import { HttpSetup } from '../../../../src/core/public';
 import { ASSISTANT_API } from '../../common/constants/llm';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { None } from 'vega';
 
 jest.mock('../services');
 
@@ -22,6 +24,14 @@ describe('useFeedback hook', () => {
     getDataSourceQuery: jest.fn(),
   } as unknown) as DataSourceService;
   const chatStateDispatchMock = jest.fn();
+
+  const reportUiStatsMock = jest.fn();
+  const mockUsageCollection: UsageCollectionSetup = {
+    reportUiStats: reportUiStatsMock,
+    METRIC_TYPE: {
+      CLICK: 'click',
+    },
+  };
 
   beforeEach(() => {
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
@@ -112,5 +122,46 @@ describe('useFeedback hook', () => {
     });
 
     expect(result.current.feedbackResult).toBe(undefined);
+  });
+
+  it('should call reportUiStats when sending feedback', async () => {
+    const mockInteraction = {
+      interaction_id: 'interactionId',
+    } as Interaction;
+    const mockInputMessage = {
+      type: 'input',
+    } as IMessage;
+    const mockOutputMessage = {
+      type: 'output',
+      interactionId: 'interactionId',
+    } as IOutput;
+    const mockMessages = [mockInputMessage, mockOutputMessage];
+    const correct = true;
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: { messages: mockMessages, interactions: [], llmResponding: false },
+      chatStateDispatch: chatStateDispatchMock,
+    });
+    const { result } = renderHook(() =>
+      useFeedback(mockInteraction, httpMock, dataSourceServiceMock, mockUsageCollection, 'chat')
+    );
+    expect(result.current.feedbackResult).toBe(undefined);
+
+    const sendFeedback = result.current.sendFeedback;
+    await act(async () => {
+      await sendFeedback(correct, mockOutputMessage);
+    });
+    expect(httpMock.put).toHaveBeenCalledWith(
+      `${ASSISTANT_API.FEEDBACK}/${mockOutputMessage.interactionId}`,
+      {
+        body: JSON.stringify({ satisfaction: correct }),
+        query: dataSourceServiceMock.getDataSourceQuery(),
+      }
+    );
+    expect(result.current.feedbackResult).toBe(correct);
+    expect(reportUiStatsMock).toHaveBeenCalledWith(
+      'chat',
+      'click',
+      expect.stringMatching(/^thumbup/)
+    );
   });
 });
