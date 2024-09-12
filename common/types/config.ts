@@ -6,8 +6,7 @@
 import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
-  // TODO: add here to prevent this plugin from being loaded
-  // enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: true }),
   chat: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
@@ -15,6 +14,15 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   next: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  text2viz: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  alertInsight: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  smartAnomalyDetector: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
 });

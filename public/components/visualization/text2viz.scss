@@ -1,6 +1,15 @@
 .text2viz__page {
+  .text2viz-canvas {
+    height: 100%;
+  }
+
   .visualize {
-    height: 400px;
+    height: 100%;
+    background-color: $euiColorEmptyShade;
+
+    .visChart__container {
+      overflow: unset;
+    }
   }
 
   .text2viz__right {
