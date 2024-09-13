@@ -9,6 +9,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - feat: add a dashboards-assistant trigger in query editor([265](https://github.com/opensearch-project/dashboards-assistant/pull/265))
 - fix: make sure $schema always added to LLM generated vega json object([#252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
 - feat: added a new visualization type visualization-nlq to support creating visualization from natural language([#264](https://github.com/opensearch-project/dashboards-assistant/pull/264))
+- feat: exposed an API to check if a give agent config name has configured with agent id([#307](https://github.com/opensearch-project/dashboards-assistant/pull/307))
 
 ### 📈 Features/Enhancements
 
