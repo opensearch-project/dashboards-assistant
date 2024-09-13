@@ -19,7 +19,7 @@ import { registerChatRoutes } from './routes/chat_routes';
 import { registerText2VizRoutes } from './routes/text2viz_routes';
 import { AssistantService } from './services/assistant_service';
 import { registerAgentRoutes } from './routes/agent_routes';
-import { registerSummaryAssistantRoutes } from './routes/summary_routes';
+import { registerSummaryAssistantRoutes, registerData2SummaryRoutes } from './routes/summary_routes';
 import { capabilitiesProvider as visNLQCapabilitiesProvider } from './vis_type_nlq/capabilities_provider';
 import { visNLQSavedObjectType } from './vis_type_nlq/saved_object_type';
 import { capabilitiesProvider } from './capabilities';
@@ -72,6 +72,9 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     }
 
     core.capabilities.registerProvider(capabilitiesProvider);
+    
+    // Register router for discovery summary
+    registerData2SummaryRoutes(router, assistantServiceSetup);
 
     const registerMessageParser = (messageParser: MessageParser) => {
       const findItem = this.messageParsers.find((item) => item.id === messageParser.id);
