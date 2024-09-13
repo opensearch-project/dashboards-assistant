@@ -26,6 +26,7 @@ export const TEXT2VIZ_API = {
 
 export const AGENT_API = {
   EXECUTE: `${API_BASE}/agent/_execute`,
+  CONFIG_EXISTS: `${API_BASE}/agent_config/_exists`,
 };
 
 export const SUMMARY_ASSISTANT_API = {

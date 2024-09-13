@@ -6,9 +6,15 @@
 import { OpenSearchClient } from '../../../../src/core/server';
 import { ML_COMMONS_BASE_API } from '../utils/constants';
 
-export const getAgent = async (id: string, client: OpenSearchClient['transport']) => {
+/**
+ *
+ */
+export const getAgentIdByConfigName = async (
+  configName: string,
+  client: OpenSearchClient['transport']
+): Promise<string> => {
   try {
-    const path = `${ML_COMMONS_BASE_API}/config/${id}`;
+    const path = `${ML_COMMONS_BASE_API}/config/${configName}`;
     const response = await client.request({
       method: 'GET',
       path,
@@ -18,16 +24,19 @@ export const getAgent = async (id: string, client: OpenSearchClient['transport']
       !response ||
       !(response.body.ml_configuration?.agent_id || response.body.configuration?.agent_id)
     ) {
-      throw new Error(`cannot get agent ${id} by calling the api: ${path}`);
+      throw new Error(`cannot get agent ${configName} by calling the api: ${path}`);
     }
     return response.body.ml_configuration?.agent_id || response.body.configuration.agent_id;
   } catch (error) {
     const errorMessage = JSON.stringify(error.meta?.body) || error;
-    throw new Error(`get agent ${id} failed, reason: ${errorMessage}`);
+    throw new Error(`get agent ${configName} failed, reason: ${errorMessage}`);
   }
 };
 
-export const searchAgentByName = async (name: string, client: OpenSearchClient['transport']) => {
+export const searchAgent = async (
+  { name }: { name: string },
+  client: OpenSearchClient['transport']
+) => {
   try {
     const requestParams = {
       query: {

@@ -40,7 +40,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
     router.handleLegacyErrors(async (context, req, res) => {
       const assistantClient = assistantService.getScopedClient(req, context);
       try {
-        const response = await assistantClient.executeAgentByName(TEXT2VEGA_AGENT_CONFIG_ID, {
+        const response = await assistantClient.executeAgentByConfigName(TEXT2VEGA_AGENT_CONFIG_ID, {
           input_question: req.body.input_question,
           input_instruction: req.body.input_instruction,
           ppl: req.body.ppl,
@@ -84,7 +84,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
     router.handleLegacyErrors(async (context, req, res) => {
       const assistantClient = assistantService.getScopedClient(req, context);
       try {
-        const response = await assistantClient.executeAgentByName(TEXT2PPL_AGENT_CONFIG_ID, {
+        const response = await assistantClient.executeAgentByConfigName(TEXT2PPL_AGENT_CONFIG_ID, {
           question: req.body.question,
           index: req.body.index,
         });
