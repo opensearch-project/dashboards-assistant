@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { API_BASE } from '../../common/constants/llm';
+import { AGENT_API } from '../../common/constants/llm';
 import { HttpSetup } from '../../../../src/core/public';
 
 interface Options {
@@ -17,19 +17,34 @@ export class AssistantClient {
   executeAgent = (agentId: string, parameters: Record<string, any>, options?: Options) => {
     return this.http.fetch({
       method: 'POST',
-      path: `${API_BASE}/agent/_execute`,
+      path: AGENT_API.EXECUTE,
       body: JSON.stringify(parameters),
       query: { dataSourceId: options?.dataSourceId, agentId },
     });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  executeAgentByName = (agentName: string, parameters: Record<string, any>, options?: Options) => {
+  executeAgentByConfigName = (
+    agentConfigName: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parameters: Record<string, any>,
+    options?: Options
+  ) => {
     return this.http.fetch({
       method: 'POST',
-      path: `${API_BASE}/agent/_execute`,
+      path: AGENT_API.EXECUTE,
       body: JSON.stringify(parameters),
-      query: { dataSourceId: options?.dataSourceId, agentName },
+      query: { dataSourceId: options?.dataSourceId, agentConfigName },
+    });
+  };
+
+  /**
+   * Return if the given agent config name has agent id configured
+   */
+  agentConfigExists = (agentConfigName: string, options?: Options) => {
+    return this.http.fetch<{ exists: boolean }>({
+      method: 'GET',
+      path: AGENT_API.CONFIG_EXISTS,
+      query: { dataSourceId: options?.dataSourceId, agentConfigName },
     });
   };
 }

@@ -21,7 +21,7 @@ export function registerAgentRoutes(router: IRouter, assistantService: Assistant
           }),
           schema.object({
             dataSourceId: schema.maybe(schema.string()),
-            agentName: schema.string(),
+            agentConfigName: schema.string(),
           }),
         ]),
       },
@@ -33,10 +33,36 @@ export function registerAgentRoutes(router: IRouter, assistantService: Assistant
           const response = await assistantClient.executeAgent(req.query.agentId, req.body);
           return res.ok({ body: response });
         }
-        const response = await assistantClient.executeAgentByName(req.query.agentName, req.body);
+        const response = await assistantClient.executeAgentByConfigName(
+          req.query.agentConfigName,
+          req.body
+        );
         return res.ok({ body: response });
       } catch (e) {
         return res.internalError();
+      }
+    })
+  );
+
+  router.get(
+    {
+      path: AGENT_API.CONFIG_EXISTS,
+      validate: {
+        query: schema.oneOf([
+          schema.object({
+            dataSourceId: schema.string(),
+            agentConfigName: schema.string(),
+          }),
+        ]),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      try {
+        const assistantClient = assistantService.getScopedClient(req, context);
+        const agentId = await assistantClient.getAgentIdByConfigName(req.query.agentConfigName);
+        return res.ok({ body: { exists: Boolean(agentId) } });
+      } catch (e) {
+        return res.ok({ body: { exists: false } });
       }
     })
   );
