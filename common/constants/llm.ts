@@ -44,5 +44,5 @@ export const DEFAULT_USER_NAME = 'User';
 
 export const TEXT2VEGA_INPUT_SIZE_LIMIT = 400;
 
-export const TEXT2VEGA_AGENT_CONFIG_ID = 'os_text2vega_new2';
+export const TEXT2VEGA_AGENT_CONFIG_ID = 'os_text2vega';
 export const TEXT2PPL_AGENT_CONFIG_ID = 'os_query_assist_ppl';

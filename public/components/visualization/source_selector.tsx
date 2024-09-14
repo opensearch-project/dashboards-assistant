@@ -17,6 +17,8 @@ import { StartServices } from '../../types';
 import { TEXT2VEGA_AGENT_CONFIG_ID } from '../../../common/constants/llm';
 import { getAssistantService } from '../../services';
 
+const DEFAULT_DATA_SOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
+
 export const SourceSelector = ({
   selectedSourceId,
   onChange,
@@ -75,18 +77,21 @@ export const SourceSelector = ({
 
   const onSetDataSourceOptions = useCallback(
     async (options: DataSourceGroup[]) => {
-      // Only support index pattern type of data set
+      // Only support opensearch default data source
       const indexPatternOptions = options.find(
-        (item) => item.groupType === 'DEFAULT_INDEX_PATTERNS'
+        (item) => item.groupType === DEFAULT_DATA_SOURCE_TYPE
+      );
+      const supportedDataSources = currentDataSources.filter(
+        (dataSource) => dataSource.getType() === DEFAULT_DATA_SOURCE_TYPE
       );
 
-      if (!indexPatternOptions) {
+      if (!indexPatternOptions || supportedDataSources.length === 0) {
         return;
       }
 
       // Group index pattern ids by data source id
       const dataSourceIdToIndexPatternIds: Record<string, string[]> = {};
-      const promises = currentDataSources.map(async (dataSource) => {
+      const promises = supportedDataSources.map(async (dataSource) => {
         const { dataSets } = await dataSource.getDataSet();
         if (Array.isArray(dataSets)) {
           /**
