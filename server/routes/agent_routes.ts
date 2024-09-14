@@ -50,7 +50,7 @@ export function registerAgentRoutes(router: IRouter, assistantService: Assistant
       validate: {
         query: schema.oneOf([
           schema.object({
-            dataSourceId: schema.string(),
+            dataSourceId: schema.maybe(schema.string()),
             agentConfigName: schema.string(),
           }),
         ]),
