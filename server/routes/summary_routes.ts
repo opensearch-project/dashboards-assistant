@@ -7,7 +7,7 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
-import { getAgent, searchAgentByName } from './get_agent';
+import { getAgentIdByConfigName, searchAgent } from './get_agent';
 import { AssistantServiceSetup } from '../services/assistant_service';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
@@ -41,7 +41,7 @@ export function registerSummaryAssistantRoutes(
         dataSourceId: req.query.dataSourceId,
       });
       const assistantClient = assistantService.getScopedClient(req, context);
-      const response = await assistantClient.executeAgentByName(SUMMARY_AGENT_CONFIG_ID, {
+      const response = await assistantClient.executeAgentByConfigName(SUMMARY_AGENT_CONFIG_ID, {
         context: req.body.context,
         question: req.body.question,
       });
@@ -53,13 +53,13 @@ export function registerSummaryAssistantRoutes(
           // only get it by searching on name since it is not stored in agent config.
           if (req.body.insightType === 'os_insight') {
             if (!osInsightAgentId) {
-              osInsightAgentId = await getAgent(OS_INSIGHT_AGENT_CONFIG_ID, client);
+              osInsightAgentId = await getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
             }
             insightAgentIdExists = !!osInsightAgentId;
           } else if (req.body.insightType === 'user_insight') {
             if (req.body.type === 'alerts') {
               if (!userInsightAgentId) {
-                userInsightAgentId = await searchAgentByName('KB_For_Alert_Insight', client);
+                userInsightAgentId = await searchAgent({ name: 'KB_For_Alert_Insight' }, client);
               }
             }
             insightAgentIdExists = !!userInsightAgentId;
@@ -127,7 +127,10 @@ export function registerSummaryAssistantRoutes(
   );
 }
 
-export function registerData2SummaryRoutes(router: IRouter, assistantService: AssistantServiceSetup) {
+export function registerData2SummaryRoutes(
+  router: IRouter,
+  assistantService: AssistantServiceSetup
+) {
   router.post(
     {
       path: SUMMARY_ASSISTANT_API.DATA2SUMMARY,
@@ -147,13 +150,16 @@ export function registerData2SummaryRoutes(router: IRouter, assistantService: As
     router.handleLegacyErrors(async (context, req, res) => {
       const assistantClient = assistantService.getScopedClient(req, context);
       try {
-        const response = await assistantClient.executeAgentByName(DATA2SUMMARY_AGENT_CONFIG_ID, {
-          sample_data: req.body.sample_data,
-          total_count: req.body.total_count,
-          sample_count: req.body.sample_count,
-          ppl: req.body.ppl,
-          question: req.body.question,
-        });
+        const response = await assistantClient.executeAgentByConfigName(
+          DATA2SUMMARY_AGENT_CONFIG_ID,
+          {
+            sample_data: req.body.sample_data,
+            total_count: req.body.total_count,
+            sample_count: req.body.sample_count,
+            ppl: req.body.ppl,
+            question: req.body.question,
+          }
+        );
         const result = response.body.inference_results[0].output[0].result;
         return res.ok({ body: result });
       } catch (e) {

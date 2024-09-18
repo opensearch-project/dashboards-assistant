@@ -43,6 +43,7 @@ import {
   setUiActions,
   setExpressions,
   setHttp,
+  setAssistantService,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
@@ -318,6 +319,7 @@ export class AssistantPlugin
     setNotifications(core.notifications);
     setConfigSchema(this.config);
     setUiActions(uiActions);
+    setAssistantService(assistantServiceStart);
 
     if (this.config.text2viz.enabled) {
       uiActions.addTriggerAction(AI_ASSISTANT_QUERY_EDITOR_TRIGGER, {
