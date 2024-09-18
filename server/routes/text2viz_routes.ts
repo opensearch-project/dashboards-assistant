@@ -5,11 +5,13 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../src/core/server';
-import { TEXT2VEGA_INPUT_SIZE_LIMIT, TEXT2VIZ_API } from '../../common/constants/llm';
+import {
+  TEXT2PPL_AGENT_CONFIG_ID,
+  TEXT2VEGA_AGENT_CONFIG_ID,
+  TEXT2VEGA_INPUT_SIZE_LIMIT,
+  TEXT2VIZ_API,
+} from '../../common/constants/llm';
 import { AssistantServiceSetup } from '../services/assistant_service';
-
-const TEXT2VEGA_AGENT_CONFIG_ID = 'os_text2vega';
-const TEXT2PPL_AGENT_CONFIG_ID = 'os_query_assist_ppl';
 
 const inputSchema = schema.string({
   maxLength: TEXT2VEGA_INPUT_SIZE_LIMIT,
@@ -48,22 +50,39 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
           sampleData: req.body.sampleData,
         });
 
-        // let result = response.body.inference_results[0].output[0].dataAsMap;
-        let result = JSON.parse(response.body.inference_results[0].output[0].result);
-        // sometimes llm returns {response: <schema>} instead of <schema>
-        if (result.response) {
-          result = JSON.parse(result.response);
+        let textContent = response.body.inference_results[0].output[0].result;
+
+        // extra content between tag <vega-lite></vega-lite>
+        const startTag = '<vega-lite>';
+        const endTag = '</vega-lite>';
+
+        const startIndex = textContent.indexOf(startTag);
+        const endIndex = textContent.indexOf(endTag);
+
+        if (startIndex !== -1 && endIndex !== -1 && startIndex < endIndex) {
+          // Extract the content between the tags
+          textContent = textContent.substring(startIndex + startTag.length, endIndex).trim();
         }
-        // Sometimes the response contains width and height which is not needed, here delete the these fields
-        delete result.width;
-        delete result.height;
 
-        // make sure $schema field always been added, sometimes, LLM 'forgot' to add this field
-        result.$schema = 'https://vega.github.io/schema/vega-lite/v5.json';
+        // extract json object
+        const jsonMatch = textContent.match(/\{.*\}/s);
+        if (jsonMatch) {
+          let result = JSON.parse(jsonMatch[0]);
+          // sometimes llm returns {response: <schema>} instead of <schema>
+          if (result.response) {
+            result = JSON.parse(result.response);
+          }
+          // Sometimes the response contains width and height which is not needed, here delete the these fields
+          delete result.width;
+          delete result.height;
 
-        return res.ok({ body: result });
+          // make sure $schema field always been added, sometimes, LLM 'forgot' to add this field
+          result.$schema = 'https://vega.github.io/schema/vega-lite/v5.json';
+          return res.ok({ body: result });
+        }
+        return res.badRequest();
       } catch (e) {
-        return res.internalError();
+        return res.badRequest();
       }
     })
   );
@@ -92,7 +111,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         const result = JSON.parse(response.body.inference_results[0].output[0].result);
         return res.ok({ body: result });
       } catch (e) {
-        return res.internalError();
+        return res.badRequest();
       }
     })
   );
