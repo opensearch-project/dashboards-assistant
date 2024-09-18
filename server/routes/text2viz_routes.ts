@@ -7,7 +7,7 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../src/core/server';
 import {
   TEXT2PPL_AGENT_CONFIG_ID,
-  TEXT2VEGA_AGENT_CONFIG_ID,
+  TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
   TEXT2VEGA_INPUT_SIZE_LIMIT,
   TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
   TEXT2VIZ_API,
@@ -45,7 +45,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
       try {
         const agentConfigName = req.body.input_instruction
           ? TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID
-          : TEXT2VEGA_AGENT_CONFIG_ID;
+          : TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID;
         const response = await assistantClient.executeAgentByConfigName(agentConfigName, {
           input_question: req.body.input_question,
           input_instruction: req.body.input_instruction,
