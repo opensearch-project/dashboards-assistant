@@ -9,6 +9,7 @@ import {
   TEXT2PPL_AGENT_CONFIG_ID,
   TEXT2VEGA_AGENT_CONFIG_ID,
   TEXT2VEGA_INPUT_SIZE_LIMIT,
+  TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
   TEXT2VIZ_API,
 } from '../../common/constants/llm';
 import { AssistantServiceSetup } from '../services/assistant_service';
@@ -42,7 +43,10 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
     router.handleLegacyErrors(async (context, req, res) => {
       const assistantClient = assistantService.getScopedClient(req, context);
       try {
-        const response = await assistantClient.executeAgentByConfigName(TEXT2VEGA_AGENT_CONFIG_ID, {
+        const agentConfigName = req.body.input_instruction
+          ? TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID
+          : TEXT2VEGA_AGENT_CONFIG_ID;
+        const response = await assistantClient.executeAgentByConfigName(agentConfigName, {
           input_question: req.body.input_question,
           input_instruction: req.body.input_instruction,
           ppl: req.body.ppl,
