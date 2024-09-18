@@ -297,12 +297,10 @@ export class AssistantPlugin
         if (!this.incontextInsightRegistry?.isEnabled()) return <div {...props} />;
         const httpSetup = core.http;
         const usageCollection = setupDeps.usageCollection || null;
-        const dataSourceService = this.dataSourceService;
         return (
           <IncontextInsightComponent
             {...props}
             httpSetup={httpSetup}
-            dataSourceService={dataSourceService}
             usageCollection={usageCollection}
           />
         );

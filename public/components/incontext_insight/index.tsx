@@ -32,14 +32,12 @@ import { getIncontextInsightRegistry, getNotifications } from '../../services';
 import chatIcon from '../../assets/chat.svg';
 import sparkle from '../../assets/sparkle.svg';
 import { HttpSetup } from '../../../../../src/core/public';
-import { DataSourceService } from '../../services/data_source_service';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
   httpSetup?: HttpSetup;
-  dataSourceService?: DataSourceService;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -47,7 +45,6 @@ export interface IncontextInsightProps {
 export const IncontextInsight = ({
   children,
   httpSetup,
-  dataSourceService,
   usageCollection,
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);

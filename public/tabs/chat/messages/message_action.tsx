@@ -83,9 +83,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     </EuiToolTip>
   );
 
-  const feedbackTip =
-    'Thank you for the feedback. Try again by adjusting your prompt so that I have the opportunity to better assist you.';
-
+  const feedbackTip = i18n.translate(`assistantDashboards.messageActions.feedbackTip`, {
+    defaultMessage:
+      'Thank you for the feedback. Try again by adjusting your prompt so that I have the opportunity to better assist you.',
+  });
   const buttonConfigs = {
     copy: {
       show: !isFullWidth,

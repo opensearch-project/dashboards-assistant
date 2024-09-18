@@ -10,8 +10,7 @@ import { Interaction, IOutput, IMessage } from '../../common/types/chat_saved_ob
 import { DataSourceService } from '../services';
 import { HttpSetup } from '../../../../src/core/public';
 import { ASSISTANT_API } from '../../common/constants/llm';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { None } from 'vega';
+import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
 
 jest.mock('../services');
 
@@ -23,15 +22,9 @@ describe('useFeedback hook', () => {
   const dataSourceServiceMock = ({
     getDataSourceQuery: jest.fn(),
   } as unknown) as DataSourceService;
-  const chatStateDispatchMock = jest.fn();
 
-  const reportUiStatsMock = jest.fn();
-  const mockUsageCollection: UsageCollectionSetup = {
-    reportUiStats: reportUiStatsMock,
-    METRIC_TYPE: {
-      CLICK: 'click',
-    },
-  };
+  const chatStateDispatchMock = jest.fn();
+  const mockUsageCollection = usageCollectionPluginMock.createSetupContract();
 
   beforeEach(() => {
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
@@ -158,7 +151,7 @@ describe('useFeedback hook', () => {
       }
     );
     expect(result.current.feedbackResult).toBe(correct);
-    expect(reportUiStatsMock).toHaveBeenCalledWith(
+    expect(mockUsageCollection.reportUiStats).toHaveBeenCalledWith(
       'chat',
       'click',
       expect.stringMatching(/^thumbup/)

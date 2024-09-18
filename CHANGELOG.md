@@ -35,5 +35,3 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add assistant enabled capabilities to control rendering component([#267](https://github.com/opensearch-project/dashboards-assistant/pull/267))
 - Add data to summary API([#295](https://github.com/opensearch-project/dashboards-assistant/pull/295))
 - Refactor popover to add message action bar and add metrics to thumb-up and thumb-down([#304](https://github.com/opensearch-project/dashboards-assistant/pull/304))
-
-

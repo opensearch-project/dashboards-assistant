@@ -9,8 +9,7 @@ import { getConfigSchema, getNotifications } from '../../services';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
-
+import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
 
 jest.mock('../../services');
 
@@ -28,13 +27,7 @@ beforeEach(() => {
 });
 
 afterEach(cleanup);
-const reportUiStatsMock = jest.fn();
-const mockUsageCollection: UsageCollectionSetup = {
-  reportUiStats: reportUiStatsMock,
-  METRIC_TYPE: {
-    CLICK: 'click',
-  },
-};
+const mockUsageCollection = usageCollectionPluginMock.createSetupContract();
 const mockPost = jest.fn();
 const mockHttpSetup: HttpSetup = ({
   post: mockPost,
@@ -96,7 +89,7 @@ describe('GeneratePopoverBody', () => {
     expect(mockPost).toHaveBeenCalledWith(SUMMARY_ASSISTANT_API.SUMMARIZE, expect.any(Object));
     expect(mockToasts.addDanger).not.toHaveBeenCalled();
     // generated metric is sent
-    expect(reportUiStatsMock).toHaveBeenCalledWith(
+    expect(mockUsageCollection.reportUiStats).toHaveBeenCalledWith(
       'alertSumm',
       'click',
       expect.stringMatching(/^generated/)
@@ -176,7 +169,7 @@ describe('GeneratePopoverBody', () => {
     expect(mockPost).toHaveBeenCalledWith(SUMMARY_ASSISTANT_API.SUMMARIZE, expect.any(Object));
     expect(mockToasts.addDanger).not.toHaveBeenCalled();
     // generated metric is sent
-    expect(reportUiStatsMock).toHaveBeenCalledWith(
+    expect(mockUsageCollection.reportUiStats).toHaveBeenCalledWith(
       'alertSumm',
       'click',
       expect.stringMatching(/^generated/)
