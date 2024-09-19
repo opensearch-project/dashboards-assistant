@@ -18,8 +18,7 @@
   "optionalPlugins": [
     "dataSource",
     "dataSourceManagement",
-    "usageCollection",
-    "telemetry"
+    "usageCollection"
   ],
   "requiredBundles": [],
   "configPath": [
