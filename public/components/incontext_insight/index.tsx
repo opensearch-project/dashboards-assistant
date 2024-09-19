@@ -31,14 +31,16 @@ import { getIncontextInsightRegistry, getNotifications } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
 import sparkle from '../../assets/sparkle.svg';
-import { HttpSetup } from '../../../../../src/core/public';
+import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
+import { AssistantPluginStartDependencies } from '../../types';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
   httpSetup?: HttpSetup;
   usageCollection?: UsageCollectionSetup;
+  getStartServices?: StartServicesAccessor<AssistantPluginStartDependencies>;
 }
 
 // TODO: add saved objects / config to store seed suggestions
@@ -46,6 +48,7 @@ export const IncontextInsight = ({
   children,
   httpSetup,
   usageCollection,
+  getStartServices,
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -287,6 +290,7 @@ export const IncontextInsight = ({
               httpSetup={httpSetup}
               usageCollection={usageCollection}
               closePopover={closePopover}
+              getStartServices={getStartServices}
             />
           );
         case 'summary':
