@@ -5,12 +5,10 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiLoadingContent,
   EuiMarkdownFormat,
   EuiPanel,
@@ -28,6 +26,7 @@ import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import shiny_sparkle from '../../assets/shiny_sparkle.svg';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { reportMetric } from '../../utils/report_metric';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
@@ -42,16 +41,6 @@ export const GeneratePopoverBody: React.FC<{
   const metricAppName = 'alertSumm';
 
   const toasts = getNotifications().toasts;
-
-  const reportGeneratedMetric = usageCollection
-    ? (metric: string) => {
-        usageCollection.reportUiStats(
-          metricAppName,
-          usageCollection.METRIC_TYPE.CLICK,
-          metric + '-' + uuidv4()
-        );
-      }
-    : () => {};
 
   useEffectOnce(() => {
     onGenerateSummary(
@@ -114,7 +103,7 @@ export const GeneratePopoverBody: React.FC<{
               `Please provide your insight on this ${summaryType}.`
             );
           }
-          reportGeneratedMetric('generated');
+          reportMetric(usageCollection, metricAppName, 'generated');
         })
         .catch((error) => {
           toasts.addDanger(

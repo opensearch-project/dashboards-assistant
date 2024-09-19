@@ -4,7 +4,6 @@
  */
 
 import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import {
   IOutput,
@@ -15,6 +14,7 @@ import { useChatState } from './use_chat_state';
 import { HttpSetup } from '../../../../src/core/public';
 import { DataSourceService } from '../services/data_source_service';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { reportMetric } from '../utils/report_metric';
 
 export const useFeedback = (
   interaction?: Interaction | null,
@@ -44,16 +44,6 @@ export const useFeedback = (
       }
     }
 
-    const reportMetric = usageCollection
-      ? (metric: string) => {
-          usageCollection.reportUiStats(
-            metricAppName,
-            usageCollection.METRIC_TYPE.CLICK,
-            metric + '-' + uuidv4()
-          );
-        }
-      : () => {};
-
     const body: SendFeedbackBody = {
       satisfaction: correct,
     };
@@ -65,7 +55,7 @@ export const useFeedback = (
         });
       }
       setFeedbackResult(correct);
-      reportMetric(correct ? 'thumbup' : 'thumbdown');
+      reportMetric(usageCollection, metricAppName, correct ? 'thumbup' : 'thumbdown');
     } catch (error) {
       console.error('send feedback error', error);
     }
