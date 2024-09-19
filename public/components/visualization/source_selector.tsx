@@ -14,6 +14,10 @@ import {
   DataSourceOption,
 } from '../../../../../src/plugins/data/public';
 import { StartServices } from '../../types';
+import { TEXT2VEGA_AGENT_CONFIG_ID } from '../../../common/constants/llm';
+import { getAssistantService } from '../../services';
+
+const DEFAULT_DATA_SOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
 
 export const SourceSelector = ({
   selectedSourceId,
@@ -71,6 +75,64 @@ export const SourceSelector = ({
     [onChange]
   );
 
+  const onSetDataSourceOptions = useCallback(
+    async (options: DataSourceGroup[]) => {
+      // Only support opensearch default data source
+      const indexPatternOptions = options.find(
+        (item) => item.groupType === DEFAULT_DATA_SOURCE_TYPE
+      );
+      const supportedDataSources = currentDataSources.filter(
+        (dataSource) => dataSource.getType() === DEFAULT_DATA_SOURCE_TYPE
+      );
+
+      if (!indexPatternOptions || supportedDataSources.length === 0) {
+        return;
+      }
+
+      // Group index pattern ids by data source id
+      const dataSourceIdToIndexPatternIds: Record<string, string[]> = {};
+      const promises = supportedDataSources.map(async (dataSource) => {
+        const { dataSets } = await dataSource.getDataSet();
+        if (Array.isArray(dataSets)) {
+          /**
+           * id: the index pattern id
+           * dataSourceId: the data source id
+           */
+          for (const { id, dataSourceId = 'DEFAULT' } of dataSets) {
+            if (!dataSourceIdToIndexPatternIds[dataSourceId]) {
+              dataSourceIdToIndexPatternIds[dataSourceId] = [];
+            }
+            dataSourceIdToIndexPatternIds[dataSourceId].push(id);
+          }
+        }
+      });
+      await Promise.allSettled(promises);
+
+      const assistantService = getAssistantService();
+      /**
+       * Check each data source to see if text to vega agent is configured or not
+       * If not configured, disable the corresponding index pattern from the selection list
+       */
+      Object.keys(dataSourceIdToIndexPatternIds).forEach(async (key) => {
+        const res = await assistantService.client.agentConfigExists(TEXT2VEGA_AGENT_CONFIG_ID, {
+          dataSourceId: key !== 'DEFAULT' ? key : undefined,
+        });
+        if (!res.exists) {
+          dataSourceIdToIndexPatternIds[key].forEach((indexPatternId) => {
+            indexPatternOptions.options.forEach((option) => {
+              if (option.value === indexPatternId) {
+                option.disabled = true;
+              }
+            });
+          });
+        }
+      });
+
+      setDataSourceOptions([indexPatternOptions]);
+    },
+    [currentDataSources]
+  );
+
   const handleGetDataSetError = useCallback(
     () => (error: Error) => {
       toasts.addError(error, {
@@ -91,7 +153,7 @@ export const SourceSelector = ({
     <DataSourceSelectable
       dataSources={currentDataSources}
       dataSourceOptionList={dataSourceOptions}
-      setDataSourceOptionList={setDataSourceOptions}
+      setDataSourceOptionList={onSetDataSourceOptions}
       onDataSourceSelect={onDataSourceSelect}
       selectedSources={selectedSources}
       onGetDataSetError={handleGetDataSetError}

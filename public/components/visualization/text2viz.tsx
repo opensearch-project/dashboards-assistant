@@ -330,7 +330,7 @@ export const Text2Viz = () => {
   const getInputSection = () => {
     return (
       <>
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem grow={3} style={{ maxWidth: '30%' }}>
           <SourceSelector
             selectedSourceId={selectedSource}
             onChange={(ds) => setSelectedSource(ds.value)}
