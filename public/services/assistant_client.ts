@@ -38,9 +38,10 @@ export class AssistantClient {
   };
 
   /**
-   * Return if the given agent config name has agent id configured
+   * Check if the given agent config name has agent id configured
+   * Return false if any of the given config name has no agent id configured
    */
-  agentConfigExists = (agentConfigName: string, options?: Options) => {
+  agentConfigExists = (agentConfigName: string | string[], options?: Options) => {
     return this.http.fetch<{ exists: boolean }>({
       method: 'GET',
       path: AGENT_API.CONFIG_EXISTS,
