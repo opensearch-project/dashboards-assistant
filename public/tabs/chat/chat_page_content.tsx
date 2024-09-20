@@ -14,11 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useLayoutEffect, useRef } from 'react';
-import {
-  IMessage,
-  ISuggestedAction,
-  Interaction,
-} from '../../../common/types/chat_saved_object_attributes';
+import { IMessage, Interaction } from '../../../common/types/chat_saved_object_attributes';
 import { WelcomeMessage } from '../../components/chat_welcome_message';
 import { useChatContext } from '../../contexts';
 import { useChatState, useChatActions } from '../../hooks';

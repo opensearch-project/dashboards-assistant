@@ -21,6 +21,8 @@ import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/
 import { ExpressionsSetup, ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { SavedObjectsStart } from '../../../src/plugins/saved_objects/public';
 
+import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
+
 export interface RenderProps {
   props: MessageContentProps;
   chatContext: IChatContext;
@@ -53,6 +55,7 @@ export interface AssistantPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  usageCollection?: UsageCollectionSetup;
   uiActions: UiActionsSetup;
   expressions: ExpressionsSetup;
 }

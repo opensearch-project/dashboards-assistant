@@ -33,14 +33,20 @@ import chatIcon from '../../assets/chat.svg';
 import sparkle from '../../assets/sparkle.svg';
 import { HttpSetup } from '../../../../../src/core/public';
 import { GeneratePopoverBody } from './generate_popover_body';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
   httpSetup?: HttpSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 // TODO: add saved objects / config to store seed suggestions
-export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps) => {
+export const IncontextInsight = ({
+  children,
+  httpSetup,
+  usageCollection,
+}: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -279,6 +285,7 @@ export const IncontextInsight = ({ children, httpSetup }: IncontextInsightProps)
             <GeneratePopoverBody
               incontextInsight={input}
               httpSetup={httpSetup}
+              usageCollection={usageCollection}
               closePopover={closePopover}
             />
           );
