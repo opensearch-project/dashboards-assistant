@@ -84,8 +84,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   );
 
   const feedbackTip = i18n.translate(`assistantDashboards.messageActions.feedbackTip`, {
-    defaultMessage:
-      'Thank you for the feedback. Try again by adjusting your prompt so that I have the opportunity to better assist you.',
+    defaultMessage: 'We have successfully received your feedback. Thank you.',
   });
   const buttonConfigs = {
     copy: {

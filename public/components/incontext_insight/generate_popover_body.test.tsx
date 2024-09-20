@@ -90,8 +90,8 @@ describe('GeneratePopoverBody', () => {
     expect(mockToasts.addDanger).not.toHaveBeenCalled();
     // generated metric is sent
     expect(mockUsageCollection.reportUiStats).toHaveBeenCalledWith(
-      'alertSumm',
-      'click',
+      'alertSummary',
+      'count',
       expect.stringMatching(/^generated/)
     );
 
@@ -170,8 +170,8 @@ describe('GeneratePopoverBody', () => {
     expect(mockToasts.addDanger).not.toHaveBeenCalled();
     // generated metric is sent
     expect(mockUsageCollection.reportUiStats).toHaveBeenCalledWith(
-      'alertSumm',
-      'click',
+      'alertSummary',
+      'count',
       expect.stringMatching(/^generated/)
     );
 

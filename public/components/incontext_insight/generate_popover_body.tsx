@@ -19,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useEffectOnce } from 'react-use';
+import { METRIC_TYPE } from '@osd/analytics';
 import { MessageActions } from '../../tabs/chat/messages/message_action';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getNotifications } from '../../services';
@@ -38,7 +39,7 @@ export const GeneratePopoverBody: React.FC<{
   const [insight, setInsight] = useState('');
   const [insightAvailable, setInsightAvailable] = useState(false);
   const [showInsight, setShowInsight] = useState(false);
-  const metricAppName = 'alertSumm';
+  const metricAppName = 'alertSummary';
 
   const toasts = getNotifications().toasts;
 
@@ -103,7 +104,7 @@ export const GeneratePopoverBody: React.FC<{
               `Please provide your insight on this ${summaryType}.`
             );
           }
-          reportMetric(usageCollection, metricAppName, 'generated');
+          reportMetric(usageCollection, metricAppName, 'generated', METRIC_TYPE.COUNT);
         })
         .catch((error) => {
           toasts.addDanger(
