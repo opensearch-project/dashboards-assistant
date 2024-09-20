@@ -5,44 +5,59 @@
 
 import { useState } from 'react';
 import { ASSISTANT_API } from '../../common/constants/llm';
-import { IOutput, Interaction } from '../../common/types/chat_saved_object_attributes';
-import { useCore } from '../contexts/core_context';
+import {
+  IOutput,
+  Interaction,
+  SendFeedbackBody,
+} from '../../common/types/chat_saved_object_attributes';
 import { useChatState } from './use_chat_state';
-import { SendFeedbackBody } from '../../common/types/chat_saved_object_attributes';
+import { HttpSetup } from '../../../../src/core/public';
+import { DataSourceService } from '../services/data_source_service';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { reportMetric } from '../utils/report_metric';
 
-export const useFeedback = (interaction?: Interaction | null) => {
-  const core = useCore();
-  const { chatState } = useChatState();
+export const useFeedback = (
+  interaction?: Interaction | null,
+  httpSetup?: HttpSetup,
+  dataSourceService?: DataSourceService,
+  usageCollection?: UsageCollectionSetup,
+  metricAppName: string = 'chat'
+) => {
+  const chatStateContext = useChatState();
   const [feedbackResult, setFeedbackResult] = useState<undefined | boolean>(
     interaction?.additional_info?.feedback?.satisfaction ?? undefined
   );
 
-  const sendFeedback = async (message: IOutput, correct: boolean) => {
-    const outputMessage = message;
-    // Markdown type output all has interactionId. The interactionId of message is equal to interaction id.
-    const outputMessageIndex = chatState.messages.findIndex((item) => {
-      return item.type === 'output' && item.interactionId === message.interactionId;
-    });
-    const inputMessage = chatState.messages
-      .slice(0, outputMessageIndex)
-      .reverse()
-      .find((item) => item.type === 'input');
-    if (!inputMessage) {
-      return;
+  const sendFeedback = async (correct: boolean, message: IOutput | null) => {
+    if (chatStateContext?.chatState) {
+      const chatState = chatStateContext.chatState;
+      // Markdown type output all has interactionId. The interactionId of message is equal to interaction id.
+      const outputMessageIndex = chatState.messages.findIndex((item) => {
+        return item.type === 'output' && item.interactionId === message?.interactionId;
+      });
+      const inputMessage = chatState.messages
+        .slice(0, outputMessageIndex)
+        .reverse()
+        .find((item) => item.type === 'input');
+      if (!inputMessage) {
+        return;
+      }
     }
 
     const body: SendFeedbackBody = {
       satisfaction: correct,
     };
-
     try {
-      await core.services.http.put(`${ASSISTANT_API.FEEDBACK}/${message.interactionId}`, {
-        body: JSON.stringify(body),
-        query: core.services.dataSource.getDataSourceQuery(),
-      });
+      if (message) {
+        await httpSetup?.put(`${ASSISTANT_API.FEEDBACK}/${message.interactionId}`, {
+          body: JSON.stringify(body),
+          query: dataSourceService?.getDataSourceQuery(),
+        });
+      }
       setFeedbackResult(correct);
+      reportMetric(usageCollection, metricAppName, correct ? 'thumbup' : 'thumbdown');
     } catch (error) {
-      console.log('send feedback error');
+      console.error('send feedback error', error);
     }
   };
 

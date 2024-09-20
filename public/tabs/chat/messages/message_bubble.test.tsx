@@ -10,10 +10,12 @@ import { MessageBubble } from './message_bubble';
 import { IOutput } from '../../../../common/types/chat_saved_object_attributes';
 import * as useFeedbackHookExports from '../../../hooks/use_feed_back';
 import * as useChatActionsExports from '../../../hooks/use_chat_actions';
+import * as coreHookExports from '../../../contexts/core_context';
 
 describe('<MessageBubble />', () => {
   const sendFeedbackMock = jest.fn();
   const executeActionMock = jest.fn();
+  const reportUiStatsMock = jest.fn();
 
   beforeEach(() => {
     jest
@@ -27,6 +29,18 @@ describe('<MessageBubble />', () => {
       executeAction: executeActionMock,
       abortAction: jest.fn(),
       regenerate: jest.fn(),
+    });
+    jest.spyOn(coreHookExports, 'useCore').mockReturnValue({
+      services: {
+        setupDeps: {
+          usageCollection: {
+            reportUiStats: reportUiStatsMock,
+            METRIC_TYPE: {
+              CLICK: 'click',
+            },
+          },
+        },
+      },
     });
   });
 
@@ -102,7 +116,7 @@ describe('<MessageBubble />', () => {
         }}
       />
     );
-    expect(screen.queryAllByTitle('copy message')).toHaveLength(1);
+    expect(screen.queryAllByLabelText('copy message')).toHaveLength(1);
   });
 
   it('should NOT display action(copy message) on non-text output', () => {
@@ -117,7 +131,7 @@ describe('<MessageBubble />', () => {
         }}
       />
     );
-    expect(screen.queryAllByTitle('copy message')).toHaveLength(0);
+    expect(screen.queryAllByLabelText('copy message')).toHaveLength(0);
 
     rerender(
       <MessageBubble
@@ -130,7 +144,7 @@ describe('<MessageBubble />', () => {
         }}
       />
     );
-    expect(screen.queryAllByTitle('copy message')).toHaveLength(0);
+    expect(screen.queryAllByLabelText('copy message')).toHaveLength(0);
   });
 
   it('should display action: regenerate message', () => {
@@ -152,7 +166,7 @@ describe('<MessageBubble />', () => {
         }}
       />
     );
-    expect(screen.queryAllByTitle('regenerate message')).toHaveLength(1);
+    expect(screen.queryAllByLabelText('regenerate message')).toHaveLength(1);
   });
 
   it('should NOT display action: regenerate message', () => {
@@ -167,7 +181,7 @@ describe('<MessageBubble />', () => {
         }}
       />
     );
-    expect(screen.queryAllByTitle('regenerate message')).toHaveLength(0);
+    expect(screen.queryAllByLabelText('regenerate message')).toHaveLength(0);
   });
 
   it('should display actions: thumbs up and thumbs down on markdown output', () => {
@@ -208,7 +222,7 @@ describe('<MessageBubble />', () => {
     };
     render(<MessageBubble showActionBar={true} message={message} />);
     fireEvent.click(screen.getByLabelText('feedback thumbs up'));
-    expect(sendFeedbackMock).toHaveBeenCalledWith(message, true);
+    expect(sendFeedbackMock).toHaveBeenCalledWith(true, message);
   });
 
   it('should send thumbs down feedback', () => {
@@ -219,7 +233,7 @@ describe('<MessageBubble />', () => {
     };
     render(<MessageBubble showActionBar={true} message={message} />);
     fireEvent.click(screen.getByLabelText('feedback thumbs down'));
-    expect(sendFeedbackMock).toHaveBeenCalledWith(message, false);
+    expect(sendFeedbackMock).toHaveBeenCalledWith(false, message);
   });
 
   it('should not send feedback if message has already rated', () => {

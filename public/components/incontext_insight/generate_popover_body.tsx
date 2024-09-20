@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiLoadingContent,
   EuiMarkdownFormat,
   EuiPanel,
@@ -20,21 +19,28 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useEffectOnce } from 'react-use';
+import { METRIC_TYPE } from '@osd/analytics';
+import { MessageActions } from '../../tabs/chat/messages/message_action';
 import { ContextObj, IncontextInsight as IncontextInsightInput } from '../../types';
 import { getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import shiny_sparkle from '../../assets/shiny_sparkle.svg';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { reportMetric } from '../../utils/report_metric';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
   httpSetup?: HttpSetup;
+  usageCollection?: UsageCollectionSetup;
   closePopover: () => void;
-}> = ({ incontextInsight, httpSetup, closePopover }) => {
+}> = ({ incontextInsight, httpSetup, usageCollection, closePopover }) => {
   const [summary, setSummary] = useState('');
   const [insight, setInsight] = useState('');
   const [insightAvailable, setInsightAvailable] = useState(false);
   const [showInsight, setShowInsight] = useState(false);
+  const metricAppName = 'alertSummary';
+
   const toasts = getNotifications().toasts;
 
   useEffectOnce(() => {
@@ -102,6 +108,7 @@ export const GeneratePopoverBody: React.FC<{
               `Please provide your insight on this ${summaryType}.`
             );
           }
+          reportMetric(usageCollection, metricAppName, 'generated', METRIC_TYPE.COUNT);
         })
         .catch((error) => {
           toasts.addDanger(
@@ -208,23 +215,34 @@ export const GeneratePopoverBody: React.FC<{
   const renderInnerFooter = () => {
     return (
       <EuiPopoverFooter className="incontextInsightGeneratePopoverFooter" paddingSize="none">
-        <EuiFlexGroup gutterSize="none" direction={'rowReverse'}>
-          {insightAvailable && (
-            <EuiFlexItem
-              grow={false}
-              onClick={() => {
+        {
+          <div style={{ display: showInsight ? 'none' : 'block' }}>
+            <MessageActions
+              contentToCopy={summary}
+              showFeedback
+              showTraceIcon={insightAvailable}
+              onViewTrace={() => {
                 setShowInsight(true);
               }}
-            >
-              <EuiIconTip
-                aria-label="Insight"
-                type="iInCircle"
-                content="Insight with RAG"
-                color={showInsight ? 'blue' : 'black'}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+              usageCollection={usageCollection}
+              isOnTrace={showInsight}
+              metricAppName={metricAppName}
+            />
+          </div>
+        }
+        {
+          <div style={{ display: showInsight && insightAvailable ? 'block' : 'none' }}>
+            <MessageActions
+              contentToCopy={insight}
+              showFeedback
+              showTraceIcon={insightAvailable}
+              onViewTrace={() => {}}
+              usageCollection={usageCollection}
+              isOnTrace={showInsight}
+              metricAppName={metricAppName}
+            />
+          </div>
+        }
       </EuiPopoverFooter>
     );
   };
