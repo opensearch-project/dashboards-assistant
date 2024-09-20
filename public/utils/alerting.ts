@@ -40,7 +40,6 @@ export const createIndexPatterns = async (
         id: dataSourceId,
       }
     : undefined;
-  console.log('dataSourceRef', dataSourceId, dataSourceRef);
   try {
     pattern = await dataStart.indexPatterns.createAndSave({
       id: '',

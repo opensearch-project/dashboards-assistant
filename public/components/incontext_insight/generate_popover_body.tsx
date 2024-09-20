@@ -135,7 +135,7 @@ export const GeneratePopoverBody: React.FC<{
               defaultMessage: 'Generate summary error',
             })
           );
-          // closePopover();
+          closePopover();
         });
     };
 
@@ -181,7 +181,6 @@ export const GeneratePopoverBody: React.FC<{
 
   const handleNavigateToDiscover = async () => {
     const context = await incontextInsight?.contextProvider?.();
-    console.log('handleNavigateToDiscover context', context);
     const dsl = context?.additionalInfo?.dsl;
     const indexName = context?.additionalInfo?.index;
     if (!dsl || !indexName) return;
@@ -316,7 +315,7 @@ export const GeneratePopoverBody: React.FC<{
       {displayDiscoverButton && (
         <EuiButton onClick={handleNavigateToDiscover}>
           {i18n.translate('assistantDashboards.incontextInsight.discover', {
-            defaultMessage: 'Deep dive in Discover',
+            defaultMessage: 'Discover details',
           })}
         </EuiButton>
       )}
