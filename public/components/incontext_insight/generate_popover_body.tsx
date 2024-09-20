@@ -21,7 +21,7 @@ import {
 import { useEffectOnce } from 'react-use';
 import { METRIC_TYPE } from '@osd/analytics';
 import { MessageActions } from '../../tabs/chat/messages/message_action';
-import { IncontextInsight as IncontextInsightInput } from '../../types';
+import { ContextObj, IncontextInsight as IncontextInsightInput } from '../../types';
 import { getNotifications } from '../../services';
 import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
@@ -53,7 +53,7 @@ export const GeneratePopoverBody: React.FC<{
 
   const onGenerateSummary = (summarizationQuestion: string) => {
     const summarize = async () => {
-      let contextObj;
+      let contextObj: ContextObj | undefined;
       try {
         contextObj = (await incontextInsight.contextProvider?.()) ?? undefined;
       } catch (e) {
@@ -67,6 +67,8 @@ export const GeneratePopoverBody: React.FC<{
         return;
       }
       const contextContent = contextObj?.context || '';
+      const dataSourceId = contextObj?.dataSourceId;
+      const dataSourceQuery = dataSourceId ? { dataSourceId } : {};
       let summaryType: string;
       const endIndex = incontextInsight.key.indexOf('_', 0);
       if (endIndex !== -1) {
@@ -89,6 +91,7 @@ export const GeneratePopoverBody: React.FC<{
             question: summarizationQuestion,
             context: contextContent,
           }),
+          query: dataSourceQuery,
         })
         .then((response) => {
           const summaryContent = response.summary;
@@ -97,6 +100,7 @@ export const GeneratePopoverBody: React.FC<{
           setInsightAvailable(insightAgentIdExists);
           if (insightAgentIdExists) {
             onGenerateInsightBasedOnSummary(
+              dataSourceQuery,
               summaryType,
               insightType,
               summaryContent,
@@ -120,6 +124,7 @@ export const GeneratePopoverBody: React.FC<{
   };
 
   const onGenerateInsightBasedOnSummary = (
+    dataSourceQuery: {},
     summaryType: string,
     insightType: string,
     summaryContent: string,
@@ -136,6 +141,7 @@ export const GeneratePopoverBody: React.FC<{
             context,
             question: insightQuestion,
           }),
+          query: dataSourceQuery,
         })
         .then((response) => {
           setInsight(response);

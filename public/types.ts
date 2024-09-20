@@ -110,6 +110,7 @@ export type IncontextInsights = Map<string, IncontextInsight>;
 export interface ContextObj {
   context: string;
   additionalInfo: Record<string, string>;
+  dataSourceId?: string;
 }
 
 export interface IncontextInsight {
