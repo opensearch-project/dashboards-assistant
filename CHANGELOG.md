@@ -13,6 +13,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - feat: exposed an API to check if a give agent config name has configured with agent id([#307](https://github.com/opensearch-project/dashboards-assistant/pull/307))
 - feat: check all required agents before enabling index pattern selection for text to visualization([313](https://github.com/opensearch-project/dashboards-assistant/pull/313))
 - fix: pass data source id for alert summary/insight([#321](https://github.com/opensearch-project/dashboards-assistant/pull/321))
+- feat: support navigating to discover in alerting popover([#316](https://github.com/opensearch-project/dashboards-assistant/pull/316))
 
 ### 📈 Features/Enhancements
 
