@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
@@ -17,24 +17,29 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiButton,
 } from '@elastic/eui';
 import { useEffectOnce } from 'react-use';
 import { METRIC_TYPE } from '@osd/analytics';
 import { MessageActions } from '../../tabs/chat/messages/message_action';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getNotifications } from '../../services';
-import { HttpSetup } from '../../../../../src/core/public';
+import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import shiny_sparkle from '../../assets/shiny_sparkle.svg';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { reportMetric } from '../../utils/report_metric';
+import { buildUrlQuery, createIndexPatterns } from '../../utils';
+import { AssistantPluginStartDependencies } from '../../types';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
   httpSetup?: HttpSetup;
   usageCollection?: UsageCollectionSetup;
   closePopover: () => void;
-}> = ({ incontextInsight, httpSetup, usageCollection, closePopover }) => {
+  getStartServices?: StartServicesAccessor<AssistantPluginStartDependencies>;
+}> = ({ incontextInsight, httpSetup, usageCollection, closePopover, getStartServices }) => {
   const [summary, setSummary] = useState('');
   const [insight, setInsight] = useState('');
   const [insightAvailable, setInsightAvailable] = useState(false);
@@ -42,6 +47,20 @@ export const GeneratePopoverBody: React.FC<{
   const metricAppName = 'alertSummary';
 
   const toasts = getNotifications().toasts;
+
+  const [displayDiscoverButton, setDisplayDiscoverButton] = useState(false);
+
+  useEffect(() => {
+    const getMonitorType = async () => {
+      const context = await incontextInsight.contextProvider?.();
+      const monitorType = context?.additionalInfo?.monitorType;
+      // Only this two types from alerting contain DSL and index.
+      const shoudDisplayDiscoverButton =
+        monitorType === 'query_level_monitor' || monitorType === 'bucket_level_monitor';
+      setDisplayDiscoverButton(shoudDisplayDiscoverButton);
+    };
+    getMonitorType();
+  }, [incontextInsight, setDisplayDiscoverButton]);
 
   useEffectOnce(() => {
     onGenerateSummary(
@@ -154,6 +173,48 @@ export const GeneratePopoverBody: React.FC<{
     return generateInsight();
   };
 
+  const handleNavigateToDiscover = async () => {
+    const context = await incontextInsight?.contextProvider?.();
+    const dsl = context?.additionalInfo?.dsl;
+    const indexName = context?.additionalInfo?.index;
+    if (!dsl || !indexName) return;
+    const dslObject = JSON.parse(dsl);
+    const filters = dslObject?.query?.bool?.filter;
+    if (!filters) return;
+    const timeDslIndex = filters?.findIndex((filter: Record<string, string>) => filter?.range);
+    const timeDsl = filters[timeDslIndex]?.range;
+    const timeFieldName = Object.keys(timeDsl)[0];
+    if (!timeFieldName) return;
+    filters?.splice(timeDslIndex, 1);
+
+    if (getStartServices) {
+      const [coreStart, startDeps] = await getStartServices();
+      const newDiscoverEnabled = coreStart.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+      if (!newDiscoverEnabled) {
+        // Only new discover supports DQL with filters.
+        coreStart.uiSettings.set(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED, true);
+      }
+
+      const indexPattern = await createIndexPatterns(
+        startDeps.data,
+        indexName,
+        timeFieldName,
+        context?.dataSourceId
+      );
+      if (!indexPattern) return;
+      const query = await buildUrlQuery(
+        startDeps.data,
+        coreStart.savedObjects,
+        indexPattern,
+        dslObject,
+        timeDsl[timeFieldName],
+        context?.dataSourceId
+      );
+      // Navigate to new discover with query built to populate
+      coreStart.application.navigateToUrl(`data-explorer/discover#?${query}`);
+    }
+  };
+
   const renderContent = () => {
     const content = showInsight && insightAvailable ? insight : summary;
     return content ? (
@@ -245,6 +306,13 @@ export const GeneratePopoverBody: React.FC<{
     <>
       {renderInnerTitle()}
       {renderContent()}
+      {displayDiscoverButton && (
+        <EuiButton onClick={handleNavigateToDiscover}>
+          {i18n.translate('assistantDashboards.incontextInsight.discover', {
+            defaultMessage: 'Discover details',
+          })}
+        </EuiButton>
+      )}
     </>
   );
 };

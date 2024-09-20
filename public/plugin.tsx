@@ -302,6 +302,7 @@ export class AssistantPlugin
             {...props}
             httpSetup={httpSetup}
             usageCollection={setupDeps.usageCollection}
+            getStartServices={core.getStartServices}
           />
         );
       },

@@ -10,8 +10,15 @@ import { GeneratePopoverBody } from './generate_popover_body';
 import { HttpSetup } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
+import { coreMock } from '../../../../../src/core/public/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 jest.mock('../../services');
+
+jest.mock('../../utils', () => ({
+  createIndexPatterns: jest.fn().mockResolvedValue('index pattern'),
+  buildUrlQuery: jest.fn().mockResolvedValue('query'),
+}));
 
 const mockToasts = {
   addDanger: jest.fn(),
@@ -32,6 +39,36 @@ const mockPost = jest.fn();
 const mockHttpSetup: HttpSetup = ({
   post: mockPost,
 } as unknown) as HttpSetup; // Mocking HttpSetup
+
+const mockDSL = `{
+    "query": {
+        "bool": {
+            "filter": [
+                {
+                    "range": {
+                        "timestamp": {
+                            "from": "2024-09-06T04:02:52||-1h",
+                            "to": "2024-09-06T04:02:52",
+                            "include_lower": true,
+                            "include_upper": true,
+                            "boost": 1
+                        }
+                    }
+                },
+                {
+                    "term": {
+                        "FlightDelay": {
+                            "value": "true",
+                            "boost": 1
+                        }
+                    }
+                }
+            ],
+            "adjust_pure_negative": true,
+            "boost": 1
+        }
+    }
+}`;
 
 describe('GeneratePopoverBody', () => {
   const incontextInsightMock = {
@@ -239,5 +276,103 @@ describe('GeneratePopoverBody', () => {
     expect(getByText('Generated summary content')).toBeInTheDocument();
     // insight tip icon is not visible for this alert
     expect(screen.queryAllByLabelText('How was this generated?')).toHaveLength(0);
+  });
+
+  it('should not display discover link if monitor type is not  query_level_monitor or bucket_level_monitor', async () => {
+    incontextInsightMock.contextProvider = jest.fn().mockResolvedValue({
+      additionalInfo: {
+        dsl: mockDSL,
+        index: 'mock_index',
+        dataSourceId: `test-data-source-id`,
+        monitorType: 'mock_type',
+      },
+    });
+    mockPost.mockImplementation((path: string, body) => {
+      let value;
+      switch (path) {
+        case SUMMARY_ASSISTANT_API.SUMMARIZE:
+          value = {
+            summary: 'Generated summary content',
+            insightAgentIdExists: true,
+          };
+          break;
+
+        case SUMMARY_ASSISTANT_API.INSIGHT:
+          value = 'Generated insight content';
+          break;
+
+        default:
+          return null;
+      }
+      return Promise.resolve(value);
+    });
+
+    const { queryByText } = render(
+      <GeneratePopoverBody
+        incontextInsight={incontextInsightMock}
+        httpSetup={mockHttpSetup}
+        closePopover={closePopoverMock}
+      />
+    );
+
+    await waitFor(() => {
+      expect(queryByText('Discover details')).not.toBeInTheDocument();
+    });
+  });
+
+  it('handle navigate to discover after clicking link', async () => {
+    incontextInsightMock.contextProvider = jest.fn().mockResolvedValue({
+      additionalInfo: {
+        dsl: mockDSL,
+        index: 'mock_index',
+        dataSourceId: `test-data-source-id`,
+        monitorType: 'query_level_monitor',
+      },
+    });
+    mockPost.mockImplementation((path: string, body) => {
+      let value;
+      switch (path) {
+        case SUMMARY_ASSISTANT_API.SUMMARIZE:
+          value = {
+            summary: 'Generated summary content',
+            insightAgentIdExists: true,
+          };
+          break;
+
+        case SUMMARY_ASSISTANT_API.INSIGHT:
+          value = 'Generated insight content';
+          break;
+
+        default:
+          return null;
+      }
+      return Promise.resolve(value);
+    });
+
+    const coreStart = coreMock.createStart();
+    const dataStart = dataPluginMock.createStartContract();
+    const getStartServices = jest.fn().mockResolvedValue([
+      coreStart,
+      {
+        data: dataStart,
+      },
+    ]);
+    const { getByText } = render(
+      <GeneratePopoverBody
+        incontextInsight={incontextInsightMock}
+        httpSetup={mockHttpSetup}
+        closePopover={closePopoverMock}
+        getStartServices={getStartServices}
+      />
+    );
+
+    await waitFor(() => {
+      const button = getByText('Discover details');
+      expect(button).toBeInTheDocument();
+      fireEvent.click(button);
+      expect(coreStart.application.navigateToUrl).toHaveBeenCalledWith(
+        'data-explorer/discover#?query'
+      );
+    });
   });
 });
