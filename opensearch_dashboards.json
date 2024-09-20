@@ -17,7 +17,8 @@
   ],
   "optionalPlugins": [
     "dataSource",
-    "dataSourceManagement"
+    "dataSourceManagement",
+    "usageCollection"
   ],
   "requiredBundles": [],
   "configPath": [
