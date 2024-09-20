@@ -13,6 +13,7 @@ import {
   DuplicateIndexPatternError,
   IndexPattern,
 } from '../../../../src/plugins/data/public';
+import { CoreStart } from '../../../../src/core/public';
 
 export const buildFilter = (indexPatternId: string, dsl: Record<string, unknown>) => {
   const filterAlias = 'Alerting-filters';
@@ -29,15 +30,23 @@ export const buildFilter = (indexPatternId: string, dsl: Record<string, unknown>
 export const createIndexPatterns = async (
   dataStart: DataPublicPluginStart,
   patternName: string,
-  timeFieldName: string
+  timeFieldName: string,
+  dataSourceId?: string
 ) => {
   let pattern: IndexPattern | undefined;
+  const dataSourceRef = dataSourceId
+    ? {
+        type: 'data-source',
+        id: dataSourceId,
+      }
+    : undefined;
+  console.log('dataSourceRef', dataSourceId, dataSourceRef);
   try {
     pattern = await dataStart.indexPatterns.createAndSave({
       id: '',
       title: patternName,
       timeFieldName,
-      dataSourceRef: undefined, // This may represent to use local cluster,
+      dataSourceRef,
     });
   } catch (err) {
     if (err instanceof DuplicateIndexPatternError) {
@@ -53,11 +62,13 @@ export const createIndexPatterns = async (
   return pattern;
 };
 
-export const buildUrlQuery = (
+export const buildUrlQuery = async (
   dataStart: DataPublicPluginStart,
+  savedObjects: CoreStart['savedObjects'],
   indexPattern: IndexPattern,
   dsl: Record<string, unknown>,
-  timeDsl: Record<'from' | 'to', string>
+  timeDsl: Record<'from' | 'to', string>,
+  dataSourceId?: string
 ) => {
   const filter = buildFilter(indexPattern.id!, dsl);
 
@@ -74,7 +85,17 @@ export const buildUrlQuery = (
     from: timeDsl.from,
     to: timeDsl.to,
   };
-
+  let indexPatternTitle = indexPattern.title;
+  if (dataSourceId) {
+    try {
+      const dataSourceObject = await savedObjects.client.get('data-source', dataSourceId);
+      const dataSourceTitle = dataSourceObject?.get('title');
+      // If index pattern refers to a data source, discover list will display data source name as dataSourceTitle::indexPatternTitle
+      indexPatternTitle = `${dataSourceTitle}::indexPatternTitle`;
+    } catch (e) {
+      console.error('Get data source object error');
+    }
+  }
   const queryState = {
     filters,
     query: {
@@ -82,7 +103,7 @@ export const buildUrlQuery = (
         type: 'INDEX_PATTERN',
         id: indexPattern.id,
         timeFiledName: indexPattern.timeFieldName,
-        title: indexPattern.title,
+        title: indexPatternTitle,
       },
       language: 'kuery',
       query: '',

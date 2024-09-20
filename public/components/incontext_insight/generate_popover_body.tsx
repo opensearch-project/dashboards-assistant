@@ -135,7 +135,7 @@ export const GeneratePopoverBody: React.FC<{
               defaultMessage: 'Generate summary error',
             })
           );
-          closePopover();
+          // closePopover();
         });
     };
 
@@ -181,6 +181,7 @@ export const GeneratePopoverBody: React.FC<{
 
   const handleNavigateToDiscover = async () => {
     const context = await incontextInsight?.contextProvider?.();
+    console.log('handleNavigateToDiscover context', context);
     const dsl = context?.additionalInfo?.dsl;
     const indexName = context?.additionalInfo?.index;
     if (!dsl || !indexName) return;
@@ -201,9 +202,21 @@ export const GeneratePopoverBody: React.FC<{
         coreStart.uiSettings.set(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED, true);
       }
 
-      const indexPattern = await createIndexPatterns(startDeps.data, indexName, timeFieldName);
+      const indexPattern = await createIndexPatterns(
+        startDeps.data,
+        indexName,
+        timeFieldName,
+        context?.dataSourceId
+      );
       if (!indexPattern) return;
-      const query = buildUrlQuery(startDeps.data, indexPattern, dslObject, timeDsl[timeFieldName]);
+      const query = await buildUrlQuery(
+        startDeps.data,
+        coreStart.savedObjects,
+        indexPattern,
+        dslObject,
+        timeDsl[timeFieldName],
+        context?.dataSourceId
+      );
       // Navigate to new discover with query built to populate
       coreStart.application.navigateToUrl(`data-explorer/discover#?${query}`);
     }
