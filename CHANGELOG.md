@@ -11,6 +11,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - feat: added a new visualization type visualization-nlq to support creating visualization from natural language([#264](https://github.com/opensearch-project/dashboards-assistant/pull/264))
 - feat: only allow to select supported index patterns in text to visualization and code changes related to prompt updates([#310](https://github.com/opensearch-project/dashboards-assistant/pull/310))
 - feat: exposed an API to check if a give agent config name has configured with agent id([#307](https://github.com/opensearch-project/dashboards-assistant/pull/307))
+- feat: check all required agents before enabling index pattern selection for text to visualization([313](https://github.com/opensearch-project/dashboards-assistant/pull/313))
 
 ### 📈 Features/Enhancements
 
