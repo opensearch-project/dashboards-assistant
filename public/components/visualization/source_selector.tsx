@@ -14,7 +14,11 @@ import {
   DataSourceOption,
 } from '../../../../../src/plugins/data/public';
 import { StartServices } from '../../types';
-import { TEXT2VEGA_AGENT_CONFIG_ID } from '../../../common/constants/llm';
+import {
+  TEXT2PPL_AGENT_CONFIG_ID,
+  TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+  TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+} from '../../../common/constants/llm';
 import { getAssistantService } from '../../services';
 
 const DEFAULT_DATA_SOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
@@ -110,13 +114,20 @@ export const SourceSelector = ({
 
       const assistantService = getAssistantService();
       /**
-       * Check each data source to see if text to vega agent is configured or not
+       * Check each data source to see if text to vega agents are configured or not
        * If not configured, disable the corresponding index pattern from the selection list
        */
       Object.keys(dataSourceIdToIndexPatternIds).forEach(async (key) => {
-        const res = await assistantService.client.agentConfigExists(TEXT2VEGA_AGENT_CONFIG_ID, {
-          dataSourceId: key !== 'DEFAULT' ? key : undefined,
-        });
+        const res = await assistantService.client.agentConfigExists(
+          [
+            TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+            TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+            TEXT2PPL_AGENT_CONFIG_ID,
+          ],
+          {
+            dataSourceId: key !== 'DEFAULT' ? key : undefined,
+          }
+        );
         if (!res.exists) {
           dataSourceIdToIndexPatternIds[key].forEach((indexPatternId) => {
             indexPatternOptions.options.forEach((option) => {
