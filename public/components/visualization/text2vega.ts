@@ -108,7 +108,8 @@ export class Text2Vega {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const escapeField = (json: any, field: string) => {
       if (json[field]) {
-        if (typeof json[field] === 'string') {
+        // Only escape field which name is 'field'
+        if (typeof json[field] === 'string' && field === 'field') {
           json[field] = json[field].replace(/\./g, '\\.');
         }
         if (typeof json[field] === 'object') {
@@ -132,6 +133,7 @@ export class Text2Vega {
 
     // need to escape field: geo.city -> field: geo\\.city
     escapeField(res, 'encoding');
+    escapeField(res, 'layer');
     return res;
   }
 
