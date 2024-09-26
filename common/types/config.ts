@@ -25,6 +25,9 @@ export const configSchema = schema.object({
   smartAnomalyDetector: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  branding: schema.object({
+    label: schema.string({ defaultValue: '' }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

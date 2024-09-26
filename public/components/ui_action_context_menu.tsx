@@ -5,14 +5,18 @@
 
 import React, { useState, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/public';
 import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER } from '../ui_triggers';
 import { getUiActions } from '../services';
-import assistantTriggerIcon from '../assets/assistant_trigger.svg';
 
-export const ActionContextMenu = () => {
+interface Props {
+  label?: string;
+}
+
+export const ActionContextMenu = (props: Props) => {
   const uiActions = getUiActions();
   const actionsRef = useRef(uiActions.getTriggerActions(AI_ASSISTANT_QUERY_EDITOR_TRIGGER));
   const [open, setOpen] = useState(false);
@@ -38,12 +42,20 @@ export const ActionContextMenu = () => {
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
+        <EuiButtonEmpty
+          color="text"
           aria-label="AI assistant trigger button"
-          size="s"
-          iconType={assistantTriggerIcon}
+          size="xs"
+          iconType="arrowDown"
           onClick={() => setOpen(!open)}
-        />
+          iconSide="right"
+          flush="both"
+        >
+          {props.label ||
+            i18n.translate('dashboardAssistant.branding.assistantActionButton.label', {
+              defaultMessage: 'AI assistant',
+            })}
+        </EuiButtonEmpty>
       }
       isOpen={open}
       panelPaddingSize="none"
