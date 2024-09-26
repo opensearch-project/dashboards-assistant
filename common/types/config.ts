@@ -26,7 +26,7 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
   branding: schema.object({
-    label: schema.string({ defaultValue: 'AI assistant' }),
+    label: schema.string({ defaultValue: '' }),
   }),
 });
 
