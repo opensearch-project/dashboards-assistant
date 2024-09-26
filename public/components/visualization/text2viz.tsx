@@ -106,7 +106,7 @@ export const Text2Viz = () => {
         if (result.error) {
           notifications.toasts.addError(result.error, {
             title: i18n.translate('dashboardAssistant.feature.text2viz.error', {
-              defaultMessage: 'Error while executing text to vega',
+              defaultMessage: 'Error while executing text to visualization',
             }),
           });
         } else {
@@ -198,7 +198,7 @@ export const Text2Viz = () => {
     });
 
     setSubmitting(false);
-  }, [selectedSource, input, status]);
+  }, [selectedSource, input, status, notifications.toasts]);
 
   /**
    * Display the save visualization dialog to persist the current generated visualization
@@ -345,13 +345,14 @@ export const Text2Viz = () => {
             prepend={<EuiIcon type={chatIcon} />}
             placeholder="Generate visualization with a natural language question."
             onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
+            disabled={!selectedSource}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             aria-label="submit"
             onClick={onSubmit}
-            isDisabled={loading || input.trim().length === 0}
+            isDisabled={loading || input.trim().length === 0 || !selectedSource}
             display="base"
             size="s"
             iconType="returnKey"
