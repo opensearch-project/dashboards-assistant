@@ -15,6 +15,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     text2viz: true,
     alertInsight: true,
     smartAnomalyDetector: true,
+    branding: true,
   },
   schema: configSchema,
 };
