@@ -258,8 +258,8 @@ export class AssistantPlugin
           id: 'assistant-query-actions',
           order: 2000,
           isEnabled$: () => of(true),
-          getComponent: () => {
-            return <ActionContextMenu />;
+          getSearchBarButton: () => {
+            return <ActionContextMenu label={this.config.branding.label} />;
           },
         },
       },
