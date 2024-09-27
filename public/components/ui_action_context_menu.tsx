@@ -31,6 +31,7 @@ export const ActionContextMenu = (props: Props) => {
           trigger: AI_ASSISTANT_QUERY_EDITOR_TRIGGER as any,
         })),
         closeMenu: () => setOpen(false),
+        title: '',
       }),
     []
   );
