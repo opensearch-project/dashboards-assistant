@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -38,6 +38,8 @@ export const SourceSelector = ({
   } = useOpenSearchDashboards<StartServices>();
   const [currentDataSources, setCurrentDataSources] = useState<DataSource[]>([]);
   const [dataSourceOptions, setDataSourceOptions] = useState<DataSourceGroup[]>([]);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   const selectedSources = useMemo(() => {
     if (selectedSourceId) {
@@ -52,13 +54,20 @@ export const SourceSelector = ({
     return [];
   }, [selectedSourceId, dataSourceOptions]);
 
+  /**
+   * When initialized, select the first non-disabled option
+   */
   useEffect(() => {
     if (
       !selectedSourceId &&
       dataSourceOptions.length > 0 &&
       dataSourceOptions[0].options.length > 0
     ) {
-      onChange(dataSourceOptions[0].options[0]);
+      const options = dataSourceOptions[0].options;
+      const selectedOption = options.find((o) => !o.disabled);
+      if (selectedOption) {
+        onChangeRef.current(selectedOption);
+      }
     }
   }, [selectedSourceId, dataSourceOptions]);
 
@@ -81,7 +90,7 @@ export const SourceSelector = ({
 
   const onSetDataSourceOptions = useCallback(
     async (options: DataSourceGroup[]) => {
-      // Only support opensearch default data source
+      // Only support OpenSearch default data source
       const indexPatternOptions = options.find(
         (item) => item.groupType === DEFAULT_DATA_SOURCE_TYPE
       );
@@ -117,28 +126,30 @@ export const SourceSelector = ({
        * Check each data source to see if text to vega agents are configured or not
        * If not configured, disable the corresponding index pattern from the selection list
        */
-      Object.keys(dataSourceIdToIndexPatternIds).forEach(async (key) => {
-        const res = await assistantService.client.agentConfigExists(
-          [
-            TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
-            TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
-            TEXT2PPL_AGENT_CONFIG_ID,
-          ],
-          {
-            dataSourceId: key !== 'DEFAULT' ? key : undefined,
-          }
-        );
-        if (!res.exists) {
-          dataSourceIdToIndexPatternIds[key].forEach((indexPatternId) => {
-            indexPatternOptions.options.forEach((option) => {
-              if (option.value === indexPatternId) {
-                option.disabled = true;
-              }
+      const updateIndexPatternPromises = Object.keys(dataSourceIdToIndexPatternIds).map(
+        async (key) => {
+          const res = await assistantService.client.agentConfigExists(
+            [
+              TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+              TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+              TEXT2PPL_AGENT_CONFIG_ID,
+            ],
+            {
+              dataSourceId: key !== 'DEFAULT' ? key : undefined,
+            }
+          );
+          if (!res.exists) {
+            dataSourceIdToIndexPatternIds[key].forEach((indexPatternId) => {
+              indexPatternOptions.options.forEach((option) => {
+                if (option.value === indexPatternId) {
+                  option.disabled = true;
+                }
+              });
             });
-          });
+          }
         }
-      });
-
+      );
+      await Promise.allSettled(updateIndexPatternPromises);
       setDataSourceOptions([indexPatternOptions]);
     },
     [currentDataSources]
