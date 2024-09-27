@@ -25,7 +25,6 @@ import {
   UsageCollectionSetup,
 } from '../../../src/plugins/usage_collection/public';
 
-import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
 import { ConfigSchema } from '../common/types/config';
 
 export interface RenderProps {
@@ -64,7 +63,6 @@ export interface AssistantPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   uiActions: UiActionsSetup;
   expressions: ExpressionsSetup;
-  usageCollection?: UsageCollectionSetup;
 }
 
 export interface AssistantSetup {
