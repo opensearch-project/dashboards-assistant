@@ -126,28 +126,30 @@ export const SourceSelector = ({
        * Check each data source to see if text to vega agents are configured or not
        * If not configured, disable the corresponding index pattern from the selection list
        */
-      for (const key of Object.keys(dataSourceIdToIndexPatternIds)) {
-        const res = await assistantService.client.agentConfigExists(
-          [
-            TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
-            TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
-            TEXT2PPL_AGENT_CONFIG_ID,
-          ],
-          {
-            dataSourceId: key !== 'DEFAULT' ? key : undefined,
-          }
-        );
-        if (!res.exists) {
-          dataSourceIdToIndexPatternIds[key].forEach((indexPatternId) => {
-            indexPatternOptions.options.forEach((option) => {
-              if (option.value === indexPatternId) {
-                option.disabled = true;
-              }
+      const updateIndexPatternPromises = Object.keys(dataSourceIdToIndexPatternIds).map(
+        async (key) => {
+          const res = await assistantService.client.agentConfigExists(
+            [
+              TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+              TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+              TEXT2PPL_AGENT_CONFIG_ID,
+            ],
+            {
+              dataSourceId: key !== 'DEFAULT' ? key : undefined,
+            }
+          );
+          if (!res.exists) {
+            dataSourceIdToIndexPatternIds[key].forEach((indexPatternId) => {
+              indexPatternOptions.options.forEach((option) => {
+                if (option.value === indexPatternId) {
+                  option.disabled = true;
+                }
+              });
             });
-          });
+          }
         }
-      }
-
+      );
+      await Promise.allSettled(updateIndexPatternPromises);
       setDataSourceOptions([indexPatternOptions]);
     },
     [currentDataSources]
