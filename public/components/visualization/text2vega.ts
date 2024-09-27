@@ -63,6 +63,9 @@ export class Text2Vega {
                 )
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .toPromise<any>();
+              if (res.rawResponse.total === 0) {
+                throw new Error(`There is no result with the generated query: '${value.ppl}'.`);
+              }
               return { ...value, sample: res.rawResponse };
             }),
             // call llm to generate vega
