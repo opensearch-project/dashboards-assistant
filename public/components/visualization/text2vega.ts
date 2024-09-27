@@ -38,8 +38,8 @@ export class Text2Vega {
     this.result$ = this.input$
       .pipe(
         filter((v) => v.prompt.length > 0),
-        debounceTime(200),
-        tap(() => this.status$.next('RUNNING'))
+        tap(() => this.status$.next('RUNNING')),
+        debounceTime(200)
       )
       .pipe(
         switchMap((v) =>
