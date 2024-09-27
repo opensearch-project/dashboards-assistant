@@ -16,6 +16,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - feat: support navigating to discover in alerting popover([#316](https://github.com/opensearch-project/dashboards-assistant/pull/316))
 - fix: incorrect string escaping of vega schema([325](https://github.com/opensearch-project/dashboards-assistant/pull/325))
 - feat: register the AI actions to query controls in discover([#327](https://github.com/opensearch-project/dashboards-assistant/pull/327))
+- fix: t2viz ux improvements([#330](https://github.com/opensearch-project/dashboards-assistant/pull/330))
 
 ### 📈 Features/Enhancements
 
