@@ -200,6 +200,7 @@ export class AssistantPlugin
               ...pluginsStart,
               ...coreStart,
               setHeaderActionMenu: params.setHeaderActionMenu,
+              config: this.config,
             });
 
             return () => {

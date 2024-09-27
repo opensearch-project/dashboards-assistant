@@ -22,6 +22,7 @@ import { ExpressionsSetup, ExpressionsStart } from '../../../src/plugins/express
 import { SavedObjectsStart } from '../../../src/plugins/saved_objects/public';
 
 import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
+import { ConfigSchema } from '../common/types/config';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -95,6 +96,7 @@ export interface AssistantStart {
 export type StartServices = CoreStart &
   Omit<AssistantPluginStartDependencies, 'savedObjects'> & {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    config: ConfigSchema;
   };
 
 export interface UserAccount {

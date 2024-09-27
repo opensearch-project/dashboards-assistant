@@ -67,6 +67,7 @@ export const Text2Viz = () => {
       data,
       uiSettings,
       savedObjects,
+      config,
     },
   } = useOpenSearchDashboards<StartServices>();
 
@@ -342,7 +343,7 @@ export const Text2Viz = () => {
             onChange={(e) => setInput(e.target.value)}
             fullWidth
             compressed
-            prepend={<EuiIcon type={chatIcon} />}
+            prepend={<EuiIcon type={config.branding.logo || chatIcon} />}
             placeholder="Generate visualization with a natural language question."
             onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
             disabled={!selectedSource}

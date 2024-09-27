@@ -26,7 +26,8 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
   branding: schema.object({
-    label: schema.string({ defaultValue: '' }),
+    label: schema.maybe(schema.string()),
+    logo: schema.maybe(schema.string()),
   }),
 });
 
