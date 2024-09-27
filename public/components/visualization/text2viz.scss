@@ -16,4 +16,11 @@
     padding-top: 15px;
     padding-left: 30px;
   }
+
+  .feedback_thumbs {
+    position: absolute;
+    right: 16px;
+    top: 4px;
+    z-index: 9999;
+  }
 }

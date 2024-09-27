@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useCallback } from 'react';
 import { useObservable } from 'react-use';
@@ -46,9 +47,10 @@ import { getIndexPatterns } from '../../services';
 import { NLQ_VISUALIZATION_EMBEDDABLE_TYPE } from './embeddable/nlq_vis_embeddable';
 import { NLQVisualizationInput } from './embeddable/types';
 import { EditorPanel } from './editor_panel';
-import { VIS_NLQ_SAVED_OBJECT } from '../../../common/constants/vis_type_nlq';
+import { VIS_NLQ_APP_ID, VIS_NLQ_SAVED_OBJECT } from '../../../common/constants/vis_type_nlq';
 import { HeaderVariant } from '../../../../../src/core/public';
 import { TEXT2VEGA_INPUT_SIZE_LIMIT } from '../../../common/constants/llm';
+import { FeedbackThumbs } from '../feedback_thumbs';
 
 export const Text2Viz = () => {
   const { savedObjectId } = useParams<{ savedObjectId?: string }>();
@@ -68,8 +70,22 @@ export const Text2Viz = () => {
       uiSettings,
       savedObjects,
       config,
+      usageCollection,
     },
   } = useOpenSearchDashboards<StartServices>();
+
+  /**
+   * Report metrics when the application is loaded
+   */
+  useEffect(() => {
+    if (usageCollection) {
+      usageCollection.reportUiStats(
+        VIS_NLQ_APP_ID,
+        usageCollection.METRIC_TYPE.LOADED,
+        `app_loaded-${uuidv4()}`
+      );
+    }
+  }, [usageCollection]);
 
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
@@ -112,6 +128,15 @@ export const Text2Viz = () => {
           });
         } else {
           setEditorInput(JSON.stringify(result, undefined, 4));
+
+          // Report metric when visualization generated successfully
+          if (usageCollection) {
+            usageCollection.reportUiStats(
+              VIS_NLQ_APP_ID,
+              usageCollection.METRIC_TYPE.LOADED,
+              `generated-${uuidv4()}`
+            );
+          }
         }
       }
     });
@@ -119,7 +144,7 @@ export const Text2Viz = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [http, notifications]);
+  }, [http, notifications, usageCollection]);
 
   /**
    * Loads the saved object from id when editing an existing visualization
@@ -243,6 +268,15 @@ export const Text2Viz = () => {
             }),
           });
           dialog.close();
+
+          // Report metric when a new visualization is saved.
+          if (usageCollection) {
+            usageCollection.reportUiStats(
+              VIS_NLQ_APP_ID,
+              usageCollection.METRIC_TYPE.LOADED,
+              `saved-${uuidv4()}`
+            );
+          }
         }
       } catch (e) {
         notifications.toasts.addDanger({
@@ -270,7 +304,7 @@ export const Text2Viz = () => {
         />
       )
     );
-  }, [notifications, vegaSpec, input, overlays, selectedSource, savedObjectId]);
+  }, [notifications, vegaSpec, input, overlays, selectedSource, savedObjectId, usageCollection]);
 
   const pageTitle = savedObjectId
     ? i18n.translate('dashboardAssistant.feature.text2viz.breadcrumbs.editVisualization', {
@@ -412,6 +446,13 @@ export const Text2Viz = () => {
                   paddingSize="none"
                   scrollable={false}
                 >
+                  {usageCollection ? (
+                    <FeedbackThumbs
+                      usageCollection={usageCollection}
+                      appName={VIS_NLQ_APP_ID}
+                      className="feedback_thumbs"
+                    />
+                  ) : null}
                   <EmbeddableRenderer factory={factory} input={visInput} />
                 </EuiResizablePanel>
                 <EuiResizableButton />
