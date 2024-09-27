@@ -20,8 +20,11 @@ import { AssistantClient } from './services/assistant_client';
 import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { SavedObjectsStart } from '../../../src/plugins/saved_objects/public';
+import {
+  UsageCollectionStart,
+  UsageCollectionSetup,
+} from '../../../src/plugins/usage_collection/public';
 
-import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
 import { ConfigSchema } from '../common/types/config';
 
 export interface RenderProps {
@@ -49,6 +52,7 @@ export interface AssistantPluginStartDependencies {
   uiActions: UiActionsStart;
   expressions: ExpressionsStart;
   savedObjects: SavedObjectsStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface AssistantPluginSetupDependencies {
