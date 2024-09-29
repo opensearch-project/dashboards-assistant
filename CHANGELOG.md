@@ -3,11 +3,12 @@
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Unreleased
-- fix: make sure $schema always added to LLM generated vega json object([252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
+
+- fix: make sure \$schema always added to LLM generated vega json object([252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
 - feat: expose a general function for agent execution([268](https://github.com/opensearch-project/dashboards-assistant/pull/268))
 - Fix CVE-2024-4067 ([#269](https://github.com/opensearch-project/dashboards-assistant/pull/269))
 - feat: add a dashboards-assistant trigger in query editor([265](https://github.com/opensearch-project/dashboards-assistant/pull/265))
-- fix: make sure $schema always added to LLM generated vega json object([#252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
+- fix: make sure \$schema always added to LLM generated vega json object([#252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
 - feat: added a new visualization type visualization-nlq to support creating visualization from natural language([#264](https://github.com/opensearch-project/dashboards-assistant/pull/264))
 - feat: only allow to select supported index patterns in text to visualization and code changes related to prompt updates([#310](https://github.com/opensearch-project/dashboards-assistant/pull/310))
 - feat: exposed an API to check if a give agent config name has configured with agent id([#307](https://github.com/opensearch-project/dashboards-assistant/pull/307))
@@ -19,6 +20,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - fix: t2viz ux improvements([#330](https://github.com/opensearch-project/dashboards-assistant/pull/330))
 - feat: report metrics for text to visualization([#312](https://github.com/opensearch-project/dashboards-assistant/pull/312))
 - fix: Fix dynamic uses of i18n([#335](https://github.com/opensearch-project/dashboards-assistant/pull/335))
+- fix: Fix unrecognized creating index pattern duplicate cases([#337](https://github.com/opensearch-project/dashboards-assistant/pull/337))
 
 ### 📈 Features/Enhancements
 
