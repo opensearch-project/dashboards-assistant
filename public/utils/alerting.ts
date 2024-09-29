@@ -48,14 +48,15 @@ export const createIndexPatterns = async (
       dataSourceRef,
     });
   } catch (err) {
-    if (err instanceof DuplicateIndexPatternError) {
+    console.error('Create index pattern error', err.message);
+    // Err instanceof DuplicateIndexPatternError is not a trusted validation in some cases, so find index pattern directly.
+    try {
       const result = await dataStart.indexPatterns.find(patternName);
       if (result && result[0]) {
         pattern = result[0];
       }
-      console.error('Duplicate index pattern', err.message);
-    } else {
-      console.error('err', err.message);
+    } catch (e) {
+      console.error('Find index pattern error', err.message);
     }
   }
   return pattern;
