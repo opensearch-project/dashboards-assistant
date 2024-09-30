@@ -10,7 +10,6 @@ import { url } from '../../../../src/plugins/opensearch_dashboards_utils/public'
 import {
   DataPublicPluginStart,
   opensearchFilters,
-  DuplicateIndexPatternError,
   IndexPattern,
 } from '../../../../src/plugins/data/public';
 import { CoreStart } from '../../../../src/core/public';
@@ -48,14 +47,15 @@ export const createIndexPatterns = async (
       dataSourceRef,
     });
   } catch (err) {
-    if (err instanceof DuplicateIndexPatternError) {
+    console.error('Create index pattern error', err.message);
+    // Err instanceof DuplicateIndexPatternError is not a trusted validation in some cases, so find index pattern directly.
+    try {
       const result = await dataStart.indexPatterns.find(patternName);
       if (result && result[0]) {
         pattern = result[0];
       }
-      console.error('Duplicate index pattern', err.message);
-    } else {
-      console.error('err', err.message);
+    } catch (e) {
+      console.error('Find index pattern error', err.message);
     }
   }
   return pattern;
@@ -90,7 +90,7 @@ export const buildUrlQuery = async (
       const dataSourceObject = await savedObjects.client.get('data-source', dataSourceId);
       const dataSourceTitle = dataSourceObject?.get('title');
       // If index pattern refers to a data source, discover list will display data source name as dataSourceTitle::indexPatternTitle
-      indexPatternTitle = `${dataSourceTitle}::indexPatternTitle`;
+      indexPatternTitle = `${dataSourceTitle}::${indexPatternTitle}`;
     } catch (e) {
       console.error('Get data source object error');
     }
