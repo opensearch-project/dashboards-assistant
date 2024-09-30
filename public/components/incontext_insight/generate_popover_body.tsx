@@ -44,6 +44,7 @@ export const GeneratePopoverBody: React.FC<{
   const [insight, setInsight] = useState('');
   const [insightAvailable, setInsightAvailable] = useState(false);
   const [showInsight, setShowInsight] = useState(false);
+  const [discoverLoading, setDiscoverLoading] = useState(false);
   const metricAppName = 'alertSummary';
 
   const toasts = getNotifications().toasts;
@@ -180,44 +181,49 @@ export const GeneratePopoverBody: React.FC<{
   };
 
   const handleNavigateToDiscover = async () => {
-    const context = await incontextInsight?.contextProvider?.();
-    const dsl = context?.additionalInfo?.dsl;
-    const indexName = context?.additionalInfo?.index;
-    if (!dsl || !indexName) return;
-    const dslObject = JSON.parse(dsl);
-    const filters = dslObject?.query?.bool?.filter;
-    if (!filters) return;
-    const timeDslIndex = filters?.findIndex((filter: Record<string, string>) => filter?.range);
-    const timeDsl = filters[timeDslIndex]?.range;
-    const timeFieldName = Object.keys(timeDsl)[0];
-    if (!timeFieldName) return;
-    filters?.splice(timeDslIndex, 1);
+    try {
+      setDiscoverLoading(true);
+      const context = await incontextInsight?.contextProvider?.();
+      const dsl = context?.additionalInfo?.dsl;
+      const indexName = context?.additionalInfo?.index;
+      if (!dsl || !indexName) return;
+      const dslObject = JSON.parse(dsl);
+      const filters = dslObject?.query?.bool?.filter;
+      if (!filters) return;
+      const timeDslIndex = filters?.findIndex((filter: Record<string, string>) => filter?.range);
+      const timeDsl = filters[timeDslIndex]?.range;
+      const timeFieldName = Object.keys(timeDsl)[0];
+      if (!timeFieldName) return;
+      filters?.splice(timeDslIndex, 1);
 
-    if (getStartServices) {
-      const [coreStart, startDeps] = await getStartServices();
-      const newDiscoverEnabled = coreStart.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
-      if (!newDiscoverEnabled) {
-        // Only new discover supports DQL with filters.
-        coreStart.uiSettings.set(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED, true);
+      if (getStartServices) {
+        const [coreStart, startDeps] = await getStartServices();
+        const newDiscoverEnabled = coreStart.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+        if (!newDiscoverEnabled) {
+          // Only new discover supports DQL with filters.
+          coreStart.uiSettings.set(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED, true);
+        }
+
+        const indexPattern = await createIndexPatterns(
+          startDeps.data,
+          indexName,
+          timeFieldName,
+          context?.dataSourceId
+        );
+        if (!indexPattern) return;
+        const query = await buildUrlQuery(
+          startDeps.data,
+          coreStart.savedObjects,
+          indexPattern,
+          dslObject,
+          timeDsl[timeFieldName],
+          context?.dataSourceId
+        );
+        // Navigate to new discover with query built to populate
+        coreStart.application.navigateToUrl(`data-explorer/discover#?${query}`);
       }
-
-      const indexPattern = await createIndexPatterns(
-        startDeps.data,
-        indexName,
-        timeFieldName,
-        context?.dataSourceId
-      );
-      if (!indexPattern) return;
-      const query = await buildUrlQuery(
-        startDeps.data,
-        coreStart.savedObjects,
-        indexPattern,
-        dslObject,
-        timeDsl[timeFieldName],
-        context?.dataSourceId
-      );
-      // Navigate to new discover with query built to populate
-      coreStart.application.navigateToUrl(`data-explorer/discover#?${query}`);
+    } finally {
+      setDiscoverLoading(false);
     }
   };
 
@@ -317,7 +323,7 @@ export const GeneratePopoverBody: React.FC<{
       {renderInnerTitle()}
       {renderContent()}
       {displayDiscoverButton && (
-        <EuiButton onClick={handleNavigateToDiscover}>
+        <EuiButton onClick={handleNavigateToDiscover} isLoading={discoverLoading}>
           {i18n.translate('assistantDashboards.incontextInsight.discover', {
             defaultMessage: 'Discover details',
           })}
