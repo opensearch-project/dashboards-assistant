@@ -102,6 +102,8 @@ export const GeneratePopoverBody: React.FC<{
             ? 'os_insight'
             : 'user_insight'
           : undefined;
+      const index = contextObj?.additionalInfo?.index;
+      const dsl = contextObj?.additionalInfo?.dsl;
 
       await httpSetup
         ?.post(SUMMARY_ASSISTANT_API.SUMMARIZE, {
@@ -110,6 +112,8 @@ export const GeneratePopoverBody: React.FC<{
             insightType,
             question: summarizationQuestion,
             context: contextContent,
+            index,
+            dsl,
           }),
           query: dataSourceQuery,
         })
