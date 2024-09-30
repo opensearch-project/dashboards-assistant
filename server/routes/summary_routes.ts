@@ -11,6 +11,7 @@ import { getAgentIdByConfigName, searchAgent } from './get_agent';
 import { AssistantServiceSetup } from '../services/assistant_service';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
+const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_logPattern';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
 let osInsightAgentId: string | undefined;
@@ -29,6 +30,8 @@ export function registerSummaryAssistantRoutes(
           insightType: schema.maybe(schema.string()),
           question: schema.string(),
           context: schema.maybe(schema.string()),
+          index: schema.maybe(schema.string()),
+          dsl: schema.maybe(schema.string()),
         }),
         query: schema.object({
           dataSourceId: schema.maybe(schema.string()),
@@ -41,9 +44,15 @@ export function registerSummaryAssistantRoutes(
         dataSourceId: req.query.dataSourceId,
       });
       const assistantClient = assistantService.getScopedClient(req, context);
-      const response = await assistantClient.executeAgentByConfigName(SUMMARY_AGENT_CONFIG_ID, {
+      const agentConfigId =
+        req.body.index && req.body.dsl
+          ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
+          : SUMMARY_AGENT_CONFIG_ID;
+      const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
         context: req.body.context,
         question: req.body.question,
+        index: req.body.index,
+        input: req.body.dsl,
       });
       let summary;
       let insightAgentIdExists = false;
@@ -114,14 +123,13 @@ export function registerSummaryAssistantRoutes(
         question: req.body.question,
       });
       try {
-        let result = response.body.inference_results[0].output[0].result;
-        result = JSON.parse(result).output.text;
-        return res.ok({ body: result });
+        return res.ok({ body: response.body.inference_results[0].output[0].result });
       } catch (e) {
         return res.internalError();
       } finally {
-        // Reset userInsightAgentId in case users update their insight agent.
+        // Reset both agents id in case of update
         userInsightAgentId = undefined;
+        osInsightAgentId = undefined;
       }
     })
   );
