@@ -32,6 +32,7 @@ export function registerSummaryAssistantRoutes(
           context: schema.maybe(schema.string()),
           index: schema.maybe(schema.string()),
           dsl: schema.maybe(schema.string()),
+          topNLogPatternData: schema.maybe(schema.string()),
         }),
         query: schema.object({
           dataSourceId: schema.maybe(schema.string()),
@@ -45,7 +46,7 @@ export function registerSummaryAssistantRoutes(
       });
       const assistantClient = assistantService.getScopedClient(req, context);
       const agentConfigId =
-        req.body.index && req.body.dsl
+        req.body.index && req.body.dsl && req.body.topNLogPatternData
           ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
           : SUMMARY_AGENT_CONFIG_ID;
       const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
@@ -53,6 +54,7 @@ export function registerSummaryAssistantRoutes(
         question: req.body.question,
         index: req.body.index,
         input: req.body.dsl,
+        topNLogPatternData: req.body.topNLogPatternData,
       });
       let summary;
       let insightAgentIdExists = false;
