@@ -104,6 +104,7 @@ export const GeneratePopoverBody: React.FC<{
           : undefined;
       const index = contextObj?.additionalInfo?.index;
       const dsl = contextObj?.additionalInfo?.dsl;
+      const topNLogPatternData = contextObj?.additionalInfo?.topNLogPatternData;
 
       await httpSetup
         ?.post(SUMMARY_ASSISTANT_API.SUMMARIZE, {
@@ -114,6 +115,7 @@ export const GeneratePopoverBody: React.FC<{
             context: contextContent,
             index,
             dsl,
+            topNLogPatternData,
           }),
           query: dataSourceQuery,
         })
