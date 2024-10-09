@@ -11,7 +11,7 @@ import { getAgentIdByConfigName, searchAgent } from './get_agent';
 import { AssistantServiceSetup } from '../services/assistant_service';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
-const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_logPattern';
+const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
 
@@ -67,7 +67,7 @@ export function registerSummaryAssistantRoutes(
           }
         }
       } catch (e) {
-        context.assistant_plugin.logger.info(
+        context.assistant_plugin.logger.debug(
           `Cannot find insight agent for ${req.body.insightType}`,
           e
         );
