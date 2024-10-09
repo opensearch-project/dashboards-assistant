@@ -14,8 +14,6 @@ const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_logPattern';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
-let osInsightAgentId: string | undefined;
-let userInsightAgentId: string | undefined;
 
 export function registerSummaryAssistantRoutes(
   router: IRouter,
@@ -57,33 +55,26 @@ export function registerSummaryAssistantRoutes(
         topNLogPatternData: req.body.topNLogPatternData,
       });
       let summary;
-      let insightAgentIdExists = false;
+      let insightAgentId;
       try {
         if (req.body.insightType) {
           // We have separate agent for os_insight and user_insight. And for user_insight, we can
           // only get it by searching on name since it is not stored in agent config.
           if (req.body.insightType === 'os_insight') {
-            if (!osInsightAgentId) {
-              osInsightAgentId = await getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
-            }
-            insightAgentIdExists = !!osInsightAgentId;
-          } else if (req.body.insightType === 'user_insight') {
-            if (req.body.type === 'alerts') {
-              if (!userInsightAgentId) {
-                userInsightAgentId = await searchAgent({ name: 'KB_For_Alert_Insight' }, client);
-              }
-            }
-            insightAgentIdExists = !!userInsightAgentId;
+            insightAgentId = await getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
+          } else if (req.body.insightType === 'user_insight' && req.body.type === 'alerts') {
+            insightAgentId = await searchAgent({ name: 'KB_For_Alert_Insight' }, client);
           }
         }
       } catch (e) {
         context.assistant_plugin.logger.info(
-          `Cannot find insight agent for ${req.body.insightType}`
+          `Cannot find insight agent for ${req.body.insightType}`,
+          e
         );
       }
       try {
         summary = response.body.inference_results[0].output[0].result;
-        return res.ok({ body: { summary, insightAgentIdExists } });
+        return res.ok({ body: { summary, insightAgentId } });
       } catch (e) {
         return res.internalError();
       }
@@ -94,6 +85,7 @@ export function registerSummaryAssistantRoutes(
       path: SUMMARY_ASSISTANT_API.INSIGHT,
       validate: {
         body: schema.object({
+          insightAgentId: schema.string(),
           summaryType: schema.string(),
           insightType: schema.string(),
           summary: schema.string(),
@@ -110,16 +102,8 @@ export function registerSummaryAssistantRoutes(
         context,
         dataSourceId: req.query.dataSourceId,
       });
-      const insightAgentId =
-        req.body.insightType === 'os_insight' ? osInsightAgentId : userInsightAgentId;
-      if (!insightAgentId) {
-        context.assistant_plugin.logger.info(
-          `Cannot find insight agent for ${req.body.insightType}`
-        );
-        return res.internalError();
-      }
       const assistantClient = assistantService.getScopedClient(req, context);
-      const response = await assistantClient.executeAgent(insightAgentId, {
+      const response = await assistantClient.executeAgent(req.body.insightAgentId, {
         context: req.body.context,
         summary: req.body.summary,
         question: req.body.question,
@@ -128,10 +112,6 @@ export function registerSummaryAssistantRoutes(
         return res.ok({ body: response.body.inference_results[0].output[0].result });
       } catch (e) {
         return res.internalError();
-      } finally {
-        // Reset both agents id in case of update
-        userInsightAgentId = undefined;
-        osInsightAgentId = undefined;
       }
     })
   );
