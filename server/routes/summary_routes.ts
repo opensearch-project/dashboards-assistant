@@ -74,7 +74,7 @@ export function registerSummaryAssistantRoutes(
         summary = response.body.inference_results[0].output[0].result;
         return res.ok({ body: { summary, insightAgentIdExists } });
       } catch (e) {
-        return res.internalError();
+        return res.badRequest({ body: e });
       }
     })
   );
@@ -113,7 +113,7 @@ export function registerSummaryAssistantRoutes(
       try {
         return res.ok({ body: response.body.inference_results[0].output[0].result });
       } catch (e) {
-        return res.internalError();
+        return res.badRequest({ body: e });
       }
     })
   );
@@ -131,6 +131,7 @@ function detectInsightAgentId(
   } else if (insightType === 'user_insight' && summaryType === 'alerts') {
     return searchAgent({ name: 'KB_For_Alert_Insight' }, client);
   }
+  return undefined;
 }
 
 export function registerData2SummaryRoutes(
@@ -169,7 +170,7 @@ export function registerData2SummaryRoutes(
         const result = response.body.inference_results[0].output[0].result;
         return res.ok({ body: result });
       } catch (e) {
-        return res.internalError();
+        return res.badRequest({ body: e });
       }
     })
   );
