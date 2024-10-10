@@ -121,14 +121,14 @@ export function registerSummaryAssistantRoutes(
 
 function detectInsightAgentId(
   insightType: string,
-  appType: string,
+  summaryType: string,
   client: OpenSearchClient['transport']
 ) {
   // We have separate agent for os_insight and user_insight. And for user_insight, we can
   // only get it by searching on name since it is not stored in agent config.
   if (insightType === 'os_insight') {
     return getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
-  } else if (insightType === 'user_insight' && appType === 'alerts') {
+  } else if (insightType === 'user_insight' && summaryType === 'alerts') {
     return searchAgent({ name: 'KB_For_Alert_Insight' }, client);
   }
 }
