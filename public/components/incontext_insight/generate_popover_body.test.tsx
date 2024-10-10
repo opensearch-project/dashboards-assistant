@@ -87,7 +87,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: 'insightAgentId',
+            insightAgentIdExists: true,
           };
           break;
 
@@ -168,7 +168,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: undefined,
+            insightAgentIdExists: false,
           };
           break;
 
@@ -245,7 +245,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: 'insightAgentId',
+            insightAgentIdExists: true,
           };
           break;
 
@@ -293,7 +293,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: 'insightAgentId',
+            insightAgentIdExists: true,
           };
           break;
 
@@ -335,7 +335,7 @@ describe('GeneratePopoverBody', () => {
         case SUMMARY_ASSISTANT_API.SUMMARIZE:
           value = {
             summary: 'Generated summary content',
-            insightAgentId: 'insightAgentId',
+            insightAgentIdExists: true,
           };
           break;
 
