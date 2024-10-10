@@ -109,7 +109,7 @@ export const GeneratePopoverBody: React.FC<{
       await httpSetup
         ?.post(SUMMARY_ASSISTANT_API.SUMMARIZE, {
           body: JSON.stringify({
-            type: summaryType,
+            summaryType,
             insightType,
             question: summarizationQuestion,
             context: contextContent,
@@ -122,7 +122,7 @@ export const GeneratePopoverBody: React.FC<{
         .then((response) => {
           const summaryContent = response.summary;
           setSummary(summaryContent);
-          const insightAgentIdExists = insightType !== undefined && response.insightAgentIdExists;
+          const insightAgentIdExists = !!insightType && response.insightAgentIdExists;
           setInsightAvailable(insightAgentIdExists);
           if (insightAgentIdExists) {
             onGenerateInsightBasedOnSummary(
