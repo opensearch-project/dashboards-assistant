@@ -122,7 +122,6 @@ export const GeneratePopoverBody: React.FC<{
         .then((response) => {
           const summaryContent = response.summary;
           setSummary(summaryContent);
-          const insightAgentId = response.insightAgentId;
           const insightAgentIdExists = !!insightType && response.insightAgentIdExists;
           setInsightAvailable(insightAgentIdExists);
           if (insightAgentIdExists) {
