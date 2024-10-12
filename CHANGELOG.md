@@ -22,6 +22,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - fix: Fix unrecognized creating index pattern duplicate cases([#337](https://github.com/opensearch-project/dashboards-assistant/pull/337))
 - fix: Remove the cache of insight agent id in node server([#343](https://github.com/opensearch-project/dashboards-assistant/pull/343))
 - fix: Fix error time field and add filter for same name index patterns([#345](https://github.com/opensearch-project/dashboards-assistant/pull/345))
+- refactor: Add data source info in discover url when navigating([#347](https://github.com/opensearch-project/dashboards-assistant/pull/347))
 
 
 ### 📈 Features/Enhancements
