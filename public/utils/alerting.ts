@@ -88,13 +88,17 @@ export const buildUrlQuery = async (
     from: timeDsl.from,
     to: timeDsl.to,
   };
-  let indexPatternTitle = indexPattern.title;
+  const indexPatternTitle = indexPattern.title;
+  let dataSource;
   if (dataSourceId) {
     try {
       const dataSourceObject = await savedObjects.client.get('data-source', dataSourceId);
-      const dataSourceTitle = dataSourceObject?.get('title');
-      // If index pattern refers to a data source, discover list will display data source name as dataSourceTitle::indexPatternTitle
-      indexPatternTitle = `${dataSourceTitle}::${indexPatternTitle}`;
+      const dataSourceTitle = dataSourceObject?.get('title') ?? '';
+      dataSource = {
+        id: dataSourceId,
+        title: dataSourceTitle,
+        type: 'OpenSearch',
+      };
     } catch (e) {
       console.error('Get data source object error');
     }
@@ -107,6 +111,7 @@ export const buildUrlQuery = async (
         id: indexPattern.id,
         timeFieldName: indexPattern.timeFieldName,
         title: indexPatternTitle,
+        ...(dataSource ? { dataSource } : {}),
       },
       language: 'kuery',
       query: '',
