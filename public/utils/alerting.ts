@@ -50,7 +50,11 @@ export const createIndexPatterns = async (
     console.error('Create index pattern error', err.message);
     // Err instanceof DuplicateIndexPatternError is not a trusted validation in some cases, so find index pattern directly.
     try {
-      const result = await dataStart.indexPatterns.find(patternName);
+      let result = await dataStart.indexPatterns.find(patternName);
+      if (dataSourceId) {
+        // Filter same name index patterns but belonged to current data source
+        result = result.filter((item) => item?.dataSourceRef?.id === dataSourceId);
+      }
       if (result && result[0]) {
         pattern = result[0];
       }
@@ -101,7 +105,7 @@ export const buildUrlQuery = async (
       dataset: {
         type: 'INDEX_PATTERN',
         id: indexPattern.id,
-        timeFiledName: indexPattern.timeFieldName,
+        timeFieldName: indexPattern.timeFieldName,
         title: indexPatternTitle,
       },
       language: 'kuery',
