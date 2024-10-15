@@ -336,18 +336,21 @@ export class AssistantPlugin
         getIconType: () => 'visLine' as const,
         // T2Viz is only compatible with data sources that have certain agents configured
         isCompatible: async (context) => {
-          const indexPattern = await data.indexPatterns.get(context.indexPatternId);
-          const res = await assistantServiceStart.client.agentConfigExists(
-            [
-              TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
-              TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
-              TEXT2PPL_AGENT_CONFIG_ID,
-            ],
-            {
-              dataSourceId: indexPattern.dataSourceRef?.id,
-            }
-          );
-          return res.exists;
+          // t2viz only supports selecting index pattern at the moment
+          if (context.datasetType === 'INDEX_PATTERN' && context.datasetId) {
+            const res = await assistantServiceStart.client.agentConfigExists(
+              [
+                TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+                TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+                TEXT2PPL_AGENT_CONFIG_ID,
+              ],
+              {
+                dataSourceId: context.dataSourceId,
+              }
+            );
+            return res.exists;
+          }
+          return false;
         },
         execute: async () => {
           core.application.navigateToApp(TEXT2VIZ_APP_ID);

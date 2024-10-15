@@ -23,13 +23,20 @@ export const ActionContextMenu = (props: Props) => {
   const actionsRef = useRef(uiActions.getTriggerActions(AI_ASSISTANT_QUERY_EDITOR_TRIGGER));
   const [open, setOpen] = useState(false);
   const [actionContext, setActionContext] = useState({
-    indexPatternId: props.data.query.queryString.getQuery().dataset?.id ?? '',
+    datasetId: props.data.query.queryString.getQuery().dataset?.id ?? '',
+    datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
+    dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
   });
 
   useEffect(() => {
     const subscription = props.data.query.queryString.getUpdates$().subscribe((query) => {
       if (query.dataset) {
-        setActionContext((state) => ({ ...state, indexPatternId: query.dataset?.id ?? '' }));
+        setActionContext((state) => ({
+          ...state,
+          datasetId: query.dataset?.id ?? '',
+          datasetType: query.dataset?.type ?? '',
+          dataSourceId: query.dataset?.dataSource?.id,
+        }));
       }
     });
     return () => {
@@ -42,14 +49,18 @@ export const ActionContextMenu = (props: Props) => {
       buildContextMenuForActions({
         actions: actionsRef.current.map((action) => ({
           action,
-          context: { indexPatternId: actionContext.indexPatternId },
+          context: {
+            datasetId: actionContext.datasetId,
+            datasetType: actionContext.datasetType,
+            dataSourceId: actionContext.dataSourceId,
+          },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           trigger: AI_ASSISTANT_QUERY_EDITOR_TRIGGER as any,
         })),
         closeMenu: () => setOpen(false),
         title: '',
       }),
-    [actionContext.indexPatternId]
+    [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
 
   if (actionsRef.current.length === 0) {
