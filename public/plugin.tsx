@@ -60,6 +60,10 @@ import {
 } from './vis_nlq/saved_object_loader';
 import { NLQVisualizationEmbeddableFactory } from './components/visualization/embeddable/nlq_vis_embeddable_factory';
 import { NLQ_VISUALIZATION_EMBEDDABLE_TYPE } from './components/visualization/embeddable/nlq_vis_embeddable';
+import {
+  ASSISTANT_INPUT_URL_SEARCH_KEY,
+  INDEX_PATTERN_URL_SEARCH_KEY,
+} from './components/visualization/text2viz';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -329,7 +333,24 @@ export class AssistantPlugin
         getDisplayName: () => 'Generate visualization',
         getIconType: () => 'visLine' as const,
         execute: async () => {
-          core.application.navigateToApp(TEXT2VIZ_APP_ID);
+          const dataset = data.query.queryString.getQuery().dataset;
+          const url = new URL(core.application.getUrlForApp(TEXT2VIZ_APP_ID, { absolute: true }));
+          if (dataset && dataset.type === 'INDEX_PATTERN') {
+            url.searchParams.set(INDEX_PATTERN_URL_SEARCH_KEY, dataset.id);
+          }
+          /**
+           * TODO: the current implementation of getting query assistant input needs to be refactored
+           * once query assistant is moved to dashboard-assistant repo. Currently, there is no better
+           * way to get the input value as the query assistant is currently implemented in OSD core.
+           */
+          const queryAssistInputEle = document.getElementsByClassName('queryAssist__input')[0];
+          if (queryAssistInputEle instanceof HTMLInputElement) {
+            const input = queryAssistInputEle.value;
+            if (input) {
+              url.searchParams.set(ASSISTANT_INPUT_URL_SEARCH_KEY, input);
+            }
+          }
+          core.application.navigateToUrl(url.toString());
         },
       });
       const savedVisNLQLoader = createVisNLQSavedObjectLoader({
