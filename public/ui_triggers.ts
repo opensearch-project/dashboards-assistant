@@ -9,7 +9,7 @@ export const AI_ASSISTANT_QUERY_EDITOR_TRIGGER = 'AI_ASSISTANT_QUERY_EDITOR_TRIG
 
 declare module '../../../src/plugins/ui_actions/public' {
   export interface TriggerContextMapping {
-    [AI_ASSISTANT_QUERY_EDITOR_TRIGGER]: {};
+    [AI_ASSISTANT_QUERY_EDITOR_TRIGGER]: { indexPatternId: string };
   }
 }
 
