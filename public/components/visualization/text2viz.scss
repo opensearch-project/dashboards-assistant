@@ -17,10 +17,26 @@
     padding-left: 30px;
   }
 
-  .feedback_thumbs {
+  .text2viz__actionContainer {
     position: absolute;
-    right: 16px;
     top: 4px;
+    right: 16px;
     z-index: 9999;
+
+    // No existing button from OUI with the same style, have to customize here
+    .vizStyleEditor__editButton {
+      height: 22px;
+      padding: 2px;
+      font-size: 12px;
+    }
+
+    .text2viz__feedbackContainer {
+      padding-right: $euiSizeS;
+      border-right: 1px solid $euiColorLightShade
+    }
+
+    .text2viz__vizStyleEditorContainer {
+      padding-left: $euiSizeS;
+    }
   }
 }
