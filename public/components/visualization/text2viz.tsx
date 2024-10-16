@@ -178,7 +178,8 @@ export const Text2Viz = () => {
             }
           }
           if (savedVis?.uiState) {
-            setInputQuestion(JSON.parse(savedVis.uiState ?? '{}').input);
+            setInputQuestion(JSON.parse(savedVis.uiState ?? '{}').input ?? '');
+            setCurrentInstruction(JSON.parse(savedVis.uiState ?? '{}').instruction ?? '');
           }
         })
         .catch(() => {
@@ -263,6 +264,7 @@ export const Text2Viz = () => {
       });
       savedVis.uiState = JSON.stringify({
         input: inputQuestion,
+        instruction: currentInstruction,
       });
       savedVis.searchSourceFields = { index: indexPattern };
       savedVis.title = onSaveProps.newTitle;
@@ -329,6 +331,7 @@ export const Text2Viz = () => {
     selectedSource,
     savedObjectId,
     usageCollection,
+    currentInstruction,
   ]);
 
   const pageTitle = savedObjectId
