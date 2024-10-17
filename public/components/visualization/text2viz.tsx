@@ -22,7 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useCallback } from 'react';
 import { useObservable } from 'react-use';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { SourceSelector } from './source_selector';
 import type { IndexPattern } from '../../../../../src/plugins/data/public';
 import chatIcon from '../../assets/chat.svg';
@@ -52,9 +52,16 @@ import { HeaderVariant } from '../../../../../src/core/public';
 import { TEXT2VEGA_INPUT_SIZE_LIMIT } from '../../../common/constants/llm';
 import { FeedbackThumbs } from '../feedback_thumbs';
 
+export const INDEX_PATTERN_URL_SEARCH_KEY = 'indexPatternId';
+export const ASSISTANT_INPUT_URL_SEARCH_KEY = 'assistantInput';
+
 export const Text2Viz = () => {
   const { savedObjectId } = useParams<{ savedObjectId?: string }>();
-  const [selectedSource, setSelectedSource] = useState('');
+  const { search } = useLocation();
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
+  const [selectedSource, setSelectedSource] = useState(
+    searchParams.get(INDEX_PATTERN_URL_SEARCH_KEY) ?? ''
+  );
   const [savedObjectLoading, setSavedObjectLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const {
@@ -89,7 +96,7 @@ export const Text2Viz = () => {
 
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(searchParams.get(ASSISTANT_INPUT_URL_SEARCH_KEY) ?? '');
   const [editorInput, setEditorInput] = useState('');
   const text2vegaRef = useRef(new Text2Vega(http, data.search, savedObjects));
 
