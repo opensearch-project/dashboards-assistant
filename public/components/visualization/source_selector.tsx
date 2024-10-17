@@ -167,8 +167,6 @@ export const SourceSelector = ({
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
-  console.log(dataSourceOptions);
-
   const options = useMemo(() => {
     if (dataSourceOptions[0] && dataSourceOptions[0].options.length > 0) {
       return dataSourceOptions;
