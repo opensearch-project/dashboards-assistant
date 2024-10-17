@@ -52,5 +52,4 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Refactor popover to add message action bar and add metrics to thumb-up and thumb-down([#304](https://github.com/opensearch-project/dashboards-assistant/pull/304))
 - Support log pattern analysis ([#339](https://github.com/opensearch-project/dashboards-assistant/pull/339))
 - Pass top N log pattern data from alerting to agent ([#341] (https://github.com/opensearch-project/dashboards-assistant/pull/341))
-
 - Hide incompatible index patterns ([#354] (https://github.com/opensearch-project/dashboards-assistant/pull/354))
