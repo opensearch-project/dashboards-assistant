@@ -47,7 +47,13 @@ import {
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
-import { ASSISTANT_API, DEFAULT_USER_NAME } from '../common/constants/llm';
+import {
+  ASSISTANT_API,
+  DEFAULT_USER_NAME,
+  TEXT2PPL_AGENT_CONFIG_ID,
+  TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+  TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+} from '../common/constants/llm';
 import { IncontextInsightProps } from './components/incontext_insight';
 import { AssistantService } from './services/assistant_service';
 import { ActionContextMenu } from './components/ui_action_context_menu';
@@ -260,7 +266,7 @@ export class AssistantPlugin
           order: 2000,
           isEnabled$: () => of(true),
           getSearchBarButton: () => {
-            return <ActionContextMenu label={this.config.branding.label} />;
+            return <ActionContextMenu label={this.config.branding.label} data={setupDeps.data} />;
           },
         },
       },
@@ -328,6 +334,24 @@ export class AssistantPlugin
         order: 1,
         getDisplayName: () => 'Generate visualization',
         getIconType: () => 'visLine' as const,
+        // T2Viz is only compatible with data sources that have certain agents configured
+        isCompatible: async (context) => {
+          // t2viz only supports selecting index pattern at the moment
+          if (context.datasetType === 'INDEX_PATTERN' && context.datasetId) {
+            const res = await assistantServiceStart.client.agentConfigExists(
+              [
+                TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+                TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+                TEXT2PPL_AGENT_CONFIG_ID,
+              ],
+              {
+                dataSourceId: context.dataSourceId,
+              }
+            );
+            return res.exists;
+          }
+          return false;
+        },
         execute: async () => {
           core.application.navigateToApp(TEXT2VIZ_APP_ID);
         },
