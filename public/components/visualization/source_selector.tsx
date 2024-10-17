@@ -5,7 +5,7 @@
 
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
-
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   DataSource,
@@ -167,10 +167,29 @@ export const SourceSelector = ({
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
+  console.log(dataSourceOptions);
+
+  const options = useMemo(() => {
+    if (dataSourceOptions[0] && dataSourceOptions[0].options.length > 0) {
+      return dataSourceOptions;
+    }
+    return [
+      {
+        label: 'Index patterns',
+        options: [
+          {
+            label: 'No supported index patterns',
+            disabled: true,
+          },
+        ],
+      },
+    ];
+  }, [dataSourceOptions]);
+
   return (
     <DataSourceSelectable
       dataSources={currentDataSources}
-      dataSourceOptionList={dataSourceOptions}
+      dataSourceOptionList={options}
       setDataSourceOptionList={onSetDataSourceOptions}
       onDataSourceSelect={onDataSourceSelect}
       selectedSources={selectedSources}
