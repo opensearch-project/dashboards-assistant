@@ -5,7 +5,6 @@
 
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   DataSource,
