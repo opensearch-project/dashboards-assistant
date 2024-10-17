@@ -139,17 +139,9 @@ export const SourceSelector = ({
             }
           );
           if (!res.exists) {
-            // dataSourceIdToIndexPatternIds[key].forEach((indexPatternId) => {
-            //   indexPatternOptions.options.forEach((option) => {
-            //     if (option.value === indexPatternId) {
-            //       option.disabled = true;
-            //     }
-            //   });
-            // });
             indexPatternOptions.options = indexPatternOptions.options.filter(
               (option) => !dataSourceIdToIndexPatternIds[key].includes(option.value)
             );
-            // console.log(indexPatternOptions.options);
           }
         }
       );
