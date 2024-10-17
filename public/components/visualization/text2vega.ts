@@ -13,13 +13,14 @@ import { DataSourceAttributes } from '../../../../../src/plugins/data_source/com
 const topN = (ppl: string, n: number) => `${ppl} | head ${n}`;
 
 interface Input {
-  prompt: string;
+  inputQuestion: string;
+  inputInstruction?: string;
   index: string;
   dataSourceId?: string;
 }
 
 export class Text2Vega {
-  input$ = new BehaviorSubject<Input>({ prompt: '', index: '' });
+  input$ = new BehaviorSubject<Input>({ inputQuestion: '', index: '' });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   result$: Observable<Record<string, any> | { error: any }>;
   status$ = new BehaviorSubject<'RUNNING' | 'STOPPED'>('STOPPED');
@@ -37,7 +38,7 @@ export class Text2Vega {
     this.savedObjects = savedObjects;
     this.result$ = this.input$
       .pipe(
-        filter((v) => v.prompt.length > 0),
+        filter((v) => v.inputQuestion.length > 0),
         tap(() => this.status$.next('RUNNING')),
         debounceTime(200)
       )
@@ -46,7 +47,7 @@ export class Text2Vega {
           of(v).pipe(
             // text to ppl
             switchMap(async (value) => {
-              const pplQuestion = value.prompt.split('//')[0];
+              const pplQuestion = value.inputQuestion;
               const ppl = await this.text2ppl(pplQuestion, value.index, value.dataSourceId);
               return {
                 ...value,
@@ -71,7 +72,8 @@ export class Text2Vega {
             // call llm to generate vega
             switchMap(async (value) => {
               const result = await this.text2vega({
-                input: value.prompt,
+                inputQuestion: value.inputQuestion,
+                inputInstruction: value.inputInstruction,
                 ppl: value.ppl,
                 sampleData: JSON.stringify(value.sample.jsonData),
                 dataSchema: JSON.stringify(value.sample.schema),
@@ -96,13 +98,15 @@ export class Text2Vega {
   }
 
   async text2vega({
-    input,
+    inputQuestion,
+    inputInstruction = '',
     ppl,
     sampleData,
     dataSchema,
     dataSourceId,
   }: {
-    input: string;
+    inputQuestion: string;
+    inputInstruction?: string;
     ppl: string;
     sampleData: string;
     dataSchema: string;
@@ -122,7 +126,6 @@ export class Text2Vega {
         }
       }
     };
-    const [inputQuestion, inputInstruction = ''] = input.split('//');
     const res = await this.http.post(TEXT2VIZ_API.TEXT2VEGA, {
       body: JSON.stringify({
         input_question: inputQuestion.trim(),
