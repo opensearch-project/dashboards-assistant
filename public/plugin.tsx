@@ -70,6 +70,7 @@ import {
   ASSISTANT_INPUT_URL_SEARCH_KEY,
   INDEX_PATTERN_URL_SEARCH_KEY,
 } from './components/visualization/text2viz';
+import { DEFAULT_DATA } from '../../../src/plugins/data/common';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -341,7 +342,7 @@ export class AssistantPlugin
         // T2Viz is only compatible with data sources that have certain agents configured
         isCompatible: async (context) => {
           // t2viz only supports selecting index pattern at the moment
-          if (context.datasetType === 'INDEX_PATTERN' && context.datasetId) {
+          if (context.datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN && context.datasetId) {
             const res = await assistantServiceStart.client.agentConfigExists(
               [
                 TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
@@ -356,11 +357,10 @@ export class AssistantPlugin
           }
           return false;
         },
-        execute: async () => {
-          const dataset = data.query.queryString.getQuery().dataset;
+        execute: async (context) => {
           const url = new URL(core.application.getUrlForApp(TEXT2VIZ_APP_ID, { absolute: true }));
-          if (dataset && dataset.type === 'INDEX_PATTERN') {
-            url.searchParams.set(INDEX_PATTERN_URL_SEARCH_KEY, dataset.id);
+          if (context.datasetId && context.datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+            url.searchParams.set(INDEX_PATTERN_URL_SEARCH_KEY, context.datasetId);
           }
           /**
            * TODO: the current implementation of getting query assistant input needs to be refactored
