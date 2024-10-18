@@ -172,10 +172,14 @@ export const SourceSelector = ({
     }
     return [
       {
-        label: 'Index patterns',
+        label: i18n.translate('dashboardAssistant.datasource.selector.group.label', {
+          defaultMessage: 'Index patterns',
+        }),
         options: [
           {
-            label: 'No supported index patterns',
+            label: i18n.translate('dashboardAssistant.datasource.selector.emptyMessage.label', {
+              defaultMessage: 'No supported index patterns',
+            }),
             disabled: true,
           },
         ],

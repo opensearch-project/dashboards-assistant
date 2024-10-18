@@ -3,12 +3,11 @@
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Unreleased
-
-- fix: make sure \$schema always added to LLM generated vega json object([252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
+- fix: make sure $schema always added to LLM generated vega json object([252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
 - feat: expose a general function for agent execution([268](https://github.com/opensearch-project/dashboards-assistant/pull/268))
 - Fix CVE-2024-4067 ([#269](https://github.com/opensearch-project/dashboards-assistant/pull/269))
 - feat: add a dashboards-assistant trigger in query editor([265](https://github.com/opensearch-project/dashboards-assistant/pull/265))
-- fix: make sure \$schema always added to LLM generated vega json object([#252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
+- fix: make sure $schema always added to LLM generated vega json object([#252](https://github.com/opensearch-project/dashboards-assistant/pull/252))
 - feat: added a new visualization type visualization-nlq to support creating visualization from natural language([#264](https://github.com/opensearch-project/dashboards-assistant/pull/264))
 - feat: only allow to select supported index patterns in text to visualization and code changes related to prompt updates([#310](https://github.com/opensearch-project/dashboards-assistant/pull/310))
 - feat: exposed an API to check if a give agent config name has configured with agent id([#307](https://github.com/opensearch-project/dashboards-assistant/pull/307))
@@ -24,6 +23,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - fix: Remove the cache of insight agent id in node server([#343](https://github.com/opensearch-project/dashboards-assistant/pull/343))
 - fix: Fix error time field and add filter for same name index patterns([#345](https://github.com/opensearch-project/dashboards-assistant/pull/345))
 - refactor: Add data source info in discover url when navigating([#347](https://github.com/opensearch-project/dashboards-assistant/pull/347))
+- Hide incompatible index patterns ([#354] (https://github.com/opensearch-project/dashboards-assistant/pull/354))
 
 ### 📈 Features/Enhancements
 
@@ -52,4 +52,3 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Refactor popover to add message action bar and add metrics to thumb-up and thumb-down([#304](https://github.com/opensearch-project/dashboards-assistant/pull/304))
 - Support log pattern analysis ([#339](https://github.com/opensearch-project/dashboards-assistant/pull/339))
 - Pass top N log pattern data from alerting to agent ([#341] (https://github.com/opensearch-project/dashboards-assistant/pull/341))
-- Hide incompatible index patterns ([#354] (https://github.com/opensearch-project/dashboards-assistant/pull/354))
