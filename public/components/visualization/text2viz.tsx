@@ -51,6 +51,7 @@ import { VIS_NLQ_APP_ID, VIS_NLQ_SAVED_OBJECT } from '../../../common/constants/
 import { HeaderVariant } from '../../../../../src/core/public';
 import { TEXT2VEGA_INPUT_SIZE_LIMIT } from '../../../common/constants/llm';
 import { FeedbackThumbs } from '../feedback_thumbs';
+import { VizStyleEditor } from './viz_style_editor';
 
 export const INDEX_PATTERN_URL_SEARCH_KEY = 'indexPatternId';
 export const ASSISTANT_INPUT_URL_SEARCH_KEY = 'assistantInput';
@@ -96,7 +97,10 @@ export const Text2Viz = () => {
 
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
-  const [input, setInput] = useState(searchParams.get(ASSISTANT_INPUT_URL_SEARCH_KEY) ?? '');
+  const [inputQuestion, setInputQuestion] = useState(
+    searchParams.get(ASSISTANT_INPUT_URL_SEARCH_KEY) ?? ''
+  );
+  const [currentInstruction, setCurrentInstruction] = useState('');
   const [editorInput, setEditorInput] = useState('');
   const text2vegaRef = useRef(new Text2Vega(http, data.search, savedObjects));
 
@@ -174,7 +178,8 @@ export const Text2Viz = () => {
             }
           }
           if (savedVis?.uiState) {
-            setInput(JSON.parse(savedVis.uiState ?? '{}').input);
+            setInputQuestion(JSON.parse(savedVis.uiState ?? '{}').input ?? '');
+            setCurrentInstruction(JSON.parse(savedVis.uiState ?? '{}').instruction ?? '');
           }
         })
         .catch(() => {
@@ -196,42 +201,48 @@ export const Text2Viz = () => {
   /**
    * Submit user's natural language input to generate visualization
    */
-  const onSubmit = useCallback(async () => {
-    if (status === 'RUNNING' || !selectedSource) return;
+  const onSubmit = useCallback(
+    async (inputInstruction: string = '') => {
+      setCurrentInstruction(inputInstruction);
 
-    const [inputQuestion = '', inputInstruction = ''] = input.split('//');
-    if (
-      inputQuestion.trim().length > TEXT2VEGA_INPUT_SIZE_LIMIT ||
-      inputInstruction.trim().length > TEXT2VEGA_INPUT_SIZE_LIMIT
-    ) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('dashboardAssistant.feature.text2viz.invalidInput', {
-          defaultMessage: `Input size exceed limit: {limit}. Actual size: question({inputQuestionLength}), instruction({inputInstructionLength})`,
-          values: {
-            limit: TEXT2VEGA_INPUT_SIZE_LIMIT,
-            inputQuestionLength: inputQuestion.trim().length,
-            inputInstructionLength: inputInstruction.trim().length,
-          },
-        }),
+      if (status === 'RUNNING' || !selectedSource) return;
+
+      if (
+        inputQuestion.trim().length > TEXT2VEGA_INPUT_SIZE_LIMIT ||
+        inputInstruction.trim().length > TEXT2VEGA_INPUT_SIZE_LIMIT
+      ) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('dashboardAssistant.feature.text2viz.invalidInput', {
+            defaultMessage:
+              'Input size exceed limit: {limit}. Actual size: question({inputQuestionLength}), instruction({inputInstructionLength})',
+            values: {
+              limit: TEXT2VEGA_INPUT_SIZE_LIMIT,
+              inputQuestionLength: inputQuestion.trim().length,
+              inputInstructionLength: inputInstruction.trim().length,
+            },
+          }),
+        });
+        return;
+      }
+
+      setSubmitting(true);
+
+      const indexPatterns = getIndexPatterns();
+      const indexPattern = await indexPatterns.get(selectedSource);
+      currentUsedIndexPatternRef.current = indexPattern;
+
+      const text2vega = text2vegaRef.current;
+      text2vega.invoke({
+        index: indexPattern.title,
+        inputQuestion,
+        inputInstruction,
+        dataSourceId: indexPattern.dataSourceRef?.id,
       });
-      return;
-    }
 
-    setSubmitting(true);
-
-    const indexPatterns = getIndexPatterns();
-    const indexPattern = await indexPatterns.get(selectedSource);
-    currentUsedIndexPatternRef.current = indexPattern;
-
-    const text2vega = text2vegaRef.current;
-    text2vega.invoke({
-      index: indexPattern.title,
-      prompt: input,
-      dataSourceId: indexPattern.dataSourceRef?.id,
-    });
-
-    setSubmitting(false);
-  }, [selectedSource, input, status, notifications.toasts]);
+      setSubmitting(false);
+    },
+    [selectedSource, inputQuestion, status, notifications.toasts]
+  );
 
   /**
    * Display the save visualization dialog to persist the current generated visualization
@@ -252,7 +263,8 @@ export const Text2Viz = () => {
         },
       });
       savedVis.uiState = JSON.stringify({
-        input,
+        input: inputQuestion,
+        instruction: currentInstruction,
       });
       savedVis.searchSourceFields = { index: indexPattern };
       savedVis.title = onSaveProps.newTitle;
@@ -311,7 +323,16 @@ export const Text2Viz = () => {
         />
       )
     );
-  }, [notifications, vegaSpec, input, overlays, selectedSource, savedObjectId, usageCollection]);
+  }, [
+    notifications,
+    vegaSpec,
+    inputQuestion,
+    overlays,
+    selectedSource,
+    savedObjectId,
+    usageCollection,
+    currentInstruction,
+  ]);
 
   const pageTitle = savedObjectId
     ? i18n.translate('dashboardAssistant.feature.text2viz.breadcrumbs.editVisualization', {
@@ -380,8 +401,8 @@ export const Text2Viz = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={8}>
           <EuiFieldText
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            value={inputQuestion}
+            onChange={(e) => setInputQuestion(e.target.value)}
             fullWidth
             compressed
             prepend={<EuiIcon type={config.branding.logo || chatIcon} />}
@@ -393,8 +414,8 @@ export const Text2Viz = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             aria-label="submit"
-            onClick={onSubmit}
-            isDisabled={loading || input.trim().length === 0 || !selectedSource}
+            onClick={() => onSubmit()}
+            isDisabled={loading || inputQuestion.trim().length === 0 || !selectedSource}
             display="base"
             size="s"
             iconType="returnKey"
@@ -453,13 +474,23 @@ export const Text2Viz = () => {
                   paddingSize="none"
                   scrollable={false}
                 >
-                  {usageCollection ? (
-                    <FeedbackThumbs
-                      usageCollection={usageCollection}
-                      appName={VIS_NLQ_APP_ID}
-                      className="feedback_thumbs"
-                    />
-                  ) : null}
+                  <EuiFlexGroup className="text2viz__actionContainer" gutterSize="none">
+                    {usageCollection ? (
+                      <EuiFlexItem className="text2viz__feedbackContainer">
+                        <FeedbackThumbs
+                          usageCollection={usageCollection}
+                          appName={VIS_NLQ_APP_ID}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    <EuiFlexItem className="text2viz__vizStyleEditorContainer">
+                      <VizStyleEditor
+                        iconType={config.branding.logo || chatIcon}
+                        onApply={(instruction) => onSubmit(instruction)}
+                        value={currentInstruction}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                   <EmbeddableRenderer factory={factory} input={visInput} />
                 </EuiResizablePanel>
                 <EuiResizableButton />
