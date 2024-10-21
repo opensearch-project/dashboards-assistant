@@ -47,7 +47,13 @@ import {
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
-import { ASSISTANT_API, DEFAULT_USER_NAME } from '../common/constants/llm';
+import {
+  ASSISTANT_API,
+  DEFAULT_USER_NAME,
+  TEXT2PPL_AGENT_CONFIG_ID,
+  TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+  TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+} from '../common/constants/llm';
 import { IncontextInsightProps } from './components/incontext_insight';
 import { AssistantService } from './services/assistant_service';
 import { ActionContextMenu } from './components/ui_action_context_menu';
@@ -60,6 +66,11 @@ import {
 } from './vis_nlq/saved_object_loader';
 import { NLQVisualizationEmbeddableFactory } from './components/visualization/embeddable/nlq_vis_embeddable_factory';
 import { NLQ_VISUALIZATION_EMBEDDABLE_TYPE } from './components/visualization/embeddable/nlq_vis_embeddable';
+import {
+  ASSISTANT_INPUT_URL_SEARCH_KEY,
+  INDEX_PATTERN_URL_SEARCH_KEY,
+} from './components/visualization/text2viz';
+import { DEFAULT_DATA } from '../../../src/plugins/data/common';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -260,7 +271,7 @@ export class AssistantPlugin
           order: 2000,
           isEnabled$: () => of(true),
           getSearchBarButton: () => {
-            return <ActionContextMenu label={this.config.branding.label} />;
+            return <ActionContextMenu label={this.config.branding.label} data={setupDeps.data} />;
           },
         },
       },
@@ -328,8 +339,42 @@ export class AssistantPlugin
         order: 1,
         getDisplayName: () => 'Generate visualization',
         getIconType: () => 'visLine' as const,
-        execute: async () => {
-          core.application.navigateToApp(TEXT2VIZ_APP_ID);
+        // T2Viz is only compatible with data sources that have certain agents configured
+        isCompatible: async (context) => {
+          // t2viz only supports selecting index pattern at the moment
+          if (context.datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN && context.datasetId) {
+            const res = await assistantServiceStart.client.agentConfigExists(
+              [
+                TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
+                TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
+                TEXT2PPL_AGENT_CONFIG_ID,
+              ],
+              {
+                dataSourceId: context.dataSourceId,
+              }
+            );
+            return res.exists;
+          }
+          return false;
+        },
+        execute: async (context) => {
+          const url = new URL(core.application.getUrlForApp(TEXT2VIZ_APP_ID, { absolute: true }));
+          if (context.datasetId && context.datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+            url.searchParams.set(INDEX_PATTERN_URL_SEARCH_KEY, context.datasetId);
+          }
+          /**
+           * TODO: the current implementation of getting query assistant input needs to be refactored
+           * once query assistant is moved to dashboard-assistant repo. Currently, there is no better
+           * way to get the input value as the query assistant is currently implemented in OSD core.
+           */
+          const queryAssistInputEle = document.getElementsByClassName('queryAssist__input')[0];
+          if (queryAssistInputEle instanceof HTMLInputElement) {
+            const input = queryAssistInputEle.value;
+            if (input) {
+              url.searchParams.set(ASSISTANT_INPUT_URL_SEARCH_KEY, input);
+            }
+          }
+          core.application.navigateToUrl(url.toString());
         },
       });
       const savedVisNLQLoader = createVisNLQSavedObjectLoader({
