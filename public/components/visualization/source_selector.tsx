@@ -5,7 +5,6 @@
 
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
-
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   DataSource,
@@ -139,13 +138,9 @@ export const SourceSelector = ({
             }
           );
           if (!res.exists) {
-            dataSourceIdToIndexPatternIds[key].forEach((indexPatternId) => {
-              indexPatternOptions.options.forEach((option) => {
-                if (option.value === indexPatternId) {
-                  option.disabled = true;
-                }
-              });
-            });
+            indexPatternOptions.options = indexPatternOptions.options.filter(
+              (option) => !dataSourceIdToIndexPatternIds[key].includes(option.value)
+            );
           }
         }
       );
@@ -171,10 +166,31 @@ export const SourceSelector = ({
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
+  const options = useMemo(() => {
+    if (dataSourceOptions[0] && dataSourceOptions[0].options.length > 0) {
+      return dataSourceOptions;
+    }
+    return [
+      {
+        label: i18n.translate('dashboardAssistant.datasource.selector.group.label', {
+          defaultMessage: 'Index patterns',
+        }),
+        options: [
+          {
+            label: i18n.translate('dashboardAssistant.datasource.selector.emptyMessage.label', {
+              defaultMessage: 'No supported index patterns',
+            }),
+            disabled: true,
+          },
+        ],
+      },
+    ];
+  }, [dataSourceOptions]);
+
   return (
     <DataSourceSelectable
       dataSources={currentDataSources}
-      dataSourceOptionList={dataSourceOptions}
+      dataSourceOptionList={options}
       setDataSourceOptionList={onSetDataSourceOptions}
       onDataSourceSelect={onDataSourceSelect}
       selectedSources={selectedSources}

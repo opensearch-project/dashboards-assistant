@@ -25,6 +25,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - refactor: Add data source info in discover url when navigating([#347](https://github.com/opensearch-project/dashboards-assistant/pull/347))
 - feat: only display ai actions that compatible with the datasource([#350](https://github.com/opensearch-project/dashboards-assistant/pull/350))
 - feat: take index pattern and query assistant input to text2viz app([#349](https://github.com/opensearch-project/dashboards-assistant/pull/349))
+- feat: Hide incompatible index patterns ([#354] (https://github.com/opensearch-project/dashboards-assistant/pull/354))
 
 
 ### 📈 Features/Enhancements
