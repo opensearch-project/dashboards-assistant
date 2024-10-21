@@ -39,7 +39,7 @@ export function registerAgentRoutes(router: IRouter, assistantService: Assistant
         );
         return res.ok({ body: response });
       } catch (e) {
-        return res.internalError();
+        return res.badRequest();
       }
     })
   );
