@@ -93,7 +93,7 @@ export const GeneratePopoverBody: React.FC<{
             defaultMessage: 'Generate summary error',
           })
         );
-        // closePopover();
+        closePopover();
         return;
       }
       const contextContent = contextObj?.context || '';
@@ -152,7 +152,7 @@ export const GeneratePopoverBody: React.FC<{
               defaultMessage: 'Generate summary error',
             })
           );
-          // closePopover();
+          closePopover();
         });
     };
 
