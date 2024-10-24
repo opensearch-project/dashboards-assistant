@@ -5,14 +5,17 @@
 
 import rison from 'rison-node';
 import { stringify } from 'query-string';
+import moment from 'moment';
 import { buildCustomFilter } from '../../../../src/plugins/data/common';
 import { url } from '../../../../src/plugins/opensearch_dashboards_utils/public';
 import {
   DataPublicPluginStart,
   opensearchFilters,
   IndexPattern,
+  Filter,
 } from '../../../../src/plugins/data/public';
 import { CoreStart } from '../../../../src/core/public';
+import { NestedRecord } from '../types';
 
 export const buildFilter = (indexPatternId: string, dsl: Record<string, unknown>) => {
   const filterAlias = 'Alerting-filters';
@@ -69,16 +72,19 @@ export const buildUrlQuery = async (
   dataStart: DataPublicPluginStart,
   savedObjects: CoreStart['savedObjects'],
   indexPattern: IndexPattern,
-  dsl: Record<string, unknown>,
+  dsl: NestedRecord,
   timeDsl: Record<'from' | 'to', string>,
   dataSourceId?: string
 ) => {
-  const filter = buildFilter(indexPattern.id!, dsl);
-
-  const filterManager = dataStart.query.filterManager;
-  // There are some map and flatten operations to filters in filterManager, use this to keep aligned with discover.
-  filterManager.setAppFilters([filter]);
-  const filters = filterManager.getAppFilters();
+  let filters: Filter[] = [];
+  // If there is none filter after filtering timeRange filter, skip to build filter query.
+  if (dsl?.query?.bool?.filter?.length > 0) {
+    const filter = buildFilter(indexPattern.id!, dsl);
+    const filterManager = dataStart.query.filterManager;
+    // There are some map and flatten operations to filters in filterManager, use this to keep aligned with discover.
+    filterManager.setAppFilters([filter]);
+    filters = filterManager.getAppFilters();
+  }
 
   const refreshInterval = {
     pause: true,
@@ -141,4 +147,33 @@ export const buildUrlQuery = async (
     { encode: false, sort: false }
   );
   return hash;
+};
+
+export const validateToTimeRange = (time: string) => {
+  // Alerting uses this format in to field of time range filter.
+  const TO_TIME_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
+  return moment.utc(time, TO_TIME_FORMAT, true).isValid();
+};
+
+export const extractTimeRangeDSL = (filters: NestedRecord[]) => {
+  let timeRangeDSL;
+  const newFilters = filters.filter((filter: NestedRecord) => {
+    if (filter?.range && typeof filter.range === 'object') {
+      for (const key of Object.keys(filter.range)) {
+        const rangeValue = filter.range[key];
+        if (typeof rangeValue === 'object' && 'to' in rangeValue) {
+          const toValue = rangeValue.to;
+          if (typeof toValue === 'string' && validateToTimeRange(toValue)) {
+            timeRangeDSL = filter.range[key];
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  });
+  return {
+    newFilters,
+    timeRangeDSL,
+  };
 };

@@ -139,3 +139,7 @@ export type IncontextInsightType =
   | 'error';
 
 export type TabId = 'chat' | 'compose' | 'insights' | 'history' | 'trace';
+
+export interface NestedRecord<T = string> {
+  [key: string]: T | NestedRecord<T>;
+}
