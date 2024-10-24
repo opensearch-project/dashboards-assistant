@@ -157,6 +157,7 @@ export const validateToTimeRange = (time: string) => {
 
 export const extractTimeRangeDSL = (filters: NestedRecord[]) => {
   let timeRangeDSL;
+  let timeFieldName;
   const newFilters = filters.filter((filter: NestedRecord) => {
     if (filter?.range && typeof filter.range === 'object') {
       for (const key of Object.keys(filter.range)) {
@@ -165,6 +166,7 @@ export const extractTimeRangeDSL = (filters: NestedRecord[]) => {
           const toValue = rangeValue.to;
           if (typeof toValue === 'string' && validateToTimeRange(toValue)) {
             timeRangeDSL = filter.range[key];
+            timeFieldName = key;
             return false;
           }
         }
@@ -175,5 +177,6 @@ export const extractTimeRangeDSL = (filters: NestedRecord[]) => {
   return {
     newFilters,
     timeRangeDSL,
+    timeFieldName,
   };
 };

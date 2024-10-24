@@ -93,7 +93,7 @@ export const GeneratePopoverBody: React.FC<{
             defaultMessage: 'Generate summary error',
           })
         );
-        closePopover();
+        // closePopover();
         return;
       }
       const contextContent = contextObj?.context || '';
@@ -152,7 +152,7 @@ export const GeneratePopoverBody: React.FC<{
               defaultMessage: 'Generate summary error',
             })
           );
-          closePopover();
+          // closePopover();
         });
     };
 
@@ -206,11 +206,10 @@ export const GeneratePopoverBody: React.FC<{
       const dslObject = JSON.parse(dsl);
       const filters = dslObject?.query?.bool?.filter;
       if (!filters?.length) return;
-      const { timeRangeDSL, newFilters } = extractTimeRangeDSL(filters);
+      const { timeRangeDSL, newFilters, timeFieldName } = extractTimeRangeDSL(filters);
       // Filter out time range DSL and use this result to build filter query.
-      if (!timeRangeDSL) return;
+      if (!timeFieldName || !timeRangeDSL) return;
       dslObject.query.bool.filter = newFilters;
-      const timeFieldName = Object.keys(timeRangeDSL)[0];
 
       if (getStartServices) {
         const [coreStart, startDeps] = await getStartServices();
