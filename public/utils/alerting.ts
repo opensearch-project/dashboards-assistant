@@ -15,9 +15,9 @@ import {
   Filter,
 } from '../../../../src/plugins/data/public';
 import { CoreStart } from '../../../../src/core/public';
-import { NestedRecord } from '../types';
+import { NestedRecord, DSL } from '../types';
 
-export const buildFilter = (indexPatternId: string, dsl: Record<string, unknown>) => {
+export const buildFilter = (indexPatternId: string, dsl: DSL) => {
   const filterAlias = 'Alerting-filters';
   return buildCustomFilter(
     indexPatternId,
@@ -72,13 +72,13 @@ export const buildUrlQuery = async (
   dataStart: DataPublicPluginStart,
   savedObjects: CoreStart['savedObjects'],
   indexPattern: IndexPattern,
-  dsl: NestedRecord,
+  dsl: DSL,
   timeDsl: Record<'from' | 'to', string>,
   dataSourceId?: string
 ) => {
   let filters: Filter[] = [];
   // If there is none filter after filtering timeRange filter, skip to build filter query.
-  if (dsl?.query?.bool?.filter?.length > 0) {
+  if ((dsl?.query?.bool?.filter?.length ?? 0) > 0) {
     const filter = buildFilter(indexPattern.id!, dsl);
     const filterManager = dataStart.query.filterManager;
     // There are some map and flatten operations to filters in filterManager, use this to keep aligned with discover.
@@ -158,7 +158,7 @@ export const validateToTimeRange = (time: string) => {
 export const extractTimeRangeDSL = (filters: NestedRecord[]) => {
   let timeRangeDSL;
   let timeFieldName;
-  const newFilters = filters.filter((filter: NestedRecord) => {
+  const newFilters = filters.filter((filter) => {
     if (filter?.range && typeof filter.range === 'object') {
       for (const key of Object.keys(filter.range)) {
         const rangeValue = filter.range[key];

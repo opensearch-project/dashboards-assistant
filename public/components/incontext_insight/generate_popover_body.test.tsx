@@ -81,9 +81,6 @@ const mockDSL = `{
     }
 }`;
 
-const spyWindowOpen = jest.spyOn(window, 'open');
-spyWindowOpen.mockImplementation(jest.fn());
-
 describe('GeneratePopoverBody', () => {
   const incontextInsightMock = {
     contextProvider: jest.fn(),
@@ -384,7 +381,7 @@ describe('GeneratePopoverBody', () => {
       const button = getByText('Discover details');
       expect(button).toBeInTheDocument();
       fireEvent.click(button);
-      expect(spyWindowOpen).toHaveBeenCalledWith('data-explorer/discover#?query');
     });
+    expect(window.open).toHaveBeenCalledWith('formattedUrl', '_blank');
   });
 });
