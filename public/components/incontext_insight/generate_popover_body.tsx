@@ -29,9 +29,10 @@ import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import shiny_sparkle from '../../assets/shiny_sparkle.svg';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { reportMetric } from '../../utils/report_metric';
-import { buildUrlQuery, createIndexPatterns } from '../../utils';
+import { buildUrlQuery, createIndexPatterns, extractTimeRangeDSL } from '../../utils';
 import { AssistantPluginStartDependencies } from '../../types';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import { formatUrlWithWorkspaceId } from '../../../../../src/core/public/utils';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
@@ -55,10 +56,25 @@ export const GeneratePopoverBody: React.FC<{
     const getMonitorType = async () => {
       const context = await incontextInsight.contextProvider?.();
       const monitorType = context?.additionalInfo?.monitorType;
+      const dsl = context?.additionalInfo?.dsl;
       // Only this two types from alerting contain DSL and index.
-      const shoudDisplayDiscoverButton =
+      const isSupportedMonitorType =
         monitorType === 'query_level_monitor' || monitorType === 'bucket_level_monitor';
-      setDisplayDiscoverButton(shoudDisplayDiscoverButton);
+      let hasTimeRangeFilter = false;
+      if (dsl) {
+        let dslObject;
+        try {
+          dslObject = JSON.parse(dsl);
+        } catch (e) {
+          console.error('Invalid DSL', e);
+          return;
+        }
+        const filters = dslObject?.query?.bool?.filter;
+        // Filters contains time range filter,if no filters, return.
+        if (!filters?.length) return;
+        hasTimeRangeFilter = !!extractTimeRangeDSL(filters).timeRangeDSL;
+      }
+      setDisplayDiscoverButton(isSupportedMonitorType && hasTimeRangeFilter);
     };
     getMonitorType();
   }, [incontextInsight, setDisplayDiscoverButton]);
@@ -83,7 +99,7 @@ export const GeneratePopoverBody: React.FC<{
             defaultMessage: 'Generate summary error',
           })
         );
-        closePopover();
+        // closePopover();
         return;
       }
       const contextContent = contextObj?.context || '';
@@ -142,7 +158,7 @@ export const GeneratePopoverBody: React.FC<{
               defaultMessage: 'Generate summary error',
             })
           );
-          closePopover();
+          // closePopover();
         });
     };
 
@@ -195,12 +211,11 @@ export const GeneratePopoverBody: React.FC<{
       if (!dsl || !indexName) return;
       const dslObject = JSON.parse(dsl);
       const filters = dslObject?.query?.bool?.filter;
-      if (!filters) return;
-      const timeDslIndex = filters?.findIndex((filter: Record<string, string>) => filter?.range);
-      const timeDsl = filters[timeDslIndex]?.range;
-      const timeFieldName = Object.keys(timeDsl)[0];
-      if (!timeFieldName) return;
-      filters?.splice(timeDslIndex, 1);
+      if (!filters?.length) return;
+      const { timeRangeDSL, newFilters, timeFieldName } = extractTimeRangeDSL(filters);
+      // Filter out time range DSL and use this result to build filter query.
+      if (!timeFieldName || !timeRangeDSL) return;
+      dslObject.query.bool.filter = newFilters;
 
       if (getStartServices) {
         const [coreStart, startDeps] = await getStartServices();
@@ -222,11 +237,18 @@ export const GeneratePopoverBody: React.FC<{
           coreStart.savedObjects,
           indexPattern,
           dslObject,
-          timeDsl[timeFieldName],
+          timeRangeDSL,
           context?.dataSourceId
         );
-        // Navigate to new discover with query built to populate
-        coreStart.application.navigateToUrl(`data-explorer/discover#?${query}`);
+        // Navigate to new discover with query built to populate, use new window to avoid discover search failed.
+        const discoverUrl = `data-explorer/discover#?${query}`;
+        const currentWorkspace = coreStart.workspaces.currentWorkspace$.getValue();
+        const url = formatUrlWithWorkspaceId(
+          discoverUrl,
+          currentWorkspace?.id ?? '',
+          coreStart.http.basePath
+        );
+        window.open(url, '_blank');
       }
     } finally {
       setDiscoverLoading(false);
