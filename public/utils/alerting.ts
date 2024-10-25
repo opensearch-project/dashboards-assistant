@@ -149,7 +149,7 @@ export const buildUrlQuery = async (
   return hash;
 };
 
-export const validateToTimeRange = (time: string) => {
+const validateToTimeRange = (time: string) => {
   // Alerting uses this format in to field of time range filter.
   const TO_TIME_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
   return moment.utc(time, TO_TIME_FORMAT, true).isValid();

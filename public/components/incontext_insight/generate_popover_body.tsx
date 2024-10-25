@@ -62,7 +62,13 @@ export const GeneratePopoverBody: React.FC<{
         monitorType === 'query_level_monitor' || monitorType === 'bucket_level_monitor';
       let hasTimeRangeFilter = false;
       if (dsl) {
-        const dslObject = JSON.parse(dsl);
+        let dslObject;
+        try {
+          dslObject = JSON.parse(dsl);
+        } catch (e) {
+          console.error('Invalid DSL', e);
+          return;
+        }
         const filters = dslObject?.query?.bool?.filter;
         // Filters contains time range filter,if no filters, return.
         if (!filters?.length) return;
@@ -93,7 +99,7 @@ export const GeneratePopoverBody: React.FC<{
             defaultMessage: 'Generate summary error',
           })
         );
-        closePopover();
+        // closePopover();
         return;
       }
       const contextContent = contextObj?.context || '';
@@ -152,7 +158,7 @@ export const GeneratePopoverBody: React.FC<{
               defaultMessage: 'Generate summary error',
             })
           );
-          closePopover();
+          // closePopover();
         });
     };
 
