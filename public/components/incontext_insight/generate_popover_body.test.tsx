@@ -15,9 +15,20 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 jest.mock('../../services');
 
-jest.mock('../../utils', () => ({
-  createIndexPatterns: jest.fn().mockResolvedValue('index pattern'),
-  buildUrlQuery: jest.fn().mockResolvedValue('query'),
+jest.mock('../../utils', () => {
+  const originUtils = jest.requireActual('../../utils');
+  return {
+    ...originUtils,
+    createIndexPatterns: jest.fn().mockResolvedValue('index pattern'),
+    buildUrlQuery: jest.fn().mockResolvedValue('query'),
+  };
+});
+
+jest.spyOn(window, 'open').mockImplementation(() => null);
+
+jest.mock('../../../../../src/core/public/utils', () => ({
+  ...jest.requireActual('../../../../../src/core/public/utils'),
+  formatUrlWithWorkspaceId: jest.fn().mockReturnValue('formattedUrl'),
 }));
 
 const mockToasts = {
@@ -48,7 +59,7 @@ const mockDSL = `{
                     "range": {
                         "timestamp": {
                             "from": "2024-09-06T04:02:52||-1h",
-                            "to": "2024-09-06T04:02:52",
+                            "to": "2024-10-09T17:40:47+00:00",
                             "include_lower": true,
                             "include_upper": true,
                             "boost": 1
@@ -370,9 +381,7 @@ describe('GeneratePopoverBody', () => {
       const button = getByText('Discover details');
       expect(button).toBeInTheDocument();
       fireEvent.click(button);
-      expect(coreStart.application.navigateToUrl).toHaveBeenCalledWith(
-        'data-explorer/discover#?query'
-      );
     });
+    expect(window.open).toHaveBeenCalledWith('formattedUrl', '_blank');
   });
 });
