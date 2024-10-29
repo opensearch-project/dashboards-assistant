@@ -334,7 +334,7 @@ export const GeneratePopoverBody: React.FC<{
             <MessageActions
               contentToCopy={insight}
               showFeedback
-              showTraceIcon={insightAvailable}
+              showTraceIcon={false}
               onViewTrace={() => {}}
               usageCollection={usageCollection}
               isOnTrace={showInsight}
