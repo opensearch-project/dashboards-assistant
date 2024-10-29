@@ -43,6 +43,7 @@ export const GeneratePopoverBody: React.FC<{
 }> = ({ incontextInsight, httpSetup, usageCollection, closePopover, getStartServices }) => {
   const [summary, setSummary] = useState('');
   const [insight, setInsight] = useState('');
+  const [contextObject, setContextObject] = useState<ContextObj | undefined>(undefined);
   const [insightAvailable, setInsightAvailable] = useState(false);
   const [showInsight, setShowInsight] = useState(false);
   const [discoverLoading, setDiscoverLoading] = useState(false);
@@ -54,9 +55,9 @@ export const GeneratePopoverBody: React.FC<{
 
   useEffect(() => {
     const getMonitorType = async () => {
-      const context = await incontextInsight.contextProvider?.();
-      const monitorType = context?.additionalInfo?.monitorType;
-      const dsl = context?.additionalInfo?.dsl;
+      if (!contextObject) return;
+      const monitorType = contextObject?.additionalInfo?.monitorType;
+      const dsl = contextObject?.additionalInfo?.dsl;
       // Only this two types from alerting contain DSL and index.
       const isSupportedMonitorType =
         monitorType === 'query_level_monitor' || monitorType === 'bucket_level_monitor';
@@ -77,7 +78,7 @@ export const GeneratePopoverBody: React.FC<{
       setDisplayDiscoverButton(isSupportedMonitorType && hasTimeRangeFilter);
     };
     getMonitorType();
-  }, [incontextInsight, setDisplayDiscoverButton]);
+  }, [contextObject, setDisplayDiscoverButton]);
 
   useEffectOnce(() => {
     onGenerateSummary(
@@ -99,9 +100,11 @@ export const GeneratePopoverBody: React.FC<{
             defaultMessage: 'Generate summary error',
           })
         );
-        // closePopover();
+        closePopover();
         return;
       }
+      // onGenerateSummary will get contextObj when mounted, use this returned value to set state to avoid re-fetch.
+      setContextObject(contextObj);
       const contextContent = contextObj?.context || '';
       const dataSourceId = contextObj?.dataSourceId;
       const dataSourceQuery = dataSourceId ? { dataSourceId } : {};
@@ -153,12 +156,13 @@ export const GeneratePopoverBody: React.FC<{
           reportMetric(usageCollection, metricAppName, 'generated', METRIC_TYPE.COUNT);
         })
         .catch((error) => {
+          console.error('Error generate summary:', error);
           toasts.addDanger(
             i18n.translate('assistantDashboards.incontextInsight.generateSummaryError', {
               defaultMessage: 'Generate summary error',
             })
           );
-          // closePopover();
+          closePopover();
         });
     };
 
@@ -205,9 +209,9 @@ export const GeneratePopoverBody: React.FC<{
   const handleNavigateToDiscover = async () => {
     try {
       setDiscoverLoading(true);
-      const context = await incontextInsight?.contextProvider?.();
-      const dsl = context?.additionalInfo?.dsl;
-      const indexName = context?.additionalInfo?.index;
+      if (!contextObject) return;
+      const dsl = contextObject?.additionalInfo?.dsl;
+      const indexName = contextObject?.additionalInfo?.index;
       if (!dsl || !indexName) return;
       const dslObject = JSON.parse(dsl);
       const filters = dslObject?.query?.bool?.filter;
@@ -229,7 +233,7 @@ export const GeneratePopoverBody: React.FC<{
           startDeps.data,
           indexName,
           timeFieldName,
-          context?.dataSourceId
+          contextObject?.dataSourceId
         );
         if (!indexPattern) return;
         const query = await buildUrlQuery(
@@ -238,7 +242,7 @@ export const GeneratePopoverBody: React.FC<{
           indexPattern,
           dslObject,
           timeRangeDSL,
-          context?.dataSourceId
+          contextObject?.dataSourceId
         );
         // Navigate to new discover with query built to populate, use new window to avoid discover search failed.
         const discoverUrl = `data-explorer/discover#?${query}`;
