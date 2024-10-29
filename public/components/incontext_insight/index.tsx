@@ -30,7 +30,7 @@ import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getIncontextInsightRegistry, getNotifications } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
-import sparkle from '../../assets/sparkle.svg';
+import filled_sparkle from '../../assets/filled_sparkle.svg';
 import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
@@ -270,7 +270,7 @@ export const IncontextInsight = ({
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <div className="incontextInsightAnchorIcon">
-            <EuiIcon type={input.type === 'generate' ? sparkle : chatIcon} size="l" />
+            <EuiIcon type={input.type === 'generate' ? filled_sparkle : chatIcon} size="l" />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

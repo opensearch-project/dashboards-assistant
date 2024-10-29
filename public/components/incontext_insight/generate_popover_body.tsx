@@ -293,8 +293,8 @@ export const GeneratePopoverBody: React.FC<{
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
-              <EuiTitle size="xxs">
-                <h6>
+              <EuiTitle size="xxxs">
+                <p>
                   {showInsight
                     ? i18n.translate('assistantDashboards.inContextInsight.withRAGSummary', {
                         defaultMessage: 'Insight With RAG',
@@ -302,7 +302,7 @@ export const GeneratePopoverBody: React.FC<{
                     : i18n.translate('assistantDashboards.inContextInsight.summary', {
                         defaultMessage: 'Summary',
                       })}
-                </h6>
+                </p>
               </EuiTitle>
             </EuiText>
           </EuiFlexItem>
