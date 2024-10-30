@@ -58,6 +58,11 @@ export const GeneratePopoverBody: React.FC<{
       if (!contextObject) return;
       const monitorType = contextObject?.additionalInfo?.monitorType;
       const dsl = contextObject?.additionalInfo?.dsl;
+      const isVisualEditorMonitor = contextObject?.additionalInfo?.isVisualEditorMonitor;
+      // Only alerts from visual editor monitor support to navigate to discover.
+      if (!isVisualEditorMonitor) {
+        return;
+      }
       // Only this two types from alerting contain DSL and index.
       const isSupportedMonitorType =
         monitorType === 'query_level_monitor' || monitorType === 'bucket_level_monitor';
