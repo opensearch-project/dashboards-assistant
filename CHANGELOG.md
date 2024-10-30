@@ -29,6 +29,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - feat: edit visualization with natural language in a dialog([#351](https://github.com/opensearch-project/dashboards-assistant/pull/351))
 - fix: Update alerting DSL verify mechanism([#359](https://github.com/opensearch-project/dashboards-assistant/pull/359))
 - fix: Refactor contextProvider get to reduce re-fetch([#365](https://github.com/opensearch-project/dashboards-assistant/pull/365))
+- feat: Hide navigate to discover button if alert is not from visual editor monitor([#368](https://github.com/opensearch-project/dashboards-assistant/pull/368))
 
 
 ### 📈 Features/Enhancements
