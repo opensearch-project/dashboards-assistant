@@ -338,7 +338,6 @@ describe('GeneratePopoverBody', () => {
         index: 'mock_index',
         dataSourceId: `test-data-source-id`,
         monitorType: 'query_level_monitor',
-        isVisualEditorMonitor: true,
       },
     });
     mockPost.mockImplementation((path: string, body) => {
@@ -384,57 +383,5 @@ describe('GeneratePopoverBody', () => {
       fireEvent.click(button);
     });
     expect(window.open).toHaveBeenCalledWith('formattedUrl', '_blank');
-  });
-
-  it('should hide navigate to discover if not from visual editor monitor', async () => {
-    incontextInsightMock.contextProvider = jest.fn().mockResolvedValue({
-      additionalInfo: {
-        dsl: mockDSL,
-        index: 'mock_index',
-        dataSourceId: `test-data-source-id`,
-        monitorType: 'query_level_monitor',
-        isVisualEditorMonitor: false,
-      },
-    });
-    mockPost.mockImplementation((path: string, body) => {
-      let value;
-      switch (path) {
-        case SUMMARY_ASSISTANT_API.SUMMARIZE:
-          value = {
-            summary: 'Generated summary content',
-            insightAgentIdExists: true,
-          };
-          break;
-
-        case SUMMARY_ASSISTANT_API.INSIGHT:
-          value = 'Generated insight content';
-          break;
-
-        default:
-          return null;
-      }
-      return Promise.resolve(value);
-    });
-
-    const coreStart = coreMock.createStart();
-    const dataStart = dataPluginMock.createStartContract();
-    const getStartServices = jest.fn().mockResolvedValue([
-      coreStart,
-      {
-        data: dataStart,
-      },
-    ]);
-    const { queryByText } = render(
-      <GeneratePopoverBody
-        incontextInsight={incontextInsightMock}
-        httpSetup={mockHttpSetup}
-        closePopover={closePopoverMock}
-        getStartServices={getStartServices}
-      />
-    );
-
-    await waitFor(() => {
-      expect(queryByText('Discover details')).not.toBeInTheDocument();
-    });
   });
 });
