@@ -13,6 +13,8 @@ Compatible with OpenSearch and OpenSearch Dashboards Version 2.18.0
 - feat: Add alerting insight with RAG([#266](https://github.com/opensearch-project/dashboards-assistant/pull/266),[#343](https://github.com/opensearch-project/dashboards-assistant/pull/343))
 - feat: Add an API to check if a give agent config name has agent id configured([#307](https://github.com/opensearch-project/dashboards-assistant/pull/307))
 - feat: Add assistant capabilities to control rendering components([#267](https://github.com/opensearch-project/dashboards-assistant/pull/267))
+- fix: Update alerting DSL verify mechanism([#359](https://github.com/opensearch-project/dashboards-assistant/pull/359))
+- fix: Refactor contextProvider get to reduce re-fetch([#365](https://github.com/opensearch-project/dashboards-assistant/pull/365))
 
 
 ### Maintenance
