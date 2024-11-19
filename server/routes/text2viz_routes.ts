@@ -86,7 +86,11 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         }
         return res.badRequest();
       } catch (e) {
-        return res.badRequest();
+        return res.customError({
+          body: e.body || 'execute agent failed',
+          statusCode: e.statusCode || 500,
+          headers: e.headers,
+        });
       }
     })
   );
@@ -115,7 +119,11 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         const result = JSON.parse(response.body.inference_results[0].output[0].result);
         return res.ok({ body: result });
       } catch (e) {
-        return res.badRequest();
+        return res.customError({
+          body: e.body || 'execute agent failed',
+          statusCode: e.statusCode || 500,
+          headers: e.headers,
+        });
       }
     })
   );

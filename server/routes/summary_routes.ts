@@ -47,13 +47,24 @@ export function registerSummaryAssistantRoutes(
         req.body.index && req.body.dsl && req.body.topNLogPatternData
           ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
           : SUMMARY_AGENT_CONFIG_ID;
-      const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
-        context: req.body.context,
-        question: req.body.question,
-        index: req.body.index,
-        input: req.body.dsl,
-        topNLogPatternData: req.body.topNLogPatternData,
-      });
+
+      let response;
+      try {
+        response = await assistantClient.executeAgentByConfigName(agentConfigId, {
+          context: req.body.context,
+          question: req.body.question,
+          index: req.body.index,
+          input: req.body.dsl,
+          topNLogPatternData: req.body.topNLogPatternData,
+        });
+      } catch (e) {
+        return res.customError({
+          body: e.body || 'execute agent failed',
+          statusCode: e.statusCode || 500,
+          headers: e.headers,
+        });
+      }
+
       let summary;
       let insightAgentIdExists = false;
       try {
@@ -78,6 +89,7 @@ export function registerSummaryAssistantRoutes(
       }
     })
   );
+
   router.post(
     {
       path: SUMMARY_ASSISTANT_API.INSIGHT,
@@ -105,11 +117,22 @@ export function registerSummaryAssistantRoutes(
         req.body.summaryType,
         client
       );
-      const response = await assistantClient.executeAgent(insightAgentId, {
-        context: req.body.context,
-        summary: req.body.summary,
-        question: req.body.question,
-      });
+
+      let response;
+      try {
+        response = await assistantClient.executeAgent(insightAgentId, {
+          context: req.body.context,
+          summary: req.body.summary,
+          question: req.body.question,
+        });
+      } catch (e) {
+        return res.customError({
+          body: e.body || 'execute agent failed',
+          statusCode: e.statusCode || 500,
+          headers: e.headers,
+        });
+      }
+
       try {
         return res.ok({ body: response.body.inference_results[0].output[0].result });
       } catch (e) {
@@ -156,21 +179,23 @@ export function registerData2SummaryRoutes(
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const assistantClient = assistantService.getScopedClient(req, context);
+      let response;
       try {
-        const response = await assistantClient.executeAgentByConfigName(
-          DATA2SUMMARY_AGENT_CONFIG_ID,
-          {
-            sample_data: req.body.sample_data,
-            total_count: req.body.total_count,
-            sample_count: req.body.sample_count,
-            ppl: req.body.ppl,
-            question: req.body.question,
-          }
-        );
+        response = await assistantClient.executeAgentByConfigName(DATA2SUMMARY_AGENT_CONFIG_ID, {
+          sample_data: req.body.sample_data,
+          total_count: req.body.total_count,
+          sample_count: req.body.sample_count,
+          ppl: req.body.ppl,
+          question: req.body.question,
+        });
         const result = response.body.inference_results[0].output[0].result;
         return res.ok({ body: result });
       } catch (e) {
-        return res.badRequest({ body: e });
+        return res.customError({
+          body: e.body || 'execute agent failed',
+          statusCode: e.statusCode || 500,
+          headers: e.headers,
+        });
       }
     })
   );
