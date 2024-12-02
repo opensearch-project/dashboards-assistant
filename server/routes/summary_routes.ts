@@ -47,14 +47,33 @@ export function registerSummaryAssistantRoutes(
         req.body.index && req.body.dsl && req.body.topNLogPatternData
           ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
           : SUMMARY_AGENT_CONFIG_ID;
-      const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
-        context: req.body.context,
-        question: req.body.question,
-        index: req.body.index,
-        input: req.body.dsl,
-        topNLogPatternData: req.body.topNLogPatternData,
-      });
-      let summary;
+
+      let response;
+      try {
+        response = await assistantClient.executeAgentByConfigName(agentConfigId, {
+          context: req.body.context,
+          question: req.body.question,
+          index: req.body.index,
+          input: req.body.dsl,
+          topNLogPatternData: req.body.topNLogPatternData,
+        });
+      } catch (e) {
+        context.assistant_plugin.logger.error('Execute agent failed!', e);
+        if (e.statusCode >= 400 && e.statusCode <= 499) {
+          return res.customError({
+            body: e.body,
+            statusCode: e.statusCode,
+            headers: e.headers,
+          });
+        } else {
+          return res.customError({
+            body: 'Execute agent failed!',
+            statusCode: 500,
+            headers: e.headers,
+          });
+        }
+      }
+
       let insightAgentIdExists = false;
       try {
         if (req.body.insightType) {
@@ -65,19 +84,24 @@ export function registerSummaryAssistantRoutes(
           ));
         }
       } catch (e) {
-        context.assistant_plugin.logger.debug(
+        context.assistant_plugin.logger.error(
           `Cannot find insight agent for ${req.body.insightType}`,
           e
         );
       }
-      try {
-        summary = response.body.inference_results[0].output[0].result;
+
+      const summary = response.body.inference_results[0]?.output[0]?.result;
+      if (summary) {
         return res.ok({ body: { summary, insightAgentIdExists } });
-      } catch (e) {
-        return res.badRequest({ body: e });
+      } else {
+        return res.customError({
+          body: 'Execute agent failed with empty response!',
+          statusCode: 500,
+        });
       }
     })
   );
+
   router.post(
     {
       path: SUMMARY_ASSISTANT_API.INSIGHT,
@@ -105,15 +129,38 @@ export function registerSummaryAssistantRoutes(
         req.body.summaryType,
         client
       );
-      const response = await assistantClient.executeAgent(insightAgentId, {
-        context: req.body.context,
-        summary: req.body.summary,
-        question: req.body.question,
-      });
+
       try {
-        return res.ok({ body: response.body.inference_results[0].output[0].result });
+        const response = await assistantClient.executeAgent(insightAgentId, {
+          context: req.body.context,
+          summary: req.body.summary,
+          question: req.body.question,
+        });
+
+        const insight = response.body.inference_results[0]?.output[0]?.result;
+        if (insight) {
+          return res.ok({ body: { insight } });
+        } else {
+          return res.customError({
+            body: 'Execute agent failed with empty response!',
+            statusCode: 500,
+          });
+        }
       } catch (e) {
-        return res.badRequest({ body: e });
+        context.assistant_plugin.logger.error('Execute agent failed!', e);
+        if (e.statusCode >= 400 && e.statusCode <= 499) {
+          return res.customError({
+            body: e.body,
+            statusCode: e.statusCode,
+            headers: e.headers,
+          });
+        } else {
+          return res.customError({
+            body: 'Execute agent failed!',
+            statusCode: 500,
+            headers: e.headers,
+          });
+        }
       }
     })
   );
@@ -167,10 +214,31 @@ export function registerData2SummaryRoutes(
             question: req.body.question,
           }
         );
+
         const result = response.body.inference_results[0].output[0].result;
-        return res.ok({ body: result });
+        if (result) {
+          return res.ok({ body: result });
+        } else {
+          return res.customError({
+            body: 'Execute agent failed with empty response!',
+            statusCode: 500,
+          });
+        }
       } catch (e) {
-        return res.badRequest({ body: e });
+        context.assistant_plugin.logger.error('Execute agent failed!', e);
+        if (e.statusCode >= 400 && e.statusCode <= 499) {
+          return res.customError({
+            body: e.body,
+            statusCode: e.statusCode,
+            headers: e.headers,
+          });
+        } else {
+          return res.customError({
+            body: 'Execute agent failed!',
+            statusCode: 500,
+            headers: e.headers,
+          });
+        }
       }
     })
   );
