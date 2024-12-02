@@ -39,7 +39,7 @@ export function registerAgentRoutes(router: IRouter, assistantService: Assistant
         );
         return res.ok({ body: response });
       } catch (e) {
-        context.assistant_plugin.logger.debug('Execute agent failed!', e);
+        context.assistant_plugin.logger.error('Execute agent failed!', e);
         if (e.statusCode >= 400 && e.statusCode <= 499) {
           return res.customError({
             body: e.body,

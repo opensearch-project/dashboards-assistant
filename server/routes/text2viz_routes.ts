@@ -119,11 +119,20 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         const result = JSON.parse(response.body.inference_results[0].output[0].result);
         return res.ok({ body: result });
       } catch (e) {
-        return res.customError({
-          body: e.body || 'execute agent failed',
-          statusCode: e.statusCode || 500,
-          headers: e.headers,
-        });
+        context.assistant_plugin.logger.error('Execute agent failed!', e);
+        if (e.statusCode >= 400 && e.statusCode <= 499) {
+          return res.customError({
+            body: e.body,
+            statusCode: e.statusCode,
+            headers: e.headers,
+          });
+        } else {
+          return res.customError({
+            body: 'Execute agent failed!',
+            statusCode: 500,
+            headers: e.headers,
+          });
+        }
       }
     })
   );
