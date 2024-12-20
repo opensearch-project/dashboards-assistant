@@ -22,6 +22,7 @@ interface MessageActionsProps {
   showTraceIcon?: boolean;
   isOnTrace?: boolean;
   traceInteractionId?: string;
+  traceTip?: string;
   onViewTrace?: () => void;
   shouldActionBarVisibleOnHover?: boolean;
   isFullWidth?: boolean;
@@ -44,6 +45,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   showTraceIcon = false,
   isOnTrace = false,
   traceInteractionId = null,
+  traceTip = 'info',
   onViewTrace,
   shouldActionBarVisibleOnHover = false,
   isFullWidth = false,
@@ -146,7 +148,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     trace: {
       show: showTraceIcon && onViewTrace,
       component: renderButtonWithTooltip(
-        'Insight with RAG',
+        traceTip,
         <EuiSmallButtonIcon
           aria-label="How was this generated?"
           {...(traceInteractionId && {
