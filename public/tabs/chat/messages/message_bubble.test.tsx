@@ -8,6 +8,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import { MessageBubble } from './message_bubble';
 import { IOutput } from '../../../../common/types/chat_saved_object_attributes';
+import * as services from '../../../services';
 import * as useFeedbackHookExports from '../../../hooks/use_feed_back';
 import * as useChatActionsExports from '../../../hooks/use_chat_actions';
 import * as coreHookExports from '../../../contexts/core_context';
@@ -18,6 +19,7 @@ describe('<MessageBubble />', () => {
   const reportUiStatsMock = jest.fn();
 
   beforeEach(() => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({ chat: { trace: true } });
     jest
       .spyOn(useFeedbackHookExports, 'useFeedback')
       .mockReturnValue({ feedbackResult: undefined, sendFeedback: sendFeedbackMock });
@@ -288,5 +290,50 @@ describe('<MessageBubble />', () => {
       />
     );
     expect(screen.queryByTestId('trace-icon-bar')).toBeNull();
+  });
+
+  it('should control view trace through config flag', () => {
+    render(
+      <MessageBubble
+        showActionBar={true}
+        showRegenerate={true}
+        message={{
+          type: 'output',
+          contentType: 'markdown',
+          content: 'here are the indices in your cluster: .alert',
+          interactionId: 'bar1',
+        }}
+        interaction={{
+          input: 'foo',
+          response: 'bar1',
+          conversation_id: 'foo',
+          interaction_id: 'bar1',
+          create_time: new Date().toLocaleString(),
+        }}
+      />
+    );
+    expect(screen.queryByTestId('trace-icon-bar1')).toBeVisible();
+
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({ chat: { trace: false } });
+    render(
+      <MessageBubble
+        showActionBar={true}
+        showRegenerate={true}
+        message={{
+          type: 'output',
+          contentType: 'markdown',
+          content: 'here are the indices in your cluster: .alert',
+          interactionId: 'bar2',
+        }}
+        interaction={{
+          input: 'foo',
+          response: 'bar2',
+          conversation_id: 'foo',
+          interaction_id: 'bar2',
+          create_time: new Date().toLocaleString(),
+        }}
+      />
+    );
+    expect(screen.queryByTestId('trace-icon-bar2')).toBeNull();
   });
 });
