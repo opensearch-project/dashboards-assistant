@@ -10,6 +10,7 @@ export const configSchema = schema.object({
   chat: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     trace: schema.boolean({ defaultValue: true }),
+    feedback: schema.boolean({ defaultValue: true }),
   }),
   incontextInsight: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

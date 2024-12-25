@@ -47,8 +47,11 @@ type MessageBubbleProps = {
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
   const { executeAction } = useChatActions();
   const core = useCore();
+  const configSchema = getConfigSchema();
+
   // According to the design of the feedback, only markdown type output is supported.
   const showFeedback =
+    configSchema.chat.feedback &&
     'message' in props &&
     props.message.type === 'output' &&
     props.message.contentType === 'markdown';
@@ -124,7 +127,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     }
 
     const fullWidth = props.message.fullWidth;
-    const configSchema = getConfigSchema();
 
     return (
       <EuiFlexGroup

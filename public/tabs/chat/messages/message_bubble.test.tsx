@@ -19,7 +19,9 @@ describe('<MessageBubble />', () => {
   const reportUiStatsMock = jest.fn();
 
   beforeEach(() => {
-    jest.spyOn(services, 'getConfigSchema').mockReturnValue({ chat: { trace: true } });
+    jest
+      .spyOn(services, 'getConfigSchema')
+      .mockReturnValue({ chat: { trace: true, feedback: true } });
     jest
       .spyOn(useFeedbackHookExports, 'useFeedback')
       .mockReturnValue({ feedbackResult: undefined, sendFeedback: sendFeedbackMock });
@@ -335,5 +337,34 @@ describe('<MessageBubble />', () => {
       />
     );
     expect(screen.queryByTestId('trace-icon-bar2')).toBeNull();
+  });
+
+  it('should control feedback buttons through config flag', () => {
+    const { rerender } = render(
+      <MessageBubble
+        showActionBar={true}
+        message={{
+          type: 'output',
+          contentType: 'markdown',
+          content: 'here are the indices in your cluster: .alert',
+        }}
+      />
+    );
+    expect(screen.queryByLabelText('feedback thumbs down')).toBeVisible();
+    expect(screen.queryByLabelText('feedback thumbs up')).toBeVisible();
+
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({ chat: { feedback: false } });
+    rerender(
+      <MessageBubble
+        showActionBar={true}
+        message={{
+          type: 'output',
+          contentType: 'markdown',
+          content: 'here are the indices in your cluster: .alert',
+        }}
+      />
+    );
+    expect(screen.queryByLabelText('feedback thumbs down')).toBeNull();
+    expect(screen.queryByLabelText('feedback thumbs up')).toBeNull();
   });
 });
