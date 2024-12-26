@@ -225,9 +225,6 @@ export function registerData2SummaryRoutes(
           });
         }
       } catch (e) {
-        console.log('Error: ', e);
-        console.log('status code: ', e.statusCode);
-        console.log('body: ', e.body);
         context.assistant_plugin.logger.error('Execute agent failed!', e);
         if (e.statusCode >= 400 && e.statusCode <= 499) {
           return res.customError({
