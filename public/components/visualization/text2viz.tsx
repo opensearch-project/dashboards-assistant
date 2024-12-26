@@ -24,8 +24,8 @@ import { useCallback } from 'react';
 import { useObservable } from 'react-use';
 import { useLocation, useParams } from 'react-router-dom';
 import { Pipeline } from '../../utils/pipeline/pipeline';
-import { Text2PPLOperator } from '../../utils/pipeline/text_to_ppl_operator';
-import { PPLSampleOperator } from '../../utils/pipeline/ppl_sample_operator';
+import { Text2PPLTask } from '../../utils/pipeline/text_to_ppl_task';
+import { PPLSampleTask } from '../../utils/pipeline/ppl_sample_task';
 import { SourceSelector } from './source_selector';
 import type { IndexPattern } from '../../../../../src/plugins/data/public';
 import chatIcon from '../../assets/chat.svg';
@@ -54,7 +54,7 @@ import { HeaderVariant } from '../../../../../src/core/public';
 import { TEXT2VEGA_INPUT_SIZE_LIMIT } from '../../../common/constants/llm';
 import { FeedbackThumbs } from '../feedback_thumbs';
 import { VizStyleEditor } from './viz_style_editor';
-import { Text2VegaOperator } from '../../utils/pipeline/text_to_vega_operator';
+import { Text2VegaTask } from '../../utils/pipeline/text_to_vega_task';
 
 export const INDEX_PATTERN_URL_SEARCH_KEY = 'indexPatternId';
 export const ASSISTANT_INPUT_URL_SEARCH_KEY = 'assistantInput';
@@ -109,9 +109,9 @@ export const Text2Viz = () => {
 
   if (text2vegaRef.current === null) {
     text2vegaRef.current = new Pipeline([
-      new Text2PPLOperator(http),
-      new PPLSampleOperator(data.search),
-      new Text2VegaOperator(http, savedObjects),
+      new Text2PPLTask(http),
+      new PPLSampleTask(data.search),
+      new Text2VegaTask(http, savedObjects),
     ]);
   }
 

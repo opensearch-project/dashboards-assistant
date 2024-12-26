@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Operator } from './operator';
+import { Task } from './task';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 interface Input {
@@ -14,7 +14,7 @@ interface Input {
 
 const topN = (ppl: string, n: number = 2) => `${ppl} | head ${n}`;
 
-export class PPLSampleOperator extends Operator<Input, Input & { sample: string }> {
+export class PPLSampleTask extends Task<Input, Input & { sample: string }> {
   searchClient: DataPublicPluginStart['search'];
 
   constructor(searchClient: DataPublicPluginStart['search']) {

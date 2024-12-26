@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Operator } from './operator';
+import { Task } from './task';
 import { HttpSetup, SavedObjectsStart } from '../../../../../src/core/public';
 import { TEXT2VIZ_API } from '../../../common/constants/llm';
 import { DataSourceAttributes } from '../../../../../src/plugins/data_source/common/data_sources';
@@ -18,7 +18,7 @@ interface Input {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class Text2VegaOperator extends Operator<Input, Input & { vega: any }> {
+export class Text2VegaTask extends Task<Input, Input & { vega: any }> {
   http: HttpSetup;
   savedObjects: SavedObjectsStart;
 

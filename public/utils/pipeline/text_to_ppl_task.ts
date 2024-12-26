@@ -4,7 +4,7 @@
  */
 
 import { HttpSetup } from '../../../../../src/core/public';
-import { Operator } from './operator';
+import { Task } from './task';
 import { TEXT2VIZ_API } from '../../../common/constants/llm';
 
 interface Input {
@@ -13,7 +13,7 @@ interface Input {
   dataSourceId?: string;
 }
 
-export class Text2PPLOperator extends Operator<Input, Input & { ppl: string }> {
+export class Text2PPLTask extends Task<Input, Input & { ppl: string }> {
   http: HttpSetup;
 
   constructor(http: HttpSetup) {
