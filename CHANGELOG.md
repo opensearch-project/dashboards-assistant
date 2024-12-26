@@ -15,6 +15,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Bug Fixes
 
 - Optimize the response of AI agent APIs ([#373](https://github.com/opensearch-project/dashboards-assistant/pull/373))
+- fixed incorrect message id field used ([#378](https://github.com/opensearch-project/dashboards-assistant/pull/378))
 
 ### Infrastructure
 
