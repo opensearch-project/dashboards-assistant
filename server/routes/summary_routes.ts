@@ -47,7 +47,6 @@ export function registerSummaryAssistantRoutes(
         req.body.index && req.body.dsl && req.body.topNLogPatternData
           ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
           : SUMMARY_AGENT_CONFIG_ID;
-
       let response;
       try {
         response = await assistantClient.executeAgentByConfigName(agentConfigId, {
@@ -61,15 +60,13 @@ export function registerSummaryAssistantRoutes(
         context.assistant_plugin.logger.error('Execute agent failed!', e);
         if (e.statusCode >= 400 && e.statusCode <= 499) {
           return res.customError({
-            body: e.body,
+            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
             statusCode: e.statusCode,
-            headers: e.headers,
           });
         } else {
           return res.customError({
             body: 'Execute agent failed!',
             statusCode: 500,
-            headers: e.headers,
           });
         }
       }
@@ -150,15 +147,13 @@ export function registerSummaryAssistantRoutes(
         context.assistant_plugin.logger.error('Execute agent failed!', e);
         if (e.statusCode >= 400 && e.statusCode <= 499) {
           return res.customError({
-            body: e.body,
+            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
             statusCode: e.statusCode,
-            headers: e.headers,
           });
         } else {
           return res.customError({
             body: 'Execute agent failed!',
             statusCode: 500,
-            headers: e.headers,
           });
         }
       }
@@ -228,15 +223,13 @@ export function registerData2SummaryRoutes(
         context.assistant_plugin.logger.error('Execute agent failed!', e);
         if (e.statusCode >= 400 && e.statusCode <= 499) {
           return res.customError({
-            body: e.body,
+            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
             statusCode: e.statusCode,
-            headers: e.headers,
           });
         } else {
           return res.customError({
             body: 'Execute agent failed!',
             statusCode: 500,
-            headers: e.headers,
           });
         }
       }
