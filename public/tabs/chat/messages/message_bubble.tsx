@@ -17,6 +17,7 @@ import React from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { MessageActions } from './message_action';
 import { useCore } from '../../../contexts';
+import { getConfigSchema } from '../../../services';
 
 // TODO: Replace with getChrome().logos.Chat.url
 import { useChatActions } from '../../../hooks';
@@ -46,8 +47,11 @@ type MessageBubbleProps = {
 export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) => {
   const { executeAction } = useChatActions();
   const core = useCore();
+  const configSchema = getConfigSchema();
+
   // According to the design of the feedback, only markdown type output is supported.
   const showFeedback =
+    configSchema.chat.feedback &&
     'message' in props &&
     props.message.type === 'output' &&
     props.message.contentType === 'markdown';
@@ -159,7 +163,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                   interaction={props.interaction}
                   message={props.message as IOutput}
                   showFeedback={showFeedback}
-                  showTraceIcon={!!props.message.interactionId}
+                  showTraceIcon={configSchema.chat.trace && !!props.message.interactionId}
+                  traceTip="How was this generated?"
                   traceInteractionId={props.message.interactionId || ''}
                   onViewTrace={() => {
                     const message = props.message as IOutput;
