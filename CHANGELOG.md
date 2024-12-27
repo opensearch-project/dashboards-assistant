@@ -11,6 +11,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Enhancements
 
 - feat: Hide navigate to discover button if alert is not from visual editor monitor([#368](https://github.com/opensearch-project/dashboards-assistant/pull/368))
+- Add flags in the config to control trace view and feedback buttons in message bubbles ([#379](https://github.com/opensearch-project/dashboards-assistant/pull/379))
 
 ### Bug Fixes
 
