@@ -13,6 +13,7 @@ import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { registerData2SummaryRoutes, registerSummaryAssistantRoutes } from './summary_routes';
 import { AssistantClient } from '../services/assistant_client';
 import { RequestHandlerContext } from '../../../../src/core/server';
+import * as AgentHelpers from './get_agent';
 const mockedLogger = loggerMock.create();
 
 export const createMockedAssistantClient = (
@@ -147,7 +148,7 @@ describe('test summary route', () => {
         "headers": Object {},
         "payload": Object {
           "error": "Internal Server Error",
-          "message": "Execute agent failed!",
+          "message": "An internal server error occurred.",
           "statusCode": 500,
         },
         "statusCode": 500,
@@ -167,9 +168,10 @@ describe('test summary route', () => {
         },
       },
     });
+    const spy = jest.spyOn(AgentHelpers, 'getAgentIdByConfigName').mockResolvedValue('test_agent');
     const result = (await insightRequest({
       summaryType: 'alerts',
-      insightType: 'test',
+      insightType: 'os_insight',
       summary: 'summary',
       question: 'Please summarize this alert, do not use any tool.',
       context: 'context',
@@ -185,6 +187,7 @@ describe('test summary route', () => {
         "statusCode": 429,
       }
     `);
+    spy.mockRestore();
   });
 
   it('return 4xx when executeAgent throws 4xx error in string format for insight API', async () => {
@@ -192,9 +195,10 @@ describe('test summary route', () => {
       statusCode: 429,
       body: 'Request is throttled at model level',
     });
+    const spy = jest.spyOn(AgentHelpers, 'getAgentIdByConfigName').mockResolvedValue('test_agent');
     const result = (await insightRequest({
       summaryType: 'alerts',
-      insightType: 'test',
+      insightType: 'os_insight',
       summary: 'summary',
       question: 'Please summarize this alert, do not use any tool.',
       context: 'context',
@@ -210,6 +214,7 @@ describe('test summary route', () => {
         "statusCode": 429,
       }
     `);
+    spy.mockRestore();
   });
 
   it('return 5xx when executeAgent throws 5xx for insight API', async () => {
@@ -217,9 +222,10 @@ describe('test summary route', () => {
       statusCode: 500,
       body: 'Server error',
     });
+    const spy = jest.spyOn(AgentHelpers, 'getAgentIdByConfigName').mockResolvedValue('test_agent');
     const result = (await insightRequest({
       summaryType: 'alerts',
-      insightType: 'test',
+      insightType: 'os_insight',
       summary: 'summary',
       question: 'Please summarize this alert, do not use any tool.',
       context: 'context',
@@ -229,12 +235,13 @@ describe('test summary route', () => {
         "headers": Object {},
         "payload": Object {
           "error": "Internal Server Error",
-          "message": "Execute agent failed!",
+          "message": "An internal server error occurred.",
           "statusCode": 500,
         },
         "statusCode": 500,
       }
     `);
+    spy.mockRestore();
   });
 
   it('return 4xx when execute agent throws 4xx error for data2Summary API', async () => {
@@ -312,7 +319,7 @@ describe('test summary route', () => {
         "headers": Object {},
         "payload": Object {
           "error": "Internal Server Error",
-          "message": "Execute agent failed!",
+          "message": "An internal server error occurred.",
           "statusCode": 500,
         },
         "statusCode": 500,

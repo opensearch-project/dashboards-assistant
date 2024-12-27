@@ -13,6 +13,7 @@ import {
   TEXT2VIZ_API,
 } from '../../common/constants/llm';
 import { AssistantServiceSetup } from '../services/assistant_service';
+import { handleError } from './error_handler';
 
 const inputSchema = schema.string({
   maxLength: TEXT2VEGA_INPUT_SIZE_LIMIT,
@@ -86,18 +87,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         }
         return res.badRequest();
       } catch (e) {
-        context.assistant_plugin.logger.error('Execute agent failed!', e);
-        if (e.statusCode >= 400 && e.statusCode <= 499) {
-          return res.customError({
-            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
-            statusCode: e.statusCode,
-          });
-        } else {
-          return res.customError({
-            body: 'Execute agent failed!',
-            statusCode: 500,
-          });
-        }
+        return handleError(e, res, context.assistant_plugin.logger);
       }
     })
   );
@@ -126,18 +116,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         const result = JSON.parse(response.body.inference_results[0].output[0].result);
         return res.ok({ body: result });
       } catch (e) {
-        context.assistant_plugin.logger.error('Execute agent failed!', e);
-        if (e.statusCode >= 400 && e.statusCode <= 499) {
-          return res.customError({
-            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
-            statusCode: e.statusCode,
-          });
-        } else {
-          return res.customError({
-            body: 'Execute agent failed!',
-            statusCode: 500,
-          });
-        }
+        return handleError(e, res, context.assistant_plugin.logger);
       }
     })
   );

@@ -233,7 +233,7 @@ describe('OllyChatService', () => {
         interactionId: 'interactionId',
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: get agent os_chat failed, reason: Error: cannot get agent os_chat by calling the api: /_plugins/_ml/config/os_chat]`
+      `[Error: cannot get agent by config name os_chat by calling the api: /_plugins/_ml/config/os_chat]`
     );
   });
 });
