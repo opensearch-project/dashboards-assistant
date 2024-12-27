@@ -89,15 +89,13 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         context.assistant_plugin.logger.error('Execute agent failed!', e);
         if (e.statusCode >= 400 && e.statusCode <= 499) {
           return res.customError({
-            body: e.body,
+            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
             statusCode: e.statusCode,
-            headers: e.headers,
           });
         } else {
           return res.customError({
             body: 'Execute agent failed!',
             statusCode: 500,
-            headers: e.headers,
           });
         }
       }
@@ -131,15 +129,13 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         context.assistant_plugin.logger.error('Execute agent failed!', e);
         if (e.statusCode >= 400 && e.statusCode <= 499) {
           return res.customError({
-            body: e.body,
+            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
             statusCode: e.statusCode,
-            headers: e.headers,
           });
         } else {
           return res.customError({
             body: 'Execute agent failed!',
             statusCode: 500,
-            headers: e.headers,
           });
         }
       }
