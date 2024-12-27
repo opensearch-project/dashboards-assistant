@@ -23,6 +23,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { useCallback } from 'react';
 import { useObservable } from 'react-use';
 import { useLocation, useParams } from 'react-router-dom';
+import { Pipeline } from '../../utils/pipeline/pipeline';
+import { Text2PPLTask } from '../../utils/pipeline/text_to_ppl_task';
+import { PPLSampleTask } from '../../utils/pipeline/ppl_sample_task';
 import { SourceSelector } from './source_selector';
 import type { IndexPattern } from '../../../../../src/plugins/data/public';
 import chatIcon from '../../assets/chat.svg';
@@ -36,7 +39,6 @@ import { StartServices } from '../../types';
 import './text2viz.scss';
 import { Text2VizEmpty } from './text2viz_empty';
 import { Text2VizLoading } from './text2viz_loading';
-import { Text2Vega } from './text2vega';
 import {
   OnSaveProps,
   SavedObjectSaveModalOrigin,
@@ -52,6 +54,7 @@ import { HeaderVariant } from '../../../../../src/core/public';
 import { TEXT2VEGA_INPUT_SIZE_LIMIT } from '../../../common/constants/llm';
 import { FeedbackThumbs } from '../feedback_thumbs';
 import { VizStyleEditor } from './viz_style_editor';
+import { Text2VegaTask } from '../../utils/pipeline/text_to_vega_task';
 
 export const INDEX_PATTERN_URL_SEARCH_KEY = 'indexPatternId';
 export const ASSISTANT_INPUT_URL_SEARCH_KEY = 'assistantInput';
@@ -102,7 +105,15 @@ export const Text2Viz = () => {
   );
   const [currentInstruction, setCurrentInstruction] = useState('');
   const [editorInput, setEditorInput] = useState('');
-  const text2vegaRef = useRef(new Text2Vega(http, data.search, savedObjects));
+  const text2vegaRef = useRef<Pipeline | null>(null);
+
+  if (text2vegaRef.current === null) {
+    text2vegaRef.current = new Pipeline([
+      new Text2PPLTask(http),
+      new PPLSampleTask(data.search),
+      new Text2VegaTask(http, savedObjects),
+    ]);
+  }
 
   const status = useObservable(text2vegaRef.current.status$);
 
@@ -129,7 +140,7 @@ export const Text2Viz = () => {
    */
   useEffect(() => {
     const text2vega = text2vegaRef.current;
-    const subscription = text2vega.getResult$().subscribe((result) => {
+    const subscription = text2vega?.getResult$().subscribe((result) => {
       if (result) {
         if (result.error) {
           notifications.toasts.addError(result.error, {
@@ -138,7 +149,7 @@ export const Text2Viz = () => {
             }),
           });
         } else {
-          setEditorInput(JSON.stringify(result, undefined, 4));
+          setEditorInput(JSON.stringify(result.vega, undefined, 4));
 
           // Report metric when visualization generated successfully
           if (usageCollection) {
@@ -153,7 +164,7 @@ export const Text2Viz = () => {
     });
 
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, [http, notifications, usageCollection]);
 
@@ -232,7 +243,7 @@ export const Text2Viz = () => {
       currentUsedIndexPatternRef.current = indexPattern;
 
       const text2vega = text2vegaRef.current;
-      text2vega.invoke({
+      text2vega?.run({
         index: indexPattern.title,
         inputQuestion,
         inputInstruction,
