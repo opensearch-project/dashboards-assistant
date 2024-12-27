@@ -125,7 +125,7 @@ describe('test execute agent route', () => {
         "headers": Object {},
         "payload": Object {
           "error": "Internal Server Error",
-          "message": "Execute agent failed!",
+          "message": "An internal server error occurred.",
           "statusCode": 500,
         },
         "statusCode": 500,
