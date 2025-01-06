@@ -321,6 +321,7 @@ export const GeneratePopoverBody: React.FC<{
   };
 
   const renderInnerFooter = () => {
+    const traceTip = 'Insight With RAG';
     return (
       <EuiPopoverFooter className="incontextInsightGeneratePopoverFooter" paddingSize="none">
         {
@@ -332,6 +333,7 @@ export const GeneratePopoverBody: React.FC<{
               onViewTrace={() => {
                 setShowInsight(true);
               }}
+              traceTip={traceTip}
               usageCollection={usageCollection}
               isOnTrace={showInsight}
               metricAppName={metricAppName}
@@ -345,6 +347,7 @@ export const GeneratePopoverBody: React.FC<{
               showFeedback
               showTraceIcon={insightAvailable}
               onViewTrace={() => {}}
+              traceTip={traceTip}
               usageCollection={usageCollection}
               isOnTrace={showInsight}
               metricAppName={metricAppName}
