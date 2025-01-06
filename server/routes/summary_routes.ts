@@ -4,11 +4,13 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, OpenSearchClient, RequestHandlerContext } from '../../../../src/core/server';
+import { IRouter, OpenSearchClient } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
 import { getAgentIdByConfigName, searchAgent } from './get_agent';
 import { AssistantServiceSetup } from '../services/assistant_service';
+import { handleError } from './error_handler';
+import { AgentNotFoundError } from './errors';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';
@@ -47,32 +49,16 @@ export function registerSummaryAssistantRoutes(
         req.body.index && req.body.dsl && req.body.topNLogPatternData
           ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
           : SUMMARY_AGENT_CONFIG_ID;
-      let response;
       try {
-        response = await assistantClient.executeAgentByConfigName(agentConfigId, {
+        const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
           context: req.body.context,
           question: req.body.question,
           index: req.body.index,
           input: req.body.dsl,
           topNLogPatternData: req.body.topNLogPatternData,
         });
-      } catch (e) {
-        context.assistant_plugin.logger.error('Execute agent failed!', e);
-        if (e.statusCode >= 400 && e.statusCode <= 499) {
-          return res.customError({
-            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
-            statusCode: e.statusCode,
-          });
-        } else {
-          return res.customError({
-            body: 'Execute agent failed!',
-            statusCode: 500,
-          });
-        }
-      }
 
-      let insightAgentIdExists = false;
-      try {
+        let insightAgentIdExists = false;
         if (req.body.insightType) {
           insightAgentIdExists = !!(await detectInsightAgentId(
             req.body.insightType,
@@ -80,21 +66,17 @@ export function registerSummaryAssistantRoutes(
             client
           ));
         }
-      } catch (e) {
-        context.assistant_plugin.logger.error(
-          `Cannot find insight agent for ${req.body.insightType}`,
-          e
-        );
-      }
 
-      const summary = response.body.inference_results[0]?.output[0]?.result;
-      if (summary) {
+        const summary = response.body.inference_results[0]?.output[0]?.result;
+        if (!summary) {
+          return res.customError({
+            body: 'Execute agent failed with empty response!',
+            statusCode: 500,
+          });
+        }
         return res.ok({ body: { summary, insightAgentIdExists } });
-      } else {
-        return res.customError({
-          body: 'Execute agent failed with empty response!',
-          statusCode: 500,
-        });
+      } catch (e) {
+        return handleError(e, res, context.assistant_plugin.logger);
       }
     })
   );
@@ -121,13 +103,17 @@ export function registerSummaryAssistantRoutes(
         dataSourceId: req.query.dataSourceId,
       });
       const assistantClient = assistantService.getScopedClient(req, context);
-      const insightAgentId = await detectInsightAgentId(
-        req.body.insightType,
-        req.body.summaryType,
-        client
-      );
 
       try {
+        const insightAgentId = await detectInsightAgentId(
+          req.body.insightType,
+          req.body.summaryType,
+          client
+        );
+        if (!insightAgentId) {
+          return res.notFound({ body: 'Agent not found' });
+        }
+
         const response = await assistantClient.executeAgent(insightAgentId, {
           context: req.body.context,
           summary: req.body.summary,
@@ -135,27 +121,15 @@ export function registerSummaryAssistantRoutes(
         });
 
         const insight = response.body.inference_results[0]?.output[0]?.result;
-        if (insight) {
-          return res.ok({ body: { insight } });
-        } else {
+        if (!insight) {
           return res.customError({
             body: 'Execute agent failed with empty response!',
             statusCode: 500,
           });
         }
+        return res.ok({ body: { insight } });
       } catch (e) {
-        context.assistant_plugin.logger.error('Execute agent failed!', e);
-        if (e.statusCode >= 400 && e.statusCode <= 499) {
-          return res.customError({
-            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
-            statusCode: e.statusCode,
-          });
-        } else {
-          return res.customError({
-            body: 'Execute agent failed!',
-            statusCode: 500,
-          });
-        }
+        return handleError(e, res, context.assistant_plugin.logger);
       }
     })
   );
@@ -168,12 +142,20 @@ function detectInsightAgentId(
 ) {
   // We have separate agent for os_insight and user_insight. And for user_insight, we can
   // only get it by searching on name since it is not stored in agent config.
-  if (insightType === 'os_insight') {
-    return getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
-  } else if (insightType === 'user_insight' && summaryType === 'alerts') {
-    return searchAgent({ name: 'KB_For_Alert_Insight' }, client);
+  try {
+    if (insightType === 'os_insight') {
+      return getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
+    } else if (insightType === 'user_insight' && summaryType === 'alerts') {
+      return searchAgent({ name: 'KB_For_Alert_Insight' }, client);
+    }
+  } catch (e) {
+    // It only detects if the agent exists, we don't want to throw the error when not found the agent
+    // So we return `undefined` to indicate the insight agent id not found
+    if (e instanceof AgentNotFoundError) {
+      return undefined;
+    }
+    throw e;
   }
-  return undefined;
 }
 
 export function registerData2SummaryRoutes(
@@ -220,18 +202,7 @@ export function registerData2SummaryRoutes(
           });
         }
       } catch (e) {
-        context.assistant_plugin.logger.error('Execute agent failed!', e);
-        if (e.statusCode >= 400 && e.statusCode <= 499) {
-          return res.customError({
-            body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
-            statusCode: e.statusCode,
-          });
-        } else {
-          return res.customError({
-            body: 'Execute agent failed!',
-            statusCode: 500,
-          });
-        }
+        return handleError(e, res, context.assistant_plugin.logger);
       }
     })
   );
