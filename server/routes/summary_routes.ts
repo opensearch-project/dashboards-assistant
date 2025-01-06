@@ -46,7 +46,7 @@ export function registerSummaryAssistantRoutes(
       });
       const assistantClient = assistantService.getScopedClient(req, context);
       const agentConfigId =
-        req.body.index && req.body.dsl && req.body.topNLogPatternData
+        req.body.index && req.body.dsl
           ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
           : SUMMARY_AGENT_CONFIG_ID;
       try {
