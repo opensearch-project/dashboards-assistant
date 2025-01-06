@@ -14,6 +14,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Optimize the response of AI agent APIs ([#373](https://github.com/opensearch-project/dashboards-assistant/pull/373), [#380](https://github.com/opensearch-project/dashboards-assistant/pull/380))
 - fixed incorrect message id field used ([#378](https://github.com/opensearch-project/dashboards-assistant/pull/378))
+- fix: return 404 instead of 500 for missing agent config name ([#384](https://github.com/opensearch-project/dashboards-assistant/pull/384))
 
 ### Infrastructure
 
