@@ -135,7 +135,7 @@ export function registerSummaryAssistantRoutes(
   );
 }
 
-function detectInsightAgentId(
+async function detectInsightAgentId(
   insightType: string,
   summaryType: string,
   client: OpenSearchClient['transport']
@@ -144,9 +144,9 @@ function detectInsightAgentId(
   // only get it by searching on name since it is not stored in agent config.
   try {
     if (insightType === 'os_insight') {
-      return getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
+      return await getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
     } else if (insightType === 'user_insight' && summaryType === 'alerts') {
-      return searchAgent({ name: 'KB_For_Alert_Insight' }, client);
+      return await searchAgent({ name: 'KB_For_Alert_Insight' }, client);
     }
   } catch (e) {
     // It only detects if the agent exists, we don't want to throw the error when not found the agent
