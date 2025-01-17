@@ -31,6 +31,7 @@ import { getIncontextInsightRegistry, getNotifications } from '../../services';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from '../../assets/chat.svg';
 import sparkle from '../../assets/sparkle.svg';
+import shinySparkle from '../../assets/sparkle_with_gradient.svg';
 import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
@@ -52,6 +53,7 @@ export const IncontextInsight = ({
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
   useEffect(() => {
     // TODO: use animation when not using display: none
@@ -256,6 +258,7 @@ export const IncontextInsight = ({
   const renderAnchor = () => {
     if (!input || !target) return children;
 
+    const sparkleIcon = isHover ? shinySparkle : sparkle;
     return (
       <EuiFlexGroup
         className="incontextInsightAnchorButton"
@@ -264,13 +267,15 @@ export const IncontextInsight = ({
         gutterSize="none"
         alignItems="center"
         ref={anchor}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
       >
         <EuiFlexItem grow={2}>
           <div className="incontextInsightAnchorContent">{target}</div>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <div className="incontextInsightAnchorIcon">
-            <EuiIcon type={input.type === 'generate' ? sparkle : chatIcon} size="l" />
+            <EuiIcon type={input.type === 'generate' ? sparkleIcon : chatIcon} size="l" />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

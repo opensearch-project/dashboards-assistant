@@ -37,7 +37,6 @@
   box-sizing: border-box;
   max-width: fit-content;
   border-radius: 0;
-  border-bottom: dashed 2px #38414D;
   white-space: nowrap;
   // TODO: this doesn't scale nicely on same elements on view
   // border-image: linear-gradient(to left, #38414D 60%, transparent 40%) 20% repeat;
@@ -46,26 +45,14 @@
 
   .incontextInsightAnchorIcon {
     :first-child {
-      opacity: 0;
-      display: none;
-    }
-  }
-}
-
-.incontextInsightAnchorButton:hover {
-  cursor: pointer;
-  border-radius: 180px;
-  border: solid 2px $ouiBorderColor;
-  margin: -2px -5px -5px -7px;
-
-  .incontextInsightAnchorIcon {
-    :first-child {
       margin-left: 6px;
       margin-right: 2px;
       padding: 0 2px;
       opacity: 1;
-      transition: opacity 100ms linear;
       display: block;
+    }
+    &:hover {
+      cursor: pointer; 
     }
   }
 }
