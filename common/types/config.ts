@@ -13,6 +13,7 @@ export const configSchema = schema.object({
     feedback: schema.boolean({ defaultValue: true }),
     allowRenameConversation: schema.boolean({ defaultValue: true }),
     deleteConversation: schema.boolean({ defaultValue: true }),
+    hideRegenerateButton: schema.boolean({ defaultValue: true }),
   }),
   incontextInsight: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

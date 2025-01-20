@@ -160,6 +160,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
                   interaction={props.interaction}
                   message={props.message as IOutput}
                   showFeedback={showFeedback}
+                  hideRegenerateButton={configSchema.chat.hideRegenerateButton}
                   showTraceIcon={configSchema.chat.trace && !!props.message.interactionId}
                   traceTip="How was this generated?"
                   traceInteractionId={props.message.interactionId || ''}
