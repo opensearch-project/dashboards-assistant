@@ -12,6 +12,8 @@ import { HttpSetup } from '../../../../../../src/core/public';
 import { DataSourceService } from '../../../services/data_source_service';
 import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/public';
 
+// Tron Hu
+
 interface MessageActionsProps {
   contentToCopy?: string;
   showRegenerate?: boolean;
@@ -31,6 +33,9 @@ interface MessageActionsProps {
   usageCollection?: UsageCollectionSetup;
   metricAppName?: string;
   buttonOrder?: string[];
+
+  // Tiechuan Hu
+  hideRegenerateButton?: boolean;
 }
 
 type ButtonKey = 'copy' | 'regenerate' | 'thumbUp' | 'thumbDown' | 'trace';
@@ -54,6 +59,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   usageCollection,
   metricAppName = 'chat',
   buttonOrder = ['trace', 'regenerate', 'thumbUp', 'thumbDown', 'copy'],
+  // Tiechuan Hu
+  hideRegenerateButton,
 }) => {
   const { feedbackResult, sendFeedback } = useFeedback(
     interaction,
@@ -107,7 +114,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       ),
     },
     regenerate: {
-      show: showRegenerate && onRegenerate,
+      show: hideRegenerateButton && showRegenerate && onRegenerate,
       component: renderButtonWithTooltip(
         'Regenerate message',
         <EuiSmallButtonIcon

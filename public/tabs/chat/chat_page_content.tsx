@@ -24,10 +24,14 @@ import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
 import { getIncontextInsightRegistry } from '../../services';
 
+import { getConfigSchema } from '../../services';
+
 interface ChatPageContentProps {
   messagesLoading: boolean;
   messagesLoadingError?: Error;
   onRefresh: () => void;
+  // Tiechuan Hu
+  hideRegenerateButton?: boolean;
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
@@ -37,6 +41,13 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const loading = props.messagesLoading || chatState.llmResponding;
   const chatActions = useChatActions();
   const registry = getIncontextInsightRegistry();
+
+  // Tiechuan Hu
+  const configSchema = getConfigSchema();
+
+  const hideRegenerateButton = configSchema.chat.hideRegenerateButton ?? false;
+
+  console.log('in chat_page_content.tsx page, hideRegenerateButton is:', hideRegenerateButton);
 
   useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
@@ -144,7 +155,9 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           <MessageBubble loading showActionBar={false} />
         </>
       )}
-      {chatState.llmResponding && chatContext.conversationId && (
+
+      {/* Tiechuan Hu */}
+      {hideRegenerateButton && chatState.llmResponding && chatContext.conversationId && (
         <div style={{ marginLeft: '55px', marginTop: 10 }}>
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
             <EuiFlexItem>
