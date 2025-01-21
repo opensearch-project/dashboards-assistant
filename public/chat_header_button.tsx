@@ -36,6 +36,7 @@ interface HeaderChatButtonProps {
 }
 
 export const HeaderChatButton = (props: HeaderChatButtonProps) => {
+  const sideCarRef = useRef<{ close: Function }>();
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
@@ -131,7 +132,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (!flyoutLoadedRef.current && flyoutVisible) {
       const mountPoint = flyoutMountPoint.current;
       if (mountPoint) {
-        core.overlays.sidecar().open(mountPoint, {
+        sideCarRef.current = core.overlays.sidecar().open(mountPoint, {
           className: 'chatbot-sidecar',
           config: {
             dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
@@ -176,6 +177,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       if (flyoutVisibleRef.current) {
         core.overlays.sidecar().hide();
       }
+      sideCarRef.current?.close();
     };
   }, []);
 

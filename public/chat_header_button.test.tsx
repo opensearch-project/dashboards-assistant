@@ -55,6 +55,10 @@ const sideCarHideMock = jest.fn(() => {
   }
 });
 
+const sideCarRefMock = {
+  close: jest.fn(),
+};
+
 // mock sidecar open,hide and show
 jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
   overlays: {
@@ -68,6 +72,7 @@ jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
           render(<MountWrapper mount={mountPoint} />, {
             container: attachElement,
           });
+          return sideCarRefMock;
         },
         hide: sideCarHideMock,
         show: () => {
@@ -205,7 +210,7 @@ describe('<HeaderChatButton />', () => {
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
   });
 
-  it('should call sidecar hide when button unmount and chat flyout is visible', async () => {
+  it('should call sidecar hide and close when button unmount and chat flyout is visible', async () => {
     const applicationStart = {
       ...applicationServiceMock.createStartContract(),
       currentAppId$: new BehaviorSubject(''),
@@ -223,7 +228,9 @@ describe('<HeaderChatButton />', () => {
     fireEvent.click(getByLabelText('toggle chat flyout icon'));
 
     expect(sideCarHideMock).not.toHaveBeenCalled();
+    expect(sideCarRefMock.close).not.toHaveBeenCalled();
     unmount();
     expect(sideCarHideMock).toHaveBeenCalled();
+    expect(sideCarRefMock.close).toHaveBeenCalled();
   });
 });
