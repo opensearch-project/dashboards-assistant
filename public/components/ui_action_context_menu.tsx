@@ -24,8 +24,7 @@ import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 interface Props {
   data: DataPublicPluginSetup;
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
-  isQuerySummaryEnabled: boolean;
-  isASupportedLanguage$: BehaviorSubject<boolean>;
+  isShowQuerySummarySwitch$: BehaviorSubject<boolean>;
   label?: string;
 }
 
@@ -38,7 +37,7 @@ export const ActionContextMenu = (props: Props) => {
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
     dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
   });
-  const isASupportedLanguage = useObservable(props.isASupportedLanguage$) || false;
+  const isShowQuerySummarySwitch = useObservable(props.isShowQuerySummarySwitch$) || false;
   const [checked, setChecked] = useState<boolean>(false);
 
   useEffect(() => {
@@ -89,9 +88,6 @@ export const ActionContextMenu = (props: Props) => {
       }),
     [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
-
-  // Should show query summary switch when query summary is enabled and users select a supported language.
-  const isShowQuerySummarySwitch = props.isQuerySummaryEnabled && isASupportedLanguage;
 
   // The action button should be not displayed when there is no action and query summary switch.
   if (actionsRef.current.length === 0 && !isShowQuerySummarySwitch) {

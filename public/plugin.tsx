@@ -264,11 +264,7 @@ export class AssistantPlugin
       setupChat();
     }
 
-    const {
-      isQuerySummaryCollapsed$,
-      isQuerySummaryEnabled,
-      isASupportedLanguage$,
-    } = setupDeps.queryEnhancements;
+    const { isQuerySummaryCollapsed$, isShowQuerySummarySwitch$ } = setupDeps.queryEnhancements;
     setupDeps.data.__enhance({
       editor: {
         queryEditorExtension: {
@@ -280,8 +276,7 @@ export class AssistantPlugin
               <ActionContextMenu
                 label={this.config.branding.label}
                 isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
-                isQuerySummaryEnabled={isQuerySummaryEnabled}
-                isASupportedLanguage$={isASupportedLanguage$}
+                isShowQuerySummarySwitch$={isShowQuerySummarySwitch$}
                 data={setupDeps.data}
               />
             );
