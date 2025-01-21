@@ -5,9 +5,16 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiSwitch,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
+import { BehaviorSubject } from 'rxjs';
 import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/public';
 import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER } from '../ui_triggers';
 import { getUiActions } from '../services';
@@ -15,6 +22,9 @@ import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 
 interface Props {
   data: DataPublicPluginSetup;
+  isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
+  isQuerySummaryEnabled: boolean;
+  isASupportedLanguage$: BehaviorSubject<boolean>;
   label?: string;
 }
 
@@ -27,6 +37,8 @@ export const ActionContextMenu = (props: Props) => {
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
     dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
   });
+  const [isASupportedLanguage, setIsASupportedLanguage] = useState<boolean>(false);
+  const [checked, setChecked] = useState<boolean>(false);
 
   useEffect(() => {
     const subscription = props.data.query.queryString.getUpdates$().subscribe((query) => {
@@ -44,6 +56,26 @@ export const ActionContextMenu = (props: Props) => {
     };
   }, [props.data.query.queryString]);
 
+  useEffect(() => {
+    const subscription = props.isASupportedLanguage$.subscribe((value) => {
+      setIsASupportedLanguage(value);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [props.isASupportedLanguage$]);
+
+  useEffect(() => {
+    const isQuerySummaryCollapsed = props.isQuerySummaryCollapsed$.getValue();
+    setChecked(!isQuerySummaryCollapsed);
+  }, [props.isQuerySummaryCollapsed$]);
+
+  const onChange = () => {
+    props.isQuerySummaryCollapsed$.next(checked);
+    setChecked(!checked);
+  };
+
   const panels = useAsync(
     () =>
       buildContextMenuForActions({
@@ -58,7 +90,11 @@ export const ActionContextMenu = (props: Props) => {
           trigger: AI_ASSISTANT_QUERY_EDITOR_TRIGGER as any,
         })),
         closeMenu: () => setOpen(false),
-        title: '',
+        title: props.label
+          ? `${props.label.toUpperCase()} FEATURES`
+          : i18n.translate('dashboardAssistant.branding.assistantActionButton.menu.title', {
+              defaultMessage: 'AI ASSISTANT FEATURES',
+            }),
       }),
     [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
@@ -96,6 +132,18 @@ export const ActionContextMenu = (props: Props) => {
       closePopover={() => setOpen(false)}
     >
       <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
+      {props.isQuerySummaryEnabled && isASupportedLanguage && (
+        <EuiPopoverFooter paddingSize="s">
+          <EuiSwitch
+            label={i18n.translate('queryEnhancements.queryAssist.summary.switch.label', {
+              defaultMessage: `Show result summarization`,
+            })}
+            checked={checked}
+            onChange={() => onChange()}
+            data-test-subj="queryAssist_summary_switch"
+          />
+        </EuiPopoverFooter>
+      )}
     </EuiPopover>
   );
 };

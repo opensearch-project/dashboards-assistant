@@ -264,6 +264,11 @@ export class AssistantPlugin
       setupChat();
     }
 
+    const {
+      isQuerySummaryCollapsed$,
+      isQuerySummaryEnabled,
+      isASupportedLanguage$,
+    } = setupDeps.queryEnhancements;
     setupDeps.data.__enhance({
       editor: {
         queryEditorExtension: {
@@ -271,7 +276,15 @@ export class AssistantPlugin
           order: 2000,
           isEnabled$: () => of(true),
           getSearchBarButton: () => {
-            return <ActionContextMenu label={this.config.branding.label} data={setupDeps.data} />;
+            return (
+              <ActionContextMenu
+                label={this.config.branding.label}
+                isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
+                isQuerySummaryEnabled={isQuerySummaryEnabled}
+                isASupportedLanguage$={isASupportedLanguage$}
+                data={setupDeps.data}
+              />
+            );
           },
         },
       },
