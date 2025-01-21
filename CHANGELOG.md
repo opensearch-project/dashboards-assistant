@@ -19,7 +19,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - fixed incorrect message id field used ([#378](https://github.com/opensearch-project/dashboards-assistant/pull/378))
 - fix: return 404 instead of 500 for missing agent config name ([#384](https://github.com/opensearch-project/dashboards-assistant/pull/384))
 - Improve alert summary with backend log pattern experience ([#389](https://github.com/opensearch-project/dashboards-assistant/pull/389))
-- Add query assistant summary to the assistant dropdown list ([#395](https://github.com/opensearch-project/dashboards-assistant/pull/395))
 
 ### Infrastructure
 
@@ -28,3 +27,4 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Maintenance
 
 ### Refactoring
+- Add query assistant summary to the assistant dropdown list ([#395](https://github.com/opensearch-project/dashboards-assistant/pull/395))
