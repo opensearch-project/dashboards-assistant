@@ -31,7 +31,7 @@ interface MessageActionsProps {
   usageCollection?: UsageCollectionSetup;
   metricAppName?: string;
   buttonOrder?: string[];
-  hideRegenerateButton?: boolean;
+  regenerateButton?: boolean;
 }
 
 type ButtonKey = 'copy' | 'regenerate' | 'thumbUp' | 'thumbDown' | 'trace';
@@ -55,7 +55,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   usageCollection,
   metricAppName = 'chat',
   buttonOrder = ['trace', 'regenerate', 'thumbUp', 'thumbDown', 'copy'],
-  hideRegenerateButton,
+  regenerateButton,
 }) => {
   const { feedbackResult, sendFeedback } = useFeedback(
     interaction,
@@ -109,7 +109,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       ),
     },
     regenerate: {
-      show: hideRegenerateButton && showRegenerate && onRegenerate,
+      show: regenerateButton && showRegenerate && onRegenerate,
       component: renderButtonWithTooltip(
         'Regenerate message',
         <EuiSmallButtonIcon

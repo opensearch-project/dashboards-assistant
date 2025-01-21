@@ -30,7 +30,6 @@ interface ChatPageContentProps {
   messagesLoading: boolean;
   messagesLoadingError?: Error;
   onRefresh: () => void;
-  hideRegenerateButton?: boolean;
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
@@ -41,7 +40,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const chatActions = useChatActions();
   const registry = getIncontextInsightRegistry();
   const configSchema = getConfigSchema();
-  const hideRegenerateButton = configSchema.chat.hideRegenerateButton ?? false;
+  const showRegenerate = configSchema.chat.regenerateButton;
 
   useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
@@ -150,7 +149,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         </>
       )}
 
-      {hideRegenerateButton && chatState.llmResponding && chatContext.conversationId && (
+      {showRegenerate && chatState.llmResponding && chatContext.conversationId && (
         <div style={{ marginLeft: '55px', marginTop: 10 }}>
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
             <EuiFlexItem>
