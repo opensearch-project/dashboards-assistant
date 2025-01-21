@@ -37,8 +37,8 @@ export const ActionContextMenu = (props: Props) => {
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
     dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
   });
-  const resultSummaryEnabled = useObservable(props.resultSummaryEnabled$) || false;
-  const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$) || false;
+  const resultSummaryEnabled = useObservable(props.resultSummaryEnabled$, false);
+  const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$, false);
 
   useEffect(() => {
     const subscription = props.data.query.queryString.getUpdates$().subscribe((query) => {
