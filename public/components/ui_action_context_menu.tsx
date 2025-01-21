@@ -90,24 +90,15 @@ export const ActionContextMenu = (props: Props) => {
     [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
 
+  // Should show query summary switch when query summary is enabled and users select a supported language.
   const isShowQuerySummarySwitch = props.isQuerySummaryEnabled && isASupportedLanguage;
 
-  /**
-   * The action button should be not displayed when the following three situations occur:
-   * 1. There is no action.
-   * 2. Query summary is disabled.
-   * 3. Query summary is enabled and language is not supported.
-   */
+  // The action button should be not displayed when there is no action and query summary switch.
   if (actionsRef.current.length === 0 && !isShowQuerySummarySwitch) {
     return null;
   }
 
-  /**
-   * The action button should be disabled when the following three situations occur:
-   * 1. Context menu has no item.
-   * 2. Query summary is disabled.
-   * 3. Query summary is enabled and language is not supported.
-   */
+  // The action button should be disabled when context menu has no item and there is no query summary switch.
   const actionDisabled = (panels.value?.[0]?.items ?? []).length === 0 && !isShowQuerySummarySwitch;
 
   return (
