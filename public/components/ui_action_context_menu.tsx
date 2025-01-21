@@ -38,7 +38,7 @@ export const ActionContextMenu = (props: Props) => {
     dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
   });
   const resultSummaryEnabled = useObservable(props.resultSummaryEnabled$) || false;
-  const [checked, setChecked] = useState<boolean>(false);
+  const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$) || false;
 
   useEffect(() => {
     const subscription = props.data.query.queryString.getUpdates$().subscribe((query) => {
@@ -55,16 +55,6 @@ export const ActionContextMenu = (props: Props) => {
       subscription.unsubscribe();
     };
   }, [props.data.query.queryString]);
-
-  useEffect(() => {
-    const isQuerySummaryCollapsed = props.isQuerySummaryCollapsed$.getValue();
-    setChecked(!isQuerySummaryCollapsed);
-  }, [props.isQuerySummaryCollapsed$]);
-
-  const onChange = () => {
-    props.isQuerySummaryCollapsed$.next(checked);
-    setChecked(!checked);
-  };
 
   const panels = useAsync(
     () =>
@@ -129,8 +119,8 @@ export const ActionContextMenu = (props: Props) => {
             label={i18n.translate('queryEnhancements.queryAssist.summary.switch.label', {
               defaultMessage: `Show result summarization`,
             })}
-            checked={checked}
-            onChange={() => onChange()}
+            checked={!isQuerySummaryCollapsed}
+            onChange={() => props.isQuerySummaryCollapsed$.next(!isQuerySummaryCollapsed)}
             data-test-subj="queryAssist_summary_switch"
           />
         </EuiPopoverFooter>
