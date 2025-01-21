@@ -6,7 +6,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
-
+import * as services from '../../services';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import * as coreContextExports from '../../contexts/core_context';
 
@@ -21,6 +21,7 @@ const setup = ({ onClose, defaultTitle, conversationId }: EditConversationNameMo
   const useCoreMock = {
     services: { ...coreMock.createStart(), dataSource: new DataSourceServiceMock() },
   };
+
   jest.spyOn(coreContextExports, 'useCore').mockReturnValue(useCoreMock);
 
   const renderResult = render(
@@ -40,7 +41,55 @@ const setup = ({ onClose, defaultTitle, conversationId }: EditConversationNameMo
 };
 
 describe('<EditConversationNameModal />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should not render modal when feature flag is disabled', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: false,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
+    const onCloseMock = jest.fn();
+    setup({
+      conversationId: '1',
+      defaultTitle: 'foo',
+      onClose: onCloseMock,
+    });
+
+    await waitFor(() => {
+      expect(onCloseMock).toHaveBeenCalledWith('cancelled');
+    });
+  });
+
   it('should render default title in name input', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const { renderResult } = setup({
       conversationId: '1',
       defaultTitle: 'foo',
@@ -54,6 +103,21 @@ describe('<EditConversationNameModal />', () => {
   });
 
   it('should call onClose with "canceled" after cancel button click', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
       conversationId: '1',
@@ -77,6 +141,21 @@ describe('<EditConversationNameModal />', () => {
   });
 
   it('should show success toast and call onClose with "updated" after patch conversation succeed', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
       conversationId: '1',
@@ -104,6 +183,21 @@ describe('<EditConversationNameModal />', () => {
   });
 
   it('should show error toasts and call onClose with "errored" after failed patch conversation', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
       conversationId: '1',
@@ -131,6 +225,21 @@ describe('<EditConversationNameModal />', () => {
   });
 
   it('should call onClose with cancelled after patch conversation aborted', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const onCloseMock = jest.fn();
     const { renderResult, useCoreMock } = setup({
       conversationId: '1',

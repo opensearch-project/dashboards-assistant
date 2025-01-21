@@ -15,7 +15,7 @@ import * as useSaveChatExports from '../../hooks/use_save_chat';
 import * as chatContextExports from '../../contexts/chat_context';
 import * as coreContextExports from '../../contexts/core_context';
 import { IMessage } from '../../../common/types/chat_saved_object_attributes';
-
+import * as services from '../../services';
 import { ChatWindowHeaderTitle } from '../chat_window_header_title';
 import { DataSourceServiceMock } from '../../services/data_source_service.mock';
 
@@ -84,7 +84,76 @@ const setup = ({
 };
 
 describe('<ChatWindowHeaderTitle />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it('should show rename conversation option when feature flag is enabled', () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
+    const { renderResult } = setup();
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
+    expect(renderResult.getByRole('button', { name: 'Rename conversation' })).toBeInTheDocument();
+  });
+
+  it('should not show rename conversation option when feature flag is disabled', () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: false,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
+    const { renderResult } = setup();
+
+    // Check spy was called
+
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
+    // Check what's actually rendered
+    console.log('Rendered content:', renderResult.container.innerHTML);
+    expect(
+      renderResult.queryByRole('button', { name: 'Rename conversation' })
+    ).not.toBeInTheDocument();
+  });
   it('should reload history list after edit conversation name', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
     const { renderResult, useCoreMock } = setup();
 
     fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
@@ -102,6 +171,21 @@ describe('<ChatWindowHeaderTitle />', () => {
   });
 
   it('should show "Rename conversation", "New conversation" and "Save to notebook" actions after title click', () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true, // Feature flag enabled to show rename option
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const { renderResult } = setup();
 
     expect(
@@ -122,6 +206,21 @@ describe('<ChatWindowHeaderTitle />', () => {
   });
 
   it('should show rename modal and hide rename actions after rename button clicked', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true, // Feature flag enabled to allow rename
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const { renderResult } = setup();
 
     fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
@@ -136,6 +235,22 @@ describe('<ChatWindowHeaderTitle />', () => {
   });
 
   it('should call loadChat with undefined, hide actions and show success toasts after new conversation button clicked', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
     const { renderResult, useCoreMock, useChatActionsMock } = setup();
 
     fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
@@ -157,6 +272,22 @@ describe('<ChatWindowHeaderTitle />', () => {
   });
 
   it('should show save to notebook modal after "Save to notebook" clicked', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
     const { renderResult } = setup({
       messages: [{ type: 'input', contentType: 'text', content: 'foo' }],
     });

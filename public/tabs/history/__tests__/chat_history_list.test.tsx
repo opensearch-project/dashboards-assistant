@@ -7,9 +7,28 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
 import { ChatHistoryList } from '../chat_history_list';
-
+import * as services from '../../../services';
 describe('<ChatHistoryList />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should render two history titles, update times and one horizontal rule', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
     const { getByText, getAllByLabelText } = render(
       <ChatHistoryList
         chatHistories={[
@@ -27,6 +46,21 @@ describe('<ChatHistoryList />', () => {
   });
 
   it('should call onChatHistoryTitleClick  with id and title', () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const onChatHistoryTitleClickMock = jest.fn();
     const { getByText } = render(
       <ChatHistoryList
@@ -41,6 +75,21 @@ describe('<ChatHistoryList />', () => {
   });
 
   it('should call onChatHistoryEditClick with id and title', () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const onChatHistoryEditClickMock = jest.fn();
     const { getByLabelText } = render(
       <ChatHistoryList
@@ -55,6 +104,21 @@ describe('<ChatHistoryList />', () => {
   });
 
   it('should call onChatHistoryDeleteClick with id and title', () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const onChatHistoryDeleteClickMock = jest.fn();
     const { getByLabelText } = render(
       <ChatHistoryList

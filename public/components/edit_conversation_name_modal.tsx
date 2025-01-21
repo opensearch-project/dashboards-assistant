@@ -8,6 +8,7 @@ import React, { useCallback, useRef } from 'react';
 import { EuiConfirmModal, EuiCompressedFieldText, EuiSpacer, EuiText } from '@elastic/eui';
 import { useCore } from '../contexts/core_context';
 import { usePatchConversation } from '../hooks';
+import { getConfigSchema } from '../services';
 
 export interface EditConversationNameModalProps {
   onClose?: (status: 'updated' | 'cancelled' | 'errored', newTitle?: string) => void;
@@ -25,6 +26,7 @@ export const EditConversationNameModal = ({
       notifications: { toasts },
     },
   } = useCore();
+  const configSchema = getConfigSchema();
   const titleInputRef = useRef<HTMLInputElement>(null);
   const { loading, abort, patchConversation, isAborted } = usePatchConversation();
 
@@ -50,6 +52,13 @@ export const EditConversationNameModal = ({
     }
     onClose?.('updated', title);
   }, [onClose, conversationId, patchConversation, toasts.addSuccess, toasts.addDanger, isAborted]);
+  console.log('Rename conversation enabled:', configSchema.chat.allowRenameConversation);
+
+  // Move the feature flag check after all hooks are declared
+  if (!configSchema.chat.allowRenameConversation) {
+    onClose?.('cancelled');
+    return null;
+  }
 
   return (
     <EuiConfirmModal
