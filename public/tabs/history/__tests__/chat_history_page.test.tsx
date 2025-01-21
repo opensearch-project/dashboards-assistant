@@ -17,6 +17,7 @@ import * as coreContextExports from '../../../contexts/core_context';
 import { ConversationsService } from '../../../services/conversations_service';
 
 import { ChatHistoryPage } from '../chat_history_page';
+import * as services from '../../../services';
 
 const mockGetConversationsHttp = () => {
   const http = coreMock.createStart().http;
@@ -84,7 +85,25 @@ const setup = ({
 };
 
 describe('<ChatHistoryPage />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should clear old conversation data after current conversation deleted', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const { renderResult, useChatStateMock, useChatContextMock } = setup({
       http: mockGetConversationsHttp(),
     });
@@ -108,6 +127,21 @@ describe('<ChatHistoryPage />', () => {
   });
 
   it('should render empty screen', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
     const http = coreMock.createStart().http;
     http.get.mockImplementation(async () => {
       return {
@@ -125,6 +159,54 @@ describe('<ChatHistoryPage />', () => {
           'No conversation has been recorded. Start a conversation in the assistant to have it saved.'
         )
       ).toBeTruthy();
+    });
+  });
+
+  it('should not show edit button when feature flag is disabled', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: false,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.queryByLabelText('Edit conversation name')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show edit button when feature flag is enabled', async () => {
+    jest.spyOn(services, 'getConfigSchema').mockReturnValue({
+      enabled: true,
+      chat: {
+        enabled: true,
+        allowRenameConversation: true,
+        trace: true,
+        feedback: true,
+      },
+      incontextInsight: { enabled: true },
+      next: { enabled: false },
+      text2viz: { enabled: false },
+      alertInsight: { enabled: false },
+      smartAnomalyDetector: { enabled: false },
+      branding: { label: undefined, logo: undefined },
+    });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.getByLabelText('Edit conversation name')).toBeInTheDocument();
     });
   });
 
