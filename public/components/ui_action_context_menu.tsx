@@ -90,12 +90,25 @@ export const ActionContextMenu = (props: Props) => {
     [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
 
-  if (actionsRef.current.length === 0) {
+  const isShowQuerySummarySwitch = props.isQuerySummaryEnabled && isASupportedLanguage;
+
+  /**
+   * The action button should be not displayed when the following three situations occur:
+   * 1. There is no action.
+   * 2. Query summary is disabled.
+   * 3. Query summary is enabled and language is not supported.
+   */
+  if (actionsRef.current.length === 0 && !isShowQuerySummarySwitch) {
     return null;
   }
 
-  // If context menu has no item, the action button should be disabled
-  const actionDisabled = (panels.value?.[0]?.items ?? []).length === 0;
+  /**
+   * The action button should be disabled when the following three situations occur:
+   * 1. Context menu has no item.
+   * 2. Query summary is disabled.
+   * 3. Query summary is enabled and language is not supported.
+   */
+  const actionDisabled = (panels.value?.[0]?.items ?? []).length === 0 && !isShowQuerySummarySwitch;
 
   return (
     <EuiPopover
@@ -123,7 +136,7 @@ export const ActionContextMenu = (props: Props) => {
       closePopover={() => setOpen(false)}
     >
       <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
-      {props.isQuerySummaryEnabled && isASupportedLanguage && (
+      {isShowQuerySummarySwitch && (
         <EuiPopoverFooter paddingSize="s">
           <EuiSwitch
             label={i18n.translate('queryEnhancements.queryAssist.summary.switch.label', {
