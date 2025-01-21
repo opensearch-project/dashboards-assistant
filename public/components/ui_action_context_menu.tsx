@@ -15,6 +15,7 @@ import {
 import { i18n } from '@osd/i18n';
 
 import { BehaviorSubject } from 'rxjs';
+import { useObservable } from 'react-use';
 import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/public';
 import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER } from '../ui_triggers';
 import { getUiActions } from '../services';
@@ -37,7 +38,7 @@ export const ActionContextMenu = (props: Props) => {
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
     dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
   });
-  const [isASupportedLanguage, setIsASupportedLanguage] = useState<boolean>(false);
+  const isASupportedLanguage = useObservable(props.isASupportedLanguage$) || false;
   const [checked, setChecked] = useState<boolean>(false);
 
   useEffect(() => {
@@ -55,16 +56,6 @@ export const ActionContextMenu = (props: Props) => {
       subscription.unsubscribe();
     };
   }, [props.data.query.queryString]);
-
-  useEffect(() => {
-    const subscription = props.isASupportedLanguage$.subscribe((value) => {
-      setIsASupportedLanguage(value);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [props.isASupportedLanguage$]);
 
   useEffect(() => {
     const isQuerySummaryCollapsed = props.isQuerySummaryCollapsed$.getValue();
