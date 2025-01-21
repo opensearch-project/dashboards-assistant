@@ -35,8 +35,6 @@ interface HeaderChatButtonProps {
   currentAccount: UserAccount;
 }
 
-let flyoutLoaded = false;
-
 export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
@@ -48,6 +46,9 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
   const [inputFocus, setInputFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const flyoutLoadedRef = useRef(false);
+  const flyoutVisibleRef = useRef(flyoutVisible);
+  flyoutVisibleRef.current = flyoutVisible;
   const registry = getIncontextInsightRegistry();
 
   const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
@@ -127,7 +128,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   };
 
   useEffect(() => {
-    if (!flyoutLoaded && flyoutVisible) {
+    if (!flyoutLoadedRef.current && flyoutVisible) {
       const mountPoint = flyoutMountPoint.current;
       if (mountPoint) {
         core.overlays.sidecar().open(mountPoint, {
@@ -135,16 +136,17 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           config: {
             dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
             paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+            isHidden: false,
           },
         });
-        flyoutLoaded = true;
+        flyoutLoadedRef.current = true;
       }
-    } else if (flyoutLoaded && flyoutVisible) {
+    } else if (flyoutLoadedRef.current && flyoutVisible) {
       core.overlays.sidecar().show();
-    } else if (flyoutLoaded && !flyoutVisible) {
+    } else if (flyoutLoadedRef.current && !flyoutVisible) {
       core.overlays.sidecar().hide();
     }
-  }, [flyoutVisible, flyoutLoaded]);
+  }, [flyoutVisible]);
 
   const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -166,6 +168,14 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
     return () => {
       document.removeEventListener('keydown', onGlobalMouseUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (flyoutVisibleRef.current) {
+        core.overlays.sidecar().hide();
+      }
     };
   }, []);
 
