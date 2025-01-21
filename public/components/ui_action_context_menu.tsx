@@ -24,7 +24,7 @@ import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 interface Props {
   data: DataPublicPluginSetup;
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
-  isShowQuerySummarySwitch$: BehaviorSubject<boolean>;
+  resultSummaryEnabled$: BehaviorSubject<boolean>;
   label?: string;
 }
 
@@ -37,7 +37,7 @@ export const ActionContextMenu = (props: Props) => {
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
     dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
   });
-  const isShowQuerySummarySwitch = useObservable(props.isShowQuerySummarySwitch$) || false;
+  const resultSummaryEnabled = useObservable(props.resultSummaryEnabled$) || false;
   const [checked, setChecked] = useState<boolean>(false);
 
   useEffect(() => {
@@ -89,13 +89,13 @@ export const ActionContextMenu = (props: Props) => {
     [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
 
-  // The action button should be not displayed when there is no action and query summary switch.
-  if (actionsRef.current.length === 0 && !isShowQuerySummarySwitch) {
+  // The action button should be not displayed when there is no action and result summary disabled.
+  if (actionsRef.current.length === 0 && !resultSummaryEnabled) {
     return null;
   }
 
-  // The action button should be disabled when context menu has no item and there is no query summary switch.
-  const actionDisabled = (panels.value?.[0]?.items ?? []).length === 0 && !isShowQuerySummarySwitch;
+  // The action button should be disabled when context menu has no item and result summary disabled.
+  const actionDisabled = (panels.value?.[0]?.items ?? []).length === 0 && !resultSummaryEnabled;
 
   return (
     <EuiPopover
@@ -123,7 +123,7 @@ export const ActionContextMenu = (props: Props) => {
       closePopover={() => setOpen(false)}
     >
       <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
-      {isShowQuerySummarySwitch && (
+      {resultSummaryEnabled && (
         <EuiPopoverFooter paddingSize="s">
           <EuiSwitch
             label={i18n.translate('queryEnhancements.queryAssist.summary.switch.label', {
