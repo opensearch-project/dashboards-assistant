@@ -3,12 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
+import { EuiBadge, EuiFieldText, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useEffectOnce } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
 
-import { ApplicationStart, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
+import {
+  ApplicationStart,
+  ChromeStart,
+  HeaderVariant,
+  SIDECAR_DOCKED_MODE,
+} from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';
 import { getIncontextInsightRegistry } from './services';
@@ -28,16 +33,19 @@ import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_rea
 import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
 
 interface HeaderChatButtonProps {
+  chrome: ChromeStart;
   application: ApplicationStart;
   messageRenderers: Record<string, MessageRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
   assistantActions: AssistantActions;
   currentAccount: UserAccount;
+  inLegacyHeader?: boolean;
 }
 
 let flyoutLoaded = false;
 
 export const HeaderChatButton = (props: HeaderChatButtonProps) => {
+  const { inLegacyHeader } = props;
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
@@ -49,6 +57,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [inputFocus, setInputFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const registry = getIncontextInsightRegistry();
+  const headerVariant = useObservable(props.chrome.getHeaderVariant$());
+  const isSingleLineHeader = headerVariant === HeaderVariant.APPLICATION;
 
   const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
   const core = useCore();
@@ -216,46 +226,61 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
   return (
     <>
-      <div className={classNames('llm-chat-header-icon-wrapper')}>
+      {!inLegacyHeader && isSingleLineHeader && (
+        <EuiButtonIcon
+          className={classNames({
+            'llm-chat-header-icon-for-singleline-header': true,
+          })}
+          iconType={chatIcon}
+          onClick={() => setFlyoutVisible(!flyoutVisible)}
+          display="base"
+          size="s"
+        />
+      )}
+      <div
+        className={classNames({
+          'llm-chat-header-icon-wrapper': true,
+          'in-singleline-header': isSingleLineHeader,
+          'in-legacy-header': inLegacyHeader,
+        })}
+      >
         <EuiFieldText
           aria-label="chat input"
           inputRef={inputRef}
           compressed
           onFocus={() => setInputFocus(true)}
           onBlur={() => setInputFocus(false)}
-          placeholder="Ask question"
+          placeholder="Ask a question"
           onKeyPress={onKeyPress}
           onKeyUp={onKeyUp}
-          prepend={
-            <EuiIcon
-              aria-label="toggle chat flyout icon"
-              type={chatIcon}
-              size="l"
-              onClick={() => setFlyoutVisible(!flyoutVisible)}
-            />
-          }
-          append={
-            <span className="llm-chat-header-shortcut">
-              {inputFocus ? (
-                <EuiBadge
-                  title="press enter to chat"
-                  className="llm-chat-header-shortcut-enter"
-                  color="hollow"
-                >
-                  ⏎
-                </EuiBadge>
-              ) : (
-                <EuiBadge
-                  title="press Ctrl + / to start typing"
-                  className="llm-chat-header-shortcut-cmd"
-                  color="hollow"
-                >
-                  Ctrl + /
-                </EuiBadge>
-              )}
-            </span>
-          }
+          className="llm-chat-header-text-input"
         />
+        <EuiIcon
+          aria-label="toggle chat flyout icon"
+          type={chatIcon}
+          size="m"
+          onClick={() => setFlyoutVisible(!flyoutVisible)}
+          className="llm-chat-toggle-icon"
+        />
+        <span className="llm-chat-header-shortcut">
+          {inputFocus ? (
+            <EuiBadge
+              color="hollow"
+              title="press enter to chat"
+              className="llm-chat-header-shortcut-enter"
+            >
+              ⏎
+            </EuiBadge>
+          ) : (
+            <EuiBadge
+              color="hollow"
+              title="press Ctrl + / to start typing"
+              className="llm-chat-header-shortcut-cmd"
+            >
+              Ctrl + /
+            </EuiBadge>
+          )}
+        </span>
         <ChatContext.Provider value={chatContextValue}>
           <ChatStateProvider>
             <SetContext assistantActions={props.assistantActions} />

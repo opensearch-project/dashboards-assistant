@@ -4,25 +4,14 @@
  */
 
 .llm-chat-header-icon-wrapper {
-  margin: 0 8px;
-  height: 48px;
   display: flex;
   align-items: center;
+  position: relative;
+  width: 200px;
 
-  .euiFormControlLayout__prepend {
-    background-color: transparent !important;
-    width: 36px !important;
-  }
-
-  .euiFieldText {
-    width: 96px;
-    transition: width 0.3s ease-in-out;
-
-    &:focus {
-      width: 250px;
-      background-image: none;
-      background-color: transparent;
-    }
+  &.in-legacy-header{
+    margin: 0 $euiSizeS;
+    height: $euiSizeL * 2;
   }
 
   .euiIcon {
@@ -31,27 +20,31 @@
     }
   }
 
-  .llm-chat-header-shortcut {
-    display: flex;
-    align-items: center;
-    padding-right: 6px;
+  @media (max-width: 1200px) {
+    &.in-singleline-header{
+      display: none;
+    }
   }
 
-  &::after {
-    content: '';
-    display: block;
+  .llm-chat-header-text-input{
+    padding-left: $euiSizeXL;
+    padding-right: $euiSizeL * 2;
+  }
+
+  .llm-chat-toggle-icon{
     position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: 4px;
-    right: 4px;
-    border-radius: 9px;
-    z-index: -1;
+    left: $euiSizeS;
+  }
+
+  .llm-chat-header-shortcut{
+    position: absolute;
+    right: $euiSizeS;
   }
 }
-.llm-chat-header-icon-wrapper-selected {
-  &::after {
-    background-color: $ouiColorPrimary;
+
+.llm-chat-header-icon-for-singleline-header{
+  @media (min-width: 1201px) {
+    display: none;
   }
 }
 
