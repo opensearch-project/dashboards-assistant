@@ -40,7 +40,6 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const chatActions = useChatActions();
   const registry = getIncontextInsightRegistry();
   const configSchema = getConfigSchema();
-  const showRegenerate = configSchema.chat.regenerateButton;
 
   useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
@@ -130,7 +129,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
             <MessageBubble
               message={message}
               showActionBar={isChatOutput}
-              showRegenerate={isLatestOutput}
+              showRegenerate={isLatestOutput && configSchema.chat.regenerateMessage}
               shouldActionBarVisibleOnHover={!isLatestOutput}
               onRegenerate={chatActions.regenerate}
               interaction={interaction}
@@ -149,20 +148,22 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         </>
       )}
 
-      {showRegenerate && chatState.llmResponding && chatContext.conversationId && (
-        <div style={{ marginLeft: '55px', marginTop: 10 }}>
-          <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <SuggestionBubble
-                content="Stop generating response"
-                color="default"
-                iconType="crossInACircleFilled"
-                onClick={() => chatActions.abortAction(chatContext.conversationId)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      )}
+      {configSchema.chat.regenerateMessage &&
+        chatState.llmResponding &&
+        chatContext.conversationId && (
+          <div style={{ marginLeft: '55px', marginTop: 10 }}>
+            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <SuggestionBubble
+                  content="Stop generating response"
+                  color="default"
+                  iconType="crossInACircleFilled"
+                  onClick={() => chatActions.abortAction(chatContext.conversationId)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        )}
       {chatState.llmError && (
         <EuiEmptyPrompt
           iconType="alert"
