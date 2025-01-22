@@ -8,12 +8,7 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce, useObservable } from 'react-use';
 
-import {
-  ApplicationStart,
-  ChromeStart,
-  HeaderVariant,
-  SIDECAR_DOCKED_MODE,
-} from '../../../src/core/public';
+import { ApplicationStart, HeaderVariant, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
 // TODO: Replace with getChrome().logos.Chat.url
 import chatIcon from './assets/chat.svg';
 import { getIncontextInsightRegistry } from './services';
@@ -33,7 +28,6 @@ import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_rea
 import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
 
 interface HeaderChatButtonProps {
-  chrome: ChromeStart;
   application: ApplicationStart;
   messageRenderers: Record<string, MessageRenderer>;
   actionExecutors: Record<string, ActionExecutor>;
@@ -45,6 +39,7 @@ interface HeaderChatButtonProps {
 let flyoutLoaded = false;
 
 export const HeaderChatButton = (props: HeaderChatButtonProps) => {
+  const core = useCore();
   const { inLegacyHeader } = props;
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
@@ -57,11 +52,10 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [inputFocus, setInputFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const registry = getIncontextInsightRegistry();
-  const headerVariant = useObservable(props.chrome.getHeaderVariant$());
+  const headerVariant = useObservable(core.services.chrome.getHeaderVariant$());
   const isSingleLineHeader = headerVariant === HeaderVariant.APPLICATION;
 
   const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
-  const core = useCore();
   const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
   const flyoutMountPoint = useRef(null);
   usePatchFixedStyle();
@@ -235,6 +229,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           onClick={() => setFlyoutVisible(!flyoutVisible)}
           display="base"
           size="s"
+          aria-label="toggle chat flyout button icon"
         />
       )}
       <div

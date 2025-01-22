@@ -257,7 +257,6 @@ export class AssistantPlugin
                   actionExecutors={actionExecutors}
                   assistantActions={assistantActions}
                   currentAccount={{ username }}
-                  chrome={coreStart.chrome}
                 />
               </CoreContext.Provider>
             ),
@@ -273,7 +272,6 @@ export class AssistantPlugin
                   actionExecutors={actionExecutors}
                   assistantActions={assistantActions}
                   currentAccount={{ username }}
-                  chrome={coreStart.chrome}
                   inLegacyHeader
                 />
               </CoreContext.Provider>
