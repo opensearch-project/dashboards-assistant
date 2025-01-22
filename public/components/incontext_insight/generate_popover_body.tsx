@@ -23,17 +23,15 @@ import { useEffectOnce } from 'react-use';
 import { METRIC_TYPE } from '@osd/analytics';
 import { MessageActions } from '../../tabs/chat/messages/message_action';
 import { ContextObj, IncontextInsight as IncontextInsightInput } from '../../types';
-import { getNotifications } from '../../services';
+import { getNotifications, getLogoIcon } from '../../services';
 import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
-import shiny_sparkle from '../../assets/shiny_sparkle.svg';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { reportMetric } from '../../utils/report_metric';
 import { buildUrlQuery, createIndexPatterns, extractTimeRangeDSL } from '../../utils';
 import { AssistantPluginStartDependencies } from '../../types';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { formatUrlWithWorkspaceId } from '../../../../../src/core/public/utils';
-import { ConfigSchema } from '../../../common/types/config';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
@@ -41,8 +39,7 @@ export const GeneratePopoverBody: React.FC<{
   usageCollection?: UsageCollectionSetup;
   closePopover: () => void;
   getStartServices?: StartServicesAccessor<AssistantPluginStartDependencies>;
-  config?: ConfigSchema;
-}> = ({ incontextInsight, httpSetup, usageCollection, closePopover, getStartServices, config }) => {
+}> = ({ incontextInsight, httpSetup, usageCollection, closePopover, getStartServices }) => {
   const [summary, setSummary] = useState('');
   const [insight, setInsight] = useState('');
   const [contextObject, setContextObject] = useState<ContextObj | undefined>(undefined);
@@ -54,10 +51,6 @@ export const GeneratePopoverBody: React.FC<{
   const toasts = getNotifications().toasts;
 
   const [displayDiscoverButton, setDisplayDiscoverButton] = useState(false);
-
-  const logoIcon = useMemo(() => {
-    return config?.branding?.logo?.gradient ?? shiny_sparkle;
-  }, [config]);
 
   useEffect(() => {
     const getMonitorType = async () => {
@@ -303,7 +296,12 @@ export const GeneratePopoverBody: React.FC<{
                 color={'text'}
               />
             ) : (
-              <EuiIcon aria-label="alert-assistant" color="hollow" size="m" type={logoIcon} />
+              <EuiIcon
+                aria-label="alert-assistant"
+                color="hollow"
+                size="m"
+                type={getLogoIcon('gradient')}
+              />
             )}
           </EuiFlexItem>
           <EuiFlexItem>

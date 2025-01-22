@@ -25,25 +25,21 @@ import {
   EuiWrappingPopover,
   keys,
 } from '@elastic/eui';
-import React, { Children, isValidElement, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getIncontextInsightRegistry, getNotifications } from '../../services';
-// TODO: Replace with getChrome().logos.Chat.url
-import chatIcon from '../../assets/chat.svg';
+import { getIncontextInsightRegistry, getNotifications, getLogoIcon } from '../../services';
 import sparkle from '../../assets/sparkle.svg';
 import shinySparkle from '../../assets/sparkle_with_gradient.svg';
 import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
 import { AssistantPluginStartDependencies } from '../../types';
-import { ConfigSchema } from '../../../common/types/config';
 
 export interface IncontextInsightProps {
   children?: React.ReactNode;
   httpSetup?: HttpSetup;
   usageCollection?: UsageCollectionSetup;
   getStartServices?: StartServicesAccessor<AssistantPluginStartDependencies>;
-  config?: ConfigSchema;
 }
 
 // TODO: add saved objects / config to store seed suggestions
@@ -52,7 +48,6 @@ export const IncontextInsight = ({
   httpSetup,
   usageCollection,
   getStartServices,
-  config,
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -92,10 +87,6 @@ export const IncontextInsight = ({
       }, 1250);
     }
   }, []);
-
-  const logoIcon = useMemo(() => {
-    return config?.branding?.logo?.gradient ?? chatIcon;
-  }, [config]);
 
   const registry = getIncontextInsightRegistry();
   const toasts = getNotifications().toasts;
@@ -282,7 +273,7 @@ export const IncontextInsight = ({
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <div className="incontextInsightAnchorIcon">
-            <EuiIcon type={logoIcon} size="m" />
+            <EuiIcon type={getLogoIcon('gradient')} size="m" />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -303,7 +294,6 @@ export const IncontextInsight = ({
               usageCollection={usageCollection}
               closePopover={closePopover}
               getStartServices={getStartServices}
-              config={config}
             />
           );
         case 'summary':
@@ -337,7 +327,7 @@ export const IncontextInsight = ({
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
                   <div>
-                    <EuiBadge color="hollow" iconType={logoIcon} iconSide="left">
+                    <EuiBadge color="hollow" iconType={getLogoIcon('gradient')} iconSide="left">
                       {i18n.translate('assistantDashboards.incontextInsight.assistant', {
                         defaultMessage: 'OpenSearch Assistant',
                       })}

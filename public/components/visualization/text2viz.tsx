@@ -28,7 +28,6 @@ import { Text2PPLTask } from '../../utils/pipeline/text_to_ppl_task';
 import { PPLSampleTask } from '../../utils/pipeline/ppl_sample_task';
 import { SourceSelector } from './source_selector';
 import type { IndexPattern } from '../../../../../src/plugins/data/public';
-import chatIcon from '../../assets/chat.svg';
 import { EmbeddableRenderer } from '../../../../../src/plugins/embeddable/public';
 import {
   useOpenSearchDashboards,
@@ -45,7 +44,7 @@ import {
 } from '../../../../../src/plugins/saved_objects/public';
 import { getVisNLQSavedObjectLoader } from '../../vis_nlq/saved_object_loader';
 import { VisNLQSavedObject } from '../../vis_nlq/types';
-import { getIndexPatterns } from '../../services';
+import { getIndexPatterns, getLogoIcon } from '../../services';
 import { NLQ_VISUALIZATION_EMBEDDABLE_TYPE } from './embeddable/nlq_vis_embeddable';
 import { NLQVisualizationInput } from './embeddable/types';
 import { EditorPanel } from './editor_panel';
@@ -129,10 +128,6 @@ export const Text2Viz = () => {
       return undefined;
     }
   }, [editorInput]);
-
-  const logoIcon = useMemo(() => {
-    return config?.branding?.logo?.gray ?? chatIcon;
-  }, [config]);
 
   /**
    * The index pattern of current generated visualization used
@@ -420,7 +415,7 @@ export const Text2Viz = () => {
             onChange={(e) => setInputQuestion(e.target.value)}
             fullWidth
             compressed
-            prepend={<EuiIcon type={logoIcon} />}
+            prepend={<EuiIcon type={getLogoIcon('gray')} />}
             placeholder="Generate visualization with a natural language question."
             onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
             disabled={!selectedSource}
@@ -500,7 +495,7 @@ export const Text2Viz = () => {
                     ) : null}
                     <EuiFlexItem className="text2viz__vizStyleEditorContainer">
                       <VizStyleEditor
-                        iconType={logoIcon}
+                        iconType={getLogoIcon('gray')}
                         onApply={(instruction) => onSubmit(instruction)}
                         value={currentInstruction}
                       />

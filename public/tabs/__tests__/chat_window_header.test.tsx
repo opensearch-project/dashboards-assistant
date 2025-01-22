@@ -17,13 +17,7 @@ jest.mock('../../components/chat_window_header_title', () => {
 
 jest.mock('../../services', () => {
   return {
-    getConfigSchema: jest.fn().mockReturnValue({
-      branding: {
-        logo: {
-          gray: '',
-        },
-      },
-    }),
+    getLogoIcon: jest.fn().mockReturnValue(''),
   };
 });
 
