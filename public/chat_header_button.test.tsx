@@ -16,6 +16,7 @@ import { MountWrapper } from '../../../src/core/public/utils';
 let mockSend: jest.Mock;
 let mockLoadChat: jest.Mock;
 let mockIncontextInsightRegistry: jest.Mock;
+let mockGetLogoIcon: jest.Mock;
 
 jest.mock('./hooks/use_chat_actions', () => {
   mockSend = jest.fn();
@@ -43,8 +44,10 @@ jest.mock('./services', () => {
     on: jest.fn(),
     off: jest.fn(),
   });
+  mockGetLogoIcon = jest.fn().mockReturnValue('');
   return {
     getIncontextInsightRegistry: mockIncontextInsightRegistry,
+    getLogoIcon: mockGetLogoIcon,
   };
 });
 

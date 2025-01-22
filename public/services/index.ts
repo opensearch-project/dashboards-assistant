@@ -11,6 +11,7 @@ import { ConfigSchema } from '../../common/types/config';
 import { IndexPatternsContract } from '../../../../src/plugins/data/public';
 import { ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import { AssistantServiceStart } from './assistant_service';
+import chatIcon from '../assets/chat.svg';
 
 export * from './incontext_insight';
 export { ConversationLoadService } from './conversation_load_service';
@@ -43,3 +44,7 @@ export const [getAssistantService, setAssistantService] = createGetterSetter<Ass
 );
 
 export { DataSourceService, DataSourceServiceContract } from './data_source_service';
+
+export const getLogoIcon = (type: 'gray' | 'gradient', defaultIcon = chatIcon) => {
+  return getConfigSchema()?.branding?.logo?.[type] ?? defaultIcon;
+};

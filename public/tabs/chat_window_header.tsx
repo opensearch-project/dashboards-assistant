@@ -7,10 +7,9 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui'
 import React from 'react';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatWindowHeaderTitle } from '../components/chat_window_header_title';
-// TODO: Replace with getChrome().logos.Chat.url
-import chatIcon from '../assets/chat.svg';
 import { TAB_ID } from '../utils/constants';
 import { SidecarIconMenu } from '../components/sidecar_icon_menu';
+import { getLogoIcon } from '../services';
 
 export const ChatWindowHeader = React.memo(() => {
   const chatContext = useChatContext();
@@ -26,7 +25,7 @@ export const ChatWindowHeader = React.memo(() => {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} style={{ marginLeft: '8px' }}>
-              <EuiIcon type={chatIcon} size="m" />
+              <EuiIcon type={getLogoIcon('gradient')} size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ChatWindowHeaderTitle />

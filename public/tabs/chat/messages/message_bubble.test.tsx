@@ -22,6 +22,7 @@ describe('<MessageBubble />', () => {
     jest
       .spyOn(services, 'getConfigSchema')
       .mockReturnValue({ chat: { trace: true, feedback: true } });
+    jest.spyOn(services, 'getLogoIcon').mockReturnValue('');
     jest
       .spyOn(useFeedbackHookExports, 'useFeedback')
       .mockReturnValue({ feedbackResult: undefined, sendFeedback: sendFeedbackMock });
