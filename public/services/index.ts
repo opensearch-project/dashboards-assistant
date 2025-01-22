@@ -45,6 +45,6 @@ export const [getAssistantService, setAssistantService] = createGetterSetter<Ass
 
 export { DataSourceService, DataSourceServiceContract } from './data_source_service';
 
-export const getLogoIcon = (type: 'gray' | 'gradient') => {
-  return getConfigSchema()?.branding?.logo?.[type] ?? chatIcon;
+export const getLogoIcon = (type: 'gray' | 'gradient', defaultIcon = chatIcon) => {
+  return getConfigSchema()?.branding?.logo?.[type] ?? defaultIcon;
 };
