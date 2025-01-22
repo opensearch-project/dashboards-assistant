@@ -222,9 +222,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     <>
       {!inLegacyHeader && isSingleLineHeader && (
         <EuiButtonIcon
-          className={classNames({
-            'llm-chat-header-icon-for-singleline-header': true,
-          })}
+          className={classNames(['eui-hideFor--xl', 'eui-hideFor--xxl', 'eui-hideFor--xxxl'])}
           iconType={chatIcon}
           onClick={() => setFlyoutVisible(!flyoutVisible)}
           display="base"
@@ -235,7 +233,10 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       <div
         className={classNames({
           'llm-chat-header-icon-wrapper': true,
-          'in-singleline-header': isSingleLineHeader,
+          'eui-hideFor--l': isSingleLineHeader,
+          'eui-hideFor--m': isSingleLineHeader,
+          'eui-hideFor--s': isSingleLineHeader,
+          'eui-hideFor--xs': isSingleLineHeader,
           'in-legacy-header': inLegacyHeader,
         })}
       >
