@@ -17,6 +17,7 @@ import { MountWrapper } from '../../../src/core/public/utils';
 let mockSend: jest.Mock;
 let mockLoadChat: jest.Mock;
 let mockIncontextInsightRegistry: jest.Mock;
+let mockGetLogoIcon: jest.Mock;
 
 jest.mock('./hooks/use_chat_actions', () => {
   mockSend = jest.fn();
@@ -44,12 +45,24 @@ jest.mock('./services', () => {
     on: jest.fn(),
     off: jest.fn(),
   });
+  mockGetLogoIcon = jest.fn().mockReturnValue('');
   return {
     getIncontextInsightRegistry: mockIncontextInsightRegistry,
+    getLogoIcon: mockGetLogoIcon,
   };
 });
 
 const chromeStartMock = chromeServiceMock.createStartContract();
+const sideCarHideMock = jest.fn(() => {
+  const element = document.getElementById('sidecar-mock-div');
+  if (element) {
+    element.style.display = 'none';
+  }
+});
+
+const sideCarRefMock = {
+  close: jest.fn(),
+};
 
 // mock sidecar open,hide and show
 jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
@@ -67,13 +80,9 @@ jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
           render(<MountWrapper mount={mountPoint} />, {
             container: attachElement,
           });
+          return sideCarRefMock;
         },
-        hide: () => {
-          const element = document.getElementById('sidecar-mock-div');
-          if (element) {
-            element.style.display = 'none';
-          }
-        },
+        hide: sideCarHideMock,
         show: () => {
           const element = document.getElementById('sidecar-mock-div');
           if (element) {
@@ -207,6 +216,30 @@ describe('<HeaderChatButton />', () => {
       metaKey: true,
     });
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
+  });
+
+  it('should call sidecar hide and close when button unmount and chat flyout is visible', async () => {
+    const applicationStart = {
+      ...applicationServiceMock.createStartContract(),
+      currentAppId$: new BehaviorSubject(''),
+    };
+    const { unmount, getByLabelText } = render(
+      <HeaderChatButton
+        application={applicationStart}
+        messageRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={{} as AssistantActions}
+        currentAccount={{ username: 'test_user' }}
+      />
+    );
+
+    fireEvent.click(getByLabelText('toggle chat flyout icon'));
+
+    expect(sideCarHideMock).not.toHaveBeenCalled();
+    expect(sideCarRefMock.close).not.toHaveBeenCalled();
+    unmount();
+    expect(sideCarHideMock).toHaveBeenCalled();
+    expect(sideCarRefMock.close).toHaveBeenCalled();
   });
 
   it('should render toggle chat flyout button icon', () => {

@@ -29,7 +29,12 @@ export const configSchema = schema.object({
   }),
   branding: schema.object({
     label: schema.maybe(schema.string()),
-    logo: schema.maybe(schema.string()),
+    logo: schema.maybe(
+      schema.object({
+        gradient: schema.maybe(schema.string()),
+        gray: schema.maybe(schema.string()),
+      })
+    ),
   }),
 });
 
