@@ -89,7 +89,36 @@ describe('<ChatHistoryPage />', () => {
     jest.clearAllMocks();
     setupConfigSchemaMock();
   });
+
+  it('should not show delete button when feature flag is disabled', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: false },
+    });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.queryByLabelText('Delete conversation')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show delete button when feature flag is enabled', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: true },
+    });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.getByLabelText('Delete conversation')).toBeInTheDocument();
+    });
+  });
+
   it('should clear old conversation data after current conversation deleted', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: true },
+    });
+
     const { renderResult, useChatStateMock, useChatContextMock } = setup({
       http: mockGetConversationsHttp(),
     });

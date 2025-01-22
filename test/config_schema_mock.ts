@@ -4,11 +4,13 @@
  */
 
 import * as services from '../public/services';
+
 interface ChatConfig {
   enabled: boolean;
   trace: boolean;
   feedback: boolean;
   allowRenameConversation: boolean;
+  deleteConversation: boolean;
 }
 
 interface ConfigSchema {
@@ -33,6 +35,7 @@ export const getMockConfigSchema = (
     trace: true,
     feedback: true,
     allowRenameConversation: true,
+    deleteConversation: true,
     ...(overrides.chat || {}),
   },
   incontextInsight: { enabled: true },
