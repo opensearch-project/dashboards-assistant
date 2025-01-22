@@ -247,7 +247,7 @@ export class AssistantPlugin
         }
 
         if (coreStart.chrome.navGroup.getNavGroupEnabled()) {
-          coreStart.chrome.navControls.registerNewPrimaryHeaderRight({
+          coreStart.chrome.navControls.registerHeaderRight({
             order: 10000,
             mount: toMountPoint(
               <CoreContext.Provider>
