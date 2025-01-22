@@ -30,3 +30,4 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Maintenance
 
 ### Refactoring
+- Add query assistant summary to the assistant dropdown list ([#395](https://github.com/opensearch-project/dashboards-assistant/pull/395))
