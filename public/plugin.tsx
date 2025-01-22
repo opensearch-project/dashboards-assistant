@@ -315,6 +315,7 @@ export class AssistantPlugin
             httpSetup={httpSetup}
             usageCollection={setupDeps.usageCollection}
             getStartServices={core.getStartServices}
+            config={this.config}
           />
         );
       },

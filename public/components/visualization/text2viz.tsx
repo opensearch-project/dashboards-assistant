@@ -130,6 +130,10 @@ export const Text2Viz = () => {
     }
   }, [editorInput]);
 
+  const logoIcon = useMemo(() => {
+    return config?.branding?.logo?.gray ?? chatIcon;
+  }, [config]);
+
   /**
    * The index pattern of current generated visualization used
    */
@@ -416,7 +420,7 @@ export const Text2Viz = () => {
             onChange={(e) => setInputQuestion(e.target.value)}
             fullWidth
             compressed
-            prepend={<EuiIcon type={config.branding.logo || chatIcon} />}
+            prepend={<EuiIcon type={logoIcon} />}
             placeholder="Generate visualization with a natural language question."
             onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
             disabled={!selectedSource}
@@ -496,7 +500,7 @@ export const Text2Viz = () => {
                     ) : null}
                     <EuiFlexItem className="text2viz__vizStyleEditorContainer">
                       <VizStyleEditor
-                        iconType={config.branding.logo || chatIcon}
+                        iconType={logoIcon}
                         onApply={(instruction) => onSubmit(instruction)}
                         value={currentInstruction}
                       />

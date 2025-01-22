@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
@@ -33,6 +33,7 @@ import { buildUrlQuery, createIndexPatterns, extractTimeRangeDSL } from '../../u
 import { AssistantPluginStartDependencies } from '../../types';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { formatUrlWithWorkspaceId } from '../../../../../src/core/public/utils';
+import { ConfigSchema } from '../../../common/types/config';
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
@@ -40,7 +41,8 @@ export const GeneratePopoverBody: React.FC<{
   usageCollection?: UsageCollectionSetup;
   closePopover: () => void;
   getStartServices?: StartServicesAccessor<AssistantPluginStartDependencies>;
-}> = ({ incontextInsight, httpSetup, usageCollection, closePopover, getStartServices }) => {
+  config?: ConfigSchema;
+}> = ({ incontextInsight, httpSetup, usageCollection, closePopover, getStartServices, config }) => {
   const [summary, setSummary] = useState('');
   const [insight, setInsight] = useState('');
   const [contextObject, setContextObject] = useState<ContextObj | undefined>(undefined);
@@ -52,6 +54,10 @@ export const GeneratePopoverBody: React.FC<{
   const toasts = getNotifications().toasts;
 
   const [displayDiscoverButton, setDisplayDiscoverButton] = useState(false);
+
+  const logoIcon = useMemo(() => {
+    return config?.branding?.logo?.gradient ?? shiny_sparkle;
+  }, [config]);
 
   useEffect(() => {
     const getMonitorType = async () => {
@@ -297,7 +303,7 @@ export const GeneratePopoverBody: React.FC<{
                 color={'text'}
               />
             ) : (
-              <EuiIcon aria-label="alert-assistant" color="hollow" size="l" type={shiny_sparkle} />
+              <EuiIcon aria-label="alert-assistant" color="hollow" size="m" type={logoIcon} />
             )}
           </EuiFlexItem>
           <EuiFlexItem>

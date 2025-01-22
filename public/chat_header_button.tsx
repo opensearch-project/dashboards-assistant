@@ -26,6 +26,7 @@ import {
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
+import { getConfigSchema } from './services';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -49,7 +50,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [inputFocus, setInputFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const registry = getIncontextInsightRegistry();
-
+  const config = getConfigSchema();
   const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
   const core = useCore();
   const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
@@ -60,6 +61,10 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
     return () => subscription.unsubscribe();
   });
+
+  const logoIcon = useMemo(() => {
+    return config?.branding?.logo?.gray ?? chatIcon;
+  }, [config]);
 
   const chatContextValue: IChatContext = useMemo(
     () => ({
@@ -229,8 +234,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           prepend={
             <EuiIcon
               aria-label="toggle chat flyout icon"
-              type={chatIcon}
-              size="l"
+              type={logoIcon}
+              size="m"
               onClick={() => setFlyoutVisible(!flyoutVisible)}
             />
           }

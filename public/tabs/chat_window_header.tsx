@@ -11,9 +11,14 @@ import { ChatWindowHeaderTitle } from '../components/chat_window_header_title';
 import chatIcon from '../assets/chat.svg';
 import { TAB_ID } from '../utils/constants';
 import { SidecarIconMenu } from '../components/sidecar_icon_menu';
+import { getConfigSchema } from '../services';
 
 export const ChatWindowHeader = React.memo(() => {
   const chatContext = useChatContext();
+
+  const configSchema = getConfigSchema();
+
+  const logoIcon = configSchema?.branding?.logo?.gradient ?? chatIcon;
 
   return (
     <>
@@ -26,7 +31,7 @@ export const ChatWindowHeader = React.memo(() => {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} style={{ marginLeft: '8px' }}>
-              <EuiIcon type={chatIcon} size="m" />
+              <EuiIcon type={logoIcon} size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ChatWindowHeaderTitle />

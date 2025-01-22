@@ -56,6 +56,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     props.message.type === 'output' &&
     props.message.contentType === 'markdown';
 
+  const logoIcon = configSchema?.branding?.logo?.gradient ?? chatIcon;
+
   const createAvatar = (iconType?: IconType) => {
     if (iconType) {
       return (
@@ -68,7 +70,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
         />
       );
     } else {
-      return <EuiIcon type={chatIcon} size="l" />;
+      return <EuiIcon type={logoIcon} size="l" />;
     }
   };
 
