@@ -15,6 +15,12 @@ jest.mock('../../components/chat_window_header_title', () => {
   return { ChatWindowHeaderTitle: () => <div>OpenSearch Assistant</div> };
 });
 
+jest.mock('../../services', () => {
+  return {
+    getLogoIcon: jest.fn().mockReturnValue(''),
+  };
+});
+
 const setup = ({ selectedTabId }: { selectedTabId?: TabId } = {}) => {
   const useChatContextMock = {
     conversationId: '1',
