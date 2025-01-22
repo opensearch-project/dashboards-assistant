@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import moment from 'moment';
+import { getConfigSchema } from '../../services';
 
 interface ChatHistory {
   id: string;
@@ -37,6 +38,8 @@ export const ChatHistoryListItem = ({
   onDeleteClick,
   onEditClick,
 }: ChatHistoryListItemProps) => {
+  const configSchema = getConfigSchema();
+  const showDeleteButton = configSchema.chat.deleteConversation;
   const handleTitleClick = useCallback(() => {
     onTitleClick?.(id, title);
   }, [onTitleClick, id, title]);
@@ -82,14 +85,16 @@ export const ChatHistoryListItem = ({
                 color="text"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSmallButtonIcon
-                onClick={handleDeleteClick}
-                iconType="trash"
-                color="danger"
-                aria-label="Delete conversation"
-              />
-            </EuiFlexItem>
+            {showDeleteButton && (
+              <EuiFlexItem grow={false}>
+                <EuiSmallButtonIcon
+                  onClick={handleDeleteClick}
+                  iconType="trash"
+                  color="danger"
+                  aria-label="Delete conversation"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

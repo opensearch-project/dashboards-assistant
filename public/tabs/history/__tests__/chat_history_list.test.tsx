@@ -5,10 +5,14 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-
 import { ChatHistoryList } from '../chat_history_list';
-
+import { setupConfigSchemaMock } from '../../../../test/config_schema_mock';
 describe('<ChatHistoryList />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupConfigSchemaMock();
+  });
+
   it('should render two history titles, update times and one horizontal rule', async () => {
     const { getByText, getAllByLabelText } = render(
       <ChatHistoryList
@@ -66,5 +70,19 @@ describe('<ChatHistoryList />', () => {
     expect(onChatHistoryDeleteClickMock).not.toHaveBeenCalled();
     fireEvent.click(getByLabelText('Delete conversation'));
     expect(onChatHistoryDeleteClickMock).toHaveBeenCalledWith({ id: '1' });
+  });
+
+  it('should not show delete button when deleteConversation is disabled', () => {
+    setupConfigSchemaMock({
+      chat: {
+        deleteConversation: false,
+      },
+    });
+
+    const { queryByLabelText } = render(
+      <ChatHistoryList chatHistories={[{ id: '1', title: 'foo', updatedTimeMs: 0 }]} />
+    );
+
+    expect(queryByLabelText('Delete conversation')).not.toBeInTheDocument();
   });
 });
