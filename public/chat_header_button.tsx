@@ -234,7 +234,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       {!inLegacyHeader && isSingleLineHeader && (
         <EuiButtonIcon
           className={classNames(['eui-hideFor--xl', 'eui-hideFor--xxl', 'eui-hideFor--xxxl'])}
-          iconType={getLogoIcon('gray')}
+          iconType={getLogoIcon('gradient')}
           onClick={() => setFlyoutVisible(!flyoutVisible)}
           display="base"
           size="s"
@@ -264,7 +264,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
         />
         <EuiIcon
           aria-label="toggle chat flyout icon"
-          type={getLogoIcon('gray')}
+          type={getLogoIcon(inputFocus ? 'gradient' : 'gray')}
           size="m"
           onClick={() => setFlyoutVisible(!flyoutVisible)}
           className="llm-chat-toggle-icon"
