@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
@@ -23,7 +23,7 @@ import { useEffectOnce } from 'react-use';
 import { METRIC_TYPE } from '@osd/analytics';
 import { MessageActions } from '../../tabs/chat/messages/message_action';
 import { ContextObj, IncontextInsight as IncontextInsightInput } from '../../types';
-import { getNotifications } from '../../services';
+import { getNotifications, getLogoIcon } from '../../services';
 import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
 import shiny_sparkle from '../../assets/shiny_sparkle.svg';
@@ -297,7 +297,12 @@ export const GeneratePopoverBody: React.FC<{
                 color={'text'}
               />
             ) : (
-              <EuiIcon aria-label="alert-assistant" color="hollow" size="l" type={shiny_sparkle} />
+              <EuiIcon
+                aria-label="alert-assistant"
+                color="hollow"
+                size="m"
+                type={getLogoIcon('gradient', shiny_sparkle)}
+              />
             )}
           </EuiFlexItem>
           <EuiFlexItem>
