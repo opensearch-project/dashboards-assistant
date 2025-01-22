@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { act, render, fireEvent, screen } from '@testing-library/react';
+import { act, render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 
 import { HeaderChatButton } from './chat_header_button';
-import { applicationServiceMock } from '../../../src/core/public/mocks';
+import { applicationServiceMock, chromeServiceMock } from '../../../src/core/public/mocks';
+import { HeaderVariant } from '../../../src/core/public';
 import { AssistantActions } from './types';
-import { BehaviorSubject } from 'rxjs';
 import * as coreContextExports from './contexts/core_context';
 import { MountWrapper } from '../../../src/core/public/utils';
 
@@ -51,6 +52,7 @@ jest.mock('./services', () => {
   };
 });
 
+const chromeStartMock = chromeServiceMock.createStartContract();
 const sideCarHideMock = jest.fn(() => {
   const element = document.getElementById('sidecar-mock-div');
   if (element) {
@@ -64,6 +66,9 @@ const sideCarRefMock = {
 
 // mock sidecar open,hide and show
 jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
+  services: {
+    chrome: chromeStartMock,
+  },
   overlays: {
     // @ts-ignore
     sidecar: () => {
@@ -235,5 +240,22 @@ describe('<HeaderChatButton />', () => {
     unmount();
     expect(sideCarHideMock).toHaveBeenCalled();
     expect(sideCarRefMock.close).toHaveBeenCalled();
+  });
+
+  it('should render toggle chat flyout button icon', () => {
+    chromeStartMock.getHeaderVariant$.mockReturnValue(
+      new BehaviorSubject(HeaderVariant.APPLICATION)
+    );
+    render(
+      <HeaderChatButton
+        application={applicationServiceMock.createStartContract()}
+        messageRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={{} as AssistantActions}
+        currentAccount={{ username: 'test_user' }}
+        inLegacyHeader={false}
+      />
+    );
+    expect(screen.getByLabelText('toggle chat flyout button icon')).toBeInTheDocument();
   });
 });

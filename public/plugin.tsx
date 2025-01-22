@@ -246,20 +246,38 @@ export class AssistantPlugin
           });
         }
 
-        coreStart.chrome.navControls.registerRight({
-          order: 10000,
-          mount: toMountPoint(
-            <CoreContext.Provider>
-              <HeaderChatButton
-                application={coreStart.application}
-                messageRenderers={messageRenderers}
-                actionExecutors={actionExecutors}
-                assistantActions={assistantActions}
-                currentAccount={{ username }}
-              />
-            </CoreContext.Provider>
-          ),
-        });
+        if (coreStart.chrome.navGroup.getNavGroupEnabled()) {
+          coreStart.chrome.navControls.registerPrimaryHeaderRight({
+            order: 10000,
+            mount: toMountPoint(
+              <CoreContext.Provider>
+                <HeaderChatButton
+                  application={coreStart.application}
+                  messageRenderers={messageRenderers}
+                  actionExecutors={actionExecutors}
+                  assistantActions={assistantActions}
+                  currentAccount={{ username }}
+                />
+              </CoreContext.Provider>
+            ),
+          });
+        } else {
+          coreStart.chrome.navControls.registerRight({
+            order: 10000,
+            mount: toMountPoint(
+              <CoreContext.Provider>
+                <HeaderChatButton
+                  application={coreStart.application}
+                  messageRenderers={messageRenderers}
+                  actionExecutors={actionExecutors}
+                  assistantActions={assistantActions}
+                  currentAccount={{ username }}
+                  inLegacyHeader
+                />
+              </CoreContext.Provider>
+            ),
+          });
+        }
       };
       setupChat();
     }
