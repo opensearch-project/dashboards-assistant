@@ -24,6 +24,7 @@ import {
   UsageCollectionStart,
   UsageCollectionSetup,
 } from '../../../src/plugins/usage_collection/public';
+import { QueryEnhancementsPluginSetup } from '../../../src/plugins/query_enhancements/public';
 
 import { ConfigSchema } from '../common/types/config';
 
@@ -63,6 +64,7 @@ export interface AssistantPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   uiActions: UiActionsSetup;
   expressions: ExpressionsSetup;
+  queryEnhancements: QueryEnhancementsPluginSetup;
 }
 
 export interface AssistantSetup {
