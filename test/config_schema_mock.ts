@@ -4,7 +4,6 @@
  */
 
 import * as services from '../public/services';
-
 interface ChatConfig {
   enabled: boolean;
   trace: boolean;
