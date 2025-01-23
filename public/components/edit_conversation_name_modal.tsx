@@ -52,13 +52,6 @@ export const EditConversationNameModal = ({
     }
     onClose?.('updated', title);
   }, [onClose, conversationId, patchConversation, toasts.addSuccess, toasts.addDanger, isAborted]);
-  console.log('Rename conversation enabled:', configSchema.chat.allowRenameConversation);
-
-  // Move the feature flag check after all hooks are declared
-  if (!configSchema.chat.allowRenameConversation) {
-    onClose?.('cancelled');
-    return null;
-  }
 
   return (
     <EuiConfirmModal
