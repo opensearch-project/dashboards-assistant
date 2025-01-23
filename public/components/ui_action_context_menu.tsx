@@ -70,11 +70,7 @@ export const ActionContextMenu = (props: Props) => {
           trigger: AI_ASSISTANT_QUERY_EDITOR_TRIGGER as any,
         })),
         closeMenu: () => setOpen(false),
-        title: props.label
-          ? `${props.label.toUpperCase()} FEATURES`
-          : i18n.translate('dashboardAssistant.branding.assistantActionButton.menu.title', {
-              defaultMessage: 'AI ASSISTANT FEATURES',
-            }),
+        title: props.label ? `${props.label.toUpperCase()} FEATURES` : '',
       }),
     [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
@@ -92,7 +88,7 @@ export const ActionContextMenu = (props: Props) => {
       button={
         <EuiButtonEmpty
           color="text"
-          aria-label="AI assistant trigger button"
+          aria-label="OpenSearch assistant trigger button"
           size="xs"
           iconType="arrowDown"
           onClick={() => setOpen(!open)}
@@ -103,7 +99,7 @@ export const ActionContextMenu = (props: Props) => {
         >
           {props.label ||
             i18n.translate('dashboardAssistant.branding.assistantActionButton.label', {
-              defaultMessage: 'AI assistant',
+              defaultMessage: 'OpenSearch Assistant',
             })}
         </EuiButtonEmpty>
       }
