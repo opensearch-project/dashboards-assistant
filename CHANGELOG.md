@@ -16,6 +16,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add flags in the config to control trace view and feedback buttons in message bubbles ([#379](https://github.com/opensearch-project/dashboards-assistant/pull/379))
 - feat: Update UI for In-context summarization in Alerts table([#392](https://github.com/opensearch-project/dashboards-assistant/pull/392))
 - Set logo config and read logo by config([#401](https://github.com/opensearch-project/dashboards-assistant/pull/401))
+- Use feature flag to disable the rename conversation api ([#401](https://github.com/opensearch-project/dashboards-assistant/pull/410))
 
 ### Bug Fixes
 
@@ -34,7 +35,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Refactoring
 - Add query assistant summary to the assistant dropdown list ([#395](https://github.com/opensearch-project/dashboards-assistant/pull/395))
 - Update dropdown list button label and remove popover title ([#407](https://github.com/opensearch-project/dashboards-assistant/pull/407))
-=======
 - Add support for registerMessageParser ([#5](https://github.com/opensearch-project/dashboards-assistant/pull/5))
 - Change implementation of basic_input_output to built-in parser ([#10](https://github.com/opensearch-project/dashboards-assistant/pull/10))
 - Add interactions into ChatState and pass specific interaction into message_bubble ([#12](https://github.com/opensearch-project/dashboards-assistant/pull/12))
