@@ -6,7 +6,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { HttpStart } from '../../../../../../src/core/public';
@@ -89,7 +89,41 @@ describe('<ChatHistoryPage />', () => {
     jest.clearAllMocks();
     setupConfigSchemaMock();
   });
+
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should not show delete button when feature flag is disabled', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: false },
+    });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.queryByLabelText('Delete conversation')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show delete button when feature flag is enabled', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: true },
+    });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.getByLabelText('Delete conversation')).toBeInTheDocument();
+    });
+  });
+
   it('should clear old conversation data after current conversation deleted', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: true },
+    });
+
     const { renderResult, useChatStateMock, useChatContextMock } = setup({
       http: mockGetConversationsHttp(),
     });
