@@ -6,7 +6,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { HttpStart } from '../../../../../../src/core/public';
@@ -17,6 +17,7 @@ import * as coreContextExports from '../../../contexts/core_context';
 import { ConversationsService } from '../../../services/conversations_service';
 
 import { ChatHistoryPage } from '../chat_history_page';
+import { setupConfigSchemaMock } from '../../../../test/config_schema_mock';
 
 const mockGetConversationsHttp = () => {
   const http = coreMock.createStart().http;
@@ -84,7 +85,45 @@ const setup = ({
 };
 
 describe('<ChatHistoryPage />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupConfigSchemaMock();
+  });
+
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should not show delete button when feature flag is disabled', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: false },
+    });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.queryByLabelText('Delete conversation')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show delete button when feature flag is enabled', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: true },
+    });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.getByLabelText('Delete conversation')).toBeInTheDocument();
+    });
+  });
+
   it('should clear old conversation data after current conversation deleted', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: true },
+    });
+
     const { renderResult, useChatStateMock, useChatContextMock } = setup({
       http: mockGetConversationsHttp(),
     });
@@ -125,6 +164,24 @@ describe('<ChatHistoryPage />', () => {
           'No conversation has been recorded. Start a conversation in the assistant to have it saved.'
         )
       ).toBeTruthy();
+    });
+  });
+
+  it('should not show edit button when feature flag is disabled', async () => {
+    setupConfigSchemaMock({ chat: { allowRenameConversation: false } });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.queryByLabelText('Edit conversation name')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show edit button when feature flag is enabled', async () => {
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.getByLabelText('Edit conversation name')).toBeInTheDocument();
     });
   });
 

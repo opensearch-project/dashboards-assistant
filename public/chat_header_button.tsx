@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBadge, EuiFieldText, EuiIcon } from '@elastic/eui';
+import { EuiBadge, EuiFieldText, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useEffectOnce } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
 
-import { ApplicationStart, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
-// TODO: Replace with getChrome().logos.Chat.url
-import chatIcon from './assets/chat.svg';
+import { ApplicationStart, HeaderVariant, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
 import { getIncontextInsightRegistry } from './services';
 import { ChatFlyout } from './chat_flyout';
 import { ChatContext, IChatContext } from './contexts/chat_context';
@@ -26,6 +24,7 @@ import {
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
+import { getLogoIcon } from './services';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -33,11 +32,13 @@ interface HeaderChatButtonProps {
   actionExecutors: Record<string, ActionExecutor>;
   assistantActions: AssistantActions;
   currentAccount: UserAccount;
+  inLegacyHeader?: boolean;
 }
 
-let flyoutLoaded = false;
-
 export const HeaderChatButton = (props: HeaderChatButtonProps) => {
+  const core = useCore();
+  const { inLegacyHeader } = props;
+  const sideCarRef = useRef<{ close: Function }>();
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
@@ -48,10 +49,14 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
   const [inputFocus, setInputFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const flyoutLoadedRef = useRef(false);
+  const flyoutVisibleRef = useRef(flyoutVisible);
+  flyoutVisibleRef.current = flyoutVisible;
   const registry = getIncontextInsightRegistry();
+  const headerVariant = useObservable(core.services.chrome.getHeaderVariant$());
+  const isSingleLineHeader = headerVariant === HeaderVariant.APPLICATION;
 
   const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
-  const core = useCore();
   const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
   const flyoutMountPoint = useRef(null);
   usePatchFixedStyle();
@@ -127,24 +132,25 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   };
 
   useEffect(() => {
-    if (!flyoutLoaded && flyoutVisible) {
+    if (!flyoutLoadedRef.current && flyoutVisible) {
       const mountPoint = flyoutMountPoint.current;
       if (mountPoint) {
-        core.overlays.sidecar().open(mountPoint, {
+        sideCarRef.current = core.overlays.sidecar().open(mountPoint, {
           className: 'chatbot-sidecar',
           config: {
             dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
             paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+            isHidden: false,
           },
         });
-        flyoutLoaded = true;
+        flyoutLoadedRef.current = true;
       }
-    } else if (flyoutLoaded && flyoutVisible) {
+    } else if (flyoutLoadedRef.current && flyoutVisible) {
       core.overlays.sidecar().show();
-    } else if (flyoutLoaded && !flyoutVisible) {
+    } else if (flyoutLoadedRef.current && !flyoutVisible) {
       core.overlays.sidecar().hide();
     }
-  }, [flyoutVisible, flyoutLoaded]);
+  }, [flyoutVisible]);
 
   const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -166,6 +172,15 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
     return () => {
       document.removeEventListener('keydown', onGlobalMouseUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (flyoutVisibleRef.current) {
+        core.overlays.sidecar().hide();
+      }
+      sideCarRef.current?.close();
     };
   }, []);
 
@@ -216,46 +231,63 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
   return (
     <>
-      <div className={classNames('llm-chat-header-icon-wrapper')}>
+      {!inLegacyHeader && isSingleLineHeader && (
+        <EuiButtonIcon
+          className={classNames(['eui-hideFor--xl', 'eui-hideFor--xxl', 'eui-hideFor--xxxl'])}
+          iconType={getLogoIcon('gradient')}
+          onClick={() => setFlyoutVisible(!flyoutVisible)}
+          display="base"
+          size="s"
+          aria-label="toggle chat flyout button icon"
+        />
+      )}
+      <div
+        className={classNames({
+          'llm-chat-header-icon-wrapper': true,
+          'eui-hideFor--l': isSingleLineHeader,
+          'eui-hideFor--m': isSingleLineHeader,
+          'eui-hideFor--s': isSingleLineHeader,
+          'eui-hideFor--xs': isSingleLineHeader,
+          'in-legacy-header': inLegacyHeader,
+        })}
+      >
         <EuiFieldText
           aria-label="chat input"
           inputRef={inputRef}
           compressed
           onFocus={() => setInputFocus(true)}
           onBlur={() => setInputFocus(false)}
-          placeholder="Ask question"
+          placeholder="Ask a question"
           onKeyPress={onKeyPress}
           onKeyUp={onKeyUp}
-          prepend={
-            <EuiIcon
-              aria-label="toggle chat flyout icon"
-              type={chatIcon}
-              size="l"
-              onClick={() => setFlyoutVisible(!flyoutVisible)}
-            />
-          }
-          append={
-            <span className="llm-chat-header-shortcut">
-              {inputFocus ? (
-                <EuiBadge
-                  title="press enter to chat"
-                  className="llm-chat-header-shortcut-enter"
-                  color="hollow"
-                >
-                  ⏎
-                </EuiBadge>
-              ) : (
-                <EuiBadge
-                  title="press Ctrl + / to start typing"
-                  className="llm-chat-header-shortcut-cmd"
-                  color="hollow"
-                >
-                  Ctrl + /
-                </EuiBadge>
-              )}
-            </span>
-          }
+          className="llm-chat-header-text-input"
         />
+        <EuiIcon
+          aria-label="toggle chat flyout icon"
+          type={getLogoIcon(inputFocus ? 'gradient' : 'gray')}
+          size="m"
+          onClick={() => setFlyoutVisible(!flyoutVisible)}
+          className="llm-chat-toggle-icon"
+        />
+        <span className="llm-chat-header-shortcut">
+          {inputFocus ? (
+            <EuiBadge
+              color="hollow"
+              title="press enter to chat"
+              className="llm-chat-header-shortcut-enter"
+            >
+              ⏎
+            </EuiBadge>
+          ) : (
+            <EuiBadge
+              color="hollow"
+              title="press Ctrl + / to start typing"
+              className="llm-chat-header-shortcut-cmd"
+            >
+              Ctrl + /
+            </EuiBadge>
+          )}
+        </span>
         <ChatContext.Provider value={chatContextValue}>
           <ChatStateProvider>
             <SetContext assistantActions={props.assistantActions} />

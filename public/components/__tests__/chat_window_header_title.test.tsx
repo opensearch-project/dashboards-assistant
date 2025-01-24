@@ -15,10 +15,10 @@ import * as useSaveChatExports from '../../hooks/use_save_chat';
 import * as chatContextExports from '../../contexts/chat_context';
 import * as coreContextExports from '../../contexts/core_context';
 import { IMessage } from '../../../common/types/chat_saved_object_attributes';
-
+import * as services from '../../services';
 import { ChatWindowHeaderTitle } from '../chat_window_header_title';
 import { DataSourceServiceMock } from '../../services/data_source_service.mock';
-
+import { setupConfigSchemaMock } from '../../../test/config_schema_mock';
 const setup = ({
   messages = [],
   ...rest
@@ -84,6 +84,28 @@ const setup = ({
 };
 
 describe('<ChatWindowHeaderTitle />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupConfigSchemaMock();
+  });
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+  it('should show rename conversation option when feature flag enabled', () => {
+    const { renderResult } = setup();
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
+    expect(renderResult.getByRole('button', { name: 'Rename conversation' })).toBeInTheDocument();
+  });
+
+  it('should not show rename conversation option when feature flag is disabled', () => {
+    setupConfigSchemaMock({ chat: { allowRenameConversation: false } });
+    const { renderResult } = setup();
+    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
+    expect(
+      renderResult.queryByRole('button', { name: 'Rename conversation' })
+    ).not.toBeInTheDocument();
+  });
   it('should reload history list after edit conversation name', async () => {
     const { renderResult, useCoreMock } = setup();
 

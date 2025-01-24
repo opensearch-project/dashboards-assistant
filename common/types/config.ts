@@ -11,6 +11,8 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     trace: schema.boolean({ defaultValue: true }),
     feedback: schema.boolean({ defaultValue: true }),
+    allowRenameConversation: schema.boolean({ defaultValue: true }),
+    deleteConversation: schema.boolean({ defaultValue: true }),
   }),
   incontextInsight: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -29,7 +31,12 @@ export const configSchema = schema.object({
   }),
   branding: schema.object({
     label: schema.maybe(schema.string()),
-    logo: schema.maybe(schema.string()),
+    logo: schema.maybe(
+      schema.object({
+        gradient: schema.maybe(schema.string()),
+        gray: schema.maybe(schema.string()),
+      })
+    ),
   }),
 });
 

@@ -27,10 +27,9 @@ import {
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getIncontextInsightRegistry, getNotifications } from '../../services';
-// TODO: Replace with getChrome().logos.Chat.url
-import chatIcon from '../../assets/chat.svg';
+import { getIncontextInsightRegistry, getNotifications, getLogoIcon } from '../../services';
 import sparkle from '../../assets/sparkle.svg';
+import shinySparkle from '../../assets/sparkle_with_gradient.svg';
 import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
@@ -52,6 +51,7 @@ export const IncontextInsight = ({
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
   useEffect(() => {
     // TODO: use animation when not using display: none
@@ -256,6 +256,7 @@ export const IncontextInsight = ({
   const renderAnchor = () => {
     if (!input || !target) return children;
 
+    const sparkleIcon = isHover ? shinySparkle : sparkle;
     return (
       <EuiFlexGroup
         className="incontextInsightAnchorButton"
@@ -264,13 +265,15 @@ export const IncontextInsight = ({
         gutterSize="none"
         alignItems="center"
         ref={anchor}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
       >
         <EuiFlexItem grow={2}>
           <div className="incontextInsightAnchorContent">{target}</div>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <div className="incontextInsightAnchorIcon">
-            <EuiIcon type={input.type === 'generate' ? sparkle : chatIcon} size="l" />
+            <EuiIcon type={getLogoIcon('gradient')} size="m" />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -324,7 +327,7 @@ export const IncontextInsight = ({
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
                   <div>
-                    <EuiBadge color="hollow" iconType={chatIcon} iconSide="left">
+                    <EuiBadge color="hollow" iconType={getLogoIcon('gradient')} iconSide="left">
                       {i18n.translate('assistantDashboards.incontextInsight.assistant', {
                         defaultMessage: 'OpenSearch Assistant',
                       })}

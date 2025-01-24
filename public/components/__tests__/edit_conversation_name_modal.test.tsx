@@ -6,9 +6,10 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
-
+import * as services from '../../services';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import * as coreContextExports from '../../contexts/core_context';
+import { setupConfigSchemaMock } from '../../../test/config_schema_mock';
 
 import {
   EditConversationNameModal,
@@ -21,6 +22,7 @@ const setup = ({ onClose, defaultTitle, conversationId }: EditConversationNameMo
   const useCoreMock = {
     services: { ...coreMock.createStart(), dataSource: new DataSourceServiceMock() },
   };
+
   jest.spyOn(coreContextExports, 'useCore').mockReturnValue(useCoreMock);
 
   const renderResult = render(
@@ -40,6 +42,16 @@ const setup = ({ onClose, defaultTitle, conversationId }: EditConversationNameMo
 };
 
 describe('<EditConversationNameModal />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupConfigSchemaMock();
+  });
+
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should render default title in name input', async () => {
     const { renderResult } = setup({
       conversationId: '1',

@@ -17,11 +17,8 @@ import React from 'react';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { MessageActions } from './message_action';
 import { useCore } from '../../../contexts';
-import { getConfigSchema } from '../../../services';
-
-// TODO: Replace with getChrome().logos.Chat.url
+import { getConfigSchema, getLogoIcon } from '../../../services';
 import { useChatActions } from '../../../hooks';
-import chatIcon from '../../../assets/chat.svg';
 import {
   IMessage,
   IOutput,
@@ -68,7 +65,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
         />
       );
     } else {
-      return <EuiIcon type={chatIcon} size="l" />;
+      return <EuiIcon type={getLogoIcon('gradient')} size="l" />;
     }
   };
 
