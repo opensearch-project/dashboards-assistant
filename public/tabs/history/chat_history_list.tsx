@@ -40,6 +40,7 @@ export const ChatHistoryListItem = ({
 }: ChatHistoryListItemProps) => {
   const configSchema = getConfigSchema();
   const showEditButton = configSchema.chat.allowRenameConversation;
+  const showDeleteButton = configSchema.chat.deleteConversation;
 
   const handleTitleClick = useCallback(() => {
     onTitleClick?.(id, title);
@@ -88,14 +89,16 @@ export const ChatHistoryListItem = ({
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <EuiSmallButtonIcon
-                onClick={handleDeleteClick}
-                iconType="trash"
-                color="danger"
-                aria-label="Delete conversation"
-              />
-            </EuiFlexItem>
+            {showDeleteButton && (
+              <EuiFlexItem grow={false}>
+                <EuiSmallButtonIcon
+                  onClick={handleDeleteClick}
+                  iconType="trash"
+                  color="danger"
+                  aria-label="Delete conversation"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

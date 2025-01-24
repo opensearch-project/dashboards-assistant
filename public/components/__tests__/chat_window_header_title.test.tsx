@@ -88,6 +88,10 @@ describe('<ChatWindowHeaderTitle />', () => {
     jest.clearAllMocks();
     setupConfigSchemaMock();
   });
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
   it('should show rename conversation option when feature flag enabled', () => {
     const { renderResult } = setup();
     fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));

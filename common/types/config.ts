@@ -12,6 +12,7 @@ export const configSchema = schema.object({
     trace: schema.boolean({ defaultValue: true }),
     feedback: schema.boolean({ defaultValue: true }),
     allowRenameConversation: schema.boolean({ defaultValue: true }),
+    deleteConversation: schema.boolean({ defaultValue: true }),
   }),
   incontextInsight: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

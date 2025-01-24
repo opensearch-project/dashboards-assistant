@@ -3,29 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ConfigSchema } from 'common/types/config';
 import * as services from '../public/services';
-interface ChatConfig {
-  enabled: boolean;
-  trace: boolean;
-  feedback: boolean;
-  allowRenameConversation: boolean;
-}
 
-interface ConfigSchema {
-  enabled: boolean;
-  chat: ChatConfig;
-  incontextInsight: { enabled: boolean };
-  next: { enabled: boolean };
-  text2viz: { enabled: boolean };
-  alertInsight: { enabled: boolean };
-  smartAnomalyDetector: { enabled: boolean };
-  branding: {
-    label: string | undefined;
-    logo: string | undefined;
-  };
-}
 export const getMockConfigSchema = (
-  overrides: { chat?: Partial<ChatConfig> } = {}
+  overrides: { chat?: Partial<ConfigSchema['chat']> } = {}
 ): ConfigSchema => ({
   enabled: true,
   chat: {
@@ -33,6 +15,7 @@ export const getMockConfigSchema = (
     trace: true,
     feedback: true,
     allowRenameConversation: true,
+    deleteConversation: true,
     ...(overrides.chat || {}),
   },
   incontextInsight: { enabled: true },
@@ -43,6 +26,8 @@ export const getMockConfigSchema = (
   branding: { label: undefined, logo: undefined },
 });
 
-export const setupConfigSchemaMock = (overrides: Partial<{ chat: Partial<ChatConfig> }> = {}) => {
+export const setupConfigSchemaMock = (
+  overrides: Partial<{ chat: Partial<ConfigSchema['chat']> }> = {}
+) => {
   jest.spyOn(services, 'getConfigSchema').mockReturnValue(getMockConfigSchema(overrides));
 };
