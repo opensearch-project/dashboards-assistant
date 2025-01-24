@@ -18,6 +18,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Set logo config and read logo by config([#401](https://github.com/opensearch-project/dashboards-assistant/pull/401))
 - Use feature flag to disable the rename conversation api ([#401](https://github.com/opensearch-project/dashboards-assistant/pull/410))
 - Disable delete conversation api based on feature flag([#409](https://github.com/opensearch-project/dashboards-assistant/pull/409))
+- Add options to hide "stop generation" and regenerate button based on feature flag ([#394](https://github.com/opensearch-project/dashboards-assistant/pull/394))
 
 
 ### Bug Fixes

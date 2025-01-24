@@ -11,13 +11,22 @@ import * as chatStateHookExports from '../../hooks/use_chat_state';
 import * as chatActionHookExports from '../../hooks/use_chat_actions';
 import { IMessage } from '../../../common/types/chat_saved_object_attributes';
 import { getIncontextInsightRegistry } from '../../services';
+import { setupConfigSchemaMock } from '../../../test/config_schema_mock';
 
 jest.mock('../../services');
 
 jest.mock('./messages/message_bubble', () => {
   return {
-    MessageBubble: ({ children }: { children?: React.ReactNode }) => (
-      <div aria-label="chat message bubble">{children}</div>
+    MessageBubble: ({
+      children,
+      showRegenerate,
+    }: {
+      children?: React.ReactNode;
+      showRegenerate?: boolean;
+    }) => (
+      <div aria-label="chat message bubble" data-test-subj={`showRegenerate-${showRegenerate}`}>
+        {children}
+      </div>
     ),
   };
 });
@@ -36,6 +45,10 @@ beforeEach(() => {
 describe('<ChatPageContent />', () => {
   const abortActionMock = jest.fn();
   const executeActionMock = jest.fn();
+
+  beforeAll(() => {
+    setupConfigSchemaMock();
+  });
 
   beforeEach(() => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
@@ -225,5 +238,39 @@ describe('<ChatPageContent />', () => {
     render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
     fireEvent.click(screen.getByText('What are the indices in my cluster?'));
     expect(executeActionMock).toHaveBeenCalled();
+  });
+
+  it('should not show regenerate button when feature flag is false', () => {
+    setupConfigSchemaMock({
+      chat: {
+        regenerateMessage: false,
+      },
+    });
+
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: {
+        messages: [
+          {
+            type: 'input',
+            content: 'what indices are in my cluster?',
+            contentType: 'text',
+          },
+          {
+            type: 'output',
+            content: 'here are the indices in your cluster: .kibana',
+            contentType: 'markdown',
+            suggestedActions: [{ actionType: 'send_as_input', message: 'suggested action mock' }],
+          },
+        ],
+        llmResponding: true,
+        interactions: [],
+      },
+      chatStateDispatch: jest.fn(),
+    });
+
+    const { queryAllByTestId } = render(
+      <ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />
+    );
+    expect(queryAllByTestId(`showRegenerate-false`).length).toEqual(2);
   });
 });
