@@ -5,16 +5,9 @@
 
 import { ConfigSchema } from 'common/types/config';
 import * as services from '../public/services';
-interface ChatConfig {
-  enabled: boolean;
-  trace: boolean;
-  feedback: boolean;
-  allowRenameConversation: boolean;
-  deleteConversation: boolean;
-}
 
 export const getMockConfigSchema = (
-  overrides: { chat?: Partial<ChatConfig> } = {}
+  overrides: { chat?: Partial<ConfigSchema['chat']> } = {}
 ): ConfigSchema => ({
   enabled: true,
   chat: {
