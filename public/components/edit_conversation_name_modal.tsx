@@ -8,7 +8,6 @@ import React, { useCallback, useRef } from 'react';
 import { EuiConfirmModal, EuiCompressedFieldText, EuiSpacer, EuiText } from '@elastic/eui';
 import { useCore } from '../contexts/core_context';
 import { usePatchConversation } from '../hooks';
-import { getConfigSchema } from '../services';
 
 export interface EditConversationNameModalProps {
   onClose?: (status: 'updated' | 'cancelled' | 'errored', newTitle?: string) => void;
@@ -26,7 +25,6 @@ export const EditConversationNameModal = ({
       notifications: { toasts },
     },
   } = useCore();
-  const configSchema = getConfigSchema();
   const titleInputRef = useRef<HTMLInputElement>(null);
   const { loading, abort, patchConversation, isAborted } = usePatchConversation();
 

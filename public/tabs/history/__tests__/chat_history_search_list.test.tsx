@@ -6,15 +6,12 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
-
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as chatContextExports from '../../../contexts/chat_context';
 import * as coreContextExports from '../../../contexts/core_context';
-import * as services from '../../../services';
-
+import { setupConfigSchemaMock } from '../../../../test/config_schema_mock';
 import { ChatHistorySearchList, ChatHistorySearchListProps } from '../chat_history_search_list';
 import { DataSourceServiceMock } from '../../../services/data_source_service.mock';
-import { setupConfigSchemaMock } from '../../../../test/config_schema_mock';
 
 const setup = ({
   loading = false,
@@ -63,6 +60,31 @@ describe('<ChatHistorySearchList />', () => {
     jest.clearAllMocks();
     setupConfigSchemaMock();
   });
+
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should not show delete button when deleteConversation is disabled', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: false },
+    });
+
+    const { renderResult } = setup();
+
+    expect(renderResult.queryByLabelText('Delete conversation')).not.toBeInTheDocument();
+  });
+
+  it('should show delete button when deleteConversation is enabled', async () => {
+    setupConfigSchemaMock({
+      chat: { deleteConversation: true },
+    });
+    const { renderResult } = setup();
+
+    expect(renderResult.getByLabelText('Delete conversation')).toBeInTheDocument();
+  });
+
   it('should set new window title after edit conversation name', async () => {
     const { renderResult, useChatContextMock } = setup();
 
@@ -83,6 +105,9 @@ describe('<ChatHistorySearchList />', () => {
 
   it('should call onRefresh and onHistoryDeleted after conversation deleted', async () => {
     setupConfigSchemaMock({ chat: { allowRenameConversation: false } });
+    setupConfigSchemaMock({
+      chat: { deleteConversation: true },
+    });
     const onRefreshMock = jest.fn();
     const onHistoryDeletedMock = jest.fn();
 
@@ -110,7 +135,6 @@ describe('<ChatHistorySearchList />', () => {
     const { renderResult } = setup({
       histories: [],
     });
-
     expect(renderResult.getByText('There were no results found.')).toBeInTheDocument();
   });
 });

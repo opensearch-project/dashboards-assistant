@@ -47,6 +47,11 @@ describe('<EditConversationNameModal />', () => {
     setupConfigSchemaMock();
   });
 
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should render default title in name input', async () => {
     const { renderResult } = setup({
       conversationId: '1',
