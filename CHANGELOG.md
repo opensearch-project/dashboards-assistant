@@ -17,7 +17,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - feat: Update UI for In-context summarization in Alerts table([#392](https://github.com/opensearch-project/dashboards-assistant/pull/392))
 - Set logo config and read logo by config([#401](https://github.com/opensearch-project/dashboards-assistant/pull/401))
 - Use feature flag to disable the rename conversation api ([#401](https://github.com/opensearch-project/dashboards-assistant/pull/410))
-- Disable delete conversation api based on feature flag([#402](https://github.com/opensearch-project/dashboards-assistant/pull/402))
+- Disable delete conversation api based on feature flag([#409](https://github.com/opensearch-project/dashboards-assistant/pull/409))
 
 
 ### Bug Fixes
