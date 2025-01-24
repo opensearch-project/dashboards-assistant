@@ -16,6 +16,7 @@ export const getMockConfigSchema = (
     feedback: true,
     allowRenameConversation: true,
     deleteConversation: true,
+    regenerateMessage: true,
     ...(overrides.chat || {}),
   },
   incontextInsight: { enabled: true },
