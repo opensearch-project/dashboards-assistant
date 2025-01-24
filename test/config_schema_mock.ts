@@ -26,6 +26,8 @@ export const getMockConfigSchema = (
   branding: { label: undefined, logo: undefined },
 });
 
-export const setupConfigSchemaMock = (overrides: Partial<{ chat: Partial<ChatConfig> }> = {}) => {
+export const setupConfigSchemaMock = (
+  overrides: Partial<{ chat: Partial<ConfigSchema['chat']> }> = {}
+) => {
   jest.spyOn(services, 'getConfigSchema').mockReturnValue(getMockConfigSchema(overrides));
 };
