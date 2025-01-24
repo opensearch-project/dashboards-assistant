@@ -13,6 +13,11 @@ describe('<ChatHistoryList />', () => {
     setupConfigSchemaMock();
   });
 
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should render two history titles, update times and one horizontal rule', async () => {
     const { getByText, getAllByLabelText } = render(
       <ChatHistoryList

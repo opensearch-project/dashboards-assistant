@@ -61,6 +61,11 @@ describe('<ChatHistorySearchList />', () => {
     setupConfigSchemaMock();
   });
 
+  // There is side effect from setupConfigSchemaMock, need to restore.
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should not show delete button when deleteConversation is disabled', async () => {
     setupConfigSchemaMock({
       chat: { deleteConversation: false },
