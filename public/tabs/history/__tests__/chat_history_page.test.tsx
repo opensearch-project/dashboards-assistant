@@ -17,6 +17,7 @@ import * as coreContextExports from '../../../contexts/core_context';
 import { ConversationsService } from '../../../services/conversations_service';
 
 import { ChatHistoryPage } from '../chat_history_page';
+import { setupConfigSchemaMock } from '../../../../test/config_schema_mock';
 
 const mockGetConversationsHttp = () => {
   const http = coreMock.createStart().http;
@@ -84,6 +85,10 @@ const setup = ({
 };
 
 describe('<ChatHistoryPage />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupConfigSchemaMock();
+  });
   it('should clear old conversation data after current conversation deleted', async () => {
     const { renderResult, useChatStateMock, useChatContextMock } = setup({
       http: mockGetConversationsHttp(),
@@ -125,6 +130,24 @@ describe('<ChatHistoryPage />', () => {
           'No conversation has been recorded. Start a conversation in the assistant to have it saved.'
         )
       ).toBeTruthy();
+    });
+  });
+
+  it('should not show edit button when feature flag is disabled', async () => {
+    setupConfigSchemaMock({ chat: { allowRenameConversation: false } });
+
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.queryByLabelText('Edit conversation name')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show edit button when feature flag is enabled', async () => {
+    const { renderResult } = setup();
+
+    await waitFor(() => {
+      expect(renderResult.getByLabelText('Edit conversation name')).toBeInTheDocument();
     });
   });
 
