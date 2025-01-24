@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { TAB_ID } from '../utils/constants';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { findLastIndex } from '../utils';
@@ -10,7 +11,9 @@ import {
   IMessage,
   ISuggestedAction,
   SendResponse,
+  StreamChunk,
 } from '../../common/types/chat_saved_object_attributes';
+import { sreamDeserializer } from '../../common/utils/stream/serializer';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { AssistantActions } from '../types';
@@ -27,8 +30,14 @@ export const useChatActions = (): AssistantActions => {
     const abortController = new AbortController();
     abortControllerRef = abortController;
     chatStateDispatch({ type: 'send', payload: input });
+    const response$ = new BehaviorSubject<SendResponse>({
+      conversationId: '',
+      messages: [],
+      interactions: [],
+    });
+    const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
     try {
-      const response = await core.services.http.post<SendResponse>(ASSISTANT_API.SEND_MESSAGE, {
+      const fetchResponse = await core.services.http.post(ASSISTANT_API.SEND_MESSAGE, {
         // do not send abort signal to http client to allow LLM call run in background
         body: JSON.stringify({
           conversationId: chatContext.conversationId,
@@ -36,48 +45,120 @@ export const useChatActions = (): AssistantActions => {
           input,
         }),
         query: core.services.dataSource.getDataSourceQuery(),
+        asResponse: true,
+        pureFetch: true,
       });
-      if (abortController.signal.aborted) return;
-      // Refresh history list after new conversation created if new conversation saved and history list page visible
-      if (
-        !chatContext.conversationId &&
-        response.conversationId &&
-        core.services.conversations.options?.page === 1 &&
-        chatContext.selectedTabId === TAB_ID.HISTORY
-      ) {
-        core.services.conversations.reload();
-      }
-      chatContext.setConversationId(response.conversationId);
-      // set title for first time
-      if (response.title && !chatContext.title) {
-        chatContext.setTitle(response.title);
-      }
-      /**
-       * Remove messages that do not have messageId
-       * because they are used for displaying loading state
-       */
-      chatStateDispatch({
-        type: 'receive',
-        payload: {
-          messages: chatState.messages.filter((item) => item.messageId),
-          interactions: chatState.interactions,
-        },
-      });
+      if (fetchResponse.response?.headers.get('X-Stream')) {
+        const reader = fetchResponse.response?.body?.getReader();
 
-      /**
-       * Patch messages and interactions based on backend response
-       */
-      chatStateDispatch({
-        type: 'patch',
-        payload: {
-          messages: response.messages,
-          interactions: response.interactions,
-        },
-      });
+        const decoder = new TextDecoder('utf-8');
+
+        function processText({
+          done,
+          value,
+        }: ReadableStreamReadResult<Uint8Array>): Promise<void> | void {
+          if (done) {
+            chunk$.complete();
+            return;
+          }
+          const chunk = decoder.decode(value, { stream: true });
+          try {
+            const chunkObjects = sreamDeserializer(chunk);
+            chunkObjects.forEach((chunkObject) => {
+              chunk$.next(chunkObject);
+            });
+          } catch (e) {
+            // can not parse the chunk.
+            chunk$.error(e);
+          }
+          return reader?.read().then(processText);
+        }
+
+        reader?.read().then(processText);
+      } else {
+        const response = await fetchResponse.response?.json();
+        if (abortController.signal.aborted) {
+          response$.unsubscribe();
+          return;
+        }
+        chunk$.next({
+          type: 'metadata',
+          body: response,
+        });
+      }
     } catch (error) {
-      if (abortController.signal.aborted) return;
-      chatStateDispatch({ type: 'error', payload: error });
+      if (abortController.signal.aborted) {
+        response$.unsubscribe();
+        return;
+      }
+      response$.error(error);
     }
+
+    chunk$.subscribe(
+      (chunk) => {
+        if (chunk) {
+          if (chunk.type === 'metadata') {
+            const { body } = chunk;
+            if (body.conversationId) {
+              chatContext.setConversationId(body.conversationId);
+            }
+
+            // set title for first time
+            if (body.title && !chatContext.title) {
+              chatContext.setTitle(body.title);
+            }
+
+            if (body.messages?.length && body.interactions?.length) {
+              /**
+               * Remove messages that do not have messageId
+               * because they are used for displaying loading state
+               */
+              chatStateDispatch({
+                type: 'receive',
+                payload: {
+                  messages: chatState.messages.filter((item) => item.messageId),
+                  interactions: chatState.interactions,
+                },
+              });
+
+              /**
+               * Patch messages and interactions based on backend response
+               */
+              chatStateDispatch({
+                type: 'patch',
+                payload: {
+                  messages: body.messages,
+                  interactions: body.interactions,
+                },
+              });
+            }
+
+            response$.next({
+              ...response$.getValue(),
+              ...chunk.body,
+            });
+          } else if (chunk.type === 'error') {
+            response$.error(new Error(chunk.body));
+            return;
+          }
+        }
+      },
+      (error) => {
+        chatStateDispatch({ type: 'error', payload: error });
+      },
+      () => {
+        // Refresh history list after new conversation created if new conversation saved and history list page visible
+        if (
+          !chatContext.conversationId &&
+          response$.getValue().conversationId &&
+          core.services.conversations.options?.page === 1 &&
+          chatContext.selectedTabId === TAB_ID.HISTORY
+        ) {
+          core.services.conversations.reload();
+        }
+        response$.complete();
+      }
+    );
   };
 
   const loadChat = async (conversationId?: string, title?: string) => {
