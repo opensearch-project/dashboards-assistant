@@ -7,8 +7,13 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
 import { ChatHistoryList } from '../chat_history_list';
-
+import * as services from '../../../services';
+import { setupConfigSchemaMock } from '../../../../test/config_schema_mock';
 describe('<ChatHistoryList />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupConfigSchemaMock();
+  });
   it('should render two history titles, update times and one horizontal rule', async () => {
     const { getByText, getAllByLabelText } = render(
       <ChatHistoryList

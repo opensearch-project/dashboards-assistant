@@ -10,9 +10,11 @@ import { I18nProvider } from '@osd/i18n/react';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as chatContextExports from '../../../contexts/chat_context';
 import * as coreContextExports from '../../../contexts/core_context';
+import * as services from '../../../services';
 
 import { ChatHistorySearchList, ChatHistorySearchListProps } from '../chat_history_search_list';
 import { DataSourceServiceMock } from '../../../services/data_source_service.mock';
+import { setupConfigSchemaMock } from '../../../../test/config_schema_mock';
 
 const setup = ({
   loading = false,
@@ -57,6 +59,10 @@ const setup = ({
 };
 
 describe('<ChatHistorySearchList />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupConfigSchemaMock();
+  });
   it('should set new window title after edit conversation name', async () => {
     const { renderResult, useChatContextMock } = setup();
 
@@ -76,6 +82,7 @@ describe('<ChatHistorySearchList />', () => {
   });
 
   it('should call onRefresh and onHistoryDeleted after conversation deleted', async () => {
+    setupConfigSchemaMock({ chat: { allowRenameConversation: false } });
     const onRefreshMock = jest.fn();
     const onHistoryDeletedMock = jest.fn();
 
