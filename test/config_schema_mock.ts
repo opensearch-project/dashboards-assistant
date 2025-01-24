@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ConfigSchema } from 'common/types/config';
 import * as services from '../public/services';
 interface ChatConfig {
   enabled: boolean;
@@ -12,19 +13,6 @@ interface ChatConfig {
   deleteConversation: boolean;
 }
 
-interface ConfigSchema {
-  enabled: boolean;
-  chat: ChatConfig;
-  incontextInsight: { enabled: boolean };
-  next: { enabled: boolean };
-  text2viz: { enabled: boolean };
-  alertInsight: { enabled: boolean };
-  smartAnomalyDetector: { enabled: boolean };
-  branding: {
-    label: string | undefined;
-    logo: string | undefined;
-  };
-}
 export const getMockConfigSchema = (
   overrides: { chat?: Partial<ChatConfig> } = {}
 ): ConfigSchema => ({
