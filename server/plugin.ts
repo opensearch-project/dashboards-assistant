@@ -19,7 +19,10 @@ import { registerChatRoutes } from './routes/chat_routes';
 import { registerText2VizRoutes } from './routes/text2viz_routes';
 import { AssistantService } from './services/assistant_service';
 import { registerAgentRoutes } from './routes/agent_routes';
-import { registerSummaryAssistantRoutes, registerData2SummaryRoutes } from './routes/summary_routes';
+import {
+  registerSummaryAssistantRoutes,
+  registerData2SummaryRoutes,
+} from './routes/summary_routes';
 import { capabilitiesProvider as visNLQCapabilitiesProvider } from './vis_type_nlq/capabilities_provider';
 import { visNLQSavedObjectType } from './vis_type_nlq/saved_object_type';
 import { capabilitiesProvider } from './capabilities';
@@ -72,7 +75,27 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     }
 
     core.capabilities.registerProvider(capabilitiesProvider);
-    
+    // register UI capabilities from dynamic config service
+    core.capabilities.registerSwitcher(async () => {
+      const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
+      const store = dynamicConfigServiceStart.getAsyncLocalStore();
+      const client = dynamicConfigServiceStart.getClient();
+      try {
+        const dynamicConfig = await client.getConfig(
+          { pluginConfigPath: 'assistant' },
+          { asyncLocalStorageContext: store! }
+        );
+        return {
+          assistant: {
+            chatEnabled: dynamicConfig.chat.enabled,
+          },
+        };
+      } catch (e) {
+        this.logger.error(e);
+        return {};
+      }
+    });
+
     // Register router for discovery summary
     registerData2SummaryRoutes(router, assistantServiceSetup);
 
