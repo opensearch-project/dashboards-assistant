@@ -80,15 +80,20 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
       const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
       const store = dynamicConfigServiceStart.getAsyncLocalStore();
       const client = dynamicConfigServiceStart.getClient();
-      const dynamicConfig = await client.getConfig(
-        { pluginConfigPath: 'assistant' },
-        { asyncLocalStorageContext: store! }
-      );
-      return {
-        assistant: {
-          chatEnabled: dynamicConfig.chat.enabled,
-        },
-      };
+      try {
+        const dynamicConfig = await client.getConfig(
+          { pluginConfigPath: 'assistant' },
+          { asyncLocalStorageContext: store! }
+        );
+        return {
+          assistant: {
+            chatEnabled: dynamicConfig.chat.enabled,
+          },
+        };
+      } catch (e) {
+        this.logger.error(e);
+        return {};
+      }
     });
 
     // Register router for discovery summary
