@@ -282,7 +282,11 @@ export class AssistantPlugin
       }
     })();
 
-    const { isQuerySummaryCollapsed$, resultSummaryEnabled$ } = setupDeps.queryEnhancements;
+    const {
+      isQuerySummaryCollapsed$,
+      resultSummaryEnabled$,
+      isSummaryAgentAvailable$,
+    } = setupDeps.queryEnhancements;
     setupDeps.data.__enhance({
       editor: {
         queryEditorExtension: {
@@ -292,9 +296,11 @@ export class AssistantPlugin
           getSearchBarButton: () => {
             return (
               <ActionContextMenu
+                httpSetup={core.http}
                 label={this.config.branding.label}
                 isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
                 resultSummaryEnabled$={resultSummaryEnabled$}
+                isSummaryAgentAvailable$={isSummaryAgentAvailable$}
                 data={setupDeps.data}
               />
             );

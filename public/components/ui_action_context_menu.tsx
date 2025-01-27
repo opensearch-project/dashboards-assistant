@@ -16,15 +16,18 @@ import { i18n } from '@osd/i18n';
 
 import { BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
+import { HttpSetup } from '../../../../src/core/public';
 import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/public';
 import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER } from '../ui_triggers';
 import { getUiActions } from '../services';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
-
+import { AGENT_API, DATA2SUMMARY_AGENT_CONFIG_ID } from '../../common/constants/llm';
 interface Props {
   data: DataPublicPluginSetup;
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
   resultSummaryEnabled$: BehaviorSubject<boolean>;
+  isSummaryAgentAvailable$: BehaviorSubject<boolean>;
+  httpSetup: HttpSetup;
   label?: string;
 }
 
@@ -39,6 +42,35 @@ export const ActionContextMenu = (props: Props) => {
   });
   const resultSummaryEnabled = useObservable(props.resultSummaryEnabled$, false);
   const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$, false);
+  const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$, false);
+
+  async function checkAgentsExist(
+    http: HttpSetup,
+    agentConfigName: string | string[],
+    dataSourceId?: string
+  ) {
+    const response = await http.get(AGENT_API.CONFIG_EXISTS, {
+      query: { agentConfigName, dataSourceId },
+    });
+    return response;
+  }
+
+  useEffect(() => {
+    const fetchSummaryAgent = async () => {
+      try {
+        const summaryAgentStatus = await checkAgentsExist(
+          props.httpSetup,
+          DATA2SUMMARY_AGENT_CONFIG_ID,
+          props.data.query.queryString.getQuery().dataset?.dataSource?.id
+        );
+        props.isSummaryAgentAvailable$.next(!!summaryAgentStatus.exists);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchSummaryAgent();
+  }, [props, props.httpSetup]);
 
   useEffect(() => {
     const subscription = props.data.query.queryString.getUpdates$().subscribe((query) => {
@@ -75,14 +107,13 @@ export const ActionContextMenu = (props: Props) => {
     [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
 
-  // The action button should be not displayed when there is no action and result summary disabled.
-  if (actionsRef.current.length === 0 && !resultSummaryEnabled) {
+  // The action button should be not displayed when there is no action and result summary disabled or there is no data2Summary agent
+  if (!isSummaryAgentAvailable || (actionsRef.current.length === 0 && !resultSummaryEnabled)) {
     return null;
   }
 
-  // The action button should be disabled when context menu has no item and result summary disabled.
+  // The action button should be disabled when context menu has no item and result summary disabled
   const actionDisabled = (panels.value?.[0]?.items ?? []).length === 0 && !resultSummaryEnabled;
-
   return (
     <EuiPopover
       button={
