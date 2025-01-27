@@ -21,7 +21,8 @@ import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/p
 import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER } from '../ui_triggers';
 import { getUiActions } from '../services';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
-import { AGENT_API, DATA2SUMMARY_AGENT_CONFIG_ID } from '../../common/constants/llm';
+import { DATA2SUMMARY_AGENT_CONFIG_ID } from '../../common/constants/llm';
+import { checkAgentsExist } from '../../common/utils/llm_chat/get_is_data2summary_available';
 interface Props {
   data: DataPublicPluginSetup;
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
@@ -44,18 +45,9 @@ export const ActionContextMenu = (props: Props) => {
   const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$, false);
   const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$, false);
 
-  async function checkAgentsExist(
-    http: HttpSetup,
-    agentConfigName: string | string[],
-    dataSourceId?: string
-  ) {
-    const response = await http.get(AGENT_API.CONFIG_EXISTS, {
-      query: { agentConfigName, dataSourceId },
-    });
-    return response;
-  }
-
   useEffect(() => {
+    props.isSummaryAgentAvailable$.next(false);
+    if (!resultSummaryEnabled) return;
     const fetchSummaryAgent = async () => {
       try {
         const summaryAgentStatus = await checkAgentsExist(
@@ -70,7 +62,7 @@ export const ActionContextMenu = (props: Props) => {
     };
 
     fetchSummaryAgent();
-  }, [props, props.httpSetup]);
+  }, [props.data.query.queryString.getQuery()?.dataset?.dataSource?.id, resultSummaryEnabled]);
 
   useEffect(() => {
     const subscription = props.data.query.queryString.getUpdates$().subscribe((query) => {
@@ -108,12 +100,15 @@ export const ActionContextMenu = (props: Props) => {
   );
 
   // The action button should be not displayed when there is no action and result summary disabled or there is no data2Summary agent
-  if (!isSummaryAgentAvailable || (actionsRef.current.length === 0 && !resultSummaryEnabled)) {
+  if ((!resultSummaryEnabled && actionsRef.current.length === 0) || !isSummaryAgentAvailable) {
     return null;
   }
 
   // The action button should be disabled when context menu has no item and result summary disabled
-  const actionDisabled = (panels.value?.[0]?.items ?? []).length === 0 && !resultSummaryEnabled;
+  const actionDisabled =
+    ((panels.value?.[0]?.items ?? []).length === 0 && !resultSummaryEnabled) ||
+    !isSummaryAgentAvailable;
+
   return (
     <EuiPopover
       button={
