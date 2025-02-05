@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { i18n } from '@osd/i18n';
 import { IRouter, OpenSearchClient } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
@@ -11,6 +12,8 @@ import { getAgentIdByConfigName, searchAgent } from './get_agent';
 import { AssistantServiceSetup } from '../services/assistant_service';
 import { handleError } from './error_handler';
 import { AgentNotFoundError } from './errors';
+
+import { DataSourceNotFoundError } from '../utils/get_opensearch_client_transport';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';
@@ -105,29 +108,14 @@ export function registerSummaryAssistantRoutes(
           dataSourceId: req.query.dataSourceId,
         });
       } catch (err) {
-        console.error('Error creating OpenSearch client:', err);
-
-        if (
-          err.statusCode === 403 &&
-          err.message?.includes('Saved object does not belong to the workspace')
-        ) {
-          return res.notFound({
-            body: 'Workspace/data source is invalid or not found',
+        if (err instanceof DataSourceNotFoundError) {
+          const msg = i18n.translate('assistant.server.error.workspaceDataSourceNotFound', {
+            defaultMessage: 'Workspace/data source is invalid or not found.',
           });
+          return res.notFound({ body: msg });
         }
-        if (
-          err.message?.includes('Data source not found') ||
-          err.message?.includes('Workspace not found') ||
-          err.message?.includes('Saved object does not belong to the workspace')
-        ) {
-          return res.notFound({
-            body: 'Workspace/data source is invalid or not found',
-          });
-        }
-
         return handleError(err, res, context.assistant_plugin.logger);
       }
-
       const assistantClient = assistantService.getScopedClient(req, context);
 
       try {

@@ -5,6 +5,13 @@
 
 import { OpenSearchClient, RequestHandlerContext } from '../../../../src/core/server';
 
+export class DataSourceNotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DataSourceNotFoundError';
+  }
+}
+
 export const getOpenSearchClientTransport = async ({
   context,
   dataSourceId,
@@ -19,7 +26,11 @@ export const getOpenSearchClientTransport = async ({
   dataSourceId?: string;
 }) => {
   if (dataSourceId && context.dataSource) {
-    return (await context.dataSource.opensearch.getClient(dataSourceId)).transport;
+    try {
+      return (await context.dataSource.opensearch.getClient(dataSourceId)).transport;
+    } catch (err) {
+      throw new DataSourceNotFoundError('Saved object does not belong to the workspace');
+    }
   }
   return context.core.opensearch.client.asCurrentUser.transport;
 };
