@@ -98,10 +98,36 @@ export function registerSummaryAssistantRoutes(
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const client = await getOpenSearchClientTransport({
-        context,
-        dataSourceId: req.query.dataSourceId,
-      });
+      let client;
+      try {
+        client = await getOpenSearchClientTransport({
+          context,
+          dataSourceId: req.query.dataSourceId,
+        });
+      } catch (err) {
+        console.error('Error creating OpenSearch client:', err);
+
+        if (
+          err.statusCode === 403 &&
+          err.message?.includes('Saved object does not belong to the workspace')
+        ) {
+          return res.notFound({
+            body: 'Workspace/data source is invalid or not found',
+          });
+        }
+        if (
+          err.message?.includes('Data source not found') ||
+          err.message?.includes('Workspace not found') ||
+          err.message?.includes('Saved object does not belong to the workspace')
+        ) {
+          return res.notFound({
+            body: 'Workspace/data source is invalid or not found',
+          });
+        }
+
+        return handleError(err, res, context.assistant_plugin.logger);
+      }
+
       const assistantClient = assistantService.getScopedClient(req, context);
 
       try {
