@@ -137,7 +137,9 @@ export function registerSummaryAssistantRoutes(
         const insight = response.body.inference_results[0]?.output[0]?.result;
         if (!insight) {
           return res.customError({
-            body: 'Execute agent failed with empty response!',
+            body: i18n.translate('assistant.server.error.workspaceDataSourceNotFound', {
+              defaultMessage: 'Workspace/data source is invalid or not found!!',
+            }),
             statusCode: 500,
           });
         }
