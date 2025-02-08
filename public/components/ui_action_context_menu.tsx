@@ -100,14 +100,14 @@ export const ActionContextMenu = (props: Props) => {
   );
 
   // The action button should be not displayed when there is no action and result summary disabled or there is no data2Summary agent
-  if ((!resultSummaryEnabled && actionsRef.current.length === 0) || !isSummaryAgentAvailable) {
+  if ((!resultSummaryEnabled || !isSummaryAgentAvailable) && actionsRef.current.length === 0) {
     return null;
   }
 
-  // The action button should be disabled when context menu has no item and result summary disabled
+  // The action button should be disabled when context menu has no item or result summary disabled or or no data2Summary agent is available
   const actionDisabled =
-    ((panels.value?.[0]?.items ?? []).length === 0 && !resultSummaryEnabled) ||
-    !isSummaryAgentAvailable;
+    (!resultSummaryEnabled || !isSummaryAgentAvailable) &&
+    (panels.value?.[0]?.items ?? []).length === 0;
 
   return (
     <EuiPopover
