@@ -44,6 +44,7 @@ export const ActionContextMenu = (props: Props) => {
   const resultSummaryEnabled = useObservable(props.resultSummaryEnabled$, false);
   const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$, false);
   const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$, false);
+  const shouldShowSummarizationAction = resultSummaryEnabled && isSummaryAgentAvailable;
 
   useEffect(() => {
     props.isSummaryAgentAvailable$.next(false);
@@ -100,14 +101,13 @@ export const ActionContextMenu = (props: Props) => {
   );
 
   // The action button should be not displayed when there is no action and result summary disabled or there is no data2Summary agent
-  if ((!resultSummaryEnabled || !isSummaryAgentAvailable) && actionsRef.current.length === 0) {
+  if (!shouldShowSummarizationAction && actionsRef.current.length === 0) {
     return null;
   }
 
   // The action button should be disabled when context menu has no item or result summary disabled or or no data2Summary agent is available
   const actionDisabled =
-    (!resultSummaryEnabled || !isSummaryAgentAvailable) &&
-    (panels.value?.[0]?.items ?? []).length === 0;
+    !shouldShowSummarizationAction && (panels.value?.[0]?.items ?? []).length === 0;
 
   return (
     <EuiPopover
@@ -135,7 +135,7 @@ export const ActionContextMenu = (props: Props) => {
       closePopover={() => setOpen(false)}
     >
       <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
-      {resultSummaryEnabled && (
+      {shouldShowSummarizationAction && (
         <EuiPopoverFooter paddingSize="s">
           <EuiSwitch
             label={i18n.translate('queryEnhancements.queryAssist.summary.switch.label', {
