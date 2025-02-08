@@ -101,24 +101,14 @@ export function registerSummaryAssistantRoutes(
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      let client;
       try {
-        client = await getOpenSearchClientTransport({
+        const client = await getOpenSearchClientTransport({
           context,
           dataSourceId: req.query.dataSourceId,
         });
-      } catch (err) {
-        if (err instanceof DataSourceNotFoundError) {
-          const msg = i18n.translate('assistant.server.error.workspaceDataSourceNotFound', {
-            defaultMessage: 'Workspace/data source is invalid or not found.',
-          });
-          return res.notFound({ body: msg });
-        }
-        return handleError(err, res, context.assistant_plugin.logger);
-      }
-      const assistantClient = assistantService.getScopedClient(req, context);
 
-      try {
+        const assistantClient = assistantService.getScopedClient(req, context);
+
         const insightAgentId = await detectInsightAgentId(
           req.body.insightType,
           req.body.summaryType,

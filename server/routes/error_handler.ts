@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { Logger, OpenSearchDashboardsResponseFactory } from '../../../../src/core/server';
 import { AgentNotFoundError } from './errors';
+import { DataSourceNotFoundError } from '../utils/get_opensearch_client_transport';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleError = (e: any, res: OpenSearchDashboardsResponseFactory, logger: Logger) => {
@@ -12,6 +14,18 @@ export const handleError = (e: any, res: OpenSearchDashboardsResponseFactory, lo
   // Handle specific type of Errors
   if (e instanceof AgentNotFoundError) {
     return res.notFound({ body: 'Agent not found' });
+  }
+
+  // Handle specific type of Errors
+  if (e instanceof AgentNotFoundError) {
+    return res.notFound({ body: 'Agent not found' });
+  }
+
+  if (e instanceof DataSourceNotFoundError) {
+    const msg = i18n.translate('assistant.server.error.workspaceDataSourceNotFound', {
+      defaultMessage: 'Workspace/data source is invalid or not found.',
+    });
+    return res.notFound({ body: msg });
   }
 
   // handle http response error of calling backend API
