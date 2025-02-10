@@ -192,7 +192,39 @@ export function registerData2SummaryRoutes(
           }
         );
 
-        const result = response.body.inference_results[0].output[0].result;
+        let result = response.body.inference_results[0].output[0].result;
+
+        function postprocessing(output: string) {
+          const summarizeStartTag = '<summarization>';
+          const summarizeEndTag = '</summarization>';
+          const startTag = '<final insights>';
+          const endTag = '</final insights>';
+
+          if (
+            output.includes(summarizeStartTag) &&
+            output.includes(summarizeEndTag) &&
+            output.includes(startTag) &&
+            output.includes(endTag)
+          ) {
+            // Extract <summarization>
+            const summarizationStart = output.indexOf(summarizeStartTag) + summarizeStartTag.length;
+            const summarizationEnd = output.indexOf(summarizeEndTag);
+            const summarization = output.substring(summarizationStart, summarizationEnd).trim();
+
+            // Extract <final insights>
+            const insightsStart = output.indexOf(startTag) + startTag.length;
+            const insightsEnd = output.indexOf(endTag);
+            const finalInsights = output.substring(insightsStart, insightsEnd).trim();
+
+            // Combine <summarization> and <final insights>
+            const processedOutput = `<summarization>${summarization}</summarization>\n<insights>${finalInsights}</insights>`;
+            return processedOutput;
+          }
+          return output;
+        }
+
+        result = postprocessing(result);
+
         if (result) {
           return res.ok({ body: result });
         } else {
