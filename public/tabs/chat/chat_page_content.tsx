@@ -24,10 +24,13 @@ import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
 import { getIncontextInsightRegistry } from '../../services';
 
+import { getConfigSchema } from '../../services';
+
 interface ChatPageContentProps {
   messagesLoading: boolean;
   messagesLoadingError?: Error;
   onRefresh: () => void;
+  showWelcomePage?: boolean;
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
@@ -37,6 +40,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const loading = props.messagesLoading || chatState.llmResponding;
   const chatActions = useChatActions();
   const registry = getIncontextInsightRegistry();
+  const configSchema = getConfigSchema();
 
   useLayoutEffect(() => {
     pageEndRef.current?.scrollIntoView();
@@ -84,24 +88,28 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
 
   return (
     <>
-      <MessageBubble
-        message={{ type: 'output', contentType: 'markdown', content: '' }}
-        showActionBar={false}
-      >
-        <WelcomeMessage username={chatContext?.currentAccount?.username} />
-      </MessageBubble>
-      {firstInputIndex < 0 && (
-        <Suggestions
-          message={{
-            content: '',
-            contentType: 'markdown',
-            type: 'output',
-            suggestedActions: [
-              { message: 'What are the indices in my cluster?', actionType: 'send_as_input' },
-            ],
-          }}
-          inputDisabled={loading}
-        />
+      {props.showWelcomePage && (
+        <>
+          <MessageBubble
+            message={{ type: 'output', contentType: 'markdown', content: '' }}
+            showActionBar={false}
+          >
+            <WelcomeMessage username={chatContext?.currentAccount?.username} />
+          </MessageBubble>
+          {firstInputIndex < 0 && (
+            <Suggestions
+              message={{
+                content: '',
+                contentType: 'markdown',
+                type: 'output',
+                suggestedActions: [
+                  { message: 'What are the indices in my cluster?', actionType: 'send_as_input' },
+                ],
+              }}
+              inputDisabled={loading}
+            />
+          )}
+        </>
       )}
       <EuiSpacer />
       {chatState.messages.map((message, i) => {
@@ -126,7 +134,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
             <MessageBubble
               message={message}
               showActionBar={isChatOutput}
-              showRegenerate={isLatestOutput}
+              showRegenerate={isLatestOutput && configSchema.chat.regenerateMessage}
               shouldActionBarVisibleOnHover={!isLatestOutput}
               onRegenerate={chatActions.regenerate}
               interaction={interaction}
@@ -144,20 +152,23 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           <MessageBubble loading showActionBar={false} />
         </>
       )}
-      {chatState.llmResponding && chatContext.conversationId && (
-        <div style={{ marginLeft: '55px', marginTop: 10 }}>
-          <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <SuggestionBubble
-                content="Stop generating response"
-                color="default"
-                iconType="crossInACircleFilled"
-                onClick={() => chatActions.abortAction(chatContext.conversationId)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      )}
+
+      {configSchema.chat.regenerateMessage &&
+        chatState.llmResponding &&
+        chatContext.conversationId && (
+          <div style={{ marginLeft: '55px', marginTop: 10 }}>
+            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <SuggestionBubble
+                  content="Stop generating response"
+                  color="default"
+                  iconType="crossInACircleFilled"
+                  onClick={() => chatActions.abortAction(chatContext.conversationId)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        )}
       {chatState.llmError && (
         <EuiEmptyPrompt
           iconType="alert"

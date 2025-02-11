@@ -226,27 +226,30 @@ export class AssistantPlugin
       });
     }
 
-    if (this.config.chat.enabled) {
-      const setupChat = async () => {
-        const [coreStart, startDeps] = await core.getStartServices();
-        const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
-          ...coreStart,
-          setupDeps,
-          startDeps,
-          conversationLoad: new ConversationLoadService(coreStart.http, this.dataSourceService),
-          conversations: new ConversationsService(coreStart.http, this.dataSourceService),
-          dataSource: this.dataSourceService,
+    (async () => {
+      const [coreStart, startDeps] = await core.getStartServices();
+      if (!coreStart.application.capabilities.assistant?.chatEnabled) {
+        return;
+      }
+      const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
+        ...coreStart,
+        setupDeps,
+        startDeps,
+        conversationLoad: new ConversationLoadService(coreStart.http, this.dataSourceService),
+        conversations: new ConversationsService(coreStart.http, this.dataSourceService),
+        dataSource: this.dataSourceService,
+      });
+      const account = await getAccount();
+      const username = account.user_name;
+
+      if (this.dataSourceService.isMDSEnabled()) {
+        this.resetChatSubscription = this.dataSourceService.dataSourceIdUpdates$.subscribe(() => {
+          assistantActions.resetChat?.();
         });
-        const account = await getAccount();
-        const username = account.user_name;
+      }
 
-        if (this.dataSourceService.isMDSEnabled()) {
-          this.resetChatSubscription = this.dataSourceService.dataSourceIdUpdates$.subscribe(() => {
-            assistantActions.resetChat?.();
-          });
-        }
-
-        coreStart.chrome.navControls.registerRight({
+      if (coreStart.chrome.navGroup.getNavGroupEnabled()) {
+        coreStart.chrome.navControls.registerPrimaryHeaderRight({
           order: 10000,
           mount: toMountPoint(
             <CoreContext.Provider>
@@ -260,10 +263,26 @@ export class AssistantPlugin
             </CoreContext.Provider>
           ),
         });
-      };
-      setupChat();
-    }
+      } else {
+        coreStart.chrome.navControls.registerRight({
+          order: 10000,
+          mount: toMountPoint(
+            <CoreContext.Provider>
+              <HeaderChatButton
+                application={coreStart.application}
+                messageRenderers={messageRenderers}
+                actionExecutors={actionExecutors}
+                assistantActions={assistantActions}
+                currentAccount={{ username }}
+                inLegacyHeader
+              />
+            </CoreContext.Provider>
+          ),
+        });
+      }
+    })();
 
+    const { isQuerySummaryCollapsed$, resultSummaryEnabled$ } = setupDeps.queryEnhancements;
     setupDeps.data.__enhance({
       editor: {
         queryEditorExtension: {
@@ -271,7 +290,14 @@ export class AssistantPlugin
           order: 2000,
           isEnabled$: () => of(true),
           getSearchBarButton: () => {
-            return <ActionContextMenu label={this.config.branding.label} data={setupDeps.data} />;
+            return (
+              <ActionContextMenu
+                label={this.config.branding.label}
+                isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
+                resultSummaryEnabled$={resultSummaryEnabled$}
+                data={setupDeps.data}
+              />
+            );
           },
         },
       },

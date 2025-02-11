@@ -19,11 +19,13 @@ import { NotebookNameModal } from './notebook/notebook_name_modal';
 import { ChatExperimentalBadge } from './chat_experimental_badge';
 import { useCore } from '../contexts/core_context';
 import { EditConversationNameModal } from './edit_conversation_name_modal';
+import { getConfigSchema } from '../../public/services';
 
 export const ChatWindowHeaderTitle = React.memo(() => {
   const chatContext = useChatContext();
   const { loadChat } = useChatActions();
   const core = useCore();
+  const configSchema = getConfigSchema();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [isRenameModalOpen, setRenameModalOpen] = useState(false);
   const [isSaveNotebookModalOpen, setSaveNotebookModalOpen] = useState(false);
@@ -67,16 +69,18 @@ export const ChatWindowHeaderTitle = React.memo(() => {
   };
 
   const items = [
-    <EuiContextMenuItem
-      disabled={!chatContext.conversationId}
-      key="rename-conversation"
-      onClick={() => {
-        closePopover();
-        setRenameModalOpen(true);
-      }}
-    >
-      Rename conversation
-    </EuiContextMenuItem>,
+    configSchema.chat.allowRenameConversation ? (
+      <EuiContextMenuItem
+        disabled={!chatContext.conversationId}
+        key="rename-conversation"
+        onClick={() => {
+          closePopover();
+          setRenameModalOpen(true);
+        }}
+      >
+        Rename conversation
+      </EuiContextMenuItem>
+    ) : null,
     <EuiContextMenuItem
       key="new-conversation"
       onClick={() => {
@@ -105,7 +109,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
         Save to notebook
       </EuiContextMenuItem>
     ),
-  ];
+  ].filter((item): item is React.ReactElement => item !== null);
 
   return (
     <>

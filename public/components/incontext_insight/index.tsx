@@ -27,9 +27,7 @@ import {
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
-import { getIncontextInsightRegistry, getNotifications } from '../../services';
-// TODO: Replace with getChrome().logos.Chat.url
-import chatIcon from '../../assets/chat.svg';
+import { getIncontextInsightRegistry, getNotifications, getLogoIcon } from '../../services';
 import sparkle from '../../assets/sparkle.svg';
 import shinySparkle from '../../assets/sparkle_with_gradient.svg';
 import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
@@ -275,7 +273,7 @@ export const IncontextInsight = ({
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <div className="incontextInsightAnchorIcon">
-            <EuiIcon type={input.type === 'generate' ? sparkleIcon : chatIcon} size="l" />
+            <EuiIcon type={getLogoIcon('gradient')} size="m" />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -329,7 +327,7 @@ export const IncontextInsight = ({
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
                   <div>
-                    <EuiBadge color="hollow" iconType={chatIcon} iconSide="left">
+                    <EuiBadge color="hollow" iconType={getLogoIcon('gradient')} iconSide="left">
                       {i18n.translate('assistantDashboards.incontextInsight.assistant', {
                         defaultMessage: 'OpenSearch Assistant',
                       })}

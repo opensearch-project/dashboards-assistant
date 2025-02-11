@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import moment from 'moment';
+import { getConfigSchema } from '../../services';
 
 interface ChatHistory {
   id: string;
@@ -37,6 +38,10 @@ export const ChatHistoryListItem = ({
   onDeleteClick,
   onEditClick,
 }: ChatHistoryListItemProps) => {
+  const configSchema = getConfigSchema();
+  const showEditButton = configSchema.chat.allowRenameConversation;
+  const showDeleteButton = configSchema.chat.deleteConversation;
+
   const handleTitleClick = useCallback(() => {
     onTitleClick?.(id, title);
   }, [onTitleClick, id, title]);
@@ -74,22 +79,26 @@ export const ChatHistoryListItem = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiSmallButtonIcon
-                onClick={handleEditClick}
-                iconType="pencil"
-                aria-label="Edit conversation name"
-                color="text"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSmallButtonIcon
-                onClick={handleDeleteClick}
-                iconType="trash"
-                color="danger"
-                aria-label="Delete conversation"
-              />
-            </EuiFlexItem>
+            {showEditButton && (
+              <EuiFlexItem grow={false}>
+                <EuiSmallButtonIcon
+                  onClick={handleEditClick}
+                  iconType="pencil"
+                  aria-label="Edit conversation name"
+                  color="text"
+                />
+              </EuiFlexItem>
+            )}
+            {showDeleteButton && (
+              <EuiFlexItem grow={false}>
+                <EuiSmallButtonIcon
+                  onClick={handleDeleteClick}
+                  iconType="trash"
+                  color="danger"
+                  aria-label="Delete conversation"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

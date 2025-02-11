@@ -18,7 +18,8 @@
   "optionalPlugins": [
     "dataSource",
     "dataSourceManagement",
-    "usageCollection"
+    "usageCollection",
+    "queryEnhancements"
   ],
   "requiredBundles": [],
   "configPath": [

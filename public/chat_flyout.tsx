@@ -5,23 +5,54 @@
 
 import { EuiResizableContainer } from '@elastic/eui';
 import cs from 'classnames';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useChatContext } from './contexts/chat_context';
 import { ChatPage } from './tabs/chat/chat_page';
 import { ChatWindowHeader } from './tabs/chat_window_header';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 import { AgentFrameworkTracesFlyoutBody } from './components/agent_framework_traces_flyout_body';
 import { TAB_ID } from './utils/constants';
+import { useCore } from './contexts';
+import { useChatActions } from './hooks';
 
 interface ChatFlyoutProps {
   flyoutVisible: boolean;
   overrideComponent: React.ReactNode | null;
   flyoutFullScreen: boolean;
+  createNewConversation: boolean;
+  showWelcomePage: boolean;
+  setShowWelcomePage: (b: boolean) => void;
 }
 
 export const ChatFlyout = (props: ChatFlyoutProps) => {
   const chatContext = useChatContext();
+
   const chatHistoryPageLoadedRef = useRef(false);
+
+  const { loadChat } = useChatActions();
+  const { services } = useCore();
+  useEffect(() => {
+    if (props.createNewConversation) {
+      return;
+    }
+    services.conversations
+      .load({
+        page: 1,
+        perPage: 10,
+        fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
+        sortField: 'updatedTimeMs',
+        sortOrder: 'DESC',
+        searchFields: ['title'],
+      })
+      .then((res) => {
+        const data = services.conversations.conversations$.getValue();
+        props.setShowWelcomePage(true);
+        if (data?.objects?.length) {
+          const { id, title } = data.objects[0];
+          loadChat(id, title);
+        }
+      });
+  }, []);
 
   let chatPageVisible = false;
   let chatHistoryPageVisible = false;
@@ -103,7 +134,7 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
                 initialSize={resizable ? 70 : undefined}
                 paddingSize="none"
               >
-                <ChatPage />
+                <ChatPage showWelcomePage={props.showWelcomePage} />
               </Panel>
               <>
                 {resizable && <Resizer />}
