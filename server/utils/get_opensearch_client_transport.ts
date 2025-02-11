@@ -34,6 +34,5 @@ export const getOpenSearchClientTransport = async ({
   if (dataSourceId && context.dataSource) {
     return (await context.dataSource.opensearch.getClient(dataSourceId)).transport;
   }
-  console.log('enter context.core.opensearch.client.asCurrentUser.transport;');
   return context.core.opensearch.client.asCurrentUser.transport;
 };
