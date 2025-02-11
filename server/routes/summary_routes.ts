@@ -4,7 +4,6 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { i18n } from '@osd/i18n';
 import { IRouter, OpenSearchClient } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
@@ -12,8 +11,6 @@ import { getAgentIdByConfigName, searchAgent } from './get_agent';
 import { AssistantServiceSetup } from '../services/assistant_service';
 import { handleError } from './error_handler';
 import { AgentNotFoundError } from './errors';
-
-import { DataSourceNotFoundError } from '../utils/get_opensearch_client_transport';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';

@@ -6,7 +6,6 @@
 import { i18n } from '@osd/i18n';
 import { Logger, OpenSearchDashboardsResponseFactory } from '../../../../src/core/server';
 import { AgentNotFoundError } from './errors';
-// import { DataSourceNotFoundError } from '../utils/get_opensearch_client_transport';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleError = (e: any, res: OpenSearchDashboardsResponseFactory, logger: Logger) => {
