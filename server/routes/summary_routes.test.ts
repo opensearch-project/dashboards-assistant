@@ -13,6 +13,8 @@ import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { registerData2SummaryRoutes, registerSummaryAssistantRoutes } from './summary_routes';
 import { AssistantClient } from '../services/assistant_client';
 import { RequestHandlerContext } from '../../../../src/core/server';
+import { postprocessing } from './summary_routes';
+
 import * as AgentHelpers from './get_agent';
 const mockedLogger = loggerMock.create();
 
@@ -325,5 +327,106 @@ describe('test summary route', () => {
         "statusCode": 500,
       }
     `);
+  });
+
+  describe('postprocessing', () => {
+    it('returns combined summarization and final insights when all tags exist', () => {
+      const input = `
+        Some text <summarization>This is the summary   </summarization> 
+        random info <final insights>   These are the insights  </final insights>
+        extra text
+      `;
+      const output = postprocessing(input);
+
+      expect(output).toEqual(`This is the summary\nThese are the insights`);
+    });
+
+    it('returns original output if <summarization> tag is missing', () => {
+      const input = `Hello world <final insights>Insights here</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(input);
+    });
+
+    it('returns original output if </summarization> closing tag is missing', () => {
+      const input = `<summarization>Partial Summarization <final insights>Insights</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(input);
+    });
+
+    it('returns original output if <final insights> or </final insights> tags are missing', () => {
+      const input = `<summarization>Summary only</summarization>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(input);
+    });
+
+    it('handles empty summarization or empty insights gracefully', () => {
+      const inputWithEmptySummary = `<summarization></summarization><final insights>Some insights</final insights>`;
+      const outputWithEmptySummary = postprocessing(inputWithEmptySummary);
+      expect(outputWithEmptySummary).toEqual(`\nSome insights`);
+
+      const inputWithEmptyInsights = `<summarization>Some summary</summarization><final insights></final insights>`;
+      const outputWithEmptyInsights = postprocessing(inputWithEmptyInsights);
+      expect(outputWithEmptyInsights).toEqual(`Some summary\n`);
+    });
+
+    it('returns original output if none of the special tags are found', () => {
+      const input = `Just a normal string without any special tags.`;
+      const output = postprocessing(input);
+      expect(output).toEqual(input);
+    });
+
+    it('handles nested tags correctly', () => {
+      const input = `<summarization>Summary <summarization>nested</summarization></summarization><final insights>Insights</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(`Summary <summarization>nested</summarization>\nInsights`);
+    });
+
+    it('handles multiple sets of tags', () => {
+      const input = `<summarization>First summary</summarization><summarization>Second summary</summarization><final insights>First insight</final insights><final insights>Second insight</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(`First summary\nFirst insight`);
+    });
+
+    it('handles tags with attributes', () => {
+      const input = `<summarization type="main">Summary</summarization><final insights class="important">Insights</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(`Summary\nInsights`);
+    });
+
+    it('handles malformed or mixed case tags by returning the original string', () => {
+      const input = `<Summarization>Summary</summarization><FINAL INSIGHTS>Insights</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(input);
+    });
+
+    it('handles special characters in content', () => {
+      const input = `<summarization>Summary with <>&"'</summarization><final insights>Insights with <>& "'</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(`Summary with <>&"'\nInsights with <>& "'`);
+    });
+
+    it('handles various whitespace patterns', () => {
+      const input = `<summarization>
+          Multi-line
+          summary
+          </summarization><final insights>
+          Multi-line
+          insights
+          </final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(`Multi-line\n        summary\nMulti-line\n        insights`);
+    });
+
+    it('handles unicode characters correctly', () => {
+      const input = `<summarization>Summary with emoji 😊</summarization><final insights>Insights with unicode 你好</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(`Summary with emoji 😊\nInsights with unicode 你好`);
+    });
+
+    it('handles invisible characters', () => {
+      const input = `<summarization>Sum\u200Bmary</summarization><final insights>In\u200Bsights</final insights>`;
+      const output = postprocessing(input);
+      expect(output).toEqual(`Sum\u200Bmary\nIn\u200Bsights`);
+    });
   });
 });
