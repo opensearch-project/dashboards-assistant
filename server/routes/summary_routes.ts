@@ -43,6 +43,7 @@ export function registerSummaryAssistantRoutes(
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      console.log('enter handleLegacyErrors');
       const client = await getOpenSearchClientTransport({
         context,
         dataSourceId: req.query.dataSourceId,
@@ -79,6 +80,7 @@ export function registerSummaryAssistantRoutes(
         }
         return res.ok({ body: { summary, insightAgentIdExists } });
       } catch (e) {
+        console.log('summary_routes.ts has error under SUMMARY_ASSISTANT_API.SUMMARIZE');
         return handleError(e, res, context.assistant_plugin.logger);
       }
     })

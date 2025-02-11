@@ -32,11 +32,8 @@ export const getOpenSearchClientTransport = async ({
   dataSourceId?: string;
 }) => {
   if (dataSourceId && context.dataSource) {
-    try {
-      return (await context.dataSource.opensearch.getClient(dataSourceId)).transport;
-    } catch (err) {
-      throw new DataSourceNotFoundError('Saved object does not belong to the workspace', err);
-    }
+    return (await context.dataSource.opensearch.getClient(dataSourceId)).transport;
   }
+  console.log('enter context.core.opensearch.client.asCurrentUser.transport;');
   return context.core.opensearch.client.asCurrentUser.transport;
 };
