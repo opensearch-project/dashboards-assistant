@@ -16,15 +16,9 @@ export const handleError = (e: any, res: OpenSearchDashboardsResponseFactory, lo
     return res.notFound({ body: 'Agent not found' });
   }
 
-  // Handle specific type of Errors
-  if (e instanceof AgentNotFoundError) {
-    return res.notFound({ body: 'Agent not found' });
-  }
-
   // handle http response error of calling backend API
   if (e.statusCode) {
     if (e.statusCode >= 400 && e.statusCode <= 499) {
-      console.log('yess');
       let message = typeof e.body === 'string' ? e.body : JSON.stringify(e.body);
       if (!message) {
         message = e.message;

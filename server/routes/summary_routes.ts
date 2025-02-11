@@ -43,7 +43,6 @@ export function registerSummaryAssistantRoutes(
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      console.log('enter handleLegacyErrors');
       const client = await getOpenSearchClientTransport({
         context,
         dataSourceId: req.query.dataSourceId,
