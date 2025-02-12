@@ -7,6 +7,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Features
 
 - expose chatEnabled flag to capabilities ([#398](https://github.com/opensearch-project/dashboards-assistant/pull/398)
+- add flag to control if display conversation list ([#438](https://github.com/opensearch-project/dashboards-assistant/pull/438))
 
 ### Enhancements
 

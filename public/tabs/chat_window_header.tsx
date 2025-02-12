@@ -9,9 +9,10 @@ import { useChatContext } from '../contexts/chat_context';
 import { ChatWindowHeaderTitle } from '../components/chat_window_header_title';
 import { TAB_ID } from '../utils/constants';
 import { SidecarIconMenu } from '../components/sidecar_icon_menu';
-import { getLogoIcon } from '../services';
+import { getLogoIcon, getConfigSchema } from '../services';
 
 export const ChatWindowHeader = React.memo(() => {
+  const configSchema = getConfigSchema();
   const chatContext = useChatContext();
 
   return (
@@ -33,20 +34,22 @@ export const ChatWindowHeader = React.memo(() => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label="history"
-            iconType="clock"
-            size="xs"
-            color="text"
-            onClick={() => {
-              chatContext.setFlyoutComponent(undefined);
-              // Back to chat tab if history page already visible
-              chatContext.setSelectedTabId(
-                chatContext.selectedTabId === TAB_ID.HISTORY ? TAB_ID.CHAT : TAB_ID.HISTORY
-              );
-            }}
-            display={chatContext.selectedTabId === TAB_ID.HISTORY ? 'fill' : undefined}
-          />
+          {configSchema.chat.showConversationHistory && (
+            <EuiButtonIcon
+              aria-label="history"
+              iconType="clock"
+              size="xs"
+              color="text"
+              onClick={() => {
+                chatContext.setFlyoutComponent(undefined);
+                // Back to chat tab if history page already visible
+                chatContext.setSelectedTabId(
+                  chatContext.selectedTabId === TAB_ID.HISTORY ? TAB_ID.CHAT : TAB_ID.HISTORY
+                );
+              }}
+              display={chatContext.selectedTabId === TAB_ID.HISTORY ? 'fill' : undefined}
+            />
+          )}
         </EuiFlexItem>
         <SidecarIconMenu />
         <EuiFlexItem grow={false}>

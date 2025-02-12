@@ -14,6 +14,7 @@ export const configSchema = schema.object({
     allowRenameConversation: schema.boolean({ defaultValue: true }),
     deleteConversation: schema.boolean({ defaultValue: true }),
     regenerateMessage: schema.boolean({ defaultValue: true }),
+    showConversationHistory: schema.boolean({ defaultValue: true }),
   }),
   incontextInsight: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
