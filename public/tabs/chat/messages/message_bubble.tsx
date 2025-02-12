@@ -12,6 +12,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import { MessageActions } from './message_action';
 import { useCore } from '../../../contexts';
 import { getConfigSchema, getLogoIcon } from '../../../services';
@@ -71,7 +72,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">
-              <i>Generating response...</i>
+              <i>
+                {i18n.translate('chat.loading.response', {
+                  defaultMessage: 'Generating response...',
+                })}
+              </i>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
