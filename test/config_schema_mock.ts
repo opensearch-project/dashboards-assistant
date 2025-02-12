@@ -17,6 +17,7 @@ export const getMockConfigSchema = (
     allowRenameConversation: true,
     deleteConversation: true,
     regenerateMessage: true,
+    showConversationHistory: true,
     ...(overrides.chat || {}),
   },
   incontextInsight: { enabled: true },
@@ -31,4 +32,5 @@ export const setupConfigSchemaMock = (
   overrides: Partial<{ chat: Partial<ConfigSchema['chat']> }> = {}
 ) => {
   jest.spyOn(services, 'getConfigSchema').mockReturnValue(getMockConfigSchema(overrides));
+  console.log('Mocked getConfigSchema:', services.getConfigSchema());
 };
