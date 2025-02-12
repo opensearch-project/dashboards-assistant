@@ -223,7 +223,7 @@ export function registerData2SummaryRoutes(
 
         let result = response.body.inference_results[0].output[0].result;
 
-        result = postprocessing(result);
+        result = postProcessing(result);
 
         if (result) {
           return res.ok({ body: result });
