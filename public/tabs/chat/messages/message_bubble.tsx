@@ -4,17 +4,15 @@
  */
 
 import {
-  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { i18n } from '@osd/i18n';
 import { MessageActions } from './message_action';
 import { useCore } from '../../../contexts';
 import { getConfigSchema, getLogoIcon } from '../../../services';
@@ -53,48 +51,36 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     props.message.type === 'output' &&
     props.message.contentType === 'markdown';
 
-  const createAvatar = (iconType?: IconType) => {
-    if (iconType) {
-      return (
-        <EuiAvatar
-          className="llm-chat-avatar"
-          name="llm"
-          size="l"
-          iconType={iconType}
-          iconColor="#fff"
-        />
-      );
-    } else {
-      return <EuiIcon type={getLogoIcon('gradient')} size="l" />;
-    }
-  };
-
   if ('loading' in props && props.loading) {
     return (
-      <EuiFlexGroup
-        aria-label="chat message loading"
-        gutterSize="m"
-        justifyContent="flexStart"
-        alignItems="flexStart"
-        responsive={false}
+      <EuiPanel
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="l"
+        color="plain"
+        className="llm-chat-bubble-panel llm-chat-bubble-panel-output llm-chat-bubble-panel-loading"
       >
-        <EuiFlexItem grow={false}>
-          {createAvatar(() => (
-            <EuiLoadingSpinner size="l" />
-          ))}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={false}
-            paddingSize="l"
-            color="plain"
-            className="llm-chat-bubble-panel llm-chat-bubble-panel-output llm-chat-bubble-panel-loading"
-          >
-            <EuiLoadingContent lines={3} />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiFlexGroup
+          aria-label="chat message loading"
+          gutterSize="s"
+          justifyContent="flexStart"
+          alignItems="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <i>
+                {i18n.translate('chat.loading.response', {
+                  defaultMessage: 'Generating response...',
+                })}
+              </i>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     );
   }
 
@@ -113,7 +99,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
               hasShadow={false}
               hasBorder={false}
               paddingSize="l"
-              color="plain"
+              color="primary"
               className="llm-chat-bubble-panel llm-chat-bubble-panel-input"
             >
               {props.children}
@@ -126,66 +112,54 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo((props) =>
     const fullWidth = props.message.fullWidth;
 
     return (
-      <EuiFlexGroup
+      <EuiPanel
+        /**
+         * When using minWidth the content width inside may be larger than the container itself,
+         * especially in data grid case that the content will change its size according to fullScreen or not.
+         */
+        style={fullWidth ? { width: '100%' } : {}}
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="l"
+        color="plain"
+        className="llm-chat-bubble-panel llm-chat-bubble-panel-output"
         aria-label="chat message bubble"
-        gutterSize="m"
-        justifyContent="flexStart"
-        alignItems="flexStart"
-        responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          {props.message.contentType === 'error' ? createAvatar('alert') : createAvatar()}
-        </EuiFlexItem>
-        <EuiFlexItem className="llm-chat-bubble-wrapper">
-          <EuiPanel
-            /**
-             * When using minWidth the content width inside may be larger than the container itself,
-             * especially in data grid case that the content will change its size according to fullScreen or not.
-             */
-            style={fullWidth ? { width: '100%' } : {}}
-            hasShadow={false}
-            hasBorder={false}
-            paddingSize="l"
-            color="plain"
-            className="llm-chat-bubble-panel llm-chat-bubble-panel-output"
-          >
-            {props.children}
-            {props.showActionBar && (
-              <>
-                <EuiSpacer size="xs" />
-                <MessageActions
-                  contentToCopy={props.message.content ?? ''}
-                  showRegenerate={props.showRegenerate}
-                  onRegenerate={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
-                  interaction={props.interaction}
-                  message={props.message as IOutput}
-                  showFeedback={showFeedback}
-                  showTraceIcon={configSchema.chat.trace && !!props.message.interactionId}
-                  traceTip="How was this generated?"
-                  traceInteractionId={props.message.interactionId || ''}
-                  onViewTrace={() => {
-                    const message = props.message as IOutput;
-                    const viewTraceAction: ISuggestedAction = {
-                      actionType: 'view_trace',
-                      metadata: {
-                        interactionId: message.interactionId || '',
-                      },
-                      message: 'How was this generated?',
-                    };
-                    executeAction(viewTraceAction, message);
-                  }}
-                  shouldActionBarVisibleOnHover={props.shouldActionBarVisibleOnHover}
-                  isFullWidth={fullWidth}
-                  httpSetup={core.services.http}
-                  dataSourceService={core.services.dataSource}
-                  usageCollection={core.services.setupDeps.usageCollection}
-                  metricAppName="chat"
-                />
-              </>
-            )}
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        {props.children}
+        {props.showActionBar && (
+          <>
+            <EuiSpacer size="xs" />
+            <MessageActions
+              contentToCopy={props.message.content ?? ''}
+              showRegenerate={props.showRegenerate}
+              onRegenerate={() => props.onRegenerate?.(props.interaction?.interaction_id || '')}
+              interaction={props.interaction}
+              message={props.message as IOutput}
+              showFeedback={showFeedback}
+              showTraceIcon={configSchema.chat.trace && !!props.message.interactionId}
+              traceTip="How was this generated?"
+              traceInteractionId={props.message.interactionId || ''}
+              onViewTrace={() => {
+                const message = props.message as IOutput;
+                const viewTraceAction: ISuggestedAction = {
+                  actionType: 'view_trace',
+                  metadata: {
+                    interactionId: message.interactionId || '',
+                  },
+                  message: 'How was this generated?',
+                };
+                executeAction(viewTraceAction, message);
+              }}
+              shouldActionBarVisibleOnHover={props.shouldActionBarVisibleOnHover}
+              isFullWidth={fullWidth}
+              httpSetup={core.services.http}
+              dataSourceService={core.services.dataSource}
+              usageCollection={core.services.setupDeps.usageCollection}
+              metricAppName="chat"
+            />
+          </>
+        )}
+      </EuiPanel>
     );
   }
   return null;
