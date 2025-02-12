@@ -17,7 +17,7 @@ const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
 
-export function postprocessing(output: string) {
+export function postProcessing(output: string) {
   const summarizeStartTag = '<summarization>';
   const summarizeEndTag = '</summarization>';
   const startTag = '<final insights>';
