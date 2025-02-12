@@ -7,6 +7,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Features
 
 - expose chatEnabled flag to capabilities ([#398](https://github.com/opensearch-project/dashboards-assistant/pull/398)
+- add data to summary response post processing ([#436] (https://github.com/opensearch-project/dashboards-assistant/pull/436)
 
 ### Enhancements
 
@@ -14,6 +15,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - fixed incorrect message id field used ([#378](https://github.com/opensearch-project/dashboards-assistant/pull/378))
 - Improve alert summary with backend log pattern experience ([#389](https://github.com/opensearch-project/dashboards-assistant/pull/389))
+
 
 ### Infrastructure
 
