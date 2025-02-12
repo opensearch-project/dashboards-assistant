@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { Logger, OpenSearchDashboardsResponseFactory } from '../../../../src/core/server';
 import { AgentNotFoundError } from './errors';
 
@@ -17,8 +18,12 @@ export const handleError = (e: any, res: OpenSearchDashboardsResponseFactory, lo
   // handle http response error of calling backend API
   if (e.statusCode) {
     if (e.statusCode >= 400 && e.statusCode <= 499) {
+      let message = typeof e.body === 'string' ? e.body : JSON.stringify(e.body);
+      if (!message) {
+        message = e.message;
+      }
       return res.customError({
-        body: { message: typeof e.body === 'string' ? e.body : JSON.stringify(e.body) },
+        body: { message: message || 'unknow error' },
         statusCode: e.statusCode,
       });
     } else {
