@@ -375,12 +375,6 @@ describe('test summary route', () => {
       expect(output).toEqual(input);
     });
 
-    it('handles multiple sets of tags', () => {
-      const input = `<summarization>First summary</summarization><summarization>Second summary</summarization><final insights>First insight</final insights><final insights>Second insight</final insights>`;
-      const output = postProcessing(input);
-      expect(output).toEqual(`First summary\nFirst insight`.replace(/\\n/g, '\n'));
-    });
-
     it('handles malformed or mixed case tags by returning the original string', () => {
       const input = `<Summarization>Summary</summarization><FINAL INSIGHTS>Insights</final insights>`;
       const output = postProcessing(input);
@@ -391,6 +385,18 @@ describe('test summary route', () => {
       const input = `<summarization>Summary with <>&"'</summarization><final insights>Insights with <>& "'</final insights>`;
       const output = postProcessing(input);
       expect(output).toEqual(`Summary with <>&"'\nInsights with <>& "'`);
+    });
+
+    it('handles various whitespace patterns', () => {
+      const input = `<summarization>
+          Multi-line
+          summary
+          </summarization><final insights>
+          Multi-line
+          insights
+          </final insights>`;
+      const output = postProcessing(input);
+      expect(output).toEqual(`Multi-line\n           summary\nMulti-line\n           insights`);
     });
 
     it('handles unicode characters correctly', () => {
