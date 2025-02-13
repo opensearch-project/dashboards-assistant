@@ -128,21 +128,6 @@ export function registerSummaryAssistantRoutes(
     },
 
     router.handleLegacyErrors(async (context, req, res) => {
-      const input = `<summarization>
-      Multi-line
-      summary
-      </summarization><final insights>
-      Multi-line
-      insights
-      </final insights>`;
-
-      const result = postProcessing(input);
-
-      console.log('res is: ', result);
-      console.log(
-        'expected value is: ',
-        `Multi-line\n        summary\nMulti-line\n        insights`
-      );
       const client = await getOpenSearchClientTransport({
         context,
         dataSourceId: req.query.dataSourceId,
