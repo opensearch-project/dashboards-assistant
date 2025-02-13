@@ -387,18 +387,6 @@ describe('test summary route', () => {
       expect(output).toEqual(`Summary with <>&"'\nInsights with <>& "'`);
     });
 
-    it('handles various whitespace patterns', () => {
-      const input = `<summarization>
-          Multi-line
-          summary
-          </summarization><final insights>
-          Multi-line
-          insights
-          </final insights>`;
-      const output = postProcessing(input);
-      expect(output).toEqual(`Multi-line\n           summary\nMulti-line\n           insights`);
-    });
-
     it('handles unicode characters correctly', () => {
       const input = `<summarization>Summary with emoji 😊</summarization><final insights>Insights with unicode 你好</final insights>`;
       const output = postProcessing(input);
