@@ -126,7 +126,18 @@ export function registerSummaryAssistantRoutes(
         }),
       },
     },
+
     router.handleLegacyErrors(async (context, req, res) => {
+      const input = `<summarization>
+          Multi-line
+          summary
+          </summarization><final insights>
+          Multi-line
+          insights
+          </final insights>`;
+      const output = postProcessing(input);
+      console.log('outpus is: ', output);
+
       const client = await getOpenSearchClientTransport({
         context,
         dataSourceId: req.query.dataSourceId,
@@ -158,6 +169,7 @@ export function registerSummaryAssistantRoutes(
         }
         return res.ok({ body: { insight } });
       } catch (e) {
+        console.log('hello');
         return handleError(e, res, context.assistant_plugin.logger);
       }
     })
