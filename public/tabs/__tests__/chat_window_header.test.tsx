@@ -10,16 +10,13 @@ import { ChatWindowHeader } from '../chat_window_header';
 import * as chatContextExports from '../../contexts/chat_context';
 import { TabId } from '../../types';
 import { SIDECAR_DOCKED_MODE } from '../../../../../src/core/public';
+import { setupConfigSchemaMock } from '../../../test/config_schema_mock';
 
 jest.mock('../../components/chat_window_header_title', () => {
   return { ChatWindowHeaderTitle: () => <div>OpenSearch Assistant</div> };
 });
 
-jest.mock('../../services', () => {
-  return {
-    getLogoIcon: jest.fn().mockReturnValue(''),
-  };
-});
+jest.mock('../../services');
 
 const setup = ({ selectedTabId }: { selectedTabId?: TabId } = {}) => {
   const useChatContextMock = {
@@ -43,15 +40,28 @@ const setup = ({ selectedTabId }: { selectedTabId?: TabId } = {}) => {
 };
 
 describe('<ChatWindowHeader />', () => {
+  beforeEach(() => {
+    setupConfigSchemaMock();
+  });
   it('should render title, history, setSidecarMode and close button', () => {
     const { renderResult } = setup();
-
     expect(renderResult.getByText('OpenSearch Assistant')).toBeInTheDocument();
     expect(renderResult.getByLabelText('history')).toBeInTheDocument();
     expect(renderResult.getByLabelText('setSidecarMode')).toBeInTheDocument();
     expect(renderResult.getByLabelText('close')).toBeInTheDocument();
   });
 
+  it('should not display conversation list when feature flag is false', () => {
+    setupConfigSchemaMock({
+      chat: {
+        showConversationHistory: false,
+      },
+    });
+    const { renderResult } = setup();
+    expect(renderResult.queryByLabelText('history')).not.toBeInTheDocument();
+  });
+
+  it('should not display conversation history icon when feature flag is false', () => {});
   it('should call setFlyoutVisible with false after close button clicked', () => {
     const { renderResult, useChatContextMock } = setup();
 
