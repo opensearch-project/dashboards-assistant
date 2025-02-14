@@ -85,13 +85,17 @@ describe('<ChatPageContent />', () => {
   });
 
   it('should display welcome message by default', () => {
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent messagesLoading={false} showWelcomePage={true} onRefresh={jest.fn()} />
+    );
     expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(1);
     expect(screen.queryByLabelText('chat welcome message')).toBeInTheDocument();
   });
 
   it('should display a default suggested action', () => {
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent messagesLoading={false} showWelcomePage={true} onRefresh={jest.fn()} />
+    );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(1);
     expect(screen.queryByText('What are the indices in my cluster?')).toBeInTheDocument();
   });
@@ -114,7 +118,9 @@ describe('<ChatPageContent />', () => {
       chatState: { messages, llmResponding: false, interactions: [] },
       chatStateDispatch: jest.fn(),
     });
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent messagesLoading={false} showWelcomePage={true} onRefresh={jest.fn()} />
+    );
     expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(3);
   });
 
@@ -235,7 +241,9 @@ describe('<ChatPageContent />', () => {
   });
 
   it('should call executeAction', () => {
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent messagesLoading={false} showWelcomePage={true} onRefresh={jest.fn()} />
+    );
     fireEvent.click(screen.getByText('What are the indices in my cluster?'));
     expect(executeActionMock).toHaveBeenCalled();
   });

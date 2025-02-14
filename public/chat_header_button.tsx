@@ -43,6 +43,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
+  const [createNewConversation, setCreateNewConversation] = useState(false);
+  const [showWelcomePage, setShowWelcomePage] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
@@ -114,6 +116,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (e.key === 'Enter' && inputRef.current && inputRef.current.value.trim().length > 0) {
       // open chat window
       setFlyoutVisible(true);
+      setCreateNewConversation(true);
+      setShowWelcomePage(true);
       // start a new chat
       props.assistantActions.loadChat();
       // send message
@@ -297,6 +301,9 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
                 flyoutVisible={flyoutVisible}
                 overrideComponent={flyoutComponent}
                 flyoutFullScreen={flyoutFullScreen}
+                createNewConversation={createNewConversation}
+                showWelcomePage={showWelcomePage}
+                setShowWelcomePage={setShowWelcomePage}
               />
             </MountPointPortal>
           </ChatStateProvider>
