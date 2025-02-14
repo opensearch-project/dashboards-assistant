@@ -7,7 +7,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Features
 
 - expose chatEnabled flag to capabilities ([#398](https://github.com/opensearch-project/dashboards-assistant/pull/398))
-- update chatbot UI to align with new look ([#398](https://github.com/opensearch-project/dashboards-assistant/pull/398))
+- update chatbot UI to align with new look ([#435](https://github.com/opensearch-project/dashboards-assistant/pull/435))
 
 ### Enhancements
 
