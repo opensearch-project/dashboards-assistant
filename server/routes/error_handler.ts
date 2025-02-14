@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import { Logger, OpenSearchDashboardsResponseFactory } from '../../../../src/core/server';
 import { AgentNotFoundError } from './errors';
 
