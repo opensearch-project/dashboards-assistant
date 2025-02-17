@@ -22,6 +22,7 @@ import { registerAgentRoutes } from './routes/agent_routes';
 import {
   registerSummaryAssistantRoutes,
   registerData2SummaryRoutes,
+  registerIndexDetectRoutes,
 } from './routes/summary_routes';
 import { capabilitiesProvider as visNLQCapabilitiesProvider } from './vis_type_nlq/capabilities_provider';
 import { visNLQSavedObjectType } from './vis_type_nlq/saved_object_type';
@@ -72,6 +73,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     // Register router for alert insight
     if (config.alertInsight.enabled) {
       registerSummaryAssistantRoutes(router, assistantServiceSetup);
+      registerIndexDetectRoutes(router, assistantServiceSetup);
     }
 
     core.capabilities.registerProvider(capabilitiesProvider);

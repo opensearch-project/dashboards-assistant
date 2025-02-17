@@ -15,6 +15,7 @@ import { AgentNotFoundError } from './errors';
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';
 const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
+const INDEX_DETECT_AGENT_CONFIG_ID = 'os_index_detect';
 
 export function registerSummaryAssistantRoutes(
   router: IRouter,
@@ -187,6 +188,50 @@ export function registerData2SummaryRoutes(
             sample_count: req.body.sample_count,
             ppl: req.body.ppl,
             question: req.body.question,
+          }
+        );
+
+        const result = response.body.inference_results[0].output[0].result;
+        if (result) {
+          return res.ok({ body: result });
+        } else {
+          return res.customError({
+            body: 'Execute agent failed with empty response!',
+            statusCode: 500,
+          });
+        }
+      } catch (e) {
+        return handleError(e, res, context.assistant_plugin.logger);
+      }
+    })
+  );
+}
+
+export function registerIndexDetectRoutes(
+  router: IRouter,
+  assistantService: AssistantServiceSetup
+) {
+  router.post(
+    {
+      path: SUMMARY_ASSISTANT_API.INDEX_DETECT,
+      validate: {
+        body: schema.object({
+          sampleData: schema.maybe(schema.string()),
+          schema: schema.maybe(schema.string()),
+        }),
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const assistantClient = assistantService.getScopedClient(req, context);
+      try {
+        const response = await assistantClient.executeAgentByConfigName(
+          INDEX_DETECT_AGENT_CONFIG_ID,
+          {
+            sampleData: req.body.sampleData,
+            schema: req.body.schema,
           }
         );
 
