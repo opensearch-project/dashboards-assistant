@@ -9,6 +9,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - expose chatEnabled flag to capabilities ([#398](https://github.com/opensearch-project/dashboards-assistant/pull/398)
 - add data to summary response post processing ([#436] (https://github.com/opensearch-project/dashboards-assistant/pull/436)
 
+
 ### Enhancements
 
 ### Bug Fixes
