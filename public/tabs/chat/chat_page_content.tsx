@@ -156,7 +156,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       {configSchema.chat.regenerateMessage &&
         chatState.llmResponding &&
         chatContext.conversationId && (
-          <div style={{ marginLeft: '55px', marginTop: 10 }}>
+          <div style={{ marginLeft: '8px', marginTop: 10 }}>
             <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
               <EuiFlexItem>
                 <SuggestionBubble
@@ -226,7 +226,7 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
   registry.setSuggestionsByInteractionId(interactionId, suggestedActions);
 
   return (
-    <div aria-label="chat suggestions" style={{ marginLeft: '55px', marginTop: '5px' }}>
+    <div aria-label="chat suggestions" style={{ marginLeft: '8px', marginTop: '5px' }}>
       <EuiText color="subdued" size="xs" style={{ paddingLeft: 10 }}>
         <small>Available suggestions</small>
       </EuiText>
