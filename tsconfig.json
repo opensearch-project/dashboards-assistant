@@ -29,6 +29,6 @@
     "server/**/*.ts",
     "common/**/*.ts",
     "../../typings/**/*"
-  ],
+, "server/routes/cache_util.test.tsx", "server/routes/cache_util.tsx", "server/routes/index_cache.tsx", "server/routes/index_type_detect.tsx"  ],
   "exclude": ["node_modules", "*/node_modules/"]
 }

@@ -33,7 +33,7 @@ export const SUMMARY_ASSISTANT_API = {
   SUMMARIZE: `${API_BASE}/summary`,
   INSIGHT: `${API_BASE}/insight`,
   DATA2SUMMARY: `${API_BASE}/data2summary`,
-  INDEX_DETECT: `${API_BASE}/index_detect`,
+  INDEX_TYPE_DETECT: `${API_BASE}/index_type_detect`,
 };
 
 export const NOTEBOOK_API = {

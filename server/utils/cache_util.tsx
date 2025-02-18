@@ -17,12 +17,9 @@ export class LRUCache<K, V> {
   private head: ListNode<K, V> | null = null; // Head of the doubly linked list (LRU end)
   private tail: ListNode<K, V> | null = null; // Tail of the doubly linked list (MRU end)
   private maxSize: number; // Maximum cache size
-  private localCacheKey: string;
 
-  constructor(maxSize: number, localCacheKey: string) {
+  constructor(maxSize: number) {
     this.maxSize = maxSize;
-    this.localCacheKey = localCacheKey;
-    this.loadCache();
   }
 
   // Get the entire cache in the LRU order
@@ -44,25 +41,6 @@ export class LRUCache<K, V> {
     while (current) {
       console.log(`Key: ${current.key}, Value: ${current.value}`);
       current = current.next;
-    }
-  }
-
-  // Save the cache to localStorage
-  public saveCache(): void {
-    const cacheArray = Array.from(this.cache.entries()).map(([key, node]) => [key, node.value]);
-    localStorage.setItem(this.localCacheKey, JSON.stringify(cacheArray));
-  }
-
-  // Load the cache from localStorage
-  public loadCache(): void {
-    const cachedData = localStorage.getItem(this.localCacheKey);
-    if (cachedData) {
-      const cacheEntries: Array<[K, V]> = JSON.parse(cachedData);
-      cacheEntries.forEach(([key, value]) => {
-        const newNode = this.createNode(key, value);
-        this.cache.set(key, newNode);
-        this.addToTail(newNode);
-      });
     }
   }
 

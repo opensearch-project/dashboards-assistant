@@ -9,12 +9,7 @@ describe('LRUCache', () => {
   let cache: LRUCache<number, string>;
   beforeEach(() => {
     // Initialize a new LRUCache instance before each test
-    cache = new LRUCache<number, string>(3, 'testCache');
-  });
-
-  afterEach(() => {
-    // Clear localStorage after each test
-    localStorage.clear();
+    cache = new LRUCache<number, string>(3);
   });
 
   it('should retrieve an item from the cache', () => {
@@ -96,29 +91,30 @@ describe('LRUCache', () => {
     expect(cache.getCache(2)).toBeNull();
   });
 
-  it('should load cache from localStorage', () => {
-    localStorage.setItem(
-      'testCache',
-      JSON.stringify([
-        [1, 'value1'],
-        [2, 'value2'],
-      ])
-    );
-    cache = new LRUCache(3, 'testCache');
+  it('should handle a large number of items and evict correctly when max size is reached', () => {
+    const maxSize = 999;
+    cache = new LRUCache<number, string>(maxSize);
 
-    expect(cache.getCache(1)).toBe('value1');
+    for (let i = 1; i <= 1000; i++) {
+      cache.setCache(i, `value${i}`);
+    }
+
+    expect(cache.getCache(1)).toBeNull();
     expect(cache.getCache(2)).toBe('value2');
-  });
 
-  it('should save cache to localStorage', () => {
-    cache.setCache(1, 'value1');
-    cache.setCache(2, 'value2');
-    cache.saveCache();
-    const cachedData = localStorage.getItem('testCache');
-    expect(cachedData).toBeTruthy();
-    const parsedData = JSON.parse(cachedData || '[]');
-    expect(parsedData.length).toBe(2);
-    expect(parsedData[0]).toEqual([1, 'value1']);
-    expect(parsedData[1]).toEqual([2, 'value2']);
+    const cacheOrder = cache.getAllCache();
+
+    // Check that cache order is correct (the 2nd has been move to the last)
+    for (let i = 0; i < maxSize - 1; i++) {
+      expect(cacheOrder[i].key).toBe(i + 3);
+      expect(cacheOrder[i].value).toBe(`value${i + 3}`);
+    }
+
+    expect(cacheOrder[cacheOrder.length - 1].key).toBe(2);
+    expect(cacheOrder[cacheOrder.length - 1].value).toBe('value2');
+
+    expect(cache.getCache(1000)).toBe('value1000');
+    expect(cache.getCache(999)).toBe('value999');
+    expect(cache.getCache(998)).toBe('value998');
   });
 });
