@@ -13,11 +13,13 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Enhancements
 
+- remove os_insight agent ([#452](https://github.com/opensearch-project/dashboards-assistant/pull/452))
+
 ### Bug Fixes
 
 - fixed incorrect message id field used ([#378](https://github.com/opensearch-project/dashboards-assistant/pull/378))
 - Improve alert summary with backend log pattern experience ([#389](https://github.com/opensearch-project/dashboards-assistant/pull/389))
-- fixed in context feature returning 500 error if workspace is invalid to returning 4XX  [#429](https://github.com/opensearch-project/dashboards-assistant/pull/429)
+- fixed in context feature returning 500 error if workspace is invalid to returning 4XX [#429](https://github.com/opensearch-project/dashboards-assistant/pull/429)
 
 ### Infrastructure
 
