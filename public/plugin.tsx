@@ -311,6 +311,7 @@ export class AssistantPlugin
                   resultSummaryEnabled$={resultSummaryEnabled$}
                   isSummaryAgentAvailable$={isSummaryAgentAvailable$}
                   data={setupDeps.data}
+                  assistantServiceStart={this.assistantService.start(core.http)}
                 />
               );
             },

@@ -22,7 +22,7 @@ import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER } from '../ui_triggers';
 import { getUiActions } from '../services';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { DATA2SUMMARY_AGENT_CONFIG_ID } from '../../common/constants/llm';
-import { checkAgentsExist } from '../../common/utils/llm_chat/get_is_data2summary_available';
+import { AssistantServiceStart } from '../services/assistant_service';
 interface Props {
   data: DataPublicPluginSetup;
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
@@ -30,6 +30,7 @@ interface Props {
   isSummaryAgentAvailable$: BehaviorSubject<boolean>;
   httpSetup: HttpSetup;
   label?: string;
+  assistantServiceStart: AssistantServiceStart;
 }
 
 export const ActionContextMenu = (props: Props) => {
@@ -47,14 +48,13 @@ export const ActionContextMenu = (props: Props) => {
   const shouldShowSummarizationAction = resultSummaryEnabled && isSummaryAgentAvailable;
 
   useEffect(() => {
-    props.isSummaryAgentAvailable$.next(false);
     if (!resultSummaryEnabled) return;
+    props.isSummaryAgentAvailable$.next(false);
     const fetchSummaryAgent = async () => {
       try {
-        const summaryAgentStatus = await checkAgentsExist(
-          props.httpSetup,
+        const summaryAgentStatus = await props.assistantServiceStart.client.agentConfigExists(
           DATA2SUMMARY_AGENT_CONFIG_ID,
-          props.data.query.queryString.getQuery().dataset?.dataSource?.id
+          { dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id }
         );
         props.isSummaryAgentAvailable$.next(!!summaryAgentStatus.exists);
       } catch (error) {
