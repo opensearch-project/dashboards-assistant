@@ -120,12 +120,7 @@ export const GeneratePopoverBody: React.FC<{
       } else {
         summaryType = incontextInsight.key;
       }
-      const insightType =
-        summaryType === 'alerts'
-          ? contextObj?.additionalInfo.monitorType === 'cluster_metrics_monitor'
-            ? 'os_insight'
-            : 'user_insight'
-          : undefined;
+      const insightType = summaryType === 'alerts' ? 'user_insight' : undefined;
       const index = contextObj?.additionalInfo?.index;
       const dsl = contextObj?.additionalInfo?.dsl;
       const topNLogPatternData = contextObj?.additionalInfo?.topNLogPatternData;
