@@ -52,7 +52,7 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
           loadChat(id, title);
         }
       });
-  }, []);
+  }, [props.createNewConversation]);
 
   let chatPageVisible = false;
   let chatHistoryPageVisible = false;
