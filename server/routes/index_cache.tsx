@@ -39,7 +39,7 @@ export const setIndexCache = (
   return indexLRUCache.setCache(IndexCacheData.generateCacheKey(indexName, dataSourceId), data);
 };
 
-export const testIndexCache = (): unknown => {
+export const getAllIndexCache = (): unknown => {
   return indexLRUCache.getAllCache();
 };
 

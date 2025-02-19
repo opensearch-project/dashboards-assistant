@@ -7,7 +7,7 @@ import { schema } from '@osd/config-schema';
 import { IRouter, OpenSearchClient } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
-import { getAgentIdByConfigName, searchAgent } from './get_agent';
+import { searchAgent } from './get_agent';
 import { detectIndexType } from './index_type_detect';
 import { AssistantServiceSetup } from '../services/assistant_service';
 import { handleError } from './error_handler';

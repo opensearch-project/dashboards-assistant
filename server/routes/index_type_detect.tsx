@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AssistantClient } from 'server/services/assistant_client';
 import { escape } from 'lodash';
+import { AssistantClient } from '../services/assistant_client';
 import { OpenSearchClient } from '../../../../src/core/server';
-import { getIndexCache, setIndexCache, IndexCacheData, testIndexCache } from './index_cache';
+import { getIndexCache, setIndexCache, IndexCacheData } from './index_cache';
 
 const INDEX_TYPE_DETECT_AGENT_CONFIG_ID = 'os_index_type_detect';
 
@@ -46,15 +46,15 @@ export async function detectIndexType(
   indexName: string,
   dataSourceId: string | undefined
 ) {
-  const indexMapping = escape(JSON.stringify(await searchIndexMapping(client, indexName)));
-  const sampleData = escape(JSON.stringify(await searchSampleData(client, indexName)));
-
   const indexCache = getIndexCache(indexName, dataSourceId ? dataSourceId : '');
   if (indexCache) {
     return indexCache.isLogRelated;
   }
 
   try {
+    const indexMapping = escape(JSON.stringify(await searchIndexMapping(client, indexName)));
+    const sampleData = escape(JSON.stringify(await searchSampleData(client, indexName)));
+
     const response = await assistantClient.executeAgentByConfigName(
       INDEX_TYPE_DETECT_AGENT_CONFIG_ID,
       {
@@ -65,18 +65,15 @@ export async function detectIndexType(
 
     const detectResult = JSON.parse(response.body.inference_results[0].output[0].result);
     if (detectResult) {
-      console.log('Detect Result', detectResult);
       setIndexCache(
         new IndexCacheData(detectResult.isRelated, detectResult.reason),
         indexName,
         dataSourceId ? dataSourceId : ''
       );
-      const cache = testIndexCache();
-      console.log('Index Cache', cache);
       return detectResult.isRelated;
     }
     return false;
   } catch (error) {
-    throw new Error(`Error in detectIndexType: ${error}`);
+    throw error;
   }
 }
