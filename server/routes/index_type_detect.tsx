@@ -30,13 +30,23 @@ async function searchSampleData(client: OpenSearchClient['transport'], indexName
       match_all: {},
     },
   };
-  const response = await searchQuery(client, `/${indexName}/_search`, 'POST', query);
+  const response = await searchQuery(
+    client,
+    `/${encodeURIComponent(indexName)}/_search`,
+    'POST',
+    query
+  );
   const sourceArray = response.body.hits.hits.map((hit: { _source: unknown }) => hit._source);
   return sourceArray;
 }
 
 async function searchIndexMapping(client: OpenSearchClient['transport'], indexName: string) {
-  const response = await searchQuery(client, `/${indexName}/_mapping`, 'GET', undefined);
+  const response = await searchQuery(
+    client,
+    `/${encodeURIComponent(indexName)}/_mapping`,
+    'GET',
+    undefined
+  );
   return response.body;
 }
 
