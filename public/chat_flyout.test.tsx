@@ -9,15 +9,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ChatFlyout } from './chat_flyout';
 import * as chatContextExports from './contexts/chat_context';
 import { TAB_ID } from './utils/constants';
-import * as useChatActionsExports from './hooks/use_chat_actions';
-import { coreMock } from '../../../src/core/public/mocks';
-import { HttpStart } from '../../../src/core/public';
-import { ConversationsService } from './services';
-import * as coreContextExports from './contexts/core_context';
-import * as useChatStateExports from './hooks/use_chat_state';
-import { I18nProvider } from '@osd/i18n/react';
-import { ChatHistoryPage } from './tabs/history/chat_history_page';
-import { Subject } from 'rxjs';
 
 jest.mock('./tabs/chat/chat_page', () => ({
   ChatPage: () => <div aria-label="mock chat page" />,
@@ -37,86 +28,12 @@ jest.mock('./components/agent_framework_traces_flyout_body', () => ({
   ),
 }));
 
-const mockGetConversationsHttp = () => {
-  const http = coreMock.createStart().http;
-  http.get.mockImplementation(async () => ({
-    objects: [
-      {
-        id: '1',
-        title: 'foo',
-      },
-    ],
-    total: 100,
-  }));
-  return http;
-};
-
-const setup = ({
-  http = mockGetConversationsHttp(),
-  chatContext = {},
-  shouldRefresh = false,
-}: {
-  http?: HttpStart;
-  chatContext?: { flyoutFullScreen?: boolean };
-  shouldRefresh?: boolean;
-} = {}) => {
-  const dataSourceMock = {
-    dataSourceIdUpdates$: new Subject<string | null>(),
-    getDataSourceQuery: jest.fn(() => ({ dataSourceId: 'foo' })),
-  };
-  const useCoreMock = {
-    services: {
-      ...coreMock.createStart(),
-      http,
-      conversations: new ConversationsService(http, dataSourceMock),
-      conversationLoad: {},
-      dataSource: dataSourceMock,
-    },
-  };
-  const useChatStateMock = {
-    chatStateDispatch: jest.fn(),
-  };
-  const useChatContextMock = {
-    conversationId: '1',
-    setConversationId: jest.fn(),
-    setTitle: jest.fn(),
-    setSelectedTabId: jest.fn(),
-    ...chatContext,
-  };
-  jest.spyOn(coreContextExports, 'useCore').mockReturnValue(useCoreMock);
-  jest.spyOn(useChatStateExports, 'useChatState').mockReturnValue(useChatStateMock);
-  jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue(useChatContextMock);
-
-  const renderResult = render(
-    <I18nProvider>
-      <ChatHistoryPage shouldRefresh={shouldRefresh} />
-    </I18nProvider>
-  );
-
-  return {
-    useCoreMock,
-    useChatStateMock,
-    useChatContextMock,
-    dataSourceMock,
-    renderResult,
-  };
-};
-
 describe('<ChatFlyout />', () => {
   beforeEach(() => {
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
       setFlyoutVisible: jest.fn(),
       selectedTabId: TAB_ID.CHAT,
       interactionId: 'chat_interaction_id_mock',
-    });
-
-    jest.spyOn(useChatActionsExports, 'useChatActions').mockReturnValue({
-      send: jest.fn(),
-      loadChat: jest.fn(),
-      openChatUI: jest.fn(),
-      executeAction: jest.fn(),
-      abortAction: jest.fn(),
-      regenerate: jest.fn(),
     });
   });
 
@@ -125,30 +42,6 @@ describe('<ChatFlyout />', () => {
   });
 
   it('should only display chat panel when current tab is TAB_ID.CHAT under non-fullscreen mode', () => {
-    const { useCoreMock } = setup({ shouldRefresh: true });
-    jest.spyOn(useCoreMock.services.conversations, 'load').mockReturnValue(
-      new Promise((resolve) => {
-        resolve({
-          loading: false,
-          data: {
-            conversations: [
-              {
-                id: 'conversation_id_mock',
-                name: 'conversation_name_mock',
-                messages: [
-                  {
-                    id: 'message_id_mock',
-                    content: 'message_content_mock',
-                    role: 'user',
-                  },
-                ],
-              },
-            ],
-          },
-        });
-      })
-    );
-
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
       setFlyoutVisible: jest.fn(),
       selectedTabId: TAB_ID.CHAT,
