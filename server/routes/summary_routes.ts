@@ -17,6 +17,17 @@ const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';
 const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
 
+export function postProcessing(output: string) {
+  const pattern = /<summarization>(.*?)<\/summarization>.*?<final insights>(.*?)<\/final insights>/s;
+  const match = output.match(pattern);
+  if (match) {
+    const [, summarization, finalInsights] = match;
+    const processedOutput = `${summarization.trim()}\n${finalInsights.trim()}`;
+    return processedOutput;
+  }
+  return output;
+}
+
 export function registerSummaryAssistantRoutes(
   router: IRouter,
   assistantService: AssistantServiceSetup
@@ -97,6 +108,7 @@ export function registerSummaryAssistantRoutes(
         }),
       },
     },
+
     router.handleLegacyErrors(async (context, req, res) => {
       try {
         const client = await getOpenSearchClientTransport({
@@ -193,7 +205,10 @@ export function registerData2SummaryRoutes(
           }
         );
 
-        const result = response.body.inference_results[0].output[0].result;
+        let result = response.body.inference_results[0].output[0].result;
+
+        result = postProcessing(result);
+
         if (result) {
           return res.ok({ body: result });
         } else {
