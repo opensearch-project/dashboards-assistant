@@ -170,10 +170,10 @@ describe('test summary route', () => {
         },
       },
     });
-    const spy = jest.spyOn(AgentHelpers, 'getAgentIdByConfigName').mockResolvedValue('test_agent');
+    const spy = jest.spyOn(AgentHelpers, 'searchAgent').mockResolvedValue('test_agent');
     const result = (await insightRequest({
       summaryType: 'alerts',
-      insightType: 'os_insight',
+      insightType: 'user_insight',
       summary: 'summary',
       question: 'Please summarize this alert, do not use any tool.',
       context: 'context',
@@ -197,10 +197,10 @@ describe('test summary route', () => {
       statusCode: 429,
       body: 'Request is throttled at model level',
     });
-    const spy = jest.spyOn(AgentHelpers, 'getAgentIdByConfigName').mockResolvedValue('test_agent');
+    const spy = jest.spyOn(AgentHelpers, 'searchAgent').mockResolvedValue('test_agent');
     const result = (await insightRequest({
       summaryType: 'alerts',
-      insightType: 'os_insight',
+      insightType: 'user_insight',
       summary: 'summary',
       question: 'Please summarize this alert, do not use any tool.',
       context: 'context',
@@ -224,10 +224,10 @@ describe('test summary route', () => {
       statusCode: 500,
       body: 'Server error',
     });
-    const spy = jest.spyOn(AgentHelpers, 'getAgentIdByConfigName').mockResolvedValue('test_agent');
+    const spy = jest.spyOn(AgentHelpers, 'searchAgent').mockResolvedValue('test_agent');
     const result = (await insightRequest({
       summaryType: 'alerts',
-      insightType: 'os_insight',
+      insightType: 'user_insight',
       summary: 'summary',
       question: 'Please summarize this alert, do not use any tool.',
       context: 'context',
