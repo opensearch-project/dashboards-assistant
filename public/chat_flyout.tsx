@@ -17,8 +17,6 @@ interface ChatFlyoutProps {
   flyoutVisible: boolean;
   overrideComponent: React.ReactNode | null;
   flyoutFullScreen: boolean;
-  showWelcomePage: boolean;
-  setShowWelcomePage: (b: boolean) => void;
 }
 
 export const ChatFlyout = (props: ChatFlyoutProps) => {
@@ -106,7 +104,7 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
                 initialSize={resizable ? 70 : undefined}
                 paddingSize="none"
               >
-                <ChatPage showWelcomePage={props.showWelcomePage} />
+                <ChatPage />
               </Panel>
               <>
                 {resizable && <Resizer />}

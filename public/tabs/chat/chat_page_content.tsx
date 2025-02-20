@@ -30,7 +30,6 @@ interface ChatPageContentProps {
   messagesLoading: boolean;
   messagesLoadingError?: Error;
   onRefresh: () => void;
-  showWelcomePage?: boolean;
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
@@ -88,29 +87,27 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
 
   return (
     <>
-      {props.showWelcomePage && (
-        <>
-          <MessageBubble
-            message={{ type: 'output', contentType: 'markdown', content: '' }}
-            showActionBar={false}
-          >
-            <WelcomeMessage username={chatContext?.currentAccount?.username} />
-          </MessageBubble>
-          {firstInputIndex < 0 && (
-            <Suggestions
-              message={{
-                content: '',
-                contentType: 'markdown',
-                type: 'output',
-                suggestedActions: [
-                  { message: 'What are the indices in my cluster?', actionType: 'send_as_input' },
-                ],
-              }}
-              inputDisabled={loading}
-            />
-          )}
-        </>
-      )}
+      <>
+        <MessageBubble
+          message={{ type: 'output', contentType: 'markdown', content: '' }}
+          showActionBar={false}
+        >
+          <WelcomeMessage username={chatContext?.currentAccount?.username} />
+        </MessageBubble>
+        {firstInputIndex < 0 && (
+          <Suggestions
+            message={{
+              content: '',
+              contentType: 'markdown',
+              type: 'output',
+              suggestedActions: [
+                { message: 'What are the indices in my cluster?', actionType: 'send_as_input' },
+              ],
+            }}
+            inputDisabled={loading}
+          />
+        )}
+      </>
       <EuiSpacer />
       {chatState.messages.map((message, i) => {
         // The latest llm output, just after the last user input

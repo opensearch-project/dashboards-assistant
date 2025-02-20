@@ -54,8 +54,6 @@ describe('<ChatFlyout />', () => {
         overrideComponent={null}
         flyoutProps={{}}
         flyoutFullScreen={false}
-        setShowWelcomePage={() => {}}
-        showWelcomePage={true}
       />
     );
     expect(screen.getByLabelText('chat panel').classList).not.toContain('llm-chat-hidden');
@@ -75,8 +73,6 @@ describe('<ChatFlyout />', () => {
         overrideComponent={null}
         flyoutProps={{}}
         flyoutFullScreen={false}
-        setShowWelcomePage={() => {}}
-        showWelcomePage={true}
       />
     );
     expect(screen.getByLabelText('chat panel').classList).toContain('llm-chat-hidden');
@@ -96,8 +92,6 @@ describe('<ChatFlyout />', () => {
         overrideComponent={null}
         flyoutProps={{}}
         flyoutFullScreen={false}
-        setShowWelcomePage={() => {}}
-        showWelcomePage={true}
       />
     );
 
@@ -120,8 +114,6 @@ describe('<ChatFlyout />', () => {
         overrideComponent={null}
         flyoutProps={{}}
         flyoutFullScreen={false}
-        setShowWelcomePage={() => {}}
-        showWelcomePage={true}
       />
     );
 
@@ -143,8 +135,6 @@ describe('<ChatFlyout />', () => {
         overrideComponent={null}
         flyoutProps={{}}
         flyoutFullScreen={true} // fullscreen
-        setShowWelcomePage={() => {}}
-        showWelcomePage={true}
       />
     );
 

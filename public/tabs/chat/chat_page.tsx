@@ -14,7 +14,6 @@ import { ChatInputControls } from './controls/chat_input_controls';
 
 interface ChatPageProps {
   className?: string;
-  showWelcomePage?: boolean;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
@@ -53,7 +52,6 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
                   : undefined
               }
               onRefresh={refresh}
-              showWelcomePage={props.showWelcomePage}
             />
           </EuiPageBody>
         </EuiPage>

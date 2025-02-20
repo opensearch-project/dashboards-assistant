@@ -43,8 +43,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  // const [createNewConversation, setCreateNewConversation] = useState(false);
-  const [showWelcomePage, setShowWelcomePage] = useState(false);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
@@ -116,8 +114,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (e.key === 'Enter' && inputRef.current && inputRef.current.value.trim().length > 0) {
       // open chat window
       setFlyoutVisible(true);
-      // setCreateNewConversation(true);
-      setShowWelcomePage(true);
       // start a new chat
       props.assistantActions.loadChat();
       // send message
@@ -233,8 +229,9 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
 
-  const loadLatestConversation = () => {
+  const toggleFlyoutAndloadLatestConversation = () => {
     setFlyoutVisible(!flyoutVisible);
+    core.services.conversationLoad.status$.next('loading');
     core.services.conversations
       .load({
         page: 1,
@@ -248,7 +245,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
         const data = core.services.conversations.conversations$.getValue();
         if (data?.objects?.length) {
           const { id } = data.objects[0];
-          props.assistantActions.loadChat(id, title);
+          props.assistantActions.loadChat(id);
         }
       });
   };
@@ -259,7 +256,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
         <EuiButtonIcon
           className={classNames(['eui-hideFor--xl', 'eui-hideFor--xxl', 'eui-hideFor--xxxl'])}
           iconType={getLogoIcon('gradient')}
-          onClick={loadLatestConversation}
+          onClick={toggleFlyoutAndloadLatestConversation}
           display="base"
           size="s"
           aria-label="toggle chat flyout button icon"
@@ -290,7 +287,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           aria-label="toggle chat flyout icon"
           type={getLogoIcon(inputFocus ? 'gradient' : 'gray')}
           size="m"
-          onClick={loadLatestConversation}
+          onClick={toggleFlyoutAndloadLatestConversation}
           className="llm-chat-toggle-icon"
         />
         <span className="llm-chat-header-shortcut">
@@ -321,8 +318,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
                 flyoutVisible={flyoutVisible}
                 overrideComponent={flyoutComponent}
                 flyoutFullScreen={flyoutFullScreen}
-                showWelcomePage={showWelcomePage}
-                setShowWelcomePage={setShowWelcomePage}
               />
             </MountPointPortal>
           </ChatStateProvider>
