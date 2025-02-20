@@ -21,7 +21,6 @@ interface ChatFlyoutProps {
 
 export const ChatFlyout = (props: ChatFlyoutProps) => {
   const chatContext = useChatContext();
-
   const chatHistoryPageLoadedRef = useRef(false);
 
   let chatPageVisible = false;
