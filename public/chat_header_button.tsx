@@ -238,13 +238,13 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     core.services.conversations
       .load({
         page: 1,
-        perPage: 10,
+        perPage: 1,
         fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
         sortField: 'updatedTimeMs',
         sortOrder: 'DESC',
         searchFields: ['title'],
       })
-      .then((res) => {
+      .then(() => {
         const data = core.services.conversations.conversations$.getValue();
         if (data?.objects?.length) {
           const { id } = data.objects[0];
