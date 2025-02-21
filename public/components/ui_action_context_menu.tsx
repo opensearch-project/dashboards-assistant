@@ -36,8 +36,6 @@ export interface Props {
 export const ActionContextMenu = (props: Props) => {
   const uiActions = getUiActions();
   const actionsRef = useRef(uiActions.getTriggerActions(AI_ASSISTANT_QUERY_EDITOR_TRIGGER));
-
-  console.log('getTriggerActions', uiActions.getTriggerActions(AI_ASSISTANT_QUERY_EDITOR_TRIGGER));
   const [open, setOpen] = useState(false);
   const [actionContext, setActionContext] = useState({
     datasetId: props.data.query.queryString.getQuery().dataset?.id ?? '',
@@ -49,7 +47,6 @@ export const ActionContextMenu = (props: Props) => {
   const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$, false);
   const shouldShowSummarizationAction = resultSummaryEnabled && isSummaryAgentAvailable;
 
-  console.log('2', isSummaryAgentAvailable);
   useEffect(() => {
     if (!resultSummaryEnabled) return;
     props.isSummaryAgentAvailable$.next(false);
