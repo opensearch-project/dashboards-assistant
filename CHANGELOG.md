@@ -11,6 +11,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - add data to summary response post processing ([#436](https://github.com/opensearch-project/dashboards-assistant/pull/436))
 - add flag to control if display conversation list ([#438](https://github.com/opensearch-project/dashboards-assistant/pull/438))
 - when open chatbot, load the last conversation automatically ([#439](https://github.com/opensearch-project/dashboards-assistant/pull/439))
+- add index type detection ([#454](https://github.com/opensearch-project/dashboards-assistant/pull/454))
 
 ### Enhancements
 
