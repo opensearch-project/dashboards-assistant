@@ -231,6 +231,9 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
   const toggleFlyoutAndloadLatestConversation = () => {
     setFlyoutVisible(!flyoutVisible);
+    if (flyoutVisible) {
+      return;
+    }
     core.services.conversationLoad.status$.next('loading');
     core.services.conversations
       .load({
