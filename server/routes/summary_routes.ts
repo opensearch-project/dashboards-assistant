@@ -50,16 +50,16 @@ export function registerSummaryAssistantRoutes(
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const client = await getOpenSearchClientTransport({
-        context,
-        dataSourceId: req.query.dataSourceId,
-      });
-      const assistantClient = assistantService.getScopedClient(req, context);
-      const agentConfigId =
-        req.body.index && req.body.dsl
-          ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
-          : SUMMARY_AGENT_CONFIG_ID;
       try {
+        const client = await getOpenSearchClientTransport({
+          context,
+          dataSourceId: req.query.dataSourceId,
+        });
+        const assistantClient = assistantService.getScopedClient(req, context);
+        const agentConfigId =
+          req.body.index && req.body.dsl
+            ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
+            : SUMMARY_AGENT_CONFIG_ID;
         const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
           context: req.body.context,
           question: req.body.question,
