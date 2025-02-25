@@ -7,14 +7,13 @@ import { schema } from '@osd/config-schema';
 import { IRouter, OpenSearchClient } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
-import { getAgentIdByConfigName, searchAgent } from './get_agent';
+import { searchAgent } from './get_agent';
 import { AssistantServiceSetup } from '../services/assistant_service';
 import { handleError } from './error_handler';
 import { AgentNotFoundError } from './errors';
 
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';
-const OS_INSIGHT_AGENT_CONFIG_ID = 'os_insight';
 const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
 
 export function registerSummaryAssistantRoutes(
@@ -141,12 +140,10 @@ async function detectInsightAgentId(
   summaryType: string,
   client: OpenSearchClient['transport']
 ) {
-  // We have separate agent for os_insight and user_insight. And for user_insight, we can
+  // for user_insight, we can
   // only get it by searching on name since it is not stored in agent config.
   try {
-    if (insightType === 'os_insight') {
-      return await getAgentIdByConfigName(OS_INSIGHT_AGENT_CONFIG_ID, client);
-    } else if (insightType === 'user_insight' && summaryType === 'alerts') {
+    if (insightType === 'user_insight' && summaryType === 'alerts') {
       return await searchAgent({ name: 'KB_For_Alert_Insight' }, client);
     }
   } catch (e) {
