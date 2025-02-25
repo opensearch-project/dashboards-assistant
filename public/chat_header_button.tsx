@@ -229,13 +229,37 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
 
+  const toggleFlyoutAndloadLatestConversation = () => {
+    setFlyoutVisible(!flyoutVisible);
+    if (flyoutVisible) {
+      return;
+    }
+    core.services.conversationLoad.status$.next('loading');
+    core.services.conversations
+      .load({
+        page: 1,
+        perPage: 1,
+        fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
+        sortField: 'updatedTimeMs',
+        sortOrder: 'DESC',
+        searchFields: ['title'],
+      })
+      .then(() => {
+        const data = core.services.conversations.conversations$.getValue();
+        if (data?.objects?.length) {
+          const { id } = data.objects[0];
+          props.assistantActions.loadChat(id);
+        }
+      });
+  };
+
   return (
     <>
       {!inLegacyHeader && isSingleLineHeader && (
         <EuiButtonIcon
           className={classNames(['eui-hideFor--xl', 'eui-hideFor--xxl', 'eui-hideFor--xxxl'])}
           iconType={getLogoIcon('gradient')}
-          onClick={() => setFlyoutVisible(!flyoutVisible)}
+          onClick={toggleFlyoutAndloadLatestConversation}
           display="base"
           size="s"
           aria-label="toggle chat flyout button icon"
@@ -266,7 +290,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           aria-label="toggle chat flyout icon"
           type={getLogoIcon(inputFocus ? 'gradient' : 'gray')}
           size="m"
-          onClick={() => setFlyoutVisible(!flyoutVisible)}
+          onClick={toggleFlyoutAndloadLatestConversation}
           className="llm-chat-toggle-icon"
         />
         <span className="llm-chat-header-shortcut">
