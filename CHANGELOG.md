@@ -16,6 +16,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Enhancements
 
 - remove os_insight agent ([#452](https://github.com/opensearch-project/dashboards-assistant/pull/452))
+- Hide the assistant entry when there isn't data2summary agent ([#417](https://github.com/opensearch-project/dashboards-assistant/pull/417))
 
 ### Bug Fixes
 
