@@ -282,26 +282,43 @@ export class AssistantPlugin
       }
     })();
 
-    const { isQuerySummaryCollapsed$, resultSummaryEnabled$ } = setupDeps.queryEnhancements;
-    setupDeps.data.__enhance({
-      editor: {
-        queryEditorExtension: {
-          id: 'assistant-query-actions',
-          order: 2000,
-          isEnabled$: () => of(true),
-          getSearchBarButton: () => {
-            return (
-              <ActionContextMenu
-                label={this.config.branding.label}
-                isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
-                resultSummaryEnabled$={resultSummaryEnabled$}
-                data={setupDeps.data}
-              />
-            );
+    (async () => {
+      const [coreStart, startDeps] = await core.getStartServices();
+      const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+
+      if (!assistantEnabled) {
+        return;
+      }
+
+      const {
+        isQuerySummaryCollapsed$,
+        resultSummaryEnabled$,
+        isSummaryAgentAvailable$,
+      } = setupDeps.queryEnhancements;
+
+      setupDeps.data.__enhance({
+        editor: {
+          queryEditorExtension: {
+            id: 'assistant-query-actions',
+            order: 2000,
+            isEnabled$: () => of(true),
+            getSearchBarButton: () => {
+              return (
+                <ActionContextMenu
+                  httpSetup={core.http}
+                  label={this.config.branding.label}
+                  isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
+                  resultSummaryEnabled$={resultSummaryEnabled$}
+                  isSummaryAgentAvailable$={isSummaryAgentAvailable$}
+                  data={setupDeps.data}
+                  assistantServiceStart={this.assistantService.start(core.http)}
+                />
+              );
+            },
           },
         },
-      },
-    });
+      });
+    })();
 
     return {
       dataSource: dataSourceSetupResult,

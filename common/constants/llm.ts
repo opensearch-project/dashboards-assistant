@@ -47,3 +47,4 @@ export const TEXT2VEGA_INPUT_SIZE_LIMIT = 400;
 export const TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID = 'os_text2vega';
 export const TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID = 'os_text2vega_with_instructions';
 export const TEXT2PPL_AGENT_CONFIG_ID = 'os_query_assist_ppl';
+export const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
