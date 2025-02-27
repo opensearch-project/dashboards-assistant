@@ -55,7 +55,7 @@ export async function detectIndexType(
   assistantClient: AssistantClient,
   indexName: string,
   dataSourceId: string | undefined
-) {
+): Promise<boolean> {
   const indexCache = getIndexCache(indexName, dataSourceId ? dataSourceId : '');
   if (indexCache) {
     return indexCache.isLogRelated;
@@ -84,6 +84,8 @@ export async function detectIndexType(
     }
     return false;
   } catch (error) {
-    throw error;
+    console.error('Error detecting index type:', error);
+    // Can not detect index type and return default as is not log related
+    return false;
   }
 }
