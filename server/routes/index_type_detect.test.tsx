@@ -114,9 +114,9 @@ describe('detectIndexType', () => {
     (getIndexCache as jest.Mock).mockReturnValue(null);
     mockClient.request.mockRejectedValue(new Error('Search failed'));
 
-    await expect(
-      detectIndexType(mockClient, mockAssistantClient, 'test-index', 'test-source')
-    ).rejects.toThrow('Search failed');
+    const result = await detectIndexType(mockClient, mockAssistantClient, 'test-index', undefined);
+
+    expect(result).toBe(false);
   });
 
   it('should handle undefined dataSourceId', async () => {
