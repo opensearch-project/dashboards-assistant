@@ -168,7 +168,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       aria-label="message actions"
       className={shouldActionBarVisibleOnHover ? 'llm-chat-action-buttons-hidden' : ''}
       responsive={false}
-      gutterSize="none"
+      gutterSize="xs"
       alignItems="center"
       justifyContent="flexEnd"
     >
