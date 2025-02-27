@@ -1,6 +1,6 @@
 {
   "id": "assistantDashboards",
-  "version": "3.0.0.0-alpha1",
+  "version": "3.0.0.0",
   "opensearchDashboardsVersion": "3.0.0",
   "server": true,
   "ui": true,
@@ -15,7 +15,14 @@
     "savedObjects",
     "uiActions"
   ],
-  "optionalPlugins": ["dataSource", "dataSourceManagement", "usageCollection", "queryEnhancements"],
+  "optionalPlugins": [
+    "dataSource",
+    "dataSourceManagement",
+    "usageCollection",
+    "queryEnhancements"
+  ],
   "requiredBundles": [],
-  "configPath": ["assistant"]
+  "configPath": [
+    "assistant"
+  ]
 }
