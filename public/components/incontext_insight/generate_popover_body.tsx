@@ -363,11 +363,14 @@ export const GeneratePopoverBody: React.FC<{
       {renderInnerTitle()}
       {renderContent()}
       {displayDiscoverButton && (
-        <EuiButton onClick={handleNavigateToDiscover} isLoading={discoverLoading}>
-          {i18n.translate('assistantDashboards.incontextInsight.discover', {
-            defaultMessage: 'Discover details',
-          })}
-        </EuiButton>
+        <>
+          <EuiSpacer size="s" />
+          <EuiButton onClick={handleNavigateToDiscover} isLoading={discoverLoading}>
+            {i18n.translate('assistantDashboards.incontextInsight.discover', {
+              defaultMessage: 'Discover details',
+            })}
+          </EuiButton>
+        </>
       )}
     </>
   );
