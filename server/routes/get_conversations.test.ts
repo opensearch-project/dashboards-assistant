@@ -67,7 +67,7 @@ describe('getConversations route', () => {
       perPage: 10,
       page: 1,
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(2); //
+    expect(mockedLogger.error).toBeCalledTimes(2);
     expect(result.output).toMatchInlineSnapshot(`
       Object {
         "headers": Object {},
