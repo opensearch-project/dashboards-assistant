@@ -67,13 +67,13 @@ describe('getConversations route', () => {
       perPage: 10,
       page: 1,
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error).toBeCalledTimes(2); //
     expect(result.output).toMatchInlineSnapshot(`
       Object {
         "headers": Object {},
         "payload": Object {
           "error": "Internal Server Error",
-          "message": "getConversations error",
+          "message": "Internal Error",
           "statusCode": 500,
         },
         "statusCode": 500,

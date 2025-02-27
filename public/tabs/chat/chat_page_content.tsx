@@ -29,6 +29,7 @@ import { getConfigSchema } from '../../services';
 interface ChatPageContentProps {
   messagesLoading: boolean;
   messagesLoadingError?: Error;
+  conversationsError?: Error;
   onRefresh: () => void;
 }
 
@@ -46,6 +47,9 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   }, [chatState.messages, loading]);
 
   if (props.messagesLoading) {
+    if (props.conversationsError) {
+      return <> {props.conversationsError.body.message} </>;
+    }
     return (
       <>
         <EuiSpacer size="xl" />

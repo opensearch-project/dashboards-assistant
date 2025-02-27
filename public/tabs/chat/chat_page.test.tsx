@@ -8,10 +8,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { ConversationLoadService } from '../../services/conversation_load_service';
+import { ConversationsService } from '../../services/conversations_service';
 import { ChatPage } from './chat_page';
 import * as chatContextExports from '../../contexts/chat_context';
 import * as coreContextExports from '../../contexts/core_context';
 import * as hookExports from '../../hooks/use_chat_state';
+import { DataSourceServiceMock } from '../../services/data_source_service.mock';
+import { httpServiceMock } from '../../../../../src/core/public/mocks';
 
 jest.mock('./controls/chat_input_controls', () => {
   return { ChatInputControls: () => <div /> };
@@ -35,10 +38,17 @@ describe('<ChatPage />', () => {
     messages: [],
     interactions: [],
   });
+  const loadMockConversations = jest.fn().mockResolvedValue({});
+  const dataSourceServiceMock = new DataSourceServiceMock();
   const conversationLoadService = new ConversationLoadService(coreMock.createStart().http);
+  const conversationsService = new ConversationsService(
+    httpServiceMock.createStartContract(),
+    dataSourceServiceMock
+  );
 
   beforeEach(() => {
     jest.spyOn(conversationLoadService, 'load').mockImplementation(loadMock);
+    jest.spyOn(conversationsService, 'load').mockImplementation(loadMockConversations);
 
     jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
       conversationId: 'mocked_conversation_id',
@@ -53,6 +63,7 @@ describe('<ChatPage />', () => {
     jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
       services: {
         conversationLoad: conversationLoadService,
+        conversations: conversationsService,
       },
     });
   });
