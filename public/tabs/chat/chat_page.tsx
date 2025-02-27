@@ -21,6 +21,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
   const conversationLoadStatus = useObservable(core.services.conversationLoad.status$);
+  const conversationsStatus = useObservable(core.services.conversations.status$);
   const messagesLoading = conversationLoadStatus === 'loading';
 
   const refresh = useCallback(async () => {
@@ -50,6 +51,9 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
                 typeof conversationLoadStatus !== 'string'
                   ? conversationLoadStatus?.error
                   : undefined
+              }
+              conversationsError={
+                typeof conversationsStatus !== 'string' ? conversationsStatus?.error : undefined
               }
               onRefresh={refresh}
             />
