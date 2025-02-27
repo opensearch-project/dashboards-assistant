@@ -149,7 +149,7 @@ export function registerSummaryAssistantRoutes(
             statusCode: 500,
           });
         }
-        return res.ok({ body: { insight } });
+        return res.ok({ body: insight });
       } catch (e) {
         return handleError(e, res, context.assistant_plugin.logger);
       }
