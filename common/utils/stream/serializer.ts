@@ -5,7 +5,7 @@
 
 import { StreamChunk } from '../../types/chat_saved_object_attributes';
 
-const separators = `\n____\n`;
+const separators = `\n`;
 
 export const streamSerializer = (chunk: StreamChunk): string => {
   return `${JSON.stringify(chunk)}${separators}`;

@@ -17,7 +17,7 @@ import { sreamDeserializer } from '../../common/utils/stream/serializer';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { AssistantActions } from '../types';
-import { useChatState } from './use_chat_state';
+import { LLMResponseType, useChatState } from './use_chat_state';
 
 let abortControllerRef: AbortController;
 
@@ -30,11 +30,6 @@ export const useChatActions = (): AssistantActions => {
     const abortController = new AbortController();
     abortControllerRef = abortController;
     chatStateDispatch({ type: 'send', payload: input });
-    const response$ = new BehaviorSubject<SendResponse>({
-      conversationId: '',
-      messages: [],
-      interactions: [],
-    });
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
     try {
       const fetchResponse = await core.services.http.post(ASSISTANT_API.SEND_MESSAGE, {
@@ -49,6 +44,12 @@ export const useChatActions = (): AssistantActions => {
         pureFetch: true,
       });
       if (fetchResponse.response?.headers.get('X-Stream')) {
+        chatStateDispatch({
+          type: 'updateResponseType',
+          payload: {
+            type: LLMResponseType.STREAMING,
+          },
+        });
         const reader = fetchResponse.response?.body?.getReader();
 
         const decoder = new TextDecoder('utf-8');
@@ -76,22 +77,26 @@ export const useChatActions = (): AssistantActions => {
 
         reader?.read().then(processText);
       } else {
+        chatStateDispatch({
+          type: 'updateResponseType',
+          payload: {
+            type: LLMResponseType.TEXT,
+          },
+        });
         const response = await fetchResponse.response?.json();
         if (abortController.signal.aborted) {
-          response$.unsubscribe();
           return;
         }
         chunk$.next({
           type: 'metadata',
           body: response,
         });
+        chunk$.complete();
       }
     } catch (error) {
       if (abortController.signal.aborted) {
-        response$.unsubscribe();
         return;
       }
-      response$.error(error);
     }
 
     chunk$.subscribe(
@@ -99,6 +104,15 @@ export const useChatActions = (): AssistantActions => {
         if (chunk) {
           if (chunk.type === 'metadata') {
             const { body } = chunk;
+            // Refresh history list after new conversation created if new conversation saved and history list page visible
+            if (
+              !chatContext.conversationId &&
+              body.conversationId &&
+              core.services.conversations.options?.page === 1 &&
+              chatContext.selectedTabId === TAB_ID.HISTORY
+            ) {
+              core.services.conversations.reload();
+            }
             if (body.conversationId) {
               chatContext.setConversationId(body.conversationId);
             }
@@ -132,13 +146,14 @@ export const useChatActions = (): AssistantActions => {
                 },
               });
             }
-
-            response$.next({
-              ...response$.getValue(),
-              ...chunk.body,
+          } else if (chunk.type === 'patch') {
+            const { body } = chunk;
+            chatStateDispatch({
+              type: 'patch',
+              payload: body,
             });
           } else if (chunk.type === 'error') {
-            response$.error(new Error(chunk.body));
+            chatStateDispatch({ type: 'error', payload: new Error(chunk.body) });
             return;
           }
         }
@@ -147,16 +162,7 @@ export const useChatActions = (): AssistantActions => {
         chatStateDispatch({ type: 'error', payload: error });
       },
       () => {
-        // Refresh history list after new conversation created if new conversation saved and history list page visible
-        if (
-          !chatContext.conversationId &&
-          response$.getValue().conversationId &&
-          core.services.conversations.options?.page === 1 &&
-          chatContext.selectedTabId === TAB_ID.HISTORY
-        ) {
-          core.services.conversations.reload();
-        }
-        response$.complete();
+        chatStateDispatch({ type: 'llmRespondingChange', payload: { flag: false } });
       }
     );
   };
