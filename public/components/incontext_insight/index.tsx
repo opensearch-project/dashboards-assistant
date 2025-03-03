@@ -261,7 +261,6 @@ export const IncontextInsight = ({
       <EuiFlexGroup
         className="incontextInsightAnchorButton"
         onKeyDown={onAnchorKeyPress}
-        onClick={onAnchorClick}
         gutterSize="none"
         alignItems="center"
         ref={anchor}
@@ -272,7 +271,18 @@ export const IncontextInsight = ({
           <div className="incontextInsightAnchorContent">{target}</div>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <div className="incontextInsightAnchorIcon">
+          <div
+            className="incontextInsightAnchorIcon"
+            onClick={onAnchorClick}
+            onKeyDown={(e) => {
+              if (e.key === keys.ENTER || e.key === keys.SPACE) {
+                onAnchorClick();
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label="Show alert details"
+          >
             <EuiIcon type={getLogoIcon('gradient')} size="m" />
           </div>
         </EuiFlexItem>
