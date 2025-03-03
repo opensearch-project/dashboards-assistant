@@ -6,7 +6,6 @@
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema, TypeOf } from '@osd/config-schema';
 import { IInput, IMessage, SendResponse } from 'common/types/chat_saved_object_attributes';
-import { Stream } from 'stream';
 import {
   HttpResponsePayload,
   IOpenSearchDashboardsResponse,
@@ -281,111 +280,34 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const { messages = [], input, conversationId: conversationIdInRequestBody } = request.body;
+      const storageService = await createStorageService(context, request.query.dataSourceId);
       let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
+      const chatService = await createChatService(context, request.query.dataSourceId);
 
-      if (input.content.includes('streaming')) {
-        const stream = new Stream.PassThrough();
+      try {
+        outputs = await getConversationOutput({
+          chatService,
+          context,
+          messages,
+          input,
+          conversationId: conversationIdInRequestBody,
+        });
+      } catch (error) {
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
 
+      if (outputs.stream) {
         const result = response.ok({
           headers: {
             Connection: 'keep-alive',
             'X-Stream': true,
-            'Content-Type': 'text/plain',
+            'Content-Type': 'application/x-ndjson',
           },
-          body: stream,
-        });
-
-        // Response earlier to indicate the connection is good
-        stream.write(
-          streamSerializer({
-            type: 'metadata',
-            body: {},
-          })
-        );
-
-        process.nextTick(async () => {
-          const storageService = await createStorageService(context, request.query.dataSourceId);
-          const chatService = await createChatService(context, request.query.dataSourceId);
-          try {
-            outputs = await getConversationOutput({
-              chatService,
-              context,
-              messages,
-              input,
-              conversationId: conversationIdInRequestBody,
-            });
-            stream.write(
-              streamSerializer({
-                type: 'metadata',
-                body: {
-                  conversationId: outputs.conversationId,
-                },
-              })
-            );
-            stream.write(
-              streamSerializer({
-                type: 'metadata',
-                body: {
-                  conversationId: outputs.conversationId,
-                },
-              })
-            );
-          } catch (error) {
-            stream.write(
-              streamSerializer({
-                type: 'error',
-                body: error.message,
-              })
-            );
-            stream.end();
-            return result;
-          }
-
-          try {
-            const resultPayload = await getConversationMemory({
-              conversationIdInRequestBody,
-              conversationIdInResponse: outputs.conversationId,
-              interactionId: outputs.interactionId,
-              storageService,
-              context,
-            });
-            stream.write(
-              streamSerializer({
-                type: 'metadata',
-                body: resultPayload,
-              })
-            );
-          } catch (error) {
-            stream.write(
-              streamSerializer({
-                type: 'error',
-                body: error.message,
-              })
-            );
-            stream.end();
-            return result;
-          }
-
-          stream.end();
+          body: outputs.stream,
         });
 
         return result;
       } else {
-        const storageService = await createStorageService(context, request.query.dataSourceId);
-        const chatService = await createChatService(context, request.query.dataSourceId);
-
-        try {
-          outputs = await getConversationOutput({
-            chatService,
-            context,
-            messages,
-            input,
-            conversationId: conversationIdInRequestBody,
-          });
-        } catch (error) {
-          return response.custom({ statusCode: error.statusCode || 500, body: error.message });
-        }
-
         try {
           const resultPayload = await getConversationMemory({
             conversationIdInRequestBody,
