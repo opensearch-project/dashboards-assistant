@@ -31,6 +31,7 @@ const setup = ({
     services: {
       ...coreMock.createStart(),
       conversations: {
+        status$: new BehaviorSubject('idle'),
         conversations$: new BehaviorSubject({
           objects: [
             {
