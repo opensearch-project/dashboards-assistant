@@ -10,14 +10,13 @@ import { findLastIndex } from '../utils';
 import {
   IMessage,
   ISuggestedAction,
-  SendResponse,
   StreamChunk,
 } from '../../common/types/chat_saved_object_attributes';
-import { sreamDeserializer } from '../../common/utils/stream/serializer';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { AssistantActions } from '../types';
-import { LLMResponseType, useChatState } from './use_chat_state';
+import { useChatState } from './use_chat_state';
+import { useGetChunksFromHTTPResponse } from './use_get_chunks_from_http_response';
 
 let abortControllerRef: AbortController;
 
@@ -25,12 +24,13 @@ export const useChatActions = (): AssistantActions => {
   const chatContext = useChatContext();
   const core = useCore();
   const { chatState, chatStateDispatch } = useChatState();
+  const { getChunk$FromHttpResponse } = useGetChunksFromHTTPResponse();
 
   const send = async (input: IMessage) => {
     const abortController = new AbortController();
     abortControllerRef = abortController;
     chatStateDispatch({ type: 'send', payload: input });
-    const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
+    let chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
     try {
       const fetchResponse = await core.services.http.post(ASSISTANT_API.SEND_MESSAGE, {
         // do not send abort signal to http client to allow LLM call run in background
@@ -43,128 +43,66 @@ export const useChatActions = (): AssistantActions => {
         asResponse: true,
         pureFetch: true,
       });
-      if (fetchResponse.response?.headers.get('X-Stream')) {
-        chatStateDispatch({
-          type: 'updateResponseType',
-          payload: {
-            type: LLMResponseType.STREAMING,
-          },
-        });
-        const reader = fetchResponse.response?.body?.getReader();
-
-        const decoder = new TextDecoder('utf-8');
-
-        function processText({
-          done,
-          value,
-        }: ReadableStreamReadResult<Uint8Array>): Promise<void> | void {
-          if (done) {
-            chunk$.complete();
-            return;
-          }
-          const chunk = decoder.decode(value, { stream: true });
-          try {
-            const chunkObjects = sreamDeserializer(chunk);
-            chunkObjects.forEach((chunkObject) => {
-              chunk$.next(chunkObject);
-            });
-          } catch (e) {
-            // can not parse the chunk.
-            chunk$.error(e);
-          }
-          return reader?.read().then(processText);
-        }
-
-        reader?.read().then(processText);
-      } else {
-        chatStateDispatch({
-          type: 'updateResponseType',
-          payload: {
-            type: LLMResponseType.TEXT,
-          },
-        });
-        const response = await fetchResponse.response?.json();
-        if (abortController.signal.aborted) {
-          return;
-        }
-        chunk$.next({
-          type: 'metadata',
-          body: response,
-        });
-        chunk$.complete();
-      }
+      chunk$ = await getChunk$FromHttpResponse({
+        fetchResponse,
+        abortController,
+      });
     } catch (error) {
       if (abortController.signal.aborted) {
         return;
       }
+      chatStateDispatch({ type: 'error', payload: error });
     }
 
-    chunk$.subscribe(
-      (chunk) => {
-        if (chunk) {
-          if (chunk.type === 'metadata') {
-            const { body } = chunk;
-            // Refresh history list after new conversation created if new conversation saved and history list page visible
-            if (
-              !chatContext.conversationId &&
-              body.conversationId &&
-              core.services.conversations.options?.page === 1 &&
-              chatContext.selectedTabId === TAB_ID.HISTORY
-            ) {
-              core.services.conversations.reload();
-            }
-            if (body.conversationId) {
-              chatContext.setConversationId(body.conversationId);
-            }
+    chunk$.subscribe((chunk) => {
+      if (chunk) {
+        if (chunk.type === 'metadata') {
+          const { body } = chunk;
+          // Refresh history list after new conversation created if new conversation saved and history list page visible
+          if (
+            !chatContext.conversationId &&
+            body.conversationId &&
+            core.services.conversations.options?.page === 1 &&
+            chatContext.selectedTabId === TAB_ID.HISTORY
+          ) {
+            core.services.conversations.reload();
+          }
+          if (body.conversationId) {
+            chatContext.setConversationId(body.conversationId);
+          }
 
-            // set title for first time
-            if (body.title && !chatContext.title) {
-              chatContext.setTitle(body.title);
-            }
+          // set title for first time
+          if (body.title && !chatContext.title) {
+            chatContext.setTitle(body.title);
+          }
 
-            if (body.messages?.length && body.interactions?.length) {
-              /**
-               * Remove messages that do not have messageId
-               * because they are used for displaying loading state
-               */
-              chatStateDispatch({
-                type: 'receive',
-                payload: {
-                  messages: chatState.messages.filter((item) => item.messageId),
-                  interactions: chatState.interactions,
-                },
-              });
+          if (body.messages?.length && body.interactions?.length) {
+            /**
+             * Remove messages that do not have messageId
+             * because they are used for displaying loading state
+             */
+            chatStateDispatch({
+              type: 'receive',
+              payload: {
+                messages: chatState.messages.filter((item) => item.messageId),
+                interactions: chatState.interactions,
+              },
+            });
 
-              /**
-               * Patch messages and interactions based on backend response
-               */
-              chatStateDispatch({
-                type: 'patch',
-                payload: {
-                  messages: body.messages,
-                  interactions: body.interactions,
-                },
-              });
-            }
-          } else if (chunk.type === 'patch') {
-            const { body } = chunk;
+            /**
+             * Patch messages and interactions based on backend response
+             */
             chatStateDispatch({
               type: 'patch',
-              payload: body,
+              payload: {
+                messages: body.messages,
+                interactions: body.interactions,
+              },
             });
-          } else if (chunk.type === 'error') {
-            chatStateDispatch({ type: 'error', payload: new Error(chunk.body) });
-            return;
           }
         }
-      },
-      (error) => {
-        chatStateDispatch({ type: 'error', payload: error });
-      },
-      () => {
-        chatStateDispatch({ type: 'llmRespondingChange', payload: { flag: false } });
       }
-    );
+    });
   };
 
   const loadChat = async (conversationId?: string, title?: string) => {
