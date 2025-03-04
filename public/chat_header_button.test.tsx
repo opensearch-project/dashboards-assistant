@@ -14,6 +14,10 @@ import { AssistantActions } from './types';
 import * as coreContextExports from './contexts/core_context';
 import { MountWrapper } from '../../../src/core/public/utils';
 
+import { coreMock } from '../../../src/core/public/mocks';
+import { Subject } from 'rxjs';
+import { ConversationsService } from './services/conversations_service';
+
 let mockSend: jest.Mock;
 let mockLoadChat: jest.Mock;
 let mockIncontextInsightRegistry: jest.Mock;
@@ -64,10 +68,40 @@ const sideCarRefMock = {
   close: jest.fn(),
 };
 
+const mockGetConversationsHttp = () => {
+  const http = coreMock.createStart().http;
+  http.get.mockImplementation(async () => ({
+    objects: [
+      {
+        id: '1',
+        title: 'foo',
+      },
+    ],
+    total: 100,
+  }));
+  return http;
+};
+
+const dataSourceMock = {
+  dataSourceIdUpdates$: new Subject<string | null>(),
+  getDataSourceQuery: jest.fn(() => ({ dataSourceId: 'foo' })),
+};
+
 // mock sidecar open,hide and show
 jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
   services: {
+    ...coreMock.createStart(),
+    mockGetConversationsHttp,
     chrome: chromeStartMock,
+    conversations: new ConversationsService(mockGetConversationsHttp, dataSourceMock),
+    conversationLoad: {
+      status$: {
+        next: (param: string) => {
+          return 'loading';
+        },
+      },
+    },
+    dataSource: dataSourceMock,
   },
   overlays: {
     // @ts-ignore
