@@ -234,7 +234,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (flyoutVisible) {
       return;
     }
-    core.services.conversationLoad.status$.next('loading');
     core.services.conversations
       .load({
         page: 1,

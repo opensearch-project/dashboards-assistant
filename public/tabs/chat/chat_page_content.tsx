@@ -28,8 +28,11 @@ import { getConfigSchema } from '../../services';
 
 interface ChatPageContentProps {
   messagesLoading: boolean;
+  conversationsLoading: boolean;
   messagesLoadingError?: Error;
-  onRefresh: () => void;
+  conversationsError?: Error;
+  onRefreshConversation: () => void;
+  onRefreshConversationsList: () => void;
 }
 
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
@@ -45,7 +48,30 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     pageEndRef.current?.scrollIntoView();
   }, [chatState.messages, loading]);
 
-  if (props.messagesLoading) {
+  if (props.conversationsError) {
+    return (
+      <>
+        <EuiSpacer size="xl" />
+        <EuiEmptyPrompt
+          icon={<EuiIcon type="alert" color="danger" size="xl" />}
+          title={<h1>Error loading conversation</h1>}
+          body={props.conversationsError.body.message}
+          titleSize="l"
+          actions={
+            <EuiSmallButton
+              className="llm-chat-error-refresh-button"
+              fill
+              iconType="refresh"
+              onClick={props.onRefreshConversationsList}
+            >
+              Refresh
+            </EuiSmallButton>
+          }
+        />
+      </>
+    );
+  }
+  if (props.messagesLoading || props.conversationsLoading) {
     return (
       <>
         <EuiSpacer size="xl" />
@@ -72,7 +98,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
               className="llm-chat-error-refresh-button"
               fill
               iconType="refresh"
-              onClick={props.onRefresh}
+              onClick={props.onRefreshConversation}
             >
               Refresh
             </EuiSmallButton>

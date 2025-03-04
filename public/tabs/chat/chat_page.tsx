@@ -21,9 +21,11 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
   const conversationLoadStatus = useObservable(core.services.conversationLoad.status$);
+  const conversationsStatus = useObservable(core.services.conversations.status$);
   const messagesLoading = conversationLoadStatus === 'loading';
+  const conversationsLoading = conversationsStatus === 'loading';
 
-  const refresh = useCallback(async () => {
+  const refreshConversation = useCallback(async () => {
     if (!chatContext.conversationId) {
       return;
     }
@@ -39,6 +41,36 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
     }
   }, [chatContext.conversationId, chatStateDispatch]);
 
+  const refreshConversationsList = useCallback(async () => {
+    if (!chatContext.conversationId) {
+      core.services.conversations
+        .load({
+          page: 1,
+          perPage: 1,
+          fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
+          sortField: 'updatedTimeMs',
+          sortOrder: 'DESC',
+          searchFields: ['title'],
+        })
+        .then(async () => {
+          const data = core.services.conversations.conversations$.getValue();
+          if (data?.objects?.length) {
+            const { id } = data.objects[0];
+            const conversation = await core.services.conversationLoad.load(id);
+            if (conversation) {
+              chatStateDispatch({
+                type: 'receive',
+                payload: {
+                  messages: conversation.messages,
+                  interactions: conversation.interactions,
+                },
+              });
+            }
+          }
+        });
+    }
+  }, [chatStateDispatch]);
+
   return (
     <>
       <EuiFlyoutBody className={cs(props.className, 'llm-chat-flyout-body')}>
@@ -46,12 +78,17 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           <EuiPageBody component="div">
             <ChatPageContent
               messagesLoading={messagesLoading}
+              conversationsLoading={conversationsLoading}
               messagesLoadingError={
                 typeof conversationLoadStatus !== 'string'
                   ? conversationLoadStatus?.error
                   : undefined
               }
-              onRefresh={refresh}
+              conversationsError={
+                typeof conversationsStatus !== 'string' ? conversationsStatus?.error : undefined
+              }
+              onRefreshConversation={refreshConversation}
+              onRefreshConversationsList={refreshConversationsList}
             />
           </EuiPageBody>
         </EuiPage>
