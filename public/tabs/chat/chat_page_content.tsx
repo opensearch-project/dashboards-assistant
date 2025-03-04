@@ -167,7 +167,11 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
             >
               <MessageContent
                 message={message}
-                loading={isLatestOutput && chatState.llmResponseType === LLMResponseType.STREAMING}
+                loading={
+                  isLatestOutput &&
+                  chatState.llmResponseType === LLMResponseType.STREAMING &&
+                  chatState.llmResponding
+                }
               />
             </MessageBubble>
             {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}

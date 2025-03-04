@@ -190,6 +190,13 @@ export const useChatActions = (): AssistantActions => {
           interactions: conversation.interactions,
         },
       });
+
+      chatStateDispatch({
+        type: 'llmRespondingChange',
+        payload: {
+          flag: false,
+        },
+      });
     }
   };
 
@@ -310,6 +317,13 @@ export const useChatActions = (): AssistantActions => {
           payload: {
             messages: response.messages,
             interactions: response.interactions,
+          },
+        });
+
+        chatStateDispatch({
+          type: 'llmRespondingChange',
+          payload: {
+            flag: false,
           },
         });
       } catch (error) {
