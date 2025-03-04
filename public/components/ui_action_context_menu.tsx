@@ -87,6 +87,7 @@ export const ActionContextMenu = (props: Props) => {
     <EuiPopover
       button={
         <EuiButtonEmpty
+          style={{ marginLeft: '6px' }}
           color="text"
           aria-label="OpenSearch assistant trigger button"
           size="xs"
