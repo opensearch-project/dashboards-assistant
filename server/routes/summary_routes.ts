@@ -51,25 +51,25 @@ export function registerSummaryAssistantRoutes(
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const client = await getOpenSearchClientTransport({
-        context,
-        dataSourceId: req.query.dataSourceId,
-      });
-      const assistantClient = assistantService.getScopedClient(req, context);
-      let isLogIndex = false;
-      if (req.body.index) {
-        isLogIndex = await detectIndexType(
-          client,
-          assistantClient,
-          req.body.index,
-          req.query.dataSourceId
-        );
-      }
-      const agentConfigId =
-        req.body.index && req.body.dsl && isLogIndex
-          ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
-          : SUMMARY_AGENT_CONFIG_ID;
       try {
+        const client = await getOpenSearchClientTransport({
+          context,
+          dataSourceId: req.query.dataSourceId,
+        });
+        const assistantClient = assistantService.getScopedClient(req, context);
+        let isLogIndex = false;
+        if (req.body.index) {
+          isLogIndex = await detectIndexType(
+            client,
+            assistantClient,
+            req.body.index,
+            req.query.dataSourceId
+          );
+        }
+        const agentConfigId =
+          req.body.index && req.body.dsl && isLogIndex
+            ? LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID
+            : SUMMARY_AGENT_CONFIG_ID;
         const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
           context: req.body.context,
           question: req.body.question,
@@ -149,7 +149,7 @@ export function registerSummaryAssistantRoutes(
             statusCode: 500,
           });
         }
-        return res.ok({ body: { insight } });
+        return res.ok({ body: insight });
       } catch (e) {
         return handleError(e, res, context.assistant_plugin.logger);
       }
