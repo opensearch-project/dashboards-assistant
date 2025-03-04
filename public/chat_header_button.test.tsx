@@ -5,38 +5,21 @@
 
 import React from 'react';
 import { act, render, fireEvent, screen, waitFor } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { HeaderChatButton } from './chat_header_button';
-import { applicationServiceMock, chromeServiceMock } from '../../../src/core/public/mocks';
+import { applicationServiceMock } from '../../../src/core/public/mocks';
 import { HeaderVariant } from '../../../src/core/public';
 import { AssistantActions } from './types';
 import * as coreContextExports from './contexts/core_context';
 import { MountWrapper } from '../../../src/core/public/utils';
 
 import { coreMock } from '../../../src/core/public/mocks';
-import { Subject } from 'rxjs';
 import { ConversationsService } from './services/conversations_service';
+import { ConversationLoadService } from './services/conversation_load_service';
 
-let mockSend: jest.Mock;
-let mockLoadChat: jest.Mock;
 let mockIncontextInsightRegistry: jest.Mock;
 let mockGetLogoIcon: jest.Mock;
-
-jest.mock('./hooks/use_chat_actions', () => {
-  mockSend = jest.fn();
-  mockLoadChat = jest.fn();
-  return {
-    useChatActions: jest.fn().mockReturnValue({
-      send: mockSend,
-      loadChat: mockLoadChat,
-      openChatUI: jest.fn(),
-      executeAction: jest.fn(),
-      abortAction: jest.fn(),
-      regenerate: jest.fn(),
-    }),
-  };
-});
 
 jest.mock('./chat_flyout', () => {
   return {
@@ -56,7 +39,6 @@ jest.mock('./services', () => {
   };
 });
 
-const chromeStartMock = chromeServiceMock.createStartContract();
 const sideCarHideMock = jest.fn(() => {
   const element = document.getElementById('sidecar-mock-div');
   if (element) {
@@ -68,39 +50,42 @@ const sideCarRefMock = {
   close: jest.fn(),
 };
 
-const mockGetConversationsHttp = () => {
-  const http = coreMock.createStart().http;
-  http.get.mockImplementation(async () => ({
-    objects: [
-      {
-        id: '1',
-        title: 'foo',
-      },
-    ],
-    total: 100,
-  }));
-  return http;
-};
+const coreStartMock = coreMock.createStart();
+
+coreStartMock.http.get.mockImplementation(async (requestPath: string, _options) => {
+  if (requestPath === '/api/assistant/conversation') {
+    return {
+      title: 'a-existing-conversation',
+      messages: [{}],
+    };
+  }
+  if (requestPath === '/api/assistant/conversations') {
+    return {
+      objects: [
+        {
+          id: '1',
+          title: 'foo',
+        },
+      ],
+      total: 100,
+    };
+  }
+  return {};
+});
 
 const dataSourceMock = {
   dataSourceIdUpdates$: new Subject<string | null>(),
   getDataSourceQuery: jest.fn(() => ({ dataSourceId: 'foo' })),
 };
 
+const conversationLoadMock = new ConversationLoadService(coreStartMock.http, dataSourceMock);
+
 // mock sidecar open,hide and show
 jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
   services: {
-    ...coreMock.createStart(),
-    mockGetConversationsHttp,
-    chrome: chromeStartMock,
-    conversations: new ConversationsService(mockGetConversationsHttp, dataSourceMock),
-    conversationLoad: {
-      status$: {
-        next: (param: string) => {
-          return 'loading';
-        },
-      },
-    },
+    ...coreStartMock,
+    conversations: new ConversationsService(coreStartMock.http, dataSourceMock),
+    conversationLoad: conversationLoadMock,
     dataSource: dataSourceMock,
   },
   overlays: {
@@ -132,11 +117,11 @@ jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
 });
 
 describe('<HeaderChatButton />', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should open chat flyout, send the initial message and hide and show flyout', () => {
+  it('should open chat flyout, send the initial message and hide and show flyout', async () => {
     const applicationStart = {
       ...applicationServiceMock.createStartContract(),
       currentAppId$: new BehaviorSubject(''),
@@ -165,15 +150,24 @@ describe('<HeaderChatButton />', () => {
       charCode: 13,
     });
 
-    // start a new chat
-    expect(mockLoadChat).toHaveBeenCalled();
-    // send chat message
-    expect(mockSend).toHaveBeenCalledWith({
-      type: 'input',
-      contentType: 'text',
-      content: 'what indices are in my cluster?',
-      context: { appId: 'mock_app_id' },
+    // call send message API with new chat
+    await waitFor(() => {
+      expect(coreStartMock.http.post).lastCalledWith(
+        '/api/assistant/send_message',
+        expect.objectContaining({
+          body: JSON.stringify({
+            messages: [],
+            input: {
+              type: 'input',
+              contentType: 'text',
+              content: 'what indices are in my cluster?',
+              context: { appId: 'mock_app_id' },
+            },
+          }),
+        })
+      );
     });
+
     // chat flyout displayed
     expect(screen.queryByLabelText('chat flyout mock')).toBeInTheDocument();
     // the input value is cleared after pressing enter
@@ -187,6 +181,50 @@ describe('<HeaderChatButton />', () => {
     // sidecar hide
     fireEvent.click(toggleButton);
     expect(screen.queryByLabelText('chat flyout mock')).toBeVisible();
+  });
+
+  it('should call send message without active conversation id after input text submitted', async () => {
+    const activeConversationId = 'test-conversation';
+    const assistantActions = {} as AssistantActions;
+    const applicationStart = {
+      ...applicationServiceMock.createStartContract(),
+      currentAppId$: new BehaviorSubject(''),
+    };
+    render(
+      <HeaderChatButton
+        application={applicationStart}
+        messageRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={assistantActions}
+        currentAccount={{ username: 'test_user' }}
+      />
+    );
+
+    act(() => applicationStart.currentAppId$.next('mock_app_id'));
+
+    act(() => {
+      assistantActions.loadChat(activeConversationId);
+    });
+
+    screen.getByLabelText('chat input').focus();
+    fireEvent.change(screen.getByLabelText('chat input'), {
+      target: { value: 'what indices are in my cluster?' },
+    });
+    expect(screen.getByLabelText('chat input')).toHaveFocus();
+    fireEvent.keyPress(screen.getByLabelText('chat input'), {
+      key: 'Enter',
+      code: 'Enter',
+      charCode: 13,
+    });
+
+    await waitFor(() => {
+      expect(coreStartMock.http.post).lastCalledWith(
+        '/api/assistant/send_message',
+        expect.objectContaining({
+          body: expect.not.stringContaining(activeConversationId),
+        })
+      );
+    });
   });
 
   it('should focus in chat input when click and press Escape should blur', () => {
@@ -277,7 +315,7 @@ describe('<HeaderChatButton />', () => {
   });
 
   it('should render toggle chat flyout button icon', () => {
-    chromeStartMock.getHeaderVariant$.mockReturnValue(
+    coreStartMock.chrome.getHeaderVariant$.mockReturnValue(
       new BehaviorSubject(HeaderVariant.APPLICATION)
     );
     render(
