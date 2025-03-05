@@ -85,13 +85,27 @@ describe('<ChatPageContent />', () => {
   });
 
   it('should display welcome message by default', () => {
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(1);
     expect(screen.queryByLabelText('chat welcome message')).toBeInTheDocument();
   });
 
   it('should display a default suggested action', () => {
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(1);
     expect(screen.queryByText('What are the indices in my cluster?')).toBeInTheDocument();
   });
@@ -114,7 +128,14 @@ describe('<ChatPageContent />', () => {
       chatState: { messages, llmResponding: false, interactions: [] },
       chatStateDispatch: jest.fn(),
     });
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(3);
   });
 
@@ -147,7 +168,14 @@ describe('<ChatPageContent />', () => {
       chatState: { messages, llmResponding: false, interactions: [] },
       chatStateDispatch: jest.fn(),
     });
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(1);
     expect(screen.queryByText('suggested action mock')).toBeInTheDocument();
   });
@@ -170,7 +198,14 @@ describe('<ChatPageContent />', () => {
       chatState: { messages, llmResponding: false, interactions: [] },
       chatStateDispatch: jest.fn(),
     });
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(0);
   });
 
@@ -197,12 +232,26 @@ describe('<ChatPageContent />', () => {
       chatState: { messages, llmResponding: false, interactions: [] },
       chatStateDispatch: jest.fn(),
     });
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(0);
   });
 
   it('should display loading screen when loading the messages', () => {
-    render(<ChatPageContent messagesLoading={true} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={true}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     expect(screen.queryByText('Loading conversation')).toBeInTheDocument();
     expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(0);
   });
@@ -212,8 +261,10 @@ describe('<ChatPageContent />', () => {
     render(
       <ChatPageContent
         messagesLoading={false}
+        conversationsLoading={false}
         messagesLoadingError={new Error('failed to get response')}
-        onRefresh={onRefreshMock}
+        onRefreshConversation={onRefreshMock}
+        onRefreshConversationsList={onRefreshMock}
       />
     );
     expect(screen.queryByText('failed to get response')).toBeInTheDocument();
@@ -228,14 +279,28 @@ describe('<ChatPageContent />', () => {
       chatState: { messages: [], llmResponding: true, interactions: [] },
       chatStateDispatch: jest.fn(),
     });
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     expect(screen.queryByText('Stop generating response')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Stop generating response'));
     expect(abortActionMock).toHaveBeenCalledWith('test_conversation_id');
   });
 
   it('should call executeAction', () => {
-    render(<ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />);
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
     fireEvent.click(screen.getByText('What are the indices in my cluster?'));
     expect(executeActionMock).toHaveBeenCalled();
   });
@@ -269,7 +334,12 @@ describe('<ChatPageContent />', () => {
     });
 
     const { queryAllByTestId } = render(
-      <ChatPageContent messagesLoading={false} onRefresh={jest.fn()} />
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
     );
     expect(queryAllByTestId(`showRegenerate-false`).length).toEqual(2);
   });

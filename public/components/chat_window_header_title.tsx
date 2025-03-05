@@ -85,6 +85,7 @@ export const ChatWindowHeaderTitle = React.memo(() => {
       key="new-conversation"
       onClick={() => {
         closePopover();
+        core.services.conversations.status$.next('idle');
         loadChat(undefined);
         // Only show toast when previous conversation saved
         if (!!chatContext.conversationId) {

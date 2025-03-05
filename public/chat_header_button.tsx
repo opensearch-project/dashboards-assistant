@@ -114,6 +114,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (e.key === 'Enter' && inputRef.current && inputRef.current.value.trim().length > 0) {
       // open chat window
       setFlyoutVisible(true);
+      // clear conversations error
+      core.services.conversations.status$.next('idle');
       // start a new chat
       await props.assistantActions.loadChat();
       // send message
@@ -234,7 +236,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (flyoutVisible) {
       return;
     }
-    core.services.conversationLoad.status$.next('loading');
     core.services.conversations
       .load({
         page: 1,
