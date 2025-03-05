@@ -281,7 +281,6 @@ export const IncontextInsight = ({
             }}
             tabIndex={0}
             role="button"
-            aria-label="Show alert details"
           >
             <EuiIcon type={getLogoIcon('gradient')} size="m" />
           </div>
