@@ -4,11 +4,11 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import cs from 'classnames';
 import { useObservable } from 'react-use';
 import { useChatContext, useCore } from '../../contexts';
-import { useChatState } from '../../hooks';
+import { useChatState, useChatActions } from '../../hooks';
 import { ChatPageContent } from './chat_page_content';
 import { ChatInputControls } from './controls/chat_input_controls';
 
@@ -41,6 +41,20 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
     }
   }, [chatContext.conversationId, chatStateDispatch]);
 
+  const { loadChat } = useChatActions();
+  const chatScrollTopRef = useRef<{ scrollTop: number; height: number } | null>(null);
+  const handleScroll = async (event: React.UIEvent<HTMLElement>) => {
+    const scrollTop = event.target.scrollTop;
+    if (!messagesLoading && chatState?.nextToken && chatState?.nextToken !== '') {
+      if (scrollTop < 150) {
+        const html = event.target;
+        chatScrollTopRef.current = { scrollTop, height: html.scrollHeight };
+        await loadChat(chatContext.conversationId, chatState.nextToken);
+        html.scrollTop = html.scrollHeight - chatScrollTopRef.current.height;
+        chatScrollTopRef.current = null;
+      }
+    }
+  };
   const refreshConversationsList = useCallback(async () => {
     if (!chatContext.conversationId) {
       core.services.conversations
@@ -73,7 +87,10 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
 
   return (
     <>
-      <EuiFlyoutBody className={cs(props.className, 'llm-chat-flyout-body')}>
+      <EuiFlyoutBody
+        className={cs(props.className, 'llm-chat-flyout-body')}
+        onScroll={handleScroll}
+      >
         <EuiPage paddingSize="s">
           <EuiPageBody component="div">
             <ChatPageContent
@@ -84,6 +101,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
                   ? conversationLoadStatus?.error
                   : undefined
               }
+              chatScrollTopRef={chatScrollTopRef}
               conversationsError={
                 typeof conversationsStatus !== 'string' ? conversationsStatus?.error : undefined
               }

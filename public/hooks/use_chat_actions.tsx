@@ -80,7 +80,7 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const loadChat = async (conversationId?: string, title?: string) => {
+  const loadChat = async (conversationId?: string, nextToken?: string, title?: string) => {
     abortControllerRef?.abort();
     core.services.conversationLoad.abortController?.abort();
     chatContext.setConversationId(conversationId);
@@ -94,11 +94,12 @@ export const useChatActions = (): AssistantActions => {
       chatStateDispatch({ type: 'reset' });
       return;
     }
-    const conversation = await core.services.conversationLoad.load(conversationId);
+    const conversation = await core.services.conversationLoad.load(conversationId, nextToken);
     if (conversation) {
       chatStateDispatch({
         type: 'receive',
         payload: {
+          nextToken: conversation.nextToken,
           messages: conversation.messages,
           interactions: conversation.interactions,
         },

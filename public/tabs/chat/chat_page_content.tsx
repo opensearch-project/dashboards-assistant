@@ -30,6 +30,7 @@ interface ChatPageContentProps {
   messagesLoading: boolean;
   conversationsLoading: boolean;
   messagesLoadingError?: Error;
+  chatScrollTopRef: React.MutableRefObject<{ scrollTop: number; height: number } | null>;
   conversationsError?: Error;
   onRefreshConversation: () => void;
   onRefreshConversationsList: () => void;
@@ -45,7 +46,9 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const configSchema = getConfigSchema();
 
   useLayoutEffect(() => {
-    pageEndRef.current?.scrollIntoView();
+    if (!props.chatScrollTopRef.current) {
+      pageEndRef.current?.scrollIntoView();
+    }
   }, [chatState.messages, loading]);
 
   if (props.conversationsError) {
@@ -55,7 +58,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         <EuiEmptyPrompt
           icon={<EuiIcon type="alert" color="danger" size="xl" />}
           title={<h1>Error loading conversation</h1>}
-          body={props.conversationsError.body.message}
+          body={props.conversationsError.message}
           titleSize="l"
           actions={
             <EuiSmallButton
@@ -84,7 +87,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     );
   }
 
-  if (props.messagesLoadingError) {
+  if (props.messagesLoadingError && chatState.messages.length === 0) {
     return (
       <>
         <EuiSpacer size="xl" />
@@ -119,6 +122,12 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       >
         <WelcomeMessage username={chatContext?.currentAccount?.username} />
       </MessageBubble>
+      {props.messagesLoading && chatState.messages.length > 0 && (
+        <>
+          <EuiSpacer />
+          <MessageBubble loading showActionBar={false} />
+        </>
+      )}
       {firstInputIndex < 0 && (
         <Suggestions
           message={{
@@ -167,7 +176,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           </React.Fragment>
         );
       })}
-      {loading && (
+      {chatState.llmResponding && (
         <>
           <EuiSpacer />
           <MessageBubble loading showActionBar={false} />

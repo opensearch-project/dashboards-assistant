@@ -30,6 +30,7 @@ export interface IConversation {
   updatedTimeMs: number;
   messages: IMessage[];
   interactions: Interaction[];
+  nextToken?: string;
 }
 
 export interface IConversationFindResponse {
