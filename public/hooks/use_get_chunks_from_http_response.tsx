@@ -12,11 +12,14 @@ import { StreamChunk } from '../../common/types/chat_saved_object_attributes';
 export const useGetChunksFromHTTPResponse = () => {
   const { chatStateDispatch } = useChatState();
 
-  const getChunk$FromHttpResponse = async (props: {
+  const getConsumedChunk$FromHttpResponse = async (props: {
     fetchResponse: HttpResponse<unknown>;
     abortController: AbortController;
   }) => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
+    props.abortController.signal.onabort = () => {
+      chunk$.complete();
+    };
     if (props.fetchResponse.response?.headers.get('X-Stream')) {
       chatStateDispatch({
         type: 'updateResponseType',
@@ -97,6 +100,6 @@ export const useGetChunksFromHTTPResponse = () => {
   };
 
   return {
-    getChunk$FromHttpResponse,
+    getConsumedChunk$FromHttpResponse,
   };
 };
