@@ -194,6 +194,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       const { messages = [], input, conversationId: conversationIdInRequestBody } = request.body;
       const storageService = await createStorageService(context, request.query.dataSourceId);
       const chatService = await createChatService(context, request.query.dataSourceId);
+
       let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
 
       /**
