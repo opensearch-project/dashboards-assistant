@@ -24,7 +24,7 @@ export const useChatActions = (): AssistantActions => {
   const chatContext = useChatContext();
   const core = useCore();
   const { chatState, chatStateDispatch } = useChatState();
-  const { getChunk$FromHttpResponse } = useGetChunksFromHTTPResponse();
+  const { getConsumedChunk$FromHttpResponse } = useGetChunksFromHTTPResponse();
 
   const send = async (input: IMessage) => {
     const abortController = new AbortController();
@@ -43,7 +43,7 @@ export const useChatActions = (): AssistantActions => {
         asResponse: true,
         pureFetch: true,
       });
-      chunk$ = await getChunk$FromHttpResponse({
+      chunk$ = await getConsumedChunk$FromHttpResponse({
         fetchResponse,
         abortController,
       });
@@ -213,56 +213,59 @@ export const useChatActions = (): AssistantActions => {
     if (chatContext.conversationId) {
       const abortController = new AbortController();
       abortControllerRef = abortController;
+      let chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
       chatStateDispatch({ type: 'regenerate' });
 
       try {
-        const response = await core.services.http.put(`${ASSISTANT_API.REGENERATE}`, {
+        const fetchResponse = await core.services.http.put(`${ASSISTANT_API.REGENERATE}`, {
           body: JSON.stringify({
             conversationId: chatContext.conversationId,
             interactionId,
           }),
           query: core.services.dataSource.getDataSourceQuery(),
+          asResponse: true,
+          pureFetch: true,
         });
 
-        if (abortController.signal.aborted) {
-          return;
-        }
-        /**
-         * Remove the regenerated interaction & message.
-         * In implementation of Agent framework, it will generate a new interactionId
-         * so need to remove the staled interaction in Frontend manually.
-         */
-        const findRegeratedMessageIndex = findLastIndex(
-          chatState.messages,
-          (message) => message.type === 'input'
-        );
-        if (findRegeratedMessageIndex > -1) {
-          chatStateDispatch({
-            type: 'receive',
-            payload: {
-              messages: chatState.messages
-                .slice(0, findRegeratedMessageIndex)
-                .filter((item) => item.messageId),
-              interactions: chatState.interactions.filter(
-                (interaction) => interaction.interaction_id !== interactionId
-              ),
-            },
-          });
-        }
-
-        chatStateDispatch({
-          type: 'patch',
-          payload: {
-            messages: response.messages,
-            interactions: response.interactions,
-          },
+        chunk$ = await getConsumedChunk$FromHttpResponse({
+          fetchResponse,
+          abortController,
         });
 
-        chatStateDispatch({
-          type: 'llmRespondingChange',
-          payload: {
-            flag: false,
-          },
+        chunk$.subscribe((chunk) => {
+          if (chunk) {
+            if (chunk.type === 'metadata') {
+              const findRegeratedMessageIndex = findLastIndex(
+                chatState.messages,
+                (message) => message.type === 'input'
+              );
+              /**
+               * Remove the regenerated interaction & message.
+               * In implementation of Agent framework, it will generate a new interactionId
+               * so need to remove the staled interaction in Frontend manually.
+               * And chatStateDispatch({ type: 'receive' }) here is used to delete the input message
+               */
+              if (findRegeratedMessageIndex > -1) {
+                chatStateDispatch({
+                  type: 'receive',
+                  payload: {
+                    messages: [
+                      ...chatState.messages
+                        .slice(0, findRegeratedMessageIndex)
+                        .filter((item) => item.messageId),
+                      ...(chunk.body.messages || []),
+                    ],
+                    interactions: [
+                      ...chatState.interactions.filter(
+                        (interaction) => interaction.interaction_id !== interactionId
+                      ),
+                      ...(chunk.body.interactions || []),
+                    ],
+                  },
+                });
+              }
+            }
+          }
         });
       } catch (error) {
         if (abortController.signal.aborted) {
