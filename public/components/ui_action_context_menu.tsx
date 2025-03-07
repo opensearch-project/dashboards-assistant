@@ -11,6 +11,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -112,23 +113,35 @@ export const ActionContextMenu = (props: Props) => {
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty
-          style={{ marginLeft: '6px' }}
-          color="text"
-          aria-label="OpenSearch assistant trigger button"
-          size="xs"
-          iconType="arrowDown"
-          onClick={() => setOpen(!open)}
-          iconSide="right"
-          flush="both"
-          isDisabled={actionDisabled}
-          isLoading={panels.loading}
+        <EuiToolTip
+          content={
+            actionDisabled &&
+            i18n.translate(
+              'dashboardAssistant.assistantActionButton.buttonTooltipWithActionDisabled',
+              {
+                defaultMessage: 'First select a supported data source',
+              }
+            )
+          }
         >
-          {props.label ||
-            i18n.translate('dashboardAssistant.branding.assistantActionButton.label', {
-              defaultMessage: 'OpenSearch Assistant',
-            })}
-        </EuiButtonEmpty>
+          <EuiButtonEmpty
+            style={{ marginLeft: '6px' }}
+            color="text"
+            aria-label="OpenSearch assistant trigger button"
+            size="xs"
+            iconType="arrowDown"
+            onClick={() => setOpen(!open)}
+            iconSide="right"
+            flush="both"
+            isDisabled={actionDisabled}
+            isLoading={panels.loading}
+          >
+            {props.label ||
+              i18n.translate('dashboardAssistant.branding.assistantActionButton.label', {
+                defaultMessage: 'OpenSearch Assistant',
+              })}
+          </EuiButtonEmpty>
+        </EuiToolTip>
       }
       isOpen={open}
       panelPaddingSize="none"
