@@ -403,13 +403,13 @@ export const Text2Viz = () => {
   const getInputSection = () => {
     return (
       <>
-        <EuiFlexItem grow={3} style={{ maxWidth: '20vw' }}>
+        <EuiFlexItem grow={2} style={{ maxWidth: '35vw' }}>
           <SourceSelector
             selectedSourceId={selectedSource}
             onChange={(ds) => setSelectedSource(ds.value)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={8}>
+        <EuiFlexItem grow={1}>
           <EuiFieldText
             value={inputQuestion}
             onChange={(e) => setInputQuestion(e.target.value)}
