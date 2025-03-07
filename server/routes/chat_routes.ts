@@ -19,7 +19,6 @@ import { RoutesOptions } from '../types';
 import { ChatService } from '../services/chat/chat_service';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
 import { handleError } from './error_handler';
-import { streamSerializer } from '../../common/utils/stream/serializer';
 
 const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
@@ -171,34 +170,6 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   const createChatService = async (context: RequestHandlerContext, dataSourceId?: string) =>
     new OllyChatService(await getOpenSearchClientTransport({ context, dataSourceId }));
 
-  const getConversationOutput = async ({
-    chatService,
-    context,
-    messages,
-    input,
-    conversationId,
-  }: {
-    chatService: ChatService;
-    context: RequestHandlerContext;
-    messages: IMessage[];
-    input: IInput;
-    conversationId?: string;
-  }) => {
-    try {
-      return await chatService.requestLLM(
-        {
-          messages,
-          input,
-          conversationId,
-        },
-        context
-      );
-    } catch (error) {
-      context.assistant_plugin.logger.error(error);
-      throw error;
-    }
-  };
-
   const getConversationMemory = async ({
     conversationIdInResponse,
     conversationIdInRequestBody,
@@ -211,66 +182,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
     interactionId?: string;
     context: RequestHandlerContext;
     storageService: AgentFrameworkStorageService;
-  }) => {
-    /**
-     * Retrieve latest interactions from memory
-     */
-    const conversationId = conversationIdInResponse || (conversationIdInRequestBody as string);
-    const interactionIdForMemory = interactionId || '';
-    try {
-      if (!conversationId) {
-        throw new Error('Not a valid conversation');
-      }
-
-      const resultPayload: SendResponse = {
-        messages: [],
-        interactions: [],
-        conversationId,
-      };
-
-      if (!conversationIdInRequestBody) {
-        /**
-         * If no conversationId is provided in request payload,
-         * it means it is a brand new conversation,
-         * need to fetch all the details including title.
-         */
-        const conversation = await storageService.getConversation(conversationId);
-        resultPayload.interactions = conversation.interactions;
-        resultPayload.messages = conversation.messages;
-        resultPayload.title = conversation.title;
-      } else {
-        /**
-         * Only response with the latest interaction.
-         * It may have some issues in Concurrent case like a user may use two tabs to chat with Chatbot in one conversation.
-         * But for now we will ignore this case, can be optimized by always fetching conversation if we need to take this case into consideration.
-         */
-        const interaction = await storageService.getInteraction(
-          conversationId,
-          interactionIdForMemory
-        );
-        resultPayload.interactions = [interaction].filter((item) => item);
-        resultPayload.messages = resultPayload.interactions.length
-          ? await storageService.getMessagesFromInteractions(resultPayload.interactions)
-          : [];
-      }
-
-      resultPayload.messages
-        .filter((message) => message.type === 'input')
-        .forEach((msg) => {
-          // hide additional conetxt to how was it generated
-          const index = msg.content.indexOf('answer question:');
-          const len = 'answer question:'.length;
-          if (index !== -1) {
-            msg.content = msg.content.substring(index + len);
-          }
-        });
-
-      return resultPayload;
-    } catch (error) {
-      context.assistant_plugin.logger.error(error);
-      throw error;
-    }
-  };
+  }) => {};
 
   router.post(
     llmRequestRoute,
@@ -281,18 +193,20 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const { messages = [], input, conversationId: conversationIdInRequestBody } = request.body;
       const storageService = await createStorageService(context, request.query.dataSourceId);
-      let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
       const chatService = await createChatService(context, request.query.dataSourceId);
+      let outputs: Awaited<ReturnType<ChatService['requestLLM']>> | undefined;
 
+      /**
+       * Get final answer from Agent framework
+       */
       try {
-        outputs = await getConversationOutput({
-          chatService,
-          context,
+        outputs = await chatService.requestLLM({
           messages,
           input,
           conversationId: conversationIdInRequestBody,
         });
       } catch (error) {
+        context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
 
@@ -307,21 +221,64 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         });
 
         return result;
-      } else {
-        try {
-          const resultPayload = await getConversationMemory({
-            conversationIdInRequestBody,
-            conversationIdInResponse: outputs?.conversationId,
-            interactionId: outputs?.interactionId || '',
-            storageService,
-            context,
-          });
-          return response.ok({
-            body: resultPayload,
-          });
-        } catch (error) {
-          return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
+
+      /**
+       * Retrieve latest interactions from memory
+       */
+      const conversationId = outputs?.conversationId || (conversationIdInRequestBody as string);
+      const interactionId = outputs?.interactionId || '';
+      try {
+        if (!conversationId) {
+          throw new Error('Not a valid conversation');
         }
+
+        const resultPayload: SendResponse = {
+          messages: [],
+          interactions: [],
+          conversationId,
+        };
+
+        if (!conversationIdInRequestBody) {
+          /**
+           * If no conversationId is provided in request payload,
+           * it means it is a brand new conversation,
+           * need to fetch all the details including title.
+           */
+          const conversation = await storageService.getConversation(conversationId);
+          resultPayload.interactions = conversation.interactions;
+          resultPayload.messages = conversation.messages;
+          resultPayload.title = conversation.title;
+        } else {
+          /**
+           * Only response with the latest interaction.
+           * It may have some issues in Concurrent case like a user may use two tabs to chat with Chatbot in one conversation.
+           * But for now we will ignore this case, can be optimized by always fetching conversation if we need to take this case into consideration.
+           */
+          const interaction = await storageService.getInteraction(conversationId, interactionId);
+          resultPayload.interactions = [interaction].filter((item) => item);
+          resultPayload.messages = resultPayload.interactions.length
+            ? await storageService.getMessagesFromInteractions(resultPayload.interactions)
+            : [];
+        }
+
+        resultPayload.messages
+          .filter((message) => message.type === 'input')
+          .forEach((msg) => {
+            // hide additional conetxt to how was it generated
+            const index = msg.content.indexOf('answer question:');
+            const len = 'answer question:'.length;
+            if (index !== -1) {
+              msg.content = msg.content.substring(index + len);
+            }
+          });
+
+        return response.ok({
+          body: resultPayload,
+        });
+      } catch (error) {
+        context.assistant_plugin.logger.error(error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
     }
   );
