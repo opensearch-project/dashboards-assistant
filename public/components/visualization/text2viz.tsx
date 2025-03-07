@@ -54,6 +54,7 @@ import { TEXT2VEGA_INPUT_SIZE_LIMIT } from '../../../common/constants/llm';
 import { FeedbackThumbs } from '../feedback_thumbs';
 import { VizStyleEditor } from './viz_style_editor';
 import { Text2VegaTask } from '../../utils/pipeline/text_to_vega_task';
+import { Text2VizError } from './text2viz_error';
 
 export const INDEX_PATTERN_URL_SEARCH_KEY = 'indexPatternId';
 export const ASSISTANT_INPUT_URL_SEARCH_KEY = 'assistantInput';
@@ -67,6 +68,7 @@ export const Text2Viz = () => {
   );
   const [savedObjectLoading, setSavedObjectLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const {
     services: {
       application,
@@ -142,7 +144,9 @@ export const Text2Viz = () => {
     const subscription = text2vega?.getResult$().subscribe((result) => {
       if (result) {
         if (result.error) {
-          notifications.toasts.addError(result.error, {
+          const msg = `Unable to generate a visualization. ${result.error.message}`;
+          setErrorMessage(msg);
+          notifications.toasts.addError(new Error(msg), {
             title: i18n.translate('dashboardAssistant.feature.text2viz.error', {
               defaultMessage: 'Error while executing text to visualization',
             }),
@@ -214,6 +218,7 @@ export const Text2Viz = () => {
   const onSubmit = useCallback(
     async (inputInstruction: string = '') => {
       setCurrentInstruction(inputInstruction);
+      setErrorMessage('');
 
       if (status === 'RUNNING' || !selectedSource) return;
 
@@ -469,9 +474,10 @@ export const Text2Viz = () => {
           <EuiSpacer size="s" />
         </>
       )}
-      {noResult && <Text2VizEmpty />}
+      {noResult && !errorMessage && <Text2VizEmpty />}
       {loading && <Text2VizLoading type={savedObjectLoading ? 'loading' : 'generating'} />}
-      {resultLoaded && factory && (
+      {errorMessage && <Text2VizError message={errorMessage} />}
+      {!errorMessage && resultLoaded && factory && (
         <EuiResizableContainer style={{ flexGrow: 1, flexShrink: 1 }}>
           {(EuiResizablePanel, EuiResizableButton) => {
             return (

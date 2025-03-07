@@ -22,8 +22,12 @@ export class Text2PPLTask extends Task<Input, Input & { ppl: string }> {
   }
 
   async execute<T extends Input>(v: T) {
-    const ppl: string = await this.text2ppl(v.inputQuestion, v.index, v.dataSourceId);
-    return { ...v, ppl };
+    try {
+      const ppl: string = await this.text2ppl(v.inputQuestion, v.index, v.dataSourceId);
+      return { ...v, ppl };
+    } catch (e) {
+      throw new Error(`Error while generating PPL query with input: ${v.inputQuestion}`);
+    }
   }
 
   async text2ppl(query: string, index: string, dataSourceId?: string) {
