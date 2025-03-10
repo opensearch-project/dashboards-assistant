@@ -93,13 +93,13 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           </EuiPageBody>
         </EuiPage>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter className="llm-chat-flyout-footer">
+      <EuiFlyoutFooter>
         <EuiSpacer size="xs" />
         <ChatInputControls
           loading={chatState.llmResponding}
           disabled={messagesLoading || chatState.llmResponding}
         />
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
       </EuiFlyoutFooter>
     </>
   );
