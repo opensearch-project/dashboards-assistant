@@ -5,7 +5,7 @@
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { schema, TypeOf } from '@osd/config-schema';
-import { SendResponse } from 'common/types/chat_saved_object_attributes';
+import { IInput, IMessage, SendResponse } from 'common/types/chat_saved_object_attributes';
 import {
   HttpResponsePayload,
   IOpenSearchDashboardsResponse,
@@ -170,6 +170,20 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   const createChatService = async (context: RequestHandlerContext, dataSourceId?: string) =>
     new OllyChatService(await getOpenSearchClientTransport({ context, dataSourceId }));
 
+  const getConversationMemory = async ({
+    conversationIdInResponse,
+    conversationIdInRequestBody,
+    interactionId,
+    storageService,
+    context,
+  }: {
+    conversationIdInResponse?: string;
+    conversationIdInRequestBody?: string;
+    interactionId?: string;
+    context: RequestHandlerContext;
+    storageService: AgentFrameworkStorageService;
+  }) => {};
+
   router.post(
     llmRequestRoute,
     async (
@@ -195,6 +209,19 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       } catch (error) {
         context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
+
+      if (outputs.stream) {
+        const result = response.ok({
+          headers: {
+            Connection: 'keep-alive',
+            'X-Stream': true,
+            'Content-Type': 'application/x-ndjson',
+          },
+          body: outputs.stream,
+        });
+
+        return result;
       }
 
       /**
