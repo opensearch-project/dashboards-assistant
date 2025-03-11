@@ -50,6 +50,7 @@ export const IncontextInsight = ({
   getStartServices,
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
+  const anchorButton = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isHover, setIsHover] = useState(false);
 
@@ -281,6 +282,7 @@ export const IncontextInsight = ({
             }}
             tabIndex={0}
             role="button"
+            ref={anchorButton}
           >
             <EuiIcon type={getLogoIcon('gradient')} size="m" />
           </div>
@@ -290,7 +292,7 @@ export const IncontextInsight = ({
   };
 
   const renderPopover = () => {
-    if (!input || !target || !anchor.current) return;
+    if (!input || !target || !anchor.current || !anchorButton.current) return;
     const popoverBody = () => {
       switch (input.type) {
         case 'suggestions':
@@ -321,7 +323,7 @@ export const IncontextInsight = ({
     return (
       <EuiWrappingPopover
         key={input.key}
-        button={anchor.current?.firstChild as HTMLElement}
+        button={anchorButton.current}
         isOpen={isVisible}
         closePopover={closePopover}
         anchorClassName="incontextInsightAnchor"
