@@ -22,12 +22,26 @@ export class Text2PPLTask extends Task<Input, Input & { ppl: string }> {
   }
 
   async execute<T extends Input>(v: T) {
+    let ppl = '';
     try {
-      const ppl: string = await this.text2ppl(v.inputQuestion, v.index, v.dataSourceId);
-      return { ...v, ppl };
+      ppl = await this.text2ppl(v.inputQuestion, v.index, v.dataSourceId);
     } catch (e) {
-      throw new Error(`Error while generating PPL query with input: ${v.inputQuestion}`);
+      throw new Error(
+        `Error while generating PPL query with input: ${v.inputQuestion}. Please try rephrasing your question.`
+      );
     }
+
+    if (ppl) {
+      const statsRegex = /\|\s*stats\s+/i;
+      const hasStats = statsRegex.test(ppl);
+      if (!hasStats) {
+        throw new Error(
+          `The generated PPL query: ${ppl} doesn't seem to contain an aggregation. Ensure your question contains data aggregation (e.g., average, sum, or count) for meaningful visualization.`
+        );
+      }
+    }
+
+    return { ...v, ppl };
   }
 
   async text2ppl(query: string, index: string, dataSourceId?: string) {
