@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { errors } from '@opensearch-project/opensearch';
 import { Logger, OpenSearchDashboardsResponseFactory } from '../../../../src/core/server';
 import { AgentNotFoundError } from './errors';
 
@@ -14,6 +15,14 @@ export const handleError = (e: any, res: OpenSearchDashboardsResponseFactory, lo
     return res.notFound({ body: 'Agent not found' });
   }
 
+  // handle OpenSearch client connection errors
+  if (e instanceof errors.NoLivingConnectionsError || e instanceof errors.ConnectionError) {
+    return res.customError({
+      body: e.message,
+      statusCode: 400,
+    });
+  }
+
   // handle http response error of calling backend API
   if (e.statusCode) {
     if (e.statusCode >= 400 && e.statusCode <= 499) {
@@ -22,7 +31,7 @@ export const handleError = (e: any, res: OpenSearchDashboardsResponseFactory, lo
         message = e.message;
       }
       return res.customError({
-        body: { message: message || 'unknow error' },
+        body: { message: message || 'unknown error' },
         statusCode: e.statusCode,
       });
     } else {

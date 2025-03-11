@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ApiResponse, errors } from '@opensearch-project/opensearch';
 import { handleError } from './error_handler';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
 import { AgentNotFoundError } from './errors';
@@ -79,5 +80,30 @@ describe('Error handler', () => {
     expect(error.status).toBe(500);
     expect(error.payload).toEqual('Internal Error');
     expect(error.options).toMatchInlineSnapshot('Object {}');
+  });
+
+  it('should return 400 for OpenSearch client No Living Connections Error', () => {
+    const mockedLogger = loggerMock.create();
+    const error = handleError(
+      new errors.NoLivingConnectionsError(
+        'No Living Connections Error',
+        ({} as unknown) as ApiResponse
+      ),
+      opensearchDashboardsResponseFactory,
+      mockedLogger
+    );
+    expect(error.status).toBe(400);
+    expect(error.payload).toEqual('No Living Connections Error');
+  });
+
+  it('should return 400 for OpenSearch client connection errors', () => {
+    const mockedLogger = loggerMock.create();
+    const error = handleError(
+      new errors.ConnectionError('ConnectionError'),
+      opensearchDashboardsResponseFactory,
+      mockedLogger
+    );
+    expect(error.status).toBe(400);
+    expect(error.payload).toEqual('ConnectionError');
   });
 });
