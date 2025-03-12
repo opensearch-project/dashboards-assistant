@@ -8,8 +8,8 @@ import { Task } from './task';
 import { TEXT2VIZ_API } from '../../../common/constants/llm';
 
 export const processInputQuestion = (inputQuestion: string) => {
-  const httpErrorErrorAppendRegExp = new RegExp(`(?:${['error', 'fail'].join('|')})`, 'i');
-  if (httpErrorErrorAppendRegExp.test(inputQuestion)) {
+  const httpErrorInstructionAppendRegExp = new RegExp(`(?:${['error', 'fail'].join('|')})`, 'i');
+  if (httpErrorInstructionAppendRegExp.test(inputQuestion)) {
     return `${inputQuestion}. If you're dealing logs with http response code, then error usually refers to http response code like 4xx, 5xx`;
   }
   return inputQuestion;
