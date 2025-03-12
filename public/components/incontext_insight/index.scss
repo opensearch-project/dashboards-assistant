@@ -14,17 +14,17 @@
 }
 
 .incontextInsightHoverEffect25 {
-  opacity: .25 !important;
+  opacity: 0.25 !important;
   display: block !important;
 }
 
 .incontextInsightHoverEffect50 {
-  opacity: .5 !important;
+  opacity: 0.5 !important;
   display: block !important;
 }
 
 .incontextInsightHoverEffect75 {
-  opacity: .75 !important;
+  opacity: 0.75 !important;
   display: block !important;
 }
 
@@ -52,7 +52,7 @@
       display: block;
     }
     &:hover {
-      cursor: pointer; 
+      cursor: pointer;
     }
   }
 }
@@ -109,10 +109,19 @@
   border: none;
 }
 
-.incontextInsightGeneratePopoverFooter{
-  padding-block: 0 !important;
+.incontextInsightGeneratePopoverFooter {
+  padding: 0 $euiSizeS !important;
   margin: 0 !important;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .buttonGroupDivider {
+    height: 24px;
+    border-left: $euiBorderThin;
+    margin: 0 2px;
+  }
 }
 
 .incontextInsightGeneratePopoverContent {
@@ -120,6 +129,7 @@
   overflow: auto;
   max-height: 300px;
   scrollbar-width: thin;
+  padding: 0 $euiSizeS;
 }
 
 .incontextInsightSummary {
