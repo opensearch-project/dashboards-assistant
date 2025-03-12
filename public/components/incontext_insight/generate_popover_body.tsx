@@ -321,9 +321,15 @@ export const GeneratePopoverBody: React.FC<{
   };
 
   const renderInnerFooter = () => {
-    const traceTip = 'Insight With RAG';
     return (
       <EuiPopoverFooter className="incontextInsightGeneratePopoverFooter" paddingSize="none">
+        {displayDiscoverButton && (
+          <EuiButton onClick={handleNavigateToDiscover} isLoading={discoverLoading} size="s">
+            {i18n.translate('assistantDashboards.incontextInsight.discover', {
+              defaultMessage: 'View in Discover',
+            })}
+          </EuiButton>
+        )}
         {
           <div style={{ display: showInsight ? 'none' : 'block' }}>
             <MessageActions
@@ -333,7 +339,6 @@ export const GeneratePopoverBody: React.FC<{
               onViewTrace={() => {
                 setShowInsight(true);
               }}
-              traceTip={traceTip}
               usageCollection={usageCollection}
               isOnTrace={showInsight}
               metricAppName={metricAppName}
@@ -346,8 +351,9 @@ export const GeneratePopoverBody: React.FC<{
               contentToCopy={insight}
               showFeedback
               showTraceIcon={insightAvailable}
-              onViewTrace={() => {}}
-              traceTip={traceTip}
+              onViewTrace={() => {
+                setShowInsight(false);
+              }}
               usageCollection={usageCollection}
               isOnTrace={showInsight}
               metricAppName={metricAppName}
@@ -362,16 +368,6 @@ export const GeneratePopoverBody: React.FC<{
     <>
       {renderInnerTitle()}
       {renderContent()}
-      {displayDiscoverButton && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiButton onClick={handleNavigateToDiscover} isLoading={discoverLoading}>
-            {i18n.translate('assistantDashboards.incontextInsight.discover', {
-              defaultMessage: 'Discover details',
-            })}
-          </EuiButton>
-        </>
-      )}
     </>
   );
 };

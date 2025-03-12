@@ -327,7 +327,7 @@ describe('GeneratePopoverBody', () => {
     );
 
     await waitFor(() => {
-      expect(queryByText('Discover details')).not.toBeInTheDocument();
+      expect(queryByText('View in Discover')).not.toBeInTheDocument();
     });
   });
 
@@ -379,7 +379,7 @@ describe('GeneratePopoverBody', () => {
     );
 
     await waitFor(() => {
-      const button = getByText('Discover details');
+      const button = getByText('View in Discover');
       expect(button).toBeInTheDocument();
       fireEvent.click(button);
     });
@@ -434,7 +434,7 @@ describe('GeneratePopoverBody', () => {
     );
 
     await waitFor(() => {
-      expect(queryByText('Discover details')).not.toBeInTheDocument();
+      expect(queryByText('View in Discover')).not.toBeInTheDocument();
     });
   });
 });

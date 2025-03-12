@@ -24,6 +24,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - improve the text to visualization error handling ([#491](https://github.com/opensearch-project/dashboards-assistant/pull/491))
 - Optimize source selector width in t2v page ([#497](https://github.com/opensearch-project/dashboards-assistant/pull/497))
 - Show error message if PPL query does not contain aggregation ([#499](https://github.com/opensearch-project/dashboards-assistant/pull/499))
+- Adjust the overall style of alert summary popover ([#501](https://github.com/opensearch-project/dashboards-assistant/pull/501))
 - Add http error instruction for t2ppl task ([#502](https://github.com/opensearch-project/dashboards-assistant/pull/502))
 
 ### Bug Fixes
