@@ -41,6 +41,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-alpha1
 - Fix incontext insight popover close ([#498](https://github.com/opensearch-project/dashboards-assistant/pull/498))
 - Fix error handling for data source connection errors ([#500](https://github.com/opensearch-project/dashboards-assistant/pull/500))
 - Fix bug by hiding alert summary when clicking alert name ([#482](https://github.com/opensearch-project/dashboards-assistant/pull/482))
+- Fix alert summary message action position when no discover button ([#504](https://github.com/opensearch-project/dashboards-assistant/pull/504))
 
 ### Maintenance
 
