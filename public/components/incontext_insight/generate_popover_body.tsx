@@ -331,7 +331,10 @@ export const GeneratePopoverBody: React.FC<{
           </EuiButton>
         )}
         {
-          <div style={{ display: showInsight ? 'none' : 'block' }}>
+          <div
+            className="messageActionsWrapper"
+            style={{ display: showInsight ? 'none' : 'block' }}
+          >
             <MessageActions
               contentToCopy={summary}
               showFeedback
@@ -346,7 +349,10 @@ export const GeneratePopoverBody: React.FC<{
           </div>
         }
         {
-          <div style={{ display: showInsight && insightAvailable ? 'block' : 'none' }}>
+          <div
+            className="messageActionsWrapper"
+            style={{ display: showInsight && insightAvailable ? 'block' : 'none' }}
+          >
             <MessageActions
               contentToCopy={insight}
               showFeedback
