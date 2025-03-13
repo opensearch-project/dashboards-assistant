@@ -122,6 +122,10 @@
     border-left: $euiBorderThin;
     margin: 0 2px;
   }
+
+  .messageActionsWrapper {
+    flex-grow: 1;
+  }
 }
 
 .incontextInsightGeneratePopoverContent {
