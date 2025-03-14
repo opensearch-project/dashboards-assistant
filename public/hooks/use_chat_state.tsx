@@ -13,7 +13,7 @@ export interface ChatState {
   interactions: Interaction[];
   llmResponding: boolean;
   llmError?: Error;
-  llmResponseType: LLMResponseType;
+  llmResponseType?: LLMResponseType;
 }
 
 export enum LLMResponseType {
