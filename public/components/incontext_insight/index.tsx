@@ -12,7 +12,6 @@ import {
   EuiCompressedFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
@@ -43,6 +42,7 @@ export interface IncontextInsightProps {
   httpSetup?: HttpSetup;
   usageCollection?: UsageCollectionSetup;
   getStartServices?: StartServicesAccessor<AssistantPluginStartDependencies>;
+  title: string;
 }
 
 // TODO: add saved objects / config to store seed suggestions
@@ -51,6 +51,7 @@ export const IncontextInsight = ({
   httpSetup,
   usageCollection,
   getStartServices,
+  title,
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
   const anchorButton = useRef<HTMLDivElement>(null);
@@ -288,9 +289,7 @@ export const IncontextInsight = ({
             ref={anchorButton}
           >
             <EuiBetaBadge
-              title={i18n.translate('assistantDashboards.incontextInsight.title', {
-                defaultMessage: 'Summary',
-              })}
+              title={title}
               style={{ backgroundColor: euiThemeVars.euiColorInk }}
               className="summary-beta-badge"
               size="s"
@@ -302,9 +301,7 @@ export const IncontextInsight = ({
                   className="summary_badge_icon"
                 >
                   <EuiText color="ghost" size="s">
-                    {i18n.translate('assistantDashboards.incontextInsight.title', {
-                      defaultMessage: 'Summary',
-                    })}
+                    {title}
                   </EuiText>
                 </EuiButtonEmpty>
               }
