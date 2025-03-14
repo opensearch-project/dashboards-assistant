@@ -15,7 +15,7 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { MessageActions } from './message_action';
 import { useCore } from '../../../contexts';
-import { getConfigSchema, getLogoIcon } from '../../../services';
+import { getConfigSchema } from '../../../services';
 import { useChatActions } from '../../../hooks';
 import {
   IMessage,
