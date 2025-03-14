@@ -11,6 +11,8 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-alpha1
 - when open chatbot, load the last conversation automatically ([#439](https://github.com/opensearch-project/dashboards-assistant/pull/439))
 - add index type detection ([#454](https://github.com/opensearch-project/dashboards-assistant/pull/454))
 - add error handling when open chatbot and loading conversation ([#485](https://github.com/opensearch-project/dashboards-assistant/pull/485))
+- Generate visualization on t2v page mount ([#505](https://github.com/opensearch-project/dashboards-assistant/pull/505))
+- Update insight badge ([#507](https://github.com/opensearch-project/dashboards-assistant/pull/507))
 
 
 ### Enhancements
