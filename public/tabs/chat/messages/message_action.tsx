@@ -4,14 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSmallButtonIcon,
-  EuiCopy,
-  EuiToolTip,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSmallButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IOutput, Interaction } from '../../../../common/types/chat_saved_object_attributes';
 import { useFeedback } from '../../../hooks/use_feed_back';
@@ -29,6 +22,7 @@ interface MessageActionsProps {
   showTraceIcon?: boolean;
   isOnTrace?: boolean;
   traceInteractionId?: string;
+  traceTip?: string;
   onViewTrace?: () => void;
   shouldActionBarVisibleOnHover?: boolean;
   isFullWidth?: boolean;
@@ -51,6 +45,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   showTraceIcon = false,
   isOnTrace = false,
   traceInteractionId = null,
+  traceTip = 'info',
   onViewTrace,
   shouldActionBarVisibleOnHover = false,
   isFullWidth = false,
@@ -111,6 +106,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   const feedbackTip = i18n.translate(`assistantDashboards.messageActions.feedbackTip`, {
     defaultMessage: 'We have successfully received your feedback. Thank you.',
   });
+
   const buttonConfigs = {
     copy: {
       show: !isFullWidth,
@@ -171,23 +167,18 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
     },
     trace: {
       show: showTraceIcon && onViewTrace,
-      component: (
-        <EuiButtonEmpty
+      component: renderButtonWithTooltip(
+        traceTip,
+        <EuiSmallButtonIcon
           aria-label="How was this generated?"
           {...(traceInteractionId && {
             'data-test-subj': `trace-icon-${traceInteractionId}`,
           })}
           onClick={onViewTrace}
-          color="primary"
-        >
-          {isOnTrace
-            ? i18n.translate('assistantDashboards.incontextInsight.backToSummary', {
-                defaultMessage: 'Back to summary',
-              })
-            : i18n.translate('assistantDashboards.incontextInsight.viewInsightWithRAG', {
-                defaultMessage: 'View insight with RAG',
-              })}
-        </EuiButtonEmpty>
+          color={isOnTrace ? 'primary' : 'text'}
+          iconType="iInCircle"
+        />,
+        'trace'
       ),
     },
   };
