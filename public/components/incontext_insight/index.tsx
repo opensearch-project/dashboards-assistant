@@ -301,7 +301,7 @@ export const IncontextInsight = ({
                   color="text"
                   className="summary_badge_icon"
                 >
-                  <EuiText color="ghost">
+                  <EuiText color="ghost" size="s">
                     {i18n.translate('assistantDashboards.incontextInsight.title', {
                       defaultMessage: 'Summary',
                     })}
