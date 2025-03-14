@@ -24,8 +24,11 @@ import {
   EuiText,
   EuiWrappingPopover,
   keys,
+  EuiBetaBadge,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getIncontextInsightRegistry, getNotifications, getLogoIcon } from '../../services';
 import sparkle from '../../assets/sparkle.svg';
@@ -284,7 +287,28 @@ export const IncontextInsight = ({
             role="button"
             ref={anchorButton}
           >
-            <EuiIcon type={getLogoIcon('gradient')} size="m" />
+            <EuiBetaBadge
+              title={i18n.translate('assistantDashboards.incontextInsight.title', {
+                defaultMessage: 'Summary',
+              })}
+              style={{ backgroundColor: euiThemeVars.euiColorInk }}
+              className="summary-beta-badge"
+              size="s"
+              label={
+                <EuiButtonEmpty
+                  iconType={getLogoIcon('gradient')}
+                  iconSize="s"
+                  color="text"
+                  className="summary_badge_icon"
+                >
+                  <EuiText color="ghost">
+                    {i18n.translate('assistantDashboards.incontextInsight.title', {
+                      defaultMessage: 'Summary',
+                    })}
+                  </EuiText>
+                </EuiButtonEmpty>
+              }
+            />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

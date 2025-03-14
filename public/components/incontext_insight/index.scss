@@ -43,17 +43,13 @@
   padding: 0 5px;
   margin: 0 -2px -5px -5px;
 
-  .incontextInsightAnchorIcon {
-    :first-child {
-      margin-left: 6px;
-      margin-right: 2px;
-      padding: 0 2px;
-      opacity: 1;
-      display: block;
-    }
-    &:hover {
-      cursor: pointer;
-    }
+  .summary-beta-badge {
+    margin-left: 8px;
+  }
+
+  .summary_badge_icon {
+    filter: brightness(100);
+    height: 32px;
   }
 }
 
