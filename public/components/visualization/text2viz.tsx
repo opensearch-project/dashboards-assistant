@@ -21,7 +21,7 @@ import { i18n } from '@osd/i18n';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useCallback } from 'react';
-import { useObservable } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
 import { useLocation, useParams } from 'react-router-dom';
 import { Pipeline } from '../../utils/pipeline/pipeline';
 import { Text2PPLTask } from '../../utils/pipeline/text_to_ppl_task';
@@ -400,6 +400,13 @@ export const Text2Viz = () => {
       chrome.setHeaderVariant();
     };
   }, [chrome]);
+
+  useEffectOnce(() => {
+    if (!selectedSource || !inputQuestion) {
+      return;
+    }
+    onSubmit();
+  });
 
   const factory = embeddable.getEmbeddableFactory<NLQVisualizationInput>(
     NLQ_VISUALIZATION_EMBEDDABLE_TYPE
