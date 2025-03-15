@@ -45,11 +45,10 @@
 
   .summary-beta-badge {
     margin-left: 8px;
-  }
-
-  .summary_badge_icon {
-    filter: brightness(100);
-    height: 24px;
+    cursor: pointer;
+    .euiBetaBadge__icon {
+      filter: brightness(100);
+    }
   }
 }
 

@@ -289,22 +289,10 @@ export const IncontextInsight = ({
             ref={anchorButton}
           >
             <EuiBetaBadge
-              title={title}
+              label={title}
               style={{ backgroundColor: euiThemeVars.euiColorInk }}
               className="summary-beta-badge"
-              size="s"
-              label={
-                <EuiButtonEmpty
-                  iconType={getLogoIcon('gradient')}
-                  iconSize="s"
-                  color="text"
-                  className="summary_badge_icon"
-                >
-                  <EuiText color="ghost" size="s">
-                    {title}
-                  </EuiText>
-                </EuiButtonEmpty>
-              }
+              iconType={getLogoIcon('gradient')}
             />
           </div>
         </EuiFlexItem>
