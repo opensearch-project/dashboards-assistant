@@ -314,7 +314,7 @@ export const Text2Viz = () => {
             usageCollection.reportUiStats(
               VIS_NLQ_APP_ID,
               usageCollection.METRIC_TYPE.LOADED,
-              `saved-${uuidv4()}`
+              `created-${uuidv4()}`
             );
           }
         }

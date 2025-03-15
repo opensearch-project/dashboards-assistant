@@ -21,7 +21,7 @@ describe('<FeedbackThumbs />', () => {
     expect(usageCollectionMock.reportUiStats).toHaveBeenCalledWith(
       'test-app',
       METRIC_TYPE.CLICK,
-      expect.stringMatching(/thumbs_up.*/)
+      expect.stringMatching(/thumbup.*/)
     );
   });
 
@@ -36,7 +36,7 @@ describe('<FeedbackThumbs />', () => {
     expect(usageCollectionMock.reportUiStats).toHaveBeenCalledWith(
       'test-app',
       METRIC_TYPE.CLICK,
-      expect.stringMatching(/thumbs_down.*/)
+      expect.stringMatching(/thumbdown.*/)
     );
   });
 
