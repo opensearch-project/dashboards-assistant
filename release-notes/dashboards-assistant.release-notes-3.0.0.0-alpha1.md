@@ -28,6 +28,8 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-alpha1
 - Add http error instruction for t2ppl task ([#502](https://github.com/opensearch-project/dashboards-assistant/pull/502))
 - Change the background color, button position and text for alert summary popover ([#506](https://github.com/opensearch-project/dashboards-assistant/pull/506))
 - collect metrics for when t2viz triggered([#510](https://github.com/opensearch-project/dashboards-assistant/pull/510))
+- chatbot dock bottom border top([#511](https://github.com/opensearch-project/dashboards-assistant/pull/511))
+- update the no aggregation PPL error message([#512](https://github.com/opensearch-project/dashboards-assistant/pull/512))
 
 ### Bug Fixes
 
