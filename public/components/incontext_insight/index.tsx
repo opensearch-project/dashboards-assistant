@@ -339,6 +339,7 @@ export const IncontextInsight = ({
         anchorPosition="rightUp"
         offset={6}
         panelPaddingSize="s"
+        panelClassName="incontextInsightPopover"
       >
         {
           // For 'generate' type insights, we don't want to show this title but its own inner title

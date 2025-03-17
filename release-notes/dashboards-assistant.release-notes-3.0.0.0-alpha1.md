@@ -26,6 +26,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-alpha1
 - Show error message if PPL query does not contain aggregation ([#499](https://github.com/opensearch-project/dashboards-assistant/pull/499))
 - Adjust the overall style of alert summary popover ([#501](https://github.com/opensearch-project/dashboards-assistant/pull/501))
 - Add http error instruction for t2ppl task ([#502](https://github.com/opensearch-project/dashboards-assistant/pull/502))
+- Change the background color, button position and text for alert summary popover ([#506](https://github.com/opensearch-project/dashboards-assistant/pull/506))
 - collect metrics for when t2viz triggered([#510](https://github.com/opensearch-project/dashboards-assistant/pull/510))
 
 ### Bug Fixes
