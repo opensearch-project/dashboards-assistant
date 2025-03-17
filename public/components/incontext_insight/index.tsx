@@ -12,7 +12,6 @@ import {
   EuiCompressedFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
@@ -24,8 +23,11 @@ import {
   EuiText,
   EuiWrappingPopover,
   keys,
+  EuiBetaBadge,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { IncontextInsight as IncontextInsightInput } from '../../types';
 import { getIncontextInsightRegistry, getNotifications, getLogoIcon } from '../../services';
 import sparkle from '../../assets/sparkle.svg';
@@ -40,6 +42,7 @@ export interface IncontextInsightProps {
   httpSetup?: HttpSetup;
   usageCollection?: UsageCollectionSetup;
   getStartServices?: StartServicesAccessor<AssistantPluginStartDependencies>;
+  title: string;
 }
 
 // TODO: add saved objects / config to store seed suggestions
@@ -48,8 +51,10 @@ export const IncontextInsight = ({
   httpSetup,
   usageCollection,
   getStartServices,
+  title,
 }: IncontextInsightProps) => {
   const anchor = useRef<HTMLDivElement>(null);
+  const anchorButton = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isHover, setIsHover] = useState(false);
 
@@ -261,7 +266,6 @@ export const IncontextInsight = ({
       <EuiFlexGroup
         className="incontextInsightAnchorButton"
         onKeyDown={onAnchorKeyPress}
-        onClick={onAnchorClick}
         gutterSize="none"
         alignItems="center"
         ref={anchor}
@@ -272,8 +276,24 @@ export const IncontextInsight = ({
           <div className="incontextInsightAnchorContent">{target}</div>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <div className="incontextInsightAnchorIcon">
-            <EuiIcon type={getLogoIcon('gradient')} size="m" />
+          <div
+            className="incontextInsightAnchorIcon"
+            onClick={onAnchorClick}
+            onKeyDown={(e) => {
+              if (e.key === keys.ENTER || e.key === keys.SPACE) {
+                onAnchorClick();
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            ref={anchorButton}
+          >
+            <EuiBetaBadge
+              label={title}
+              style={{ backgroundColor: euiThemeVars.euiColorInk }}
+              className="summary-beta-badge"
+              iconType={getLogoIcon('gradient')}
+            />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -281,7 +301,7 @@ export const IncontextInsight = ({
   };
 
   const renderPopover = () => {
-    if (!input || !target || !anchor.current) return;
+    if (!input || !target || !anchor.current || !anchorButton.current) return;
     const popoverBody = () => {
       switch (input.type) {
         case 'suggestions':
@@ -312,7 +332,7 @@ export const IncontextInsight = ({
     return (
       <EuiWrappingPopover
         key={input.key}
-        button={anchor.current?.firstChild as HTMLElement}
+        button={anchorButton.current}
         isOpen={isVisible}
         closePopover={closePopover}
         anchorClassName="incontextInsightAnchor"

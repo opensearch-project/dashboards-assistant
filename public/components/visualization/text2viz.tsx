@@ -21,7 +21,7 @@ import { i18n } from '@osd/i18n';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useCallback } from 'react';
-import { useObservable } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
 import { useLocation, useParams } from 'react-router-dom';
 import { Pipeline } from '../../utils/pipeline/pipeline';
 import { Text2PPLTask } from '../../utils/pipeline/text_to_ppl_task';
@@ -54,6 +54,7 @@ import { TEXT2VEGA_INPUT_SIZE_LIMIT } from '../../../common/constants/llm';
 import { FeedbackThumbs } from '../feedback_thumbs';
 import { VizStyleEditor } from './viz_style_editor';
 import { Text2VegaTask } from '../../utils/pipeline/text_to_vega_task';
+import { Text2VizError } from './text2viz_error';
 
 export const INDEX_PATTERN_URL_SEARCH_KEY = 'indexPatternId';
 export const ASSISTANT_INPUT_URL_SEARCH_KEY = 'assistantInput';
@@ -67,6 +68,7 @@ export const Text2Viz = () => {
   );
   const [savedObjectLoading, setSavedObjectLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const {
     services: {
       application,
@@ -142,7 +144,9 @@ export const Text2Viz = () => {
     const subscription = text2vega?.getResult$().subscribe((result) => {
       if (result) {
         if (result.error) {
-          notifications.toasts.addError(result.error, {
+          const msg = `Unable to generate a visualization. ${result.error.message}`;
+          setErrorMessage(msg);
+          notifications.toasts.addError(new Error(msg), {
             title: i18n.translate('dashboardAssistant.feature.text2viz.error', {
               defaultMessage: 'Error while executing text to visualization',
             }),
@@ -214,6 +218,7 @@ export const Text2Viz = () => {
   const onSubmit = useCallback(
     async (inputInstruction: string = '') => {
       setCurrentInstruction(inputInstruction);
+      setErrorMessage('');
 
       if (status === 'RUNNING' || !selectedSource) return;
 
@@ -249,9 +254,17 @@ export const Text2Viz = () => {
         dataSourceId: indexPattern.dataSourceRef?.id,
       });
 
+      if (usageCollection) {
+        usageCollection.reportUiStats(
+          VIS_NLQ_APP_ID,
+          usageCollection.METRIC_TYPE.CLICK,
+          `triggered-${uuidv4()}`
+        );
+      }
+
       setSubmitting(false);
     },
-    [selectedSource, inputQuestion, status, notifications.toasts]
+    [selectedSource, inputQuestion, status, notifications.toasts, usageCollection]
   );
 
   /**
@@ -396,6 +409,13 @@ export const Text2Viz = () => {
     };
   }, [chrome]);
 
+  useEffectOnce(() => {
+    if (!selectedSource || !inputQuestion) {
+      return;
+    }
+    onSubmit();
+  });
+
   const factory = embeddable.getEmbeddableFactory<NLQVisualizationInput>(
     NLQ_VISUALIZATION_EMBEDDABLE_TYPE
   );
@@ -403,13 +423,13 @@ export const Text2Viz = () => {
   const getInputSection = () => {
     return (
       <>
-        <EuiFlexItem grow={3} style={{ maxWidth: '30%' }}>
+        <EuiFlexItem grow={2} style={{ width: 0 }}>
           <SourceSelector
             selectedSourceId={selectedSource}
             onChange={(ds) => setSelectedSource(ds.value)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={8}>
+        <EuiFlexItem grow={1}>
           <EuiFieldText
             value={inputQuestion}
             onChange={(e) => setInputQuestion(e.target.value)}
@@ -469,9 +489,10 @@ export const Text2Viz = () => {
           <EuiSpacer size="s" />
         </>
       )}
-      {noResult && <Text2VizEmpty />}
+      {noResult && !errorMessage && <Text2VizEmpty />}
       {loading && <Text2VizLoading type={savedObjectLoading ? 'loading' : 'generating'} />}
-      {resultLoaded && factory && (
+      {errorMessage && <Text2VizError message={errorMessage} />}
+      {!errorMessage && resultLoaded && factory && (
         <EuiResizableContainer style={{ flexGrow: 1, flexShrink: 1 }}>
           {(EuiResizablePanel, EuiResizableButton) => {
             return (

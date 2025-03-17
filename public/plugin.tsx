@@ -77,7 +77,7 @@ export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreS
 // @ts-ignore
 const LazyIncontextInsightComponent = lazy(() => import('./components/incontext_insight'));
 
-export const IncontextInsightComponent: React.FC<{ props: IncontextInsightProps }> = (props) => (
+export const IncontextInsightComponent: React.FC<IncontextInsightProps> = (props) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <LazyIncontextInsightComponent {...props} />
   </Suspense>
@@ -352,12 +352,18 @@ export class AssistantPlugin
       renderIncontextInsight: (props: any) => {
         if (!this.incontextInsightRegistry?.isEnabled()) return <div {...props} />;
         const httpSetup = core.http;
+        const title =
+          props?.title ??
+          i18n.translate('assistantDashboards.incontextInsight.title', {
+            defaultMessage: 'Summary',
+          });
         return (
           <IncontextInsightComponent
             {...props}
             httpSetup={httpSetup}
             usageCollection={setupDeps.usageCollection}
             getStartServices={core.getStartServices}
+            title={title}
           />
         );
       },

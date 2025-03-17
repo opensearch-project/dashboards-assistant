@@ -110,12 +110,14 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     ]
   );
 
-  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && inputRef.current && inputRef.current.value.trim().length > 0) {
       // open chat window
       setFlyoutVisible(true);
+      // clear conversations error
+      core.services.conversations.status$.next('idle');
       // start a new chat
-      props.assistantActions.loadChat();
+      await props.assistantActions.loadChat();
       // send message
       props.assistantActions.send({
         type: 'input',
@@ -185,7 +187,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   }, []);
 
   useEffect(() => {
-    const handleSuggestion = (event: {
+    const handleSuggestion = async (event: {
       suggestion: string;
       contextContent: string;
       datasourceId?: string;
@@ -195,7 +197,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
         setFlyoutVisible(true);
       }
       // start a new chat
-      props.assistantActions.loadChat();
+      await props.assistantActions.loadChat();
       // send message
       props.assistantActions.send({
         type: 'input',
@@ -234,7 +236,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (flyoutVisible) {
       return;
     }
-    core.services.conversationLoad.status$.next('loading');
     core.services.conversations
       .load({
         page: 1,

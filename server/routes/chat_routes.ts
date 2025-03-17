@@ -18,6 +18,7 @@ import { AgentFrameworkStorageService } from '../services/storage/agent_framewor
 import { RoutesOptions } from '../types';
 import { ChatService } from '../services/chat/chat_service';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
+import { handleError } from './error_handler';
 
 const llmRequestRoute = {
   path: ASSISTANT_API.SEND_MESSAGE,
@@ -289,7 +290,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);
-        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+        return handleError(error, response, context.assistant_plugin.logger);
       }
     }
   );

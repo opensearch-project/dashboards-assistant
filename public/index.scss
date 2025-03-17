@@ -9,7 +9,7 @@
   position: relative;
   width: 200px;
 
-  &.in-legacy-header{
+  &.in-legacy-header {
     margin: 0 $euiSizeS;
     height: $euiSizeL * 2;
   }
@@ -20,17 +20,17 @@
     }
   }
 
-  .llm-chat-header-text-input{
+  .llm-chat-header-text-input {
     padding-left: $euiSizeXL;
     padding-right: $euiSizeL * 2;
   }
 
-  .llm-chat-toggle-icon{
+  .llm-chat-toggle-icon {
     position: absolute;
     left: $euiSizeS;
   }
 
-  .llm-chat-header-shortcut{
+  .llm-chat-header-shortcut {
     position: absolute;
     right: $euiSizeS;
   }
@@ -49,6 +49,8 @@
 
 .llm-chat-flyout {
   height: 100%;
+  display: flex;
+  flex-direction: column;
   .euiFlyoutFooter {
     background: transparent;
   }
@@ -75,10 +77,6 @@
   background-color: $euiPageBackgroundColor;
   margin: 8px;
   border-radius: 8px;
-}
-
-.llm-chat-flyout-footer {
-  padding-bottom: 24px;
 }
 
 .llm-chat-bubble-wrapper {
