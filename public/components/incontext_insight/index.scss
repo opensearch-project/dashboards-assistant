@@ -82,6 +82,19 @@
   }
 }
 
+.incontextInsightPopover {
+  // Color for $ouiColorDarkestShade that don't revert color for dark mode
+  background-color: #343741 !important;
+
+  .euiPopover__panelArrow:after {
+    border-right-color: #343741 !important;
+  }
+
+  .euiLoadingContent__singleLineBackground {
+    background: linear-gradient(137deg, #a1a5ae80 45%, #ffffff80 50%, #98a2b380 55%) !important;
+  }
+}
+
 .incontextInsightPopoverFooter {
   // TODO: Remove this one paddingSize is fixed
   padding: 4px 12px 8px !important;
@@ -92,6 +105,10 @@
   max-width: 486px;
   min-width: 486px;
   width: 100%;
+
+  .euiTitle {
+    color: $euiColorGhost;
+  }
 }
 
 .incontextInsightGeneratePopoverTitle {
@@ -111,6 +128,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: $euiSizeS;
 
   .buttonGroupDivider {
     height: 24px;
