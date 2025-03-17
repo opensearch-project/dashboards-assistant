@@ -44,7 +44,7 @@ export class Text2PPLTask extends Task<Input, Input & { ppl: string }> {
       const hasStats = statsRegex.test(ppl);
       if (!hasStats) {
         throw new Error(
-          `The generated PPL query: ${ppl} doesn't seem to contain an aggregation. Ensure your question contains data aggregation (e.g., average, sum, or count) for meaningful visualization.`
+          `The generated PPL query doesn't seem to contain an aggregation. Ensure your question contains an aggregation (e.g., average, sum, or count) to create a meaningful visualization. Generated PPL: ${ppl}`
         );
       }
     }
