@@ -42,6 +42,13 @@ beforeEach(() => {
   }));
 });
 
+const mockChatScrollTopRef = {
+  current: {
+    height: 500,
+    scrollTop: 500,
+  },
+};
+
 describe('<ChatPageContent />', () => {
   const abortActionMock = jest.fn();
   const executeActionMock = jest.fn();
@@ -89,6 +96,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -102,6 +110,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -132,6 +141,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -172,6 +182,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -202,6 +213,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -236,6 +248,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -248,6 +261,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={true}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -262,6 +276,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         messagesLoadingError={new Error('failed to get response')}
         onRefreshConversation={onRefreshMock}
         onRefreshConversationsList={onRefreshMock}
@@ -283,6 +298,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -297,6 +313,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
@@ -337,6 +354,7 @@ describe('<ChatPageContent />', () => {
       <ChatPageContent
         messagesLoading={false}
         conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
       />
