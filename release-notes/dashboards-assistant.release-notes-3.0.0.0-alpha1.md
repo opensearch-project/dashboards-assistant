@@ -14,7 +14,6 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-alpha1
 - Generate visualization on t2v page mount ([#505](https://github.com/opensearch-project/dashboards-assistant/pull/505))
 - Update insight badge ([#507](https://github.com/opensearch-project/dashboards-assistant/pull/507))
 
-
 ### Enhancements
 
 - remove os_insight agent ([#452](https://github.com/opensearch-project/dashboards-assistant/pull/452))
@@ -27,7 +26,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-alpha1
 - Show error message if PPL query does not contain aggregation ([#499](https://github.com/opensearch-project/dashboards-assistant/pull/499))
 - Adjust the overall style of alert summary popover ([#501](https://github.com/opensearch-project/dashboards-assistant/pull/501))
 - Add http error instruction for t2ppl task ([#502](https://github.com/opensearch-project/dashboards-assistant/pull/502))
-
+- collect metrics for when t2viz triggered([#510](https://github.com/opensearch-project/dashboards-assistant/pull/510))
 
 ### Bug Fixes
 
@@ -44,6 +43,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-alpha1
 - Fix error handling for data source connection errors ([#500](https://github.com/opensearch-project/dashboards-assistant/pull/500))
 - Fix bug by hiding alert summary when clicking alert name ([#482](https://github.com/opensearch-project/dashboards-assistant/pull/482))
 - Fix alert summary message action position when no discover button ([#504](https://github.com/opensearch-project/dashboards-assistant/pull/504))
+- Remove text in badge to make it compatible with small screen ([#509](https://github.com/opensearch-project/dashboards-assistant/pull/509))
 
 ### Maintenance
 

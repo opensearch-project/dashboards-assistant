@@ -254,9 +254,17 @@ export const Text2Viz = () => {
         dataSourceId: indexPattern.dataSourceRef?.id,
       });
 
+      if (usageCollection) {
+        usageCollection.reportUiStats(
+          VIS_NLQ_APP_ID,
+          usageCollection.METRIC_TYPE.CLICK,
+          `triggered-${uuidv4()}`
+        );
+      }
+
       setSubmitting(false);
     },
-    [selectedSource, inputQuestion, status, notifications.toasts]
+    [selectedSource, inputQuestion, status, notifications.toasts, usageCollection]
   );
 
   /**
