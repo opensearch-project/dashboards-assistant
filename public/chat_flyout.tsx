@@ -12,6 +12,7 @@ import { ChatWindowHeader } from './tabs/chat_window_header';
 import { ChatHistoryPage } from './tabs/history/chat_history_page';
 import { AgentFrameworkTracesFlyoutBody } from './components/agent_framework_traces_flyout_body';
 import { TAB_ID } from './utils/constants';
+import { SIDECAR_DOCKED_MODE } from '../../../src/core/public';
 
 interface ChatFlyoutProps {
   flyoutVisible: boolean;
@@ -77,12 +78,17 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
 
   const leftPanelSize = getLeftPanelSize();
   const rightPanelSize = getRightPanelSize();
+  const { sidecarDockedMode } = useChatContext();
 
   return (
     <div
-      className={cs('llm-chat-flyout', {
-        'llm-chat-fullscreen': props.flyoutFullScreen,
-      })}
+      className={cs(
+        'llm-chat-flyout',
+        {
+          'llm-chat-fullscreen': props.flyoutFullScreen,
+        },
+        { 'llm-chatbot-border-top': sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER }
+      )}
     >
       <>
         <div className={cs('llm-chat-flyout-header')}>
