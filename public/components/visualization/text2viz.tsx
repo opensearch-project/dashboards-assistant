@@ -26,6 +26,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { Pipeline } from '../../utils/pipeline/pipeline';
 import { Text2PPLTask } from '../../utils/pipeline/text_to_ppl_task';
 import { PPLSampleTask } from '../../utils/pipeline/ppl_sample_task';
+import { PPLAutoSuggestTask } from '../../utils/pipeline/ppl_aggs_auto_suggest_task';
 import { SourceSelector } from './source_selector';
 import type { IndexPattern } from '../../../../../src/plugins/data/public';
 import { EmbeddableRenderer } from '../../../../../src/plugins/embeddable/public';
@@ -111,6 +112,7 @@ export const Text2Viz = () => {
   if (text2vegaRef.current === null) {
     text2vegaRef.current = new Pipeline([
       new Text2PPLTask(http),
+      new PPLAutoSuggestTask(data.search),
       new PPLSampleTask(data.search),
       new Text2VegaTask(http, savedObjects),
     ]);
@@ -252,6 +254,7 @@ export const Text2Viz = () => {
         inputQuestion,
         inputInstruction,
         dataSourceId: indexPattern.dataSourceRef?.id,
+        timeFiledName: indexPattern.timeFieldName,
       });
 
       if (usageCollection) {
