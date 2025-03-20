@@ -19,6 +19,7 @@ interface Input {
   inputQuestion: string;
   index: string;
   dataSourceId?: string;
+  timeFiledName?: string;
 }
 
 export class Text2PPLTask extends Task<Input, Input & { ppl: string }> {
@@ -37,16 +38,6 @@ export class Text2PPLTask extends Task<Input, Input & { ppl: string }> {
       throw new Error(
         `Error while generating PPL query with input: ${v.inputQuestion}. Please try rephrasing your question.`
       );
-    }
-
-    if (ppl) {
-      const statsRegex = /\|\s*stats\s+/i;
-      const hasStats = statsRegex.test(ppl);
-      if (!hasStats) {
-        throw new Error(
-          `The generated PPL query doesn't seem to contain an aggregation. Ensure your question contains an aggregation (e.g., average, sum, or count) to create a meaningful visualization. Generated PPL: ${ppl}`
-        );
-      }
     }
 
     return { ...v, ppl };
