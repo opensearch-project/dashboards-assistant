@@ -4,10 +4,10 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { PPLAutoSuggestTask } from './ppl_aggs_auto_suggest_task';
+import { PPLAggsAutoSuggestTask } from './ppl_aggs_auto_suggest_task';
 
 describe('PPLAutoSuggestTask', () => {
-  let pplAutoSuggestTask: PPLAutoSuggestTask;
+  let pplAutoSuggestTask: PPLAggsAutoSuggestTask;
   let mockSearchClient: DataPublicPluginStart['search'];
 
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('PPLAutoSuggestTask', () => {
         calculateAutoTimeExpression: jest.fn(),
       },
     };
-    pplAutoSuggestTask = new PPLAutoSuggestTask(mockSearchClient);
+    pplAutoSuggestTask = new PPLAggsAutoSuggestTask(mockSearchClient);
   });
 
   it('should return original input if PPL is empty', async () => {

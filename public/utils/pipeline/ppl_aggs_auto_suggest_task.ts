@@ -12,7 +12,7 @@ interface Input {
   timeFiledName?: string;
 }
 
-export class PPLAutoSuggestTask extends Task<Input, Input> {
+export class PPLAggsAutoSuggestTask extends Task<Input, Input> {
   searchClient: DataPublicPluginStart['search'];
 
   constructor(searchClient: DataPublicPluginStart['search']) {
