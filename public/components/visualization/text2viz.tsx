@@ -146,11 +146,6 @@ export const Text2Viz = () => {
         if (result.error) {
           const msg = `Unable to generate a visualization. ${result.error.message}`;
           setErrorMessage(msg);
-          notifications.toasts.addError(new Error(msg), {
-            title: i18n.translate('dashboardAssistant.feature.text2viz.error', {
-              defaultMessage: 'Error while executing text to visualization',
-            }),
-          });
         } else {
           setEditorInput(JSON.stringify(result.vega, undefined, 4));
 
@@ -169,7 +164,7 @@ export const Text2Viz = () => {
     return () => {
       subscription?.unsubscribe();
     };
-  }, [http, notifications, usageCollection]);
+  }, [usageCollection]);
 
   /**
    * Loads the saved object from id when editing an existing visualization
