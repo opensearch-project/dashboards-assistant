@@ -131,6 +131,30 @@ describe('PPLAutoSuggestTask', () => {
     expect(result).toEqual(expected);
   });
 
+  it('should handle null search results for time-based queries', async () => {
+    const input = {
+      ppl: 'source = test',
+      dataSourceId: 'test-source',
+      timeFiledName: 'timestamp',
+    };
+
+    // Mock null search response
+    const mockResponse = null;
+
+    mockSearchClient.search.mockReturnValue({
+      toPromise: () => Promise.resolve(mockResponse),
+    });
+
+    const expected = {
+      ppl: 'source = test | stats count()',
+      dataSourceId: 'test-source',
+      timeFiledName: 'timestamp',
+    };
+
+    const result = await pplAutoSuggestTask.execute(input);
+    expect(result).toEqual(expected);
+  });
+
   it('should handle search errors', async () => {
     const input = {
       ppl: 'source = test',

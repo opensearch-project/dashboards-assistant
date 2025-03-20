@@ -40,7 +40,7 @@ export class PPLAggsAutoSuggestTask extends Task<Input, Input> {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .toPromise<any>();
 
-            if (res.rawResponse.total === 0) {
+            if (!res || !res.rawResponse || res.rawResponse.total === 0) {
               ppl = `${ppl} | stats count()`;
             } else {
               // get min and max and calculate proper interval by range
