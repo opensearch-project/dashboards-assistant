@@ -345,7 +345,7 @@ export const GeneratePopoverBody: React.FC<{
                   defaultMessage: 'Back to summary',
                 })
               : i18n.translate('assistantDashboards.incontextInsight.viewInsight', {
-                  defaultMessage: 'View insight',
+                  defaultMessage: 'View insights',
                 })}
           </TraceButton>
         )}
