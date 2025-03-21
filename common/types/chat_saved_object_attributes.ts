@@ -87,3 +87,17 @@ export interface SendResponse {
   messages: IMessage[];
   interactions: Interaction[];
 }
+
+export type StreamChunk =
+  | {
+      type: 'patch';
+      body: Pick<SendResponse, 'interactions' | 'messages'>;
+    }
+  | {
+      type: 'error';
+      body: string;
+    }
+  | {
+      type: 'metadata';
+      body: Partial<SendResponse>;
+    };

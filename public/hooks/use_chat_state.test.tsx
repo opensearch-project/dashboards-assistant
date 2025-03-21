@@ -5,7 +5,12 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useChatState, ChatStateProvider, addPatchInArray } from './use_chat_state';
+import {
+  useChatState,
+  ChatStateProvider,
+  addPatchInArray,
+  LLMResponseType,
+} from './use_chat_state';
 
 describe('useChatState hook', () => {
   it('should have initial chat state', () => {
@@ -14,6 +19,7 @@ describe('useChatState hook', () => {
       interactions: [],
       messages: [],
       llmResponding: false,
+      llmResponseType: LLMResponseType.TEXT,
     });
   });
 
@@ -53,6 +59,7 @@ describe('useChatState hook', () => {
       interactions: [],
       messages: [],
       llmResponding: false,
+      llmResponseType: LLMResponseType.TEXT,
     });
   });
 
@@ -91,7 +98,6 @@ describe('useChatState hook', () => {
       })
     );
 
-    expect(result.current.chatState.llmResponding).toBe(false);
     expect(result.current.chatState.messages).toEqual([
       { type: 'input', contentType: 'text', content: 'question mock' },
       { type: 'output', contentType: 'markdown', content: 'output mock' },

@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import React from 'react';
 import { IMessage } from '../../../../common/types/chat_saved_object_attributes';
 import { CoreVisualization } from '../../../components/core_visualization';
 import { useChatContext } from '../../../contexts/chat_context';
+import { BlinkCursor } from '../../../components/blink_cursor';
+import { MarkdownWithBlinkCursor } from '../../../components/markdown_with_blink_cursor';
 
 export interface MessageContentProps {
   message: IMessage;
+  loading?: boolean;
 }
 
 export const MessageContent: React.FC<MessageContentProps> = React.memo((props) => {
@@ -18,7 +21,12 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
 
   switch (props.message.contentType) {
     case 'text':
-      return <EuiText style={{ whiteSpace: 'pre-line' }}>{props.message.content}</EuiText>;
+      return (
+        <EuiText style={{ whiteSpace: 'pre-line' }}>
+          {props.message.content}
+          {props.loading ? <BlinkCursor /> : null}
+        </EuiText>
+      );
 
     case 'error':
       return (
@@ -28,7 +36,11 @@ export const MessageContent: React.FC<MessageContentProps> = React.memo((props) 
       );
 
     case 'markdown':
-      return <EuiMarkdownFormat>{props.message.content}</EuiMarkdownFormat>;
+      return (
+        <MarkdownWithBlinkCursor loading={props.loading}>
+          {props.message.content}
+        </MarkdownWithBlinkCursor>
+      );
 
     case 'visualization':
       return (
