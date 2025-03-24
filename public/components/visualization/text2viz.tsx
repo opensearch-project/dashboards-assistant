@@ -26,6 +26,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { Pipeline } from '../../utils/pipeline/pipeline';
 import { Text2PPLTask } from '../../utils/pipeline/text_to_ppl_task';
 import { PPLSampleTask } from '../../utils/pipeline/ppl_sample_task';
+import { PPLAggsAutoSuggestTask } from '../../utils/pipeline/ppl_aggs_auto_suggest_task';
 import { SourceSelector } from './source_selector';
 import type { IndexPattern } from '../../../../../src/plugins/data/public';
 import { EmbeddableRenderer } from '../../../../../src/plugins/embeddable/public';
@@ -111,6 +112,7 @@ export const Text2Viz = () => {
   if (text2vegaRef.current === null) {
     text2vegaRef.current = new Pipeline([
       new Text2PPLTask(http),
+      new PPLAggsAutoSuggestTask(data.search),
       new PPLSampleTask(data.search),
       new Text2VegaTask(http, savedObjects),
     ]);
@@ -146,11 +148,6 @@ export const Text2Viz = () => {
         if (result.error) {
           const msg = `Unable to generate a visualization. ${result.error.message}`;
           setErrorMessage(msg);
-          notifications.toasts.addError(new Error(msg), {
-            title: i18n.translate('dashboardAssistant.feature.text2viz.error', {
-              defaultMessage: 'Error while executing text to visualization',
-            }),
-          });
         } else {
           setEditorInput(JSON.stringify(result.vega, undefined, 4));
 
@@ -169,7 +166,7 @@ export const Text2Viz = () => {
     return () => {
       subscription?.unsubscribe();
     };
-  }, [http, notifications, usageCollection]);
+  }, [usageCollection]);
 
   /**
    * Loads the saved object from id when editing an existing visualization
@@ -252,6 +249,7 @@ export const Text2Viz = () => {
         inputQuestion,
         inputInstruction,
         dataSourceId: indexPattern.dataSourceRef?.id,
+        timeFiledName: indexPattern.timeFieldName,
       });
 
       if (usageCollection) {

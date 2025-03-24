@@ -144,10 +144,10 @@ describe('GeneratePopoverBody', () => {
     );
 
     // insight button is visible
-    const insightButton = screen.getAllByText('View insight')[0];
+    const insightButton = screen.getAllByText('View insights')[0];
     expect(insightButton).toBeInTheDocument();
 
-    // 2. Click insight button to view insight
+    // 2. Click insight button to view insights
     fireEvent.click(insightButton);
     // title is back button + 'Insight With RAG'
     let backButton = getByLabelText('back-to-summary');
@@ -224,7 +224,7 @@ describe('GeneratePopoverBody', () => {
     );
 
     // insight button is not visible
-    expect(screen.queryAllByLabelText('View insight')).toHaveLength(0);
+    expect(screen.queryAllByLabelText('View insights')).toHaveLength(0);
     // Only call http post 1 time.
     expect(mockPost).toHaveBeenCalledTimes(1);
   });
@@ -286,7 +286,7 @@ describe('GeneratePopoverBody', () => {
     // Show summary content although insight generation failed
     expect(getByText('Generated summary content')).toBeInTheDocument();
     // insight button is not visible for this alert
-    expect(screen.queryAllByLabelText('View insight')).toHaveLength(0);
+    expect(screen.queryAllByLabelText('View insights')).toHaveLength(0);
   });
 
   it('should not display discover link if monitor type is not  query_level_monitor or bucket_level_monitor', async () => {
