@@ -157,7 +157,7 @@ export class AssistantPlugin
               defaultMessage: 'Generate visualization with a natural language question.',
             }),
             icon: 'chatRight',
-            stage: 'experimental',
+            stage: 'production',
             promotion: {
               buttonText: i18n.translate(
                 'dashboardAssistant.feature.text2viz.promotion.buttonText',
