@@ -29,6 +29,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-alpha1
 - collect metrics for when t2viz triggered([#510](https://github.com/opensearch-project/dashboards-assistant/pull/510))
 - chatbot dock bottom border top([#511](https://github.com/opensearch-project/dashboards-assistant/pull/511))
 - update the no aggregation PPL error message([#512](https://github.com/opensearch-project/dashboards-assistant/pull/512))
+- Revert - Add http error instruction for t2ppl task ([#517](https://github.com/opensearch-project/dashboards-assistant/pull/517))
 
 ### Bug Fixes
 
