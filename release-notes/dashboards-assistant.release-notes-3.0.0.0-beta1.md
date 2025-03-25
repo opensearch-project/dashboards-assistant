@@ -15,6 +15,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 
 - remove experimental badge for vis-nlp ([#528](https://github.com/opensearch-project/dashboards-assistant/pull/528))
 - Fix vertically alignment of alert insights popover title ([#526](https://github.com/opensearch-project/dashboards-assistant/pull/526))
+- Fix http request for insights to be triggered only after view insights button is clicked ([#520](https://github.com/opensearch-project/dashboards-assistant/pull/520))
 
 ### Infrastructure
 
