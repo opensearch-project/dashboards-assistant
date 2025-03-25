@@ -86,6 +86,23 @@ export const GeneratePopoverBody: React.FC<{
     getMonitorType();
   }, [contextObject, setDisplayDiscoverButton]);
 
+  useEffect(() => {
+    if (insightAvailable && showInsight && insight === '') {
+      const { contextContent, dataSourceQuery, summaryType, insightType } = getInsightParams(
+        contextObject
+      );
+
+      onGenerateInsightBasedOnSummary(
+        dataSourceQuery,
+        summaryType,
+        insightType!,
+        summary,
+        contextContent,
+        `Please provide your insight on this ${summaryType}.`
+      );
+    }
+  }, [showInsight]);
+
   useEffectOnce(() => {
     onGenerateSummary(
       incontextInsight.suggestions && incontextInsight.suggestions.length > 0
@@ -93,6 +110,27 @@ export const GeneratePopoverBody: React.FC<{
         : 'Please summarize the input'
     );
   });
+
+  const getInsightParams = (contextObj: ContextObj | undefined) => {
+    const contextContent = contextObj?.context || '';
+    const dataSourceId = contextObj?.dataSourceId;
+    const dataSourceQuery = dataSourceId ? { dataSourceId } : {};
+    let summaryType: string;
+    const endIndex = incontextInsight.key.indexOf('_', 0);
+    if (endIndex !== -1) {
+      summaryType = incontextInsight.key.substring(0, endIndex);
+    } else {
+      summaryType = incontextInsight.key;
+    }
+    const insightType = summaryType === 'alerts' ? 'user_insight' : undefined;
+
+    return {
+      contextContent,
+      dataSourceQuery,
+      summaryType,
+      insightType,
+    };
+  };
 
   const onGenerateSummary = (summarizationQuestion: string) => {
     const summarize = async () => {
@@ -111,17 +149,9 @@ export const GeneratePopoverBody: React.FC<{
       }
       // onGenerateSummary will get contextObj when mounted, use this returned value to set state to avoid re-fetch.
       setContextObject(contextObj);
-      const contextContent = contextObj?.context || '';
-      const dataSourceId = contextObj?.dataSourceId;
-      const dataSourceQuery = dataSourceId ? { dataSourceId } : {};
-      let summaryType: string;
-      const endIndex = incontextInsight.key.indexOf('_', 0);
-      if (endIndex !== -1) {
-        summaryType = incontextInsight.key.substring(0, endIndex);
-      } else {
-        summaryType = incontextInsight.key;
-      }
-      const insightType = summaryType === 'alerts' ? 'user_insight' : undefined;
+      const { contextContent, dataSourceQuery, summaryType, insightType } = getInsightParams(
+        contextObj
+      );
       const index = contextObj?.additionalInfo?.index;
       const dsl = contextObj?.additionalInfo?.dsl;
       const topNLogPatternData = contextObj?.additionalInfo?.topNLogPatternData;
@@ -144,16 +174,6 @@ export const GeneratePopoverBody: React.FC<{
           setSummary(summaryContent);
           const insightAgentIdExists = !!insightType && response.insightAgentIdExists;
           setInsightAvailable(insightAgentIdExists);
-          if (insightAgentIdExists) {
-            onGenerateInsightBasedOnSummary(
-              dataSourceQuery,
-              summaryType,
-              insightType,
-              summaryContent,
-              contextContent,
-              `Please provide your insight on this ${summaryType}.`
-            );
-          }
           reportMetric(usageCollection, metricAppName, 'generated', METRIC_TYPE.COUNT);
         })
         .catch((error) => {
@@ -287,7 +307,9 @@ export const GeneratePopoverBody: React.FC<{
                 aria-label="back-to-summary"
                 size="m"
                 onClick={() => {
-                  setShowInsight(false);
+                  if (insight !== '') {
+                    setShowInsight(false);
+                  }
                 }}
                 type="arrowLeft"
                 color="ghost"
