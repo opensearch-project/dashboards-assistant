@@ -23,8 +23,8 @@ import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
 import { getIncontextInsightRegistry } from '../../services';
-
 import { getConfigSchema } from '../../services';
+import { LLMResponseType } from '../../hooks/use_chat_state';
 
 interface ChatPageContentProps {
   messagesLoading: boolean;
@@ -149,30 +149,42 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           registry.setInteractionId(interaction);
         }
 
+        const showActionBar =
+          isChatOutput &&
+          (chatState.llmResponseType === LLMResponseType.TEXT ||
+            (chatState.llmResponseType === LLMResponseType.STREAMING && !chatState.llmResponding));
+
         return (
           <React.Fragment key={`${interaction?.conversation_id}-${i}`}>
             <ToolsUsed message={message} />
             <MessageBubble
               message={message}
-              showActionBar={isChatOutput}
+              showActionBar={showActionBar}
               showRegenerate={isLatestOutput && configSchema.chat.regenerateMessage}
               shouldActionBarVisibleOnHover={!isLatestOutput}
               onRegenerate={chatActions.regenerate}
               interaction={interaction}
             >
-              <MessageContent message={message} />
+              <MessageContent
+                message={message}
+                loading={
+                  isLatestOutput &&
+                  chatState.llmResponseType === LLMResponseType.STREAMING &&
+                  chatState.llmResponding
+                }
+              />
             </MessageBubble>
             {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}
             <EuiSpacer />
           </React.Fragment>
         );
       })}
-      {loading && (
+      {loading && chatState.llmResponseType === LLMResponseType.TEXT ? (
         <>
           <EuiSpacer />
           <MessageBubble loading showActionBar={false} />
         </>
-      )}
+      ) : null}
 
       {configSchema.chat.regenerateMessage &&
         chatState.llmResponding &&
