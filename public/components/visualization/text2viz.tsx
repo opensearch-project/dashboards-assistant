@@ -433,7 +433,7 @@ export const Text2Viz = () => {
             onChange={(e) => setInputQuestion(e.target.value)}
             fullWidth
             compressed
-            prepend={<EuiIcon type={getLogoIcon('gray')} />}
+            prepend={config.chat.enabled ? <></> : <EuiIcon type={getLogoIcon('gray')} />}
             placeholder="Generate visualization with a natural language question."
             onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
             disabled={!selectedSource}
