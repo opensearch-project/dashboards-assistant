@@ -21,4 +21,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Maintenance
 
+- Bump version to 3.0.0.0-beta1 ([#521](https://github.com/opensearch-project/dashboards-assistant/pull/521))
+
 ### Refactoring
