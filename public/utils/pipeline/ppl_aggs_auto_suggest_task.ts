@@ -14,6 +14,7 @@ interface Input {
 
 export class PPLAggsAutoSuggestTask extends Task<Input, Input> {
   searchClient: DataPublicPluginStart['search'];
+  fieldsRegex = /\s*\|\s*fields\s[^|]*/gim;
 
   constructor(searchClient: DataPublicPluginStart['search']) {
     super();
@@ -24,9 +25,15 @@ export class PPLAggsAutoSuggestTask extends Task<Input, Input> {
     let ppl = v.ppl;
 
     if (ppl) {
-      const isPPLHasAgg = this.isPPLHasAggregation(ppl);
+      const pplHasAgg = this.pplHasAggregation(ppl);
+
+      if (!pplHasAgg) {
+        // NOTE: temporary fix for the OS 2.17 PPL bug which `fields` keyword causes PPL to fail
+        ppl = ppl.replace(this.fieldsRegex, '');
+      }
+
       // if no aggregation, will try auto suggest one
-      if (!isPPLHasAgg) {
+      if (!pplHasAgg) {
         if (v.timeFiledName) {
           const dateRangePPL = `${ppl} | stats min(${v.timeFiledName}) as min, max(${v.timeFiledName}) as max`;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,7 +73,7 @@ export class PPLAggsAutoSuggestTask extends Task<Input, Input> {
     return v;
   }
 
-  private isPPLHasAggregation(ppl: string) {
+  private pplHasAggregation(ppl: string) {
     const statsRegex = /\|\s*stats\s+/i;
     return statsRegex.test(ppl);
   }
