@@ -32,7 +32,7 @@ import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collectio
 import { reportMetric } from '../../utils/report_metric';
 import { buildUrlQuery, createIndexPatterns, extractTimeRangeDSL } from '../../utils';
 import { AssistantPluginStartDependencies } from '../../types';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { formatUrlWithWorkspaceId } from '../../../../../src/core/public/utils';
 
 export const GeneratePopoverBody: React.FC<{
