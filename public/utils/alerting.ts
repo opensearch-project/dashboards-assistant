@@ -6,14 +6,9 @@
 import rison from 'rison-node';
 import { stringify } from 'query-string';
 import moment from 'moment';
-import { buildCustomFilter } from '../../../../src/plugins/data/common';
+import { buildCustomFilter, FilterStateStore } from '../../../../src/plugins/data/common';
 import { url } from '../../../../src/plugins/opensearch_dashboards_utils/public';
-import {
-  DataPublicPluginStart,
-  opensearchFilters,
-  IndexPattern,
-  Filter,
-} from '../../../../src/plugins/data/public';
+import { DataPublicPluginStart, IndexPattern, Filter } from '../../../../src/plugins/data/public';
 import { CoreStart } from '../../../../src/core/public';
 import { NestedRecord, DSL } from '../types';
 
@@ -25,7 +20,7 @@ export const buildFilter = (indexPatternId: string, dsl: DSL) => {
     false,
     false,
     filterAlias,
-    opensearchFilters.FilterStateStore.APP_STATE
+    FilterStateStore.APP_STATE
   );
 };
 

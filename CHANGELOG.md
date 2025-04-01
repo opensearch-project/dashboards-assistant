@@ -19,6 +19,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Infrastructure
 
+- Fix failed UTs with OSD 3.0 ([#527](https://github.com/opensearch-project/dashboards-assistant/pull/527))
+
 ### Documentation
 
 ### Maintenance

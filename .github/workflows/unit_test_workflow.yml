@@ -10,7 +10,7 @@ on:
   push:
     branches: ["**"]
 env:
-  OPENSEARCH_DASHBOARDS_VERSION: '2.x'
+  OPENSEARCH_DASHBOARDS_VERSION: 'main'
   NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
 
 jobs:
