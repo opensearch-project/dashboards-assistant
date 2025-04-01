@@ -105,20 +105,20 @@
   max-width: 486px;
   min-width: 486px;
   width: 100%;
+}
+
+.incontextInsightGeneratePopoverTitle {
+  margin-bottom: 0 !important;
+  border: none;
+  display: flex;
 
   .euiTitle {
     color: $euiColorGhost;
   }
-}
 
-.incontextInsightGeneratePopoverTitle {
-  // TODO: Remove this one paddingSize is fixed
-  padding: 0 !important;
-  padding-left: 5px !important;
-  margin-bottom: 0 !important;
-  min-height: 30px;
-  max-height: 30px;
-  border: none;
+  .euiFlexGroup {
+    gap: $euiSizeXS;
+  }
 }
 
 .incontextInsightGeneratePopoverFooter {
