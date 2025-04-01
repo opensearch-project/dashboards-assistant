@@ -18,6 +18,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Bug Fixes
 
 - remove experimental badge for vis-nlp ([#528](https://github.com/opensearch-project/dashboards-assistant/pull/528))
+- Fix vertically alignment of alert insights popover title ([#526](https://github.com/opensearch-project/dashboards-assistant/pull/526))
 
 ### Infrastructure
 
