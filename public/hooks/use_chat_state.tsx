@@ -13,6 +13,12 @@ export interface ChatState {
   interactions: Interaction[];
   llmResponding: boolean;
   llmError?: Error;
+  llmResponseType?: LLMResponseType;
+}
+
+export enum LLMResponseType {
+  TEXT = 'text',
+  STREAMING = 'streaming',
 }
 
 type ChatStateAction =
@@ -37,6 +43,25 @@ type ChatStateAction =
         messages: ChatState['messages'];
         interactions: ChatState['interactions'];
       };
+    }
+  | {
+      type: 'llmRespondingChange';
+      payload: {
+        flag: boolean;
+      };
+    }
+  | {
+      type: 'updateResponseType';
+      payload: {
+        type: LLMResponseType;
+      };
+    }
+  | {
+      type: 'appendMessage';
+      payload: {
+        content: string;
+        messageId: string;
+      };
     };
 
 interface IChatStateContext {
@@ -49,6 +74,7 @@ const initialState: ChatState = {
   interactions: [],
   messages: [],
   llmResponding: false,
+  llmResponseType: LLMResponseType.TEXT,
 };
 
 /**
@@ -93,7 +119,6 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
       case 'receive':
         draft.messages = action.payload.messages;
         draft.interactions = action.payload.interactions;
-        draft.llmResponding = false;
         draft.llmError = undefined;
         break;
 
@@ -122,8 +147,30 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
           action.payload.interactions,
           'interaction_id'
         );
-        draft.llmResponding = false;
         draft.llmError = undefined;
+        break;
+
+      case 'appendMessage':
+        const updatingMessage = state.messages.find(
+          (message) => message.messageId === action.payload.messageId
+        );
+        if (updatingMessage) {
+          const patchMessages: IMessage[] = [
+            {
+              ...updatingMessage,
+              content: updatingMessage.content + action.payload.content,
+            },
+          ];
+          draft.messages = addPatchInArray(state.messages, patchMessages, 'messageId');
+        }
+        break;
+
+      case 'llmRespondingChange':
+        draft.llmResponding = action.payload.flag;
+        break;
+
+      case 'updateResponseType':
+        draft.llmResponseType = action.payload.type;
         break;
     }
   });

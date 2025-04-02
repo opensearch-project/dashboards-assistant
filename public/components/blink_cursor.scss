@@ -1,0 +1,8 @@
+.assistant_blinkCursor {
+  border-right: 2px solid black;
+  animation: cursor-blink 0.8s infinite;
+}
+
+@keyframes cursor-blink {
+  50% { border-right-color: transparent; }
+}
