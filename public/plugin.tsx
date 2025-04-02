@@ -186,7 +186,7 @@ export class AssistantPlugin
                   title: attributes?.title,
                   typeTitle: 'NLQ',
                   updated_at: updatedAt,
-                  stage: 'experimental',
+                  stage: 'production',
                 }),
               },
             },
