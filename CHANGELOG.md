@@ -14,6 +14,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Revert "Add http error instruction for t2ppl task" ([#519](https://github.com/opensearch-project/dashboards-assistant/pull/519))
 - t2viz remove fields clause from generated PPL query ([#525](https://github.com/opensearch-project/dashboards-assistant/pull/525))
 - Render Icon based on the chat status ([#523](https://github.com/opensearch-project/dashboards-assistant/pull/523))
+- Refactor InContext style, add white logo and remove outdated code ([#529](https://github.com/opensearch-project/dashboards-assistant/pull/529))
 
 ### Bug Fixes
 
