@@ -1,12 +1,8 @@
 .incontextInsightAnchorButton {
-  border: solid 2px transparent;
   box-sizing: border-box;
   max-width: fit-content;
   border-radius: 0;
   white-space: nowrap;
-  // TODO: this doesn't scale nicely on same elements on view
-  // border-image: linear-gradient(to left, #38414D 60%, transparent 40%) 20% repeat;
-  padding: 0 5px;
 
   .incontextInsightAnchorIcon {
     margin-left: 4px;
