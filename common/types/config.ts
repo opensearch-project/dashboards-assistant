@@ -37,6 +37,7 @@ export const configSchema = schema.object({
       schema.object({
         gradient: schema.maybe(schema.string()),
         gray: schema.maybe(schema.string()),
+        white: schema.maybe(schema.string()),
       })
     ),
   }),

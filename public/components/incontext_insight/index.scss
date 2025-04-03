@@ -1,39 +1,5 @@
-// TODO: fix the styling due to not wanting the chat icon to push elements
-// Might be worth reconsidering the icon for absolute positioning
-.incontextInsightHoverEffectUnderline {
-  border: solid 2px transparent !important;
-  margin: -2px -5px -5px -7px !important;
-}
-
-.incontextInsightHoverEffect0 {
-  margin-left: 6px;
-  margin-right: 2px;
-  padding: 0 2px;
-  opacity: 0 !important;
-  display: block !important;
-}
-
-.incontextInsightHoverEffect25 {
-  opacity: 0.25 !important;
-  display: block !important;
-}
-
-.incontextInsightHoverEffect50 {
-  opacity: 0.5 !important;
-  display: block !important;
-}
-
-.incontextInsightHoverEffect75 {
-  opacity: 0.75 !important;
-  display: block !important;
-}
-
-.incontextInsightHoverEffect100 {
-  opacity: 1 !important;
-  display: block !important;
-}
-
 .incontextInsightAnchorButton {
+  border: solid 2px transparent;
   box-sizing: border-box;
   max-width: fit-content;
   border-radius: 0;
@@ -41,13 +7,16 @@
   // TODO: this doesn't scale nicely on same elements on view
   // border-image: linear-gradient(to left, #38414D 60%, transparent 40%) 20% repeat;
   padding: 0 5px;
-  margin: 0 -2px -5px -5px;
 
-  .summary-beta-badge {
+  .incontextInsightAnchorIcon {
     margin-left: 4px;
-    cursor: pointer;
-    .euiBetaBadge__icon {
-      filter: brightness(100);
+    .summary-beta-badge {
+      cursor: pointer;
+      vertical-align: middle;
+      //OSD UI shared will add 1px margin top for this icon globally, use sub to align
+      .euiIcon {
+        vertical-align: sub;
+      }
     }
   }
 }
