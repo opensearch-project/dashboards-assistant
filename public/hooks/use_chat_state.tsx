@@ -14,6 +14,12 @@ export interface ChatState {
   llmResponding: boolean;
   llmError?: Error;
   nextToken?: string;
+  llmResponseType?: LLMResponseType;
+}
+
+export enum LLMResponseType {
+  TEXT = 'text',
+  STREAMING = 'streaming',
 }
 
 type ChatStateAction =
@@ -26,7 +32,7 @@ type ChatStateAction =
       payload: {
         messages: ChatState['messages'];
         interactions: ChatState['interactions'];
-        nextToken: ChatState['nextToken'];
+        nextToken?: ChatState['nextToken'];
       };
     }
   | {
@@ -38,7 +44,26 @@ type ChatStateAction =
       payload: {
         messages: ChatState['messages'];
         interactions: ChatState['interactions'];
-        nextToken: ChatState['nextToken'];
+        nextToken?: ChatState['nextToken'];
+      };
+    }
+  | {
+      type: 'llmRespondingChange';
+      payload: {
+        flag: boolean;
+      };
+    }
+  | {
+      type: 'updateResponseType';
+      payload: {
+        type: LLMResponseType;
+      };
+    }
+  | {
+      type: 'appendMessage';
+      payload: {
+        content: string;
+        messageId: string;
       };
     };
 
@@ -52,6 +77,7 @@ const initialState: ChatState = {
   interactions: [],
   messages: [],
   llmResponding: false,
+  llmResponseType: LLMResponseType.TEXT,
 };
 
 /**
@@ -100,7 +126,6 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
           draft.messages = action.payload.messages;
         }
         draft.interactions = action.payload.interactions;
-        draft.llmResponding = false;
         draft.llmError = undefined;
         draft.nextToken = action.payload.nextToken;
         break;
@@ -130,8 +155,30 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
           action.payload.interactions,
           'interaction_id'
         );
-        draft.llmResponding = false;
         draft.llmError = undefined;
+        break;
+
+      case 'appendMessage':
+        const updatingMessage = state.messages.find(
+          (message) => message.messageId === action.payload.messageId
+        );
+        if (updatingMessage) {
+          const patchMessages: IMessage[] = [
+            {
+              ...updatingMessage,
+              content: updatingMessage.content + action.payload.content,
+            },
+          ];
+          draft.messages = addPatchInArray(state.messages, patchMessages, 'messageId');
+        }
+        break;
+
+      case 'llmRespondingChange':
+        draft.llmResponding = action.payload.flag;
+        break;
+
+      case 'updateResponseType':
+        draft.llmResponseType = action.payload.type;
         break;
     }
   });

@@ -38,6 +38,13 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
           interactions: conversation.interactions,
         },
       });
+
+      chatStateDispatch({
+        type: 'llmRespondingChange',
+        payload: {
+          flag: false,
+        },
+      });
     }
   }, [chatContext.conversationId, chatStateDispatch]);
 

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Stream } from 'stream';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 
@@ -14,6 +15,7 @@ export interface ChatService {
     messages: IMessage[];
     conversationId: string;
     interactionId: string;
+    stream?: Stream; // This is the stream to update the message
   }>;
 
   regenerate(
