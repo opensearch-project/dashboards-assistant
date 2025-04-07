@@ -266,6 +266,111 @@ describe('useChatState hook', () => {
       },
     ]);
   });
+
+  it('should update state after `appendMessage`', () => {
+    const { result } = renderHook(() => useChatState(), { wrapper: ChatStateProvider });
+
+    act(() => {
+      result.current.chatStateDispatch({
+        type: 'receive',
+        payload: {
+          messages: [
+            { type: 'input', contentType: 'text', content: 'question mock', messageId: 'foo' },
+            { type: 'output', contentType: 'markdown', content: '', messageId: 'bar' },
+          ],
+          interactions: [
+            {
+              input: 'question mock',
+              response: 'output mock',
+              conversation_id: 'conversation_id_mock',
+              interaction_id: 'interaction_id_mock',
+              create_time: new Date().toLocaleString(),
+            },
+          ],
+        },
+      });
+      result.current.chatStateDispatch({
+        type: 'appendMessage',
+        payload: {
+          messageId: 'bar',
+          content: 'output',
+        },
+      });
+
+      result.current.chatStateDispatch({
+        type: 'appendMessage',
+        payload: {
+          messageId: 'bar',
+          content: ' mock',
+        },
+      });
+    });
+
+    expect(result.current.chatState.messages).toEqual([
+      { type: 'input', contentType: 'text', content: 'question mock', messageId: 'foo' },
+      {
+        type: 'output',
+        contentType: 'markdown',
+        content: 'output mock',
+        messageId: 'bar',
+      },
+    ]);
+  });
+
+  it('should update state after `updateOutputMessage`', () => {
+    const { result } = renderHook(() => useChatState(), { wrapper: ChatStateProvider });
+
+    act(() => {
+      result.current.chatStateDispatch({
+        type: 'receive',
+        payload: {
+          messages: [
+            { type: 'input', contentType: 'text', content: 'question mock', messageId: 'foo' },
+            { type: 'output', contentType: 'markdown', content: 'output mock', messageId: 'bar' },
+          ],
+          interactions: [
+            {
+              input: 'question mock',
+              response: 'output mock',
+              conversation_id: 'conversation_id_mock',
+              interaction_id: 'interaction_id_mock',
+              create_time: new Date().toLocaleString(),
+            },
+          ],
+        },
+      });
+      result.current.chatStateDispatch({
+        type: 'updateOutputMessage',
+        payload: {
+          messageId: 'bar',
+          payload: {
+            suggestedActions: [
+              {
+                actionType: 'send_as_input',
+                message: 'foo',
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    expect(result.current.chatState.messages).toEqual([
+      { type: 'input', contentType: 'text', content: 'question mock', messageId: 'foo' },
+      {
+        type: 'output',
+        contentType: 'markdown',
+        content: 'output mock',
+        messageId: 'bar',
+        suggestedActions: [
+          {
+            actionType: 'send_as_input',
+            message: 'foo',
+          },
+        ],
+      },
+    ]);
+  });
 });
 
 describe('addPatchInArray', () => {

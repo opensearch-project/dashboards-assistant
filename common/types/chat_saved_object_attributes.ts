@@ -108,4 +108,11 @@ export type StreamChunk =
         messageId: string;
         content: string;
       };
+    }
+  | {
+      event: 'updateOutputMessage';
+      data: {
+        messageId: string;
+        payload: Partial<Omit<IOutput, 'messageId'>>;
+      };
     };
