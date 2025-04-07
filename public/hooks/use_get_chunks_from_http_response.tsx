@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { LLMResponseType, useChatState } from './use_chat_state';
 import { sreamDeserializer } from '../../common/utils/stream/serializer';
 import { HttpResponse } from '../../../../src/core/public';
 import { StreamChunk } from '../../common/types/chat_saved_object_attributes';
+import { MessageContentPool } from '../utils/message_content_pool';
 
 export const useGetChunksFromHTTPResponse = () => {
   const { chatStateDispatch } = useChatState();
@@ -17,8 +18,9 @@ export const useGetChunksFromHTTPResponse = () => {
     abortController: AbortController;
   }) => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
+    const messageContentPool = new MessageContentPool();
     props.abortController.signal.onabort = () => {
-      chunk$.complete();
+      messageContentPool.inputComplete();
     };
     if (props.fetchResponse.body?.getReader) {
       chatStateDispatch({
@@ -36,14 +38,21 @@ export const useGetChunksFromHTTPResponse = () => {
         value,
       }: ReadableStreamReadResult<Uint8Array>): Promise<void> | void {
         if (done) {
-          chunk$.complete();
+          messageContentPool.inputComplete();
           return;
         }
         const chunk = decoder.decode(value);
         try {
           const chunkObjects = sreamDeserializer(chunk);
           chunkObjects.forEach((chunkObject) => {
-            chunk$.next(chunkObject);
+            if (chunkObject.event === 'appendMessage') {
+              messageContentPool.addMessageContent(
+                chunkObject.data.messageId,
+                chunkObject.data.content
+              );
+            } else {
+              chunk$.next(chunkObject);
+            }
           });
         } catch (e) {
           // can not parse the chunk.
@@ -69,9 +78,28 @@ export const useGetChunksFromHTTPResponse = () => {
       // Complete right after next will only eat the emit value
       // add a setTimeout to delay it into next event loop
       setTimeout(() => {
-        chunk$.complete();
+        messageContentPool.inputComplete();
       }, 0);
     }
+
+    const messageContentPoolSubscription = messageContentPool.getOutput$().subscribe({
+      next: (message) => {
+        chunk$.next({
+          event: 'appendMessage',
+          data: {
+            messageId: message.messageId,
+            content: message.messageContent,
+          },
+        });
+      },
+      complete: () => {
+        chunk$.complete();
+        messageContentPool.stop();
+        messageContentPoolSubscription?.unsubscribe();
+      },
+    });
+
+    messageContentPool.start();
 
     chunk$.subscribe(
       (chunk) => {
