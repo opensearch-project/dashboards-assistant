@@ -122,14 +122,15 @@ describe('GeneratePopoverBody', () => {
     );
 
     // 1. Auto generate summary
-    // title is assistant icon + 'Summary'
-    expect(getByLabelText('alert-assistant')).toBeInTheDocument();
-    expect(getByText('Summary')).toBeInTheDocument();
     // content is loading
     expect(getByLabelText('loading_content')).toBeInTheDocument();
 
     // Wait for loading to complete and summary to render
     await waitFor(() => {
+      // title is assistant icon + 'Summary'
+      expect(getByLabelText('alert-assistant')).toBeInTheDocument();
+      expect(getByText('Summary')).toBeInTheDocument();
+
       expect(getByText('Generated summary content')).toBeInTheDocument();
     });
     // loading content disappeared
@@ -202,14 +203,15 @@ describe('GeneratePopoverBody', () => {
       />
     );
 
-    // title is assistant icon + 'Summary'
-    expect(getByLabelText('alert-assistant')).toBeInTheDocument();
-    expect(getByText('Summary')).toBeInTheDocument();
     // content is loading
     expect(getByLabelText('loading_content')).toBeInTheDocument();
 
     // Wait for loading to complete and summary to render
     await waitFor(() => {
+      // title is assistant icon + 'Summary'
+      expect(getByLabelText('alert-assistant')).toBeInTheDocument();
+      expect(getByText('Summary')).toBeInTheDocument();
+
       expect(getByText('Generated summary content')).toBeInTheDocument();
     });
     // loading content disappeared
