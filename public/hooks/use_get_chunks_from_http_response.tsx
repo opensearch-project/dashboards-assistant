@@ -88,6 +88,12 @@ export const useGetChunksFromHTTPResponse = () => {
               type: 'appendMessage',
               payload: data,
             });
+          } else if (chunk.event === 'updateOutputMessage') {
+            const { data } = chunk;
+            chatStateDispatch({
+              type: 'updateOutputMessage',
+              payload: data,
+            });
           } else if (chunk.event === 'error') {
             chatStateDispatch({ type: 'error', payload: new Error(chunk.data) });
             return;
