@@ -149,7 +149,9 @@ describe('<HeaderChatButton />', () => {
     expect(screen.queryByLabelText('chat flyout mock')).not.toBeVisible();
     // sidecar hide
     fireEvent.click(toggleButton);
-    expect(screen.queryByLabelText('chat flyout mock')).toBeVisible();
+    await waitFor(() => {
+      expect(screen.queryByLabelText('chat flyout mock')).toBeVisible();
+    });
   });
 
   it('should call sidecar hide and close when button unmount and chat flyout is visible', async () => {
@@ -169,11 +171,16 @@ describe('<HeaderChatButton />', () => {
 
     fireEvent.click(getByLabelText('toggle chat flyout icon'));
 
-    expect(sideCarHideMock).not.toHaveBeenCalled();
-    expect(sideCarRefMock.close).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(sideCarHideMock).not.toHaveBeenCalled();
+      expect(sideCarRefMock.close).not.toHaveBeenCalled();
+    });
+
     unmount();
-    expect(sideCarHideMock).toHaveBeenCalled();
-    expect(sideCarRefMock.close).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(sideCarHideMock).toHaveBeenCalled();
+      expect(sideCarRefMock.close).toHaveBeenCalled();
+    });
   });
 
   it('should render toggle chat flyout button icon', () => {
