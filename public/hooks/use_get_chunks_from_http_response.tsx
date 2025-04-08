@@ -5,7 +5,7 @@
 
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { LLMResponseType, useChatState } from './use_chat_state';
-import { sreamDeserializer } from '../../common/utils/stream/serializer';
+import { streamDeserializer } from '../../common/utils/stream/serializer';
 import { HttpResponse } from '../../../../src/core/public';
 import { StreamChunk } from '../../common/types/chat_saved_object_attributes';
 import { MessageContentPool } from '../utils/message_content_pool';
@@ -43,7 +43,7 @@ export const useGetChunksFromHTTPResponse = () => {
         }
         const chunk = decoder.decode(value);
         try {
-          const chunkObjects = sreamDeserializer(chunk);
+          const chunkObjects = streamDeserializer(chunk);
           chunkObjects.forEach((chunkObject) => {
             if (chunkObject.event === 'appendMessage') {
               messageContentPool.addMessageContent(

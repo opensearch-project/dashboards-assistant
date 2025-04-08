@@ -21,7 +21,7 @@ export const streamSerializer = (chunk: StreamChunk): string => {
   return chunkString;
 };
 
-export const sreamDeserializer = (content: string): StreamChunk[] => {
+export const streamDeserializer = (content: string): StreamChunk[] => {
   const streamChunks: StreamChunk[] = [];
   const parser = createParser({
     onEvent(message) {
