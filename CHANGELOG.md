@@ -6,6 +6,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Features
 
+- Add scroll load conversations ([#530](https://github.com/opensearch-project/dashboards-assistant/pull/530))
+
 ### Enhancements
 
 - remove redundant error toast([#515](https://github.com/opensearch-project/dashboards-assistant/pull/515))
