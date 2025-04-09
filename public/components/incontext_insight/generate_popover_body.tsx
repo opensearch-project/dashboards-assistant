@@ -28,7 +28,6 @@ import { ContextObj, IncontextInsight as IncontextInsightInput } from '../../typ
 import { getNotifications, getLogoIcon } from '../../services';
 import { HttpSetup, StartServicesAccessor } from '../../../../../src/core/public';
 import { SUMMARY_ASSISTANT_API } from '../../../common/constants/llm';
-import shiny_sparkle from '../../assets/shiny_sparkle.svg';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { reportMetric } from '../../utils/report_metric';
 import { buildUrlQuery, createIndexPatterns, extractTimeRangeDSL } from '../../utils';
@@ -302,7 +301,7 @@ export const GeneratePopoverBody: React.FC<{
                   aria-label="alert-assistant"
                   color="hollow"
                   size="m"
-                  type={getLogoIcon('gradient', shiny_sparkle)}
+                  type={getLogoIcon('white')}
                 />
               )
             ) : (
