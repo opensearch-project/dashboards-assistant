@@ -61,18 +61,9 @@ const SEND_MESSAGE_RESPONSE = {
   ],
 };
 
-const mockPureFetchResponse = (props: { headers?: Headers; responseJson?: unknown } = {}) => {
-  const {
-    headers = new Headers({ 'Content-Type': 'application/json' }),
-    responseJson = {},
-  } = props;
-  return {
-    response: {
-      headers,
-      json: () => Promise.resolve(responseJson),
-    },
-  };
-};
+const mockPureFetchResponse = (body: unknown) => ({
+  body,
+});
 
 describe('useChatActions hook', () => {
   const httpMock = httpServiceMock.createStartContract();
@@ -125,11 +116,7 @@ describe('useChatActions hook', () => {
   });
 
   it('should send message correctly', async () => {
-    httpMock.post.mockImplementationOnce(async () =>
-      mockPureFetchResponse({
-        responseJson: SEND_MESSAGE_RESPONSE,
-      })
-    );
+    httpMock.post.mockImplementationOnce(async () => mockPureFetchResponse(SEND_MESSAGE_RESPONSE));
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
       chatState: {
         messages: [SEND_MESSAGE_RESPONSE.messages[0] as IMessage],
@@ -295,11 +282,7 @@ describe('useChatActions hook', () => {
   });
 
   it('should regenerate message', async () => {
-    httpMock.put.mockImplementationOnce(async () =>
-      mockPureFetchResponse({
-        responseJson: SEND_MESSAGE_RESPONSE,
-      })
-    );
+    httpMock.put.mockImplementationOnce(async () => mockPureFetchResponse(SEND_MESSAGE_RESPONSE));
     jest
       .spyOn(chatContextHookExports, 'useChatContext')
       .mockReturnValue({ ...chatContextMock, conversationId: 'conversation_id_mock' });
@@ -344,11 +327,7 @@ describe('useChatActions hook', () => {
       };
     });
 
-    httpMock.put.mockImplementationOnce(async () =>
-      mockPureFetchResponse({
-        responseJson: SEND_MESSAGE_RESPONSE,
-      })
-    );
+    httpMock.put.mockImplementationOnce(async () => mockPureFetchResponse(SEND_MESSAGE_RESPONSE));
     jest
       .spyOn(chatContextHookExports, 'useChatContext')
       .mockReturnValue({ ...chatContextMock, conversationId: 'conversation_id_mock' });
