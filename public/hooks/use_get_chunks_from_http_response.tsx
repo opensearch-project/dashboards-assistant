@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { LLMResponseType, useChatState } from './use_chat_state';
 import { streamDeserializer } from '../../common/utils/stream/serializer';
 import { HttpResponse } from '../../../../src/core/public';
-import { StreamChunk } from '../../common/types/chat_saved_object_attributes';
+import { SendResponse, StreamChunk } from '../../common/types/chat_saved_object_attributes';
 import { MessageContentPool } from '../utils/message_content_pool';
 
 export const useGetChunksFromHTTPResponse = () => {
@@ -19,9 +19,9 @@ export const useGetChunksFromHTTPResponse = () => {
   }) => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
     const messageContentPool = new MessageContentPool();
-    props.abortController.signal.onabort = () => {
+    props.abortController.signal.addEventListener('abort', () => {
       messageContentPool.inputComplete();
-    };
+    });
     if (props.fetchResponse.body?.getReader) {
       chatStateDispatch({
         type: 'updateResponseType',
@@ -33,35 +33,46 @@ export const useGetChunksFromHTTPResponse = () => {
 
       const decoder = new TextDecoder();
 
-      function processText({
-        done,
-        value,
-      }: ReadableStreamReadResult<Uint8Array>): Promise<void> | void {
-        if (done) {
-          messageContentPool.inputComplete();
-          return;
-        }
-        const chunk = decoder.decode(value);
+      async function processNextChunk() {
         try {
-          const chunkObjects = streamDeserializer(chunk);
-          chunkObjects.forEach((chunkObject) => {
-            if (chunkObject.event === 'appendMessage') {
-              messageContentPool.addMessageContent(
-                chunkObject.data.messageId,
-                chunkObject.data.content
-              );
-            } else {
-              chunk$.next(chunkObject);
+          if (props.abortController.signal.aborted) {
+            // If the abort controller is aborted.
+            // stop reading the stream.
+            return;
+          }
+          const { done, value } = await reader.read();
+
+          if (done) {
+            messageContentPool.inputComplete();
+            return;
+          }
+
+          const chunk = decoder.decode(value);
+
+          try {
+            const chunkObjects = streamDeserializer(chunk);
+            for (const chunkObject of chunkObjects) {
+              if (chunkObject.event === 'appendMessage') {
+                messageContentPool.addMessageContent(
+                  chunkObject.data.messageId,
+                  chunkObject.data.content
+                );
+              } else {
+                chunk$.next(chunkObject);
+              }
             }
-          });
-        } catch (e) {
-          // can not parse the chunk.
-          chunk$.error(e);
+          } catch (e) {
+            chunk$.error(e);
+            return;
+          }
+
+          processNextChunk();
+        } catch (error) {
+          chunk$.error(error);
         }
-        return reader?.read().then(processText);
       }
 
-      reader?.read().then(processText);
+      processNextChunk();
     } else {
       chatStateDispatch({
         type: 'updateResponseType',
@@ -69,7 +80,7 @@ export const useGetChunksFromHTTPResponse = () => {
           type: LLMResponseType.TEXT,
         },
       });
-      const response = await props.fetchResponse.response?.json();
+      const response = (await props.fetchResponse.body) as Partial<SendResponse>;
       chunk$.next({
         event: 'metadata',
         data: response,

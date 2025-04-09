@@ -6,7 +6,7 @@
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 
 const JOB_INTERVAL = 50;
-const CONTENT_SLICE_LENGTH = 100;
+const CONTENT_SLICE_LENGTH = 10;
 
 export class MessageContentPool {
   // Backend may give large response in a single chunk,
