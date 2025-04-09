@@ -23,40 +23,7 @@ export class MessageContentPool {
     });
   }
 
-  addMessageContent(messageId: string, messageContent: string) {
-    const currentContent = this.messageContentChunk$.getValue();
-    const updatedContent = {
-      ...currentContent,
-      [messageId]: (currentContent[messageId] || '') + messageContent,
-    };
-    this.messageContentChunk$.next(updatedContent);
-  }
-
-  getOutput$() {
-    return this.output$;
-  }
-
-  start() {
-    this.startMessageContentJob();
-  }
-
-  stop() {
-    if (this.messageContentTimer) {
-      clearTimeout(this.messageContentTimer);
-      this.messageContentTimer = null;
-    }
-
-    if (this.outputSubscriber && !this.outputSubscriber.closed) {
-      this.outputSubscriber.complete();
-      this.outputSubscriber = null;
-    }
-  }
-
-  inputComplete() {
-    this.inputCompleted = true;
-  }
-
-  startMessageContentJob() {
+  private startMessageContentJob() {
     this.messageContentTimer = setTimeout(() => {
       const restContents = Object.entries(this.messageContentChunk$.getValue()).reduce(
         (acc, cur) => {
@@ -87,5 +54,41 @@ export class MessageContentPool {
         this.startMessageContentJob();
       }
     }, JOB_INTERVAL);
+  }
+
+  public addMessageContent(messageId: string, messageContent: string) {
+    const currentContent = this.messageContentChunk$.getValue();
+    const updatedContent = {
+      ...currentContent,
+      [messageId]: (currentContent[messageId] || '') + messageContent,
+    };
+    this.messageContentChunk$.next(updatedContent);
+  }
+
+  public getOutput$() {
+    return this.output$;
+  }
+
+  public start() {
+    this.startMessageContentJob();
+  }
+
+  public stop() {
+    if (this.messageContentTimer) {
+      clearTimeout(this.messageContentTimer);
+      this.messageContentTimer = null;
+    }
+
+    if (this.outputSubscriber && !this.outputSubscriber.closed) {
+      this.outputSubscriber.complete();
+      this.outputSubscriber = null;
+    }
+  }
+
+  /**
+   * Unlike stop method, inputComplete will give a mark and the pool will stop itself once all the content has been emitted.
+   */
+  public inputComplete() {
+    this.inputCompleted = true;
   }
 }

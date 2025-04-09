@@ -20,7 +20,7 @@ export const useGetChunksFromHTTPResponse = () => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
     const messageContentPool = new MessageContentPool();
     props.abortController.signal.addEventListener('abort', () => {
-      messageContentPool.inputComplete();
+      messageContentPool.stop();
     });
     if (props.fetchResponse.body?.getReader) {
       chatStateDispatch({
