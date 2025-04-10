@@ -53,7 +53,7 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
-          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   tests-windows-macos:
     name: Run unit tests
