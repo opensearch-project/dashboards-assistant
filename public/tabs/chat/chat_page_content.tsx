@@ -148,7 +148,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         // All the llm output in response to user's input, exclude outputs before user's first input
         const isChatOutput = firstInputIndex >= 0 && i > firstInputIndex;
         // Only show suggestion on llm outputs after last user input
-        const showSuggestions = i > lastInputIndex;
+        const showSuggestions = i > lastInputIndex && !chatState.llmResponding;
 
         let interaction: Interaction | undefined;
         if (message.type === 'output' && message.interactionId) {
