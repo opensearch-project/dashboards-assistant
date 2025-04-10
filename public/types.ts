@@ -37,7 +37,7 @@ export type MessageRenderer = (message: IMessage, renderProps: RenderProps) => R
 export type ActionExecutor = (params: Record<string, unknown>) => void;
 export interface AssistantActions {
   send: (input: IMessage) => Promise<void>;
-  loadChat: (conversationId?: string, title?: string) => Promise<void>;
+  loadChat: (conversationId?: string, nextToken?: string, title?: string) => Promise<void>;
   resetChat: () => void;
   openChatUI: (conversationId?: string) => void;
   executeAction: (suggestedAction: ISuggestedAction, message: IMessage) => Promise<void>;

@@ -46,7 +46,7 @@ describe('<ChatHistoryList />', () => {
 
     expect(onChatHistoryTitleClickMock).not.toHaveBeenCalled();
     fireEvent.click(getByText('foo'));
-    expect(onChatHistoryTitleClickMock).toHaveBeenCalledWith('1', 'foo');
+    expect(onChatHistoryTitleClickMock).toHaveBeenCalledWith('1', '', 'foo');
   });
 
   it('should call onChatHistoryEditClick with id and title', () => {
