@@ -6,12 +6,12 @@ name: Build and test
 # trigger on every commit push and PR for all branches except pushes for backport branches
 on:
   pull_request:
-    branches: ["**"]
+    branches: ['**']
   push:
-    branches: ["**"]
+    branches: ['**']
 env:
   OPENSEARCH_DASHBOARDS_VERSION: 'main'
-  NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
+  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
 
 jobs:
   Get-CI-Image-Tag:
@@ -50,8 +50,10 @@ jobs:
                                cd ./plugins/dashboards-assistant &&
                                whoami && yarn osd bootstrap && yarn run test:jest --coverage"
 
-      - name: Uploads coverage
-        uses: codecov/codecov-action@v1
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: false
 
   tests-windows-macos:
     name: Run unit tests
