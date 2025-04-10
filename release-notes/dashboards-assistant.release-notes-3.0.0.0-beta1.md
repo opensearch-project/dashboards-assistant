@@ -11,6 +11,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 - t2viz remove fields clause from generated PPL query ([#525](https://github.com/opensearch-project/dashboards-assistant/pull/525))
 - Render Icon based on the chat status ([#523](https://github.com/opensearch-project/dashboards-assistant/pull/523))
 - Add scroll load conversations ([#530](https://github.com/opensearch-project/dashboards-assistant/pull/530))
+- Refactor InContext style, add white logo and remove outdated code ([#529](https://github.com/opensearch-project/dashboards-assistant/pull/529))
 
 ### Bug Fixes
 

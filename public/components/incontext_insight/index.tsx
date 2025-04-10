@@ -58,41 +58,6 @@ export const IncontextInsight = ({
   const [isVisible, setIsVisible] = useState(false);
   const [isHover, setIsHover] = useState(false);
 
-  useEffect(() => {
-    // TODO: use animation when not using display: none
-    if (anchor.current) {
-      const incontextInsightAnchorButtonClassList = anchor.current.parentElement?.querySelector(
-        '.incontextInsightAnchorButton'
-      )?.classList;
-      const incontextInsightAnchorIconClassList = anchor.current.querySelector(
-        '.incontextInsightAnchorIcon'
-      )?.children[0].classList;
-
-      if (!incontextInsightAnchorButtonClassList || !incontextInsightAnchorIconClassList) return;
-
-      incontextInsightAnchorButtonClassList.add('incontextInsightHoverEffectUnderline');
-      incontextInsightAnchorIconClassList.add(
-        'incontextInsightHoverEffect0',
-        'incontextInsightHoverEffect25',
-        'incontextInsightHoverEffect50',
-        'incontextInsightHoverEffect75',
-        'incontextInsightHoverEffect100'
-      );
-
-      setTimeout(() => {
-        let opacityLevel = 100;
-        const intervalId = setInterval(() => {
-          incontextInsightAnchorIconClassList.remove(`incontextInsightHoverEffect${opacityLevel}`);
-          if (opacityLevel === 0) {
-            incontextInsightAnchorButtonClassList.remove('incontextInsightHoverEffectUnderline');
-            clearInterval(intervalId);
-          }
-          opacityLevel -= 25;
-        }, 25);
-      }, 1250);
-    }
-  }, []);
-
   const registry = getIncontextInsightRegistry();
   const toasts = getNotifications().toasts;
   let target: React.ReactNode;
@@ -292,7 +257,7 @@ export const IncontextInsight = ({
               label={title}
               style={{ backgroundColor: euiThemeVars.euiColorInk }}
               className="summary-beta-badge"
-              iconType={getLogoIcon('gradient')}
+              iconType={getLogoIcon('white')}
             />
           </div>
         </EuiFlexItem>
