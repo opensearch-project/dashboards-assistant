@@ -51,10 +51,9 @@ jobs:
                                whoami && yarn osd bootstrap && yarn run test:jest --coverage"
 
       - uses: actions/upload-artifact@v4
-        working-directory: ./coverage
         with:
           name: coverage-report-linux
-          path: ./clover.xml
+          path: ./plugins/dashboards-assistant/coverage/clover.xml
 
   tests-windows-macos:
     name: Run unit tests
