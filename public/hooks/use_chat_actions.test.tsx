@@ -15,14 +15,6 @@ import { ASSISTANT_API } from '../../common/constants/llm';
 import { IMessage } from 'common/types/chat_saved_object_attributes';
 import { DataSourceServiceMock } from '../services/data_source_service.mock';
 
-jest.mock('../services/conversations_service', () => {
-  return {
-    ConversationsService: jest.fn().mockImplementation(() => {
-      return { reload: jest.fn() };
-    }),
-  };
-});
-
 jest.mock('../services/conversation_load_service', () => {
   return {
     ConversationLoadService: jest.fn().mockImplementation(() => {
