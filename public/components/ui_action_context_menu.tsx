@@ -38,6 +38,7 @@ export const ActionContextMenu = (props: Props) => {
   const uiActions = getUiActions();
   const actionsRef = useRef(uiActions.getTriggerActions(AI_ASSISTANT_QUERY_EDITOR_TRIGGER));
   const [open, setOpen] = useState(false);
+  const { search } = props.data;
   const [actionContext, setActionContext] = useState({
     datasetId: props.data.query.queryString.getQuery().dataset?.id ?? '',
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
@@ -47,6 +48,7 @@ export const ActionContextMenu = (props: Props) => {
   const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$, false);
   const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$, false);
   const shouldShowSummarizationAction = resultSummaryEnabled && isSummaryAgentAvailable;
+  const [showGenerateVisualization, setShowGenerateVisualization] = useState(false);
 
   useEffect(() => {
     if (!resultSummaryEnabled) return;
@@ -130,7 +132,14 @@ export const ActionContextMenu = (props: Props) => {
             aria-label="OpenSearch assistant trigger button"
             size="xs"
             iconType="arrowDown"
-            onClick={() => setOpen(!open)}
+            onClick={() => {
+              if (search.df.df$.hasError || search.df.df$.value?.size === 0) {
+                setShowGenerateVisualization(false);
+              } else {
+                setShowGenerateVisualization(true);
+              }
+              setOpen(!open);
+            }}
             iconSide="right"
             flush="both"
             isDisabled={actionDisabled}
@@ -148,7 +157,15 @@ export const ActionContextMenu = (props: Props) => {
       anchorPosition="downRight"
       closePopover={() => setOpen(false)}
     >
-      <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
+      {showGenerateVisualization ? (
+        <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
+      ) : (
+        <EuiToolTip content="This button be disabled because of No Results/Error.">
+          <div style={{ pointerEvents: 'none' }}>
+            <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
+          </div>
+        </EuiToolTip>
+      )}
       {shouldShowSummarizationAction && (
         <EuiPopoverFooter paddingSize="s">
           <EuiSwitch
