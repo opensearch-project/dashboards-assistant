@@ -198,6 +198,19 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
       }
 
+      if (outputs.stream) {
+        const result = response.ok({
+          headers: {
+            'Content-Encoding': 'identity',
+            Connection: 'keep-alive',
+            'Content-Type': 'text/event-stream',
+          },
+          body: outputs.stream,
+        });
+
+        return result;
+      }
+
       /**
        * Retrieve latest interactions from memory
        */

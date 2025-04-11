@@ -180,7 +180,9 @@ describe('<HeaderChatButton />', () => {
     expect(screen.queryByLabelText('chat flyout mock')).not.toBeVisible();
     // sidecar hide
     fireEvent.click(toggleButton);
-    expect(screen.queryByLabelText('chat flyout mock')).toBeVisible();
+    await waitFor(() => {
+      expect(screen.queryByLabelText('chat flyout mock')).toBeVisible();
+    });
   });
 
   it('should call send message without active conversation id after input text submitted', async () => {
@@ -246,11 +248,12 @@ describe('<HeaderChatButton />', () => {
       code: 'Escape',
       charCode: 27,
     });
+
     expect(screen.getByLabelText('chat input')).not.toHaveFocus();
     expect(screen.getByTitle('press Ctrl + / to start typing')).toBeInTheDocument();
   });
 
-  it('should focus on chat input when pressing global shortcut', () => {
+  it('should focus on chat input when pressing global shortcut', async () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
@@ -267,10 +270,12 @@ describe('<HeaderChatButton />', () => {
       charCode: 111,
       ctrlKey: true,
     });
-    expect(screen.getByLabelText('chat input')).toHaveFocus();
+    await waitFor(() => {
+      expect(screen.getByLabelText('chat input')).toHaveFocus();
+    });
   });
 
-  it('should not focus on chat input when no access and pressing global shortcut', () => {
+  it('should not focus on chat input when no access and pressing global shortcut', async () => {
     render(
       <HeaderChatButton
         application={applicationServiceMock.createStartContract()}
@@ -287,7 +292,9 @@ describe('<HeaderChatButton />', () => {
       charCode: 111,
       metaKey: true,
     });
-    expect(screen.getByLabelText('chat input')).not.toHaveFocus();
+    await waitFor(() => {
+      expect(screen.getByLabelText('chat input')).not.toHaveFocus();
+    });
   });
 
   it('should call sidecar hide and close when button unmount and chat flyout is visible', async () => {
@@ -307,11 +314,16 @@ describe('<HeaderChatButton />', () => {
 
     fireEvent.click(getByLabelText('toggle chat flyout icon'));
 
-    expect(sideCarHideMock).not.toHaveBeenCalled();
-    expect(sideCarRefMock.close).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(sideCarHideMock).not.toHaveBeenCalled();
+      expect(sideCarRefMock.close).not.toHaveBeenCalled();
+    });
+
     unmount();
-    expect(sideCarHideMock).toHaveBeenCalled();
-    expect(sideCarRefMock.close).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(sideCarHideMock).toHaveBeenCalled();
+      expect(sideCarRefMock.close).toHaveBeenCalled();
+    });
   });
 
   it('should render toggle chat flyout button icon', () => {

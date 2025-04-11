@@ -61,6 +61,10 @@ const SEND_MESSAGE_RESPONSE = {
   ],
 };
 
+const mockPureFetchResponse = (body: unknown) => ({
+  body,
+});
+
 describe('useChatActions hook', () => {
   const httpMock = httpServiceMock.createStartContract();
   const chatStateDispatchMock = jest.fn();
@@ -112,7 +116,7 @@ describe('useChatActions hook', () => {
   });
 
   it('should send message correctly', async () => {
-    httpMock.post.mockResolvedValueOnce(SEND_MESSAGE_RESPONSE);
+    httpMock.post.mockImplementationOnce(async () => mockPureFetchResponse(SEND_MESSAGE_RESPONSE));
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
       chatState: {
         messages: [SEND_MESSAGE_RESPONSE.messages[0] as IMessage],
@@ -134,6 +138,7 @@ describe('useChatActions hook', () => {
         input: INPUT_MESSAGE,
       }),
       query: dataSourceServiceMock.getDataSourceQuery(),
+      asResponse: true,
     });
 
     // it should send dispatch `receive` action to remove the message without messageId
@@ -209,6 +214,7 @@ describe('useChatActions hook', () => {
         input: { type: 'input', content: 'message that send as input', contentType: 'text' },
       }),
       query: dataSourceServiceMock.getDataSourceQuery(),
+      asResponse: true,
     });
   });
 
@@ -276,7 +282,7 @@ describe('useChatActions hook', () => {
   });
 
   it('should regenerate message', async () => {
-    httpMock.put.mockResolvedValue(SEND_MESSAGE_RESPONSE);
+    httpMock.put.mockImplementationOnce(async () => mockPureFetchResponse(SEND_MESSAGE_RESPONSE));
     jest
       .spyOn(chatContextHookExports, 'useChatContext')
       .mockReturnValue({ ...chatContextMock, conversationId: 'conversation_id_mock' });
@@ -300,14 +306,11 @@ describe('useChatActions hook', () => {
         interactionId: 'interaction_id_mock',
       }),
       query: dataSourceServiceMock.getDataSourceQuery(),
+      asResponse: true,
     });
     expect(chatStateDispatchMock).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'receive', payload: { messages: [], interactions: [] } })
-    );
-
-    expect(chatStateDispatchMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'patch',
+        type: 'receive',
         payload: {
           messages: SEND_MESSAGE_RESPONSE.messages,
           interactions: SEND_MESSAGE_RESPONSE.interactions,
@@ -317,12 +320,14 @@ describe('useChatActions hook', () => {
   });
 
   it('should not handle regenerate response if the regenerate operation has already aborted', async () => {
-    const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
-      signal: { aborted: true },
-      abort: jest.fn(),
-    }));
+    const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => {
+      return {
+        signal: AbortSignal.abort(),
+        abort: jest.fn(),
+      };
+    });
 
-    httpMock.put.mockResolvedValue(SEND_MESSAGE_RESPONSE);
+    httpMock.put.mockImplementationOnce(async () => mockPureFetchResponse(SEND_MESSAGE_RESPONSE));
     jest
       .spyOn(chatContextHookExports, 'useChatContext')
       .mockReturnValue({ ...chatContextMock, conversationId: 'conversation_id_mock' });
@@ -337,6 +342,7 @@ describe('useChatActions hook', () => {
         interactionId: 'interaction_id_mock',
       }),
       query: dataSourceServiceMock.getDataSourceQuery(),
+      asResponse: true,
     });
     expect(chatStateDispatchMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'receive' })
@@ -359,10 +365,12 @@ describe('useChatActions hook', () => {
   });
 
   it('should not handle regenerate error if the regenerate operation has already aborted', async () => {
-    const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
-      signal: { aborted: true },
-      abort: jest.fn(),
-    }));
+    const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => {
+      return {
+        signal: AbortSignal.abort(),
+        abort: jest.fn(),
+      };
+    });
     httpMock.put.mockImplementationOnce(() => {
       throw new Error();
     });
@@ -393,7 +401,7 @@ describe('useChatActions hook', () => {
   it('should abort send action after reset chat', async () => {
     const abortFn = jest.fn();
     const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
-      signal: { aborted: true },
+      signal: AbortSignal.abort(),
       abort: abortFn,
     }));
     const { result } = renderHook(() => useChatActions());
@@ -407,7 +415,7 @@ describe('useChatActions hook', () => {
   it('should abort load action after reset chat', async () => {
     const abortFn = jest.fn();
     const AbortControllerMock = jest.spyOn(window, 'AbortController').mockImplementation(() => ({
-      signal: { aborted: true },
+      signal: AbortSignal.abort(),
       abort: abortFn,
     }));
     const { result } = renderHook(() => useChatActions());
