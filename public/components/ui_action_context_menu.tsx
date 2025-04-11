@@ -160,7 +160,11 @@ export const ActionContextMenu = (props: Props) => {
       {showGenerateVisualization ? (
         <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
       ) : (
-        <EuiToolTip content="This button be disabled because of No Results/Error.">
+        <EuiToolTip
+          content={i18n.translate('queryEnhancements.queryAssist.generate.visualization.label', {
+            defaultMessage: `This button be disabled because of No Results/Error.`,
+          })}
+        >
           <div style={{ pointerEvents: 'none' }}>
             <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
           </div>
