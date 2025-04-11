@@ -17,7 +17,7 @@ export class ConversationLoadService {
 
   constructor(private _http: HttpStart, private _dataSource: DataSourceService) {}
 
-  load = async (conversationId: string) => {
+  load = async (conversationId: string, nextToken?: string) => {
     this.abortController?.abort();
     this.status$.next('loading');
     this.abortController = new AbortController();
@@ -26,7 +26,10 @@ export class ConversationLoadService {
         `${ASSISTANT_API.CONVERSATION}/${conversationId}`,
         {
           signal: this.abortController.signal,
-          query: this._dataSource.getDataSourceQuery(),
+          query: {
+            ...this._dataSource.getDataSourceQuery(),
+            nextToken,
+          },
         }
       );
       this.status$.next('idle');

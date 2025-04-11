@@ -24,7 +24,7 @@ interface ChatHistory {
 
 interface ChatHistoryListItemProps extends ChatHistory {
   hasBottomBorder?: boolean;
-  onTitleClick?: (id: string, title: string) => void;
+  onTitleClick?: (id: string, nextToken: string, title: string) => void;
   onDeleteClick?: (conversation: { id: string }) => void;
   onEditClick?: (conversation: { id: string; title: string }) => void;
 }
@@ -43,7 +43,7 @@ export const ChatHistoryListItem = ({
   const showDeleteButton = configSchema.chat.deleteConversation;
 
   const handleTitleClick = useCallback(() => {
-    onTitleClick?.(id, title);
+    onTitleClick?.(id, '', title);
   }, [onTitleClick, id, title]);
 
   const handleDeleteClick = useCallback(() => {

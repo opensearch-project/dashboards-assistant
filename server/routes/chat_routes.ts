@@ -53,6 +53,7 @@ const getConversationRoute = {
     }),
     query: schema.object({
       dataSourceId: schema.maybe(schema.string()),
+      nextToken: schema.maybe(schema.string()),
     }),
   },
 };

@@ -13,6 +13,7 @@ export interface ChatState {
   interactions: Interaction[];
   llmResponding: boolean;
   llmError?: Error;
+  nextToken?: string;
 }
 
 type ChatStateAction =
@@ -25,6 +26,7 @@ type ChatStateAction =
       payload: {
         messages: ChatState['messages'];
         interactions: ChatState['interactions'];
+        nextToken: ChatState['nextToken'];
       };
     }
   | {
@@ -36,6 +38,7 @@ type ChatStateAction =
       payload: {
         messages: ChatState['messages'];
         interactions: ChatState['interactions'];
+        nextToken: ChatState['nextToken'];
       };
     };
 
@@ -91,10 +94,15 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
         break;
 
       case 'receive':
-        draft.messages = action.payload.messages;
+        if (draft.nextToken) {
+          draft.messages = action.payload.messages.concat(state.messages);
+        } else {
+          draft.messages = action.payload.messages;
+        }
         draft.interactions = action.payload.interactions;
         draft.llmResponding = false;
         draft.llmError = undefined;
+        draft.nextToken = action.payload.nextToken;
         break;
 
       case 'error':

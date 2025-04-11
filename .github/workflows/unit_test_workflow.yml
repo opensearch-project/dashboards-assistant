@@ -33,13 +33,13 @@ jobs:
     steps:
       # Enable longer filenames for windows
       - name: Checkout OpenSearch-Dashboards
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: opensearch-project/OpenSearch-Dashboards
           ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
           path: OpenSearch-Dashboards
       - name: Checkout dashboards-assistant plugin
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-assistant
       - name: Bootstrap / Run tests
@@ -50,8 +50,10 @@ jobs:
                                cd ./plugins/dashboards-assistant &&
                                whoami && yarn osd bootstrap && yarn run test:jest --coverage"
 
-      - name: Uploads coverage
-        uses: codecov/codecov-action@v1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-linux
+          path: ./OpenSearch-Dashboards/plugins/dashboards-assistant/coverage/clover.xml
 
   tests-windows-macos:
     name: Run unit tests
@@ -65,7 +67,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: git config --system core.longpaths true
       - name: Checkout OpenSearch-Dashboards
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: opensearch-project/OpenSearch-Dashboards
           ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
@@ -85,7 +87,7 @@ jobs:
       - run: node -v
       - run: yarn -v
       - name: Checkout dashboards-assistant plugin
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-assistant
       - name: Bootstrap plugin/dashboards-assistant
@@ -96,3 +98,17 @@ jobs:
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-assistant
           yarn run test:jest --coverage
+
+  tests-codecov:
+    needs: tests-linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage-report-linux
+          path: ./
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./clover.xml
