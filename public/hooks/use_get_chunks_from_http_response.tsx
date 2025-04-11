@@ -115,13 +115,7 @@ export const useGetChunksFromHTTPResponse = () => {
     chunk$.subscribe(
       (chunk) => {
         if (chunk) {
-          if (chunk.event === 'patch') {
-            const { data } = chunk;
-            chatStateDispatch({
-              type: 'patch',
-              payload: data,
-            });
-          } else if (chunk.event === 'appendMessage') {
+          if (chunk.event === 'appendMessage') {
             const { data } = chunk;
             chatStateDispatch({
               type: 'appendMessage',

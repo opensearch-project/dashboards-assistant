@@ -24,7 +24,7 @@ function getLastTextNode(node: HTMLElement | Node): Node | null | undefined {
 }
 
 export const MarkdownWithBlinkCursor = (props: EuiMarkdownFormatProps & { loading?: boolean }) => {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let blinkCursorNode: undefined | HTMLSpanElement;
     if (props.loading && ref.current) {

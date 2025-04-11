@@ -91,10 +91,6 @@ export interface SendResponse {
 
 export type StreamChunk =
   | {
-      event: 'patch';
-      data: Pick<SendResponse, 'interactions' | 'messages'>;
-    }
-  | {
       event: 'error';
       data: string;
     }
