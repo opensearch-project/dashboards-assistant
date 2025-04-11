@@ -41,18 +41,6 @@ describe('useGetChunksFromHTTPResponse', () => {
         controller.enqueue(
           new TextEncoder().encode(
             streamSerializer({
-              event: 'patch',
-              data: {
-                interactions: [],
-                messages: [],
-              },
-            })
-          )
-        );
-
-        controller.enqueue(
-          new TextEncoder().encode(
-            streamSerializer({
               event: 'appendMessage',
               data: {
                 messageId: 'a',
@@ -102,14 +90,6 @@ describe('useGetChunksFromHTTPResponse', () => {
       });
 
       expect(chatStateDispatchMock).toHaveBeenCalledWith({
-        type: 'patch',
-        payload: {
-          interactions: [],
-          messages: [],
-        },
-      });
-
-      expect(chatStateDispatchMock).toHaveBeenCalledWith({
         type: 'updateOutputMessage',
         payload: {
           messageId: '',
@@ -123,7 +103,7 @@ describe('useGetChunksFromHTTPResponse', () => {
         })
       );
 
-      expect(chatStateDispatchMock).toHaveBeenNthCalledWith(5, {
+      expect(chatStateDispatchMock).toHaveBeenNthCalledWith(4, {
         type: 'appendMessage',
         payload: {
           messageId: 'a',
@@ -131,7 +111,7 @@ describe('useGetChunksFromHTTPResponse', () => {
         },
       });
 
-      expect(chatStateDispatchMock).toHaveBeenNthCalledWith(6, {
+      expect(chatStateDispatchMock).toHaveBeenNthCalledWith(5, {
         type: 'appendMessage',
         payload: {
           messageId: 'a',
@@ -193,10 +173,10 @@ describe('useGetChunksFromHTTPResponse', () => {
         controller.enqueue(
           new TextEncoder().encode(
             streamSerializer({
-              event: 'patch',
+              event: 'updateOutputMessage',
               data: {
-                interactions: [],
-                messages: [],
+                messageId: '',
+                payload: {},
               },
             })
           )
@@ -204,7 +184,7 @@ describe('useGetChunksFromHTTPResponse', () => {
 
         setTimeout(() => {
           controller.close();
-        }, 10000);
+        }, 5000);
       },
     });
 
