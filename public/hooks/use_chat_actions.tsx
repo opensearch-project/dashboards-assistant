@@ -28,15 +28,11 @@ export const useChatActions = (): AssistantActions => {
     abortControllerRef = abortController;
     chatStateDispatch({ type: 'send', payload: input });
     try {
-      const response = await core.services.http.post<SendResponse>(ASSISTANT_API.SEND_MESSAGE, {
-        // do not send abort signal to http client to allow LLM call run in background
-        body: JSON.stringify({
-          conversationId: chatContext.conversationId,
-          ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
-          input,
-        }),
-        query: core.services.dataSource.getDataSourceQuery(),
-      });
+      const response = await core.services.conversations.sendMessage(
+        input,
+        chatState.messages,
+        chatContext.conversationId
+      );
       if (abortController.signal.aborted) return;
       // Refresh history list after new conversation created if new conversation saved and history list page visible
       if (

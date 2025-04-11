@@ -235,8 +235,16 @@ export class AssistantPlugin
         ...coreStart,
         setupDeps,
         startDeps,
-        conversationLoad: new ConversationLoadService(coreStart.http, this.dataSourceService),
-        conversations: new ConversationsService(coreStart.http, this.dataSourceService),
+        conversationLoad: new ConversationLoadService(
+          coreStart.http,
+          this.dataSourceService,
+          setupDeps.usageCollection
+        ),
+        conversations: new ConversationsService(
+          coreStart.http,
+          this.dataSourceService,
+          setupDeps.usageCollection
+        ),
         dataSource: this.dataSourceService,
       });
       const account = await getAccount();
