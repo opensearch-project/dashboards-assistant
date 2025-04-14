@@ -25,33 +25,38 @@ export class MessageContentPool {
 
   private startMessageContentJob() {
     this.messageContentTimer = setTimeout(() => {
-      const restContents = Object.entries(this.messageContentChunk$.getValue()).reduce(
-        (acc, cur) => {
-          const [messageId, messageContent] = cur;
-          this.outputSubscriber?.next({
-            messageId,
-            messageContent: messageContent.slice(0, CONTENT_SLICE_LENGTH),
-          });
-          const restContent = messageContent.slice(CONTENT_SLICE_LENGTH);
-          if (restContent.length > 0) {
-            return {
-              ...acc,
-              [messageId]: restContent,
-            };
-          }
-          return acc;
-        },
-        {}
-      );
+      try {
+        const restContents = Object.entries(this.messageContentChunk$.getValue()).reduce(
+          (acc, cur) => {
+            const [messageId, messageContent] = cur;
+            this.outputSubscriber?.next({
+              messageId,
+              messageContent: messageContent.slice(0, CONTENT_SLICE_LENGTH),
+            });
+            const restContent = messageContent.slice(CONTENT_SLICE_LENGTH);
+            if (restContent.length > 0) {
+              return {
+                ...acc,
+                [messageId]: restContent,
+              };
+            }
+            return acc;
+          },
+          {}
+        );
 
-      // Update the content pool with remaining content
-      this.messageContentChunk$.next(restContents);
+        // Update the content pool with remaining content
+        this.messageContentChunk$.next(restContents);
 
-      if (this.inputCompleted && !Object.keys(restContents).length) {
+        if (this.inputCompleted && !Object.keys(restContents).length) {
+          this.stop();
+        } else {
+          // Schedule the next processing cycle
+          this.startMessageContentJob();
+        }
+      } catch (e) {
+        this.outputSubscriber?.error(e);
         this.stop();
-      } else {
-        // Schedule the next processing cycle
-        this.startMessageContentJob();
       }
     }, JOB_INTERVAL);
   }
@@ -82,6 +87,11 @@ export class MessageContentPool {
     if (this.outputSubscriber && !this.outputSubscriber.closed) {
       this.outputSubscriber.complete();
       this.outputSubscriber = null;
+    }
+
+    if (this.messageContentChunk$ && !this.messageContentChunk$.closed) {
+      this.messageContentChunk$.complete();
+      this.messageContentChunk$.unsubscribe();
     }
   }
 
