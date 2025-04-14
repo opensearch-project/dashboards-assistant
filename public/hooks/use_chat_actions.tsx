@@ -72,43 +72,6 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const regenerateMetadataHandler = (
-    data: Partial<SendResponse>,
-    input: {
-      interactionId: string;
-    }
-  ) => {
-    const findRegeratedMessageIndex = findLastIndex(
-      chatState.messages,
-      (message) => message.type === 'input'
-    );
-    /**
-     * Remove the regenerated interaction & message.
-     * In implementation of Agent framework, it will generate a new interactionId
-     * so need to remove the staled interaction in Frontend manually.
-     * And chatStateDispatch({ type: 'receive' }) here is used to delete the input message
-     */
-    if (findRegeratedMessageIndex > -1) {
-      chatStateDispatch({
-        type: 'receive',
-        payload: {
-          messages: [
-            ...chatState.messages
-              .slice(0, findRegeratedMessageIndex)
-              .filter((item) => item.messageId),
-            ...(data.messages || []),
-          ],
-          interactions: [
-            ...chatState.interactions.filter(
-              (interaction) => interaction.interaction_id !== input.interactionId
-            ),
-            ...(data.interactions || []),
-          ],
-        },
-      });
-    }
-  };
-
   const send = async (input: IMessage): Promise<void> => {
     const abortController = new AbortController();
     abortControllerRef = abortController;
@@ -271,6 +234,43 @@ export const useChatActions = (): AssistantActions => {
       await core.services.http.post(`${ASSISTANT_API.ABORT_AGENT_EXECUTION}`, {
         body: JSON.stringify({ conversationId }),
         query: core.services.dataSource.getDataSourceQuery(),
+      });
+    }
+  };
+
+  const regenerateMetadataHandler = (
+    data: Partial<SendResponse>,
+    input: {
+      interactionId: string;
+    }
+  ) => {
+    const findRegeratedMessageIndex = findLastIndex(
+      chatState.messages,
+      (message) => message.type === 'input'
+    );
+    /**
+     * Remove the regenerated interaction & message.
+     * In implementation of Agent framework, it will generate a new interactionId
+     * so need to remove the staled interaction in Frontend manually.
+     * And chatStateDispatch({ type: 'receive' }) here is used to delete the input message
+     */
+    if (findRegeratedMessageIndex > -1) {
+      chatStateDispatch({
+        type: 'receive',
+        payload: {
+          messages: [
+            ...chatState.messages
+              .slice(0, findRegeratedMessageIndex)
+              .filter((item) => item.messageId),
+            ...(data.messages || []),
+          ],
+          interactions: [
+            ...chatState.interactions.filter(
+              (interaction) => interaction.interaction_id !== input.interactionId
+            ),
+            ...(data.interactions || []),
+          ],
+        },
       });
     }
   };
