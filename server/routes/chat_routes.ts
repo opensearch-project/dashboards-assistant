@@ -201,6 +201,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       if (outputs.stream) {
         const result = response.ok({
           headers: {
+            // Browsers often need to buffer the entire response before decompressing, which defeats the purpose of streaming.
+            // need to set 'Content-Encoding' as 'identity' here to prevent browser buffering the response.
             'Content-Encoding': 'identity',
             Connection: 'keep-alive',
             'Content-Type': 'text/event-stream',
