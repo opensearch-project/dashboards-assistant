@@ -6,15 +6,15 @@
 import { BehaviorSubject } from 'rxjs';
 import { LLMResponseType, useChatState } from './use_chat_state';
 import { streamDeserializer } from '../../common/utils/stream/serializer';
-import { HttpResponse } from '../../../../src/core/public';
-import { SendResponse, StreamChunk } from '../../common/types/chat_saved_object_attributes';
+import { StreamChunk } from '../../common/types/chat_saved_object_attributes';
 import { MessageContentPuller } from '../utils/message_content_puller';
+import { convertEventStreamToObservable } from '../../common/utils/stream/stream_to_observable';
 
 export const useGetChunksFromHTTPResponse = () => {
   const { chatStateDispatch } = useChatState();
 
   const getConsumedChunk$FromHttpResponse = async (props: {
-    fetchResponse: HttpResponse<ReadableStream | Record<string, unknown>>;
+    stream: ReadableStream;
     abortController: AbortController;
   }) => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
@@ -22,76 +22,36 @@ export const useGetChunksFromHTTPResponse = () => {
     props.abortController.signal.addEventListener('abort', () => {
       messageContentPuller.stop();
     });
-    if (props.fetchResponse.body?.getReader) {
-      chatStateDispatch({
-        type: 'updateResponseType',
-        payload: {
-          type: LLMResponseType.STREAMING,
-        },
-      });
-      const reader = (props.fetchResponse.body as ReadableStream).getReader();
-
-      const decoder = new TextDecoder();
-
-      async function processNextChunk() {
+    const result = convertEventStreamToObservable(props.stream, props.abortController);
+    chatStateDispatch({
+      type: 'updateResponseType',
+      payload: {
+        type: LLMResponseType.STREAMING,
+      },
+    });
+    result.output$.subscribe({
+      next: (chunk: string) => {
         try {
-          if (props.abortController.signal.aborted) {
-            // If the abort controller is aborted.
-            // stop reading the stream.
-            return;
-          }
-          const { done, value } = await reader.read();
-
-          if (done) {
-            messageContentPuller.inputComplete();
-            return;
-          }
-
-          const chunk = decoder.decode(value);
-
-          try {
-            const chunkObjects = streamDeserializer(chunk);
-            for (const chunkObject of chunkObjects) {
-              if (chunkObject.event === 'appendMessageContent') {
-                messageContentPuller.addMessageContent(
-                  chunkObject.data.messageId,
-                  chunkObject.data.content
-                );
-              } else {
-                chunk$.next(chunkObject);
-              }
+          const chunkObjects = streamDeserializer(chunk);
+          for (const chunkObject of chunkObjects) {
+            if (chunkObject.event === 'appendMessageContent') {
+              messageContentPuller.addMessageContent(
+                chunkObject.data.messageId,
+                chunkObject.data.content
+              );
+            } else {
+              chunk$.next(chunkObject);
             }
-          } catch (e) {
-            chunk$.error(e);
-            return;
           }
-
-          processNextChunk();
-        } catch (error) {
-          chunk$.error(error);
+        } catch (e) {
+          chunk$.error(e);
+          return;
         }
-      }
-
-      processNextChunk();
-    } else {
-      chatStateDispatch({
-        type: 'updateResponseType',
-        payload: {
-          type: LLMResponseType.TEXT,
-        },
-      });
-      const response = (await props.fetchResponse.body) as Partial<SendResponse>;
-      chunk$.next({
-        event: 'metadata',
-        data: response,
-      });
-
-      // Complete right after next will only eat the emit value
-      // add a setTimeout to delay it into next event loop
-      setTimeout(() => {
+      },
+      complete: () => {
         messageContentPuller.inputComplete();
-      }, 0);
-    }
+      },
+    });
 
     const messageContentPullerSubscription = messageContentPuller.getOutput$().subscribe({
       next: (message) => {
