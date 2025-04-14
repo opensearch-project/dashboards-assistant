@@ -19,10 +19,11 @@ export const useGetChunksFromHTTPResponse = () => {
   }) => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
     const messageContentPuller = new MessageContentPuller();
+    const result = convertEventStreamToObservable(props.stream, props.abortController);
     props.abortController.signal.addEventListener('abort', () => {
       messageContentPuller.stop();
+      result.cancel();
     });
-    const result = convertEventStreamToObservable(props.stream, props.abortController);
     chatStateDispatch({
       type: 'updateResponseType',
       payload: {
