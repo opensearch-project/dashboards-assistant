@@ -12,7 +12,7 @@ export class MessageContentPool {
   // Backend may give large response in a single chunk,
   // use an observable here to buffer the large response.
   private messageContentChunk$: BehaviorSubject<Record<string, string>>;
-  private messageContentTimer: NodeJS.Timeout | null = null;
+  private messageContentTimer: ReturnType<typeof setTimeout> | null = null;
   private outputSubscriber: Subscriber<{ messageId: string; messageContent: string }> | null = null;
   private output$: Observable<{ messageId: string; messageContent: string }>;
   private inputCompleted: boolean = false;
