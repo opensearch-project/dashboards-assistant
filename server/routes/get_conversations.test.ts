@@ -80,4 +80,29 @@ describe('getConversations route', () => {
       }
     `);
   });
+
+  it('return empty result when ".plugins-ml-memory-meta" index not found', async () => {
+    mockAgentFrameworkStorageService.getConversations.mockRejectedValueOnce({
+      meta: {
+        body: {
+          error: {
+            type: 'index_not_found_exception',
+            reason: 'not found [.plugins-ml-memory-meta]',
+          },
+        },
+      },
+    });
+
+    expect(mockAgentFrameworkStorageService.deleteConversation).not.toHaveBeenCalled();
+    const result = (await getConversationsRequest({
+      perPage: 10,
+      page: 1,
+    })) as ResponseObject;
+    expect(result.source).toMatchInlineSnapshot(`
+      Object {
+        "objects": Array [],
+        "total": 0,
+      }
+    `);
+  });
 });
