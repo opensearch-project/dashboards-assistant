@@ -126,7 +126,8 @@ describe('<HeaderChatButton />', () => {
       ...applicationServiceMock.createStartContract(),
       currentAppId$: new BehaviorSubject(''),
     };
-    render(
+
+    const { getByLabelText } = render(
       <HeaderChatButton
         application={applicationStart}
         messageRenderers={{}}
@@ -138,41 +139,9 @@ describe('<HeaderChatButton />', () => {
 
     act(() => applicationStart.currentAppId$.next('mock_app_id'));
 
-    screen.getByLabelText('chat input').focus();
-    fireEvent.change(screen.getByLabelText('chat input'), {
-      target: { value: 'what indices are in my cluster?' },
-    });
-    expect(screen.getByLabelText('chat input')).toHaveFocus();
-
-    fireEvent.keyPress(screen.getByLabelText('chat input'), {
-      key: 'Enter',
-      code: 'Enter',
-      charCode: 13,
-    });
-
-    // call send message API with new chat
-    await waitFor(() => {
-      expect(coreStartMock.http.post).lastCalledWith(
-        '/api/assistant/send_message',
-        expect.objectContaining({
-          body: JSON.stringify({
-            messages: [],
-            input: {
-              type: 'input',
-              contentType: 'text',
-              content: 'what indices are in my cluster?',
-              context: { appId: 'mock_app_id' },
-            },
-          }),
-        })
-      );
-    });
-
+    fireEvent.click(getByLabelText('toggle chat flyout icon'));
     // chat flyout displayed
     expect(screen.queryByLabelText('chat flyout mock')).toBeInTheDocument();
-    // the input value is cleared after pressing enter
-    expect(screen.getByLabelText('chat input')).toHaveValue('');
-    expect(screen.getByLabelText('chat input')).not.toHaveFocus();
 
     // sidecar show
     const toggleButton = screen.getByLabelText('toggle chat flyout icon');
@@ -181,113 +150,6 @@ describe('<HeaderChatButton />', () => {
     // sidecar hide
     fireEvent.click(toggleButton);
     expect(screen.queryByLabelText('chat flyout mock')).toBeVisible();
-  });
-
-  it('should call send message without active conversation id after input text submitted', async () => {
-    const activeConversationId = 'test-conversation';
-    const assistantActions = {} as AssistantActions;
-    const applicationStart = {
-      ...applicationServiceMock.createStartContract(),
-      currentAppId$: new BehaviorSubject(''),
-    };
-    render(
-      <HeaderChatButton
-        application={applicationStart}
-        messageRenderers={{}}
-        actionExecutors={{}}
-        assistantActions={assistantActions}
-        currentAccount={{ username: 'test_user' }}
-      />
-    );
-
-    act(() => applicationStart.currentAppId$.next('mock_app_id'));
-
-    act(() => {
-      assistantActions.loadChat(activeConversationId);
-    });
-
-    screen.getByLabelText('chat input').focus();
-    fireEvent.change(screen.getByLabelText('chat input'), {
-      target: { value: 'what indices are in my cluster?' },
-    });
-    expect(screen.getByLabelText('chat input')).toHaveFocus();
-    fireEvent.keyPress(screen.getByLabelText('chat input'), {
-      key: 'Enter',
-      code: 'Enter',
-      charCode: 13,
-    });
-
-    await waitFor(() => {
-      expect(coreStartMock.http.post).lastCalledWith(
-        '/api/assistant/send_message',
-        expect.objectContaining({
-          body: expect.not.stringContaining(activeConversationId),
-        })
-      );
-    });
-  });
-
-  it('should focus in chat input when click and press Escape should blur', () => {
-    render(
-      <HeaderChatButton
-        application={applicationServiceMock.createStartContract()}
-        messageRenderers={{}}
-        actionExecutors={{}}
-        assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user' }}
-      />
-    );
-    screen.getByLabelText('chat input').focus();
-    expect(screen.getByLabelText('chat input')).toHaveFocus();
-    expect(screen.getByTitle('press enter to chat')).toBeInTheDocument();
-
-    fireEvent.keyUp(screen.getByLabelText('chat input'), {
-      key: 'Escape',
-      code: 'Escape',
-      charCode: 27,
-    });
-    expect(screen.getByLabelText('chat input')).not.toHaveFocus();
-    expect(screen.getByTitle('press Ctrl + / to start typing')).toBeInTheDocument();
-  });
-
-  it('should focus on chat input when pressing global shortcut', () => {
-    render(
-      <HeaderChatButton
-        application={applicationServiceMock.createStartContract()}
-        messageRenderers={{}}
-        actionExecutors={{}}
-        assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user' }}
-      />
-    );
-    expect(screen.getByLabelText('chat input')).not.toHaveFocus();
-    fireEvent.keyDown(document.body, {
-      key: '/',
-      code: 'NumpadDivide',
-      charCode: 111,
-      ctrlKey: true,
-    });
-    expect(screen.getByLabelText('chat input')).toHaveFocus();
-  });
-
-  it('should not focus on chat input when no access and pressing global shortcut', () => {
-    render(
-      <HeaderChatButton
-        application={applicationServiceMock.createStartContract()}
-        messageRenderers={{}}
-        actionExecutors={{}}
-        assistantActions={{} as AssistantActions}
-        currentAccount={{ username: 'test_user' }}
-      />
-    );
-    expect(screen.getByLabelText('chat input')).not.toHaveFocus();
-    fireEvent.keyDown(document.body, {
-      key: '/',
-      code: 'NumpadDivide',
-      charCode: 111,
-      metaKey: true,
-    });
-    expect(screen.getByLabelText('chat input')).not.toHaveFocus();
   });
 
   it('should call sidecar hide and close when button unmount and chat flyout is visible', async () => {
@@ -328,6 +190,6 @@ describe('<HeaderChatButton />', () => {
         inLegacyHeader={false}
       />
     );
-    expect(screen.getByLabelText('toggle chat flyout button icon')).toBeInTheDocument();
+    expect(screen.getByLabelText('toggle chat flyout icon')).toBeInTheDocument();
   });
 });
