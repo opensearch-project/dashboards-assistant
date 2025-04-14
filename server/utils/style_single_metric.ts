@@ -10,7 +10,7 @@ export function addTitleTextLayer(json: any) {
     mark: {
       type: 'text',
       align: 'center',
-      dy: 40,
+      dy: 50,
       fontSize: 16,
       fontWeight: 'bold',
     },
@@ -30,7 +30,7 @@ export function addTitleTextLayer(json: any) {
         {
           mark: {
             type: 'text',
-            fontSize: 50,
+            fontSize: 80,
             fontWeight: 'bold',
           },
           encoding,
