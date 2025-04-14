@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export function addTitleTextLayer(json: any) {
+interface VegaLiteSpec {
+  title?: string;
+  mark?: unknown;
+  encoding?: unknown;
+  layer?: object[];
+}
+
+export function addTitleTextLayer(json: VegaLiteSpec) {
   if (!json.title) return json;
 
   const titleTextLayer = {
@@ -38,12 +45,12 @@ export function addTitleTextLayer(json: any) {
       ],
     };
   }
-  layeredSpec.layer.push(titleTextLayer);
+  layeredSpec.layer?.push(titleTextLayer);
 
   return layeredSpec;
 }
 
-export function checkSingleMetric(textContent: String) {
+export function checkSingleMetric(textContent: string) {
   const metricsMatch = textContent.match(
     /Number of metrics:\s*\[[^\]]*\]\s*<number of metrics\s*\{(\d+)\}>/
   );
