@@ -302,7 +302,7 @@ export class AssistantPlugin
             id: 'assistant-query-actions',
             order: 2000,
             isEnabled$: () => of(true),
-            getSearchBarButton: () => {
+            getQueryControlButtons: () => {
               return (
                 <ActionContextMenu
                   httpSetup={core.http}
