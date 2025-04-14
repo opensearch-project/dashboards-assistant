@@ -5,8 +5,17 @@
 
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 
-const JOB_INTERVAL = 50;
-const CONTENT_SLICE_LENGTH = 10;
+/**
+ * Giving 10 chars every 50 miliseconds,
+ * the speed looks good in practice so we make it as default.
+ */
+const DEFAULT_JOB_INTERVAL = 50;
+const DEFAULT_CONTENT_SLICE_LENGTH = 10;
+
+interface IMessageContentPullerOptions {
+  jobInterval: number;
+  contentSliceLength: number;
+}
 
 export class MessageContentPuller {
   // Backend may give large response in a single chunk,
@@ -16,8 +25,17 @@ export class MessageContentPuller {
   private outputSubscriber: Subscriber<{ messageId: string; messageContent: string }> | null = null;
   private output$: Observable<{ messageId: string; messageContent: string }>;
   private inputCompleted: boolean = false;
-  constructor() {
+  private options: IMessageContentPullerOptions;
+  constructor(options?: IMessageContentPullerOptions) {
+    const {
+      jobInterval = DEFAULT_JOB_INTERVAL,
+      contentSliceLength = DEFAULT_CONTENT_SLICE_LENGTH,
+    } = options!;
     this.messageContentChunk$ = new BehaviorSubject<Record<string, string>>({});
+    this.options = {
+      jobInterval,
+      contentSliceLength,
+    };
     this.output$ = new Observable((subscriber) => {
       this.outputSubscriber = subscriber;
     });
@@ -31,9 +49,9 @@ export class MessageContentPuller {
             const [messageId, messageContent] = cur;
             this.outputSubscriber?.next({
               messageId,
-              messageContent: messageContent.slice(0, CONTENT_SLICE_LENGTH),
+              messageContent: messageContent.slice(0, this.options.contentSliceLength),
             });
-            const restContent = messageContent.slice(CONTENT_SLICE_LENGTH);
+            const restContent = messageContent.slice(this.options.contentSliceLength);
             if (restContent.length > 0) {
               return {
                 ...acc,
@@ -58,7 +76,7 @@ export class MessageContentPuller {
         this.outputSubscriber?.error(e);
         this.stop();
       }
-    }, JOB_INTERVAL);
+    }, this.options.jobInterval);
   }
 
   public addMessageContent(messageId: string, messageContent: string) {
