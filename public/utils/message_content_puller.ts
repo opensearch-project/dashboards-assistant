@@ -30,7 +30,7 @@ export class MessageContentPuller {
     const {
       jobInterval = DEFAULT_JOB_INTERVAL,
       contentSliceLength = DEFAULT_CONTENT_SLICE_LENGTH,
-    } = options!;
+    } = options || {};
     this.messageContentChunk$ = new BehaviorSubject<Record<string, string>>({});
     this.options = {
       jobInterval,

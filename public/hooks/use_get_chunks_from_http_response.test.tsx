@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ReadableStream } from 'stream/web';
+import { ReadableStream as NodeReadableStream } from 'stream/web';
 import { useGetChunksFromHTTPResponse } from './use_get_chunks_from_http_response';
 import * as chatStateHookExports from './use_chat_state';
 import { streamSerializer } from '../../common/utils/stream/serializer';
@@ -11,17 +11,6 @@ import { waitFor } from '@testing-library/dom';
 
 describe('useGetChunksFromHTTPResponse', () => {
   const chatStateDispatchMock = jest.fn();
-  const createFetchResponse = (
-    body: ReadableStream | Record<string, unknown>
-  ): Parameters<typeof getConsumedChunk$FromHttpResponse>[0]['fetchResponse'] => {
-    return {
-      fetchOptions: {
-        path: '',
-      },
-      request: {} as Request,
-      body,
-    } as Parameters<typeof getConsumedChunk$FromHttpResponse>[0]['fetchResponse'];
-  };
 
   beforeEach(() => {
     jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
@@ -36,7 +25,7 @@ describe('useGetChunksFromHTTPResponse', () => {
 
   it('should be able to parse event stream and dispatch default action', async () => {
     const { getConsumedChunk$FromHttpResponse } = useGetChunksFromHTTPResponse();
-    const mockedEventStream = new ReadableStream({
+    const mockedEventStream = new NodeReadableStream({
       start(controller) {
         controller.enqueue(
           new TextEncoder().encode(
@@ -77,7 +66,7 @@ describe('useGetChunksFromHTTPResponse', () => {
 
     const abortController = new AbortController();
     const chunk$ = await getConsumedChunk$FromHttpResponse({
-      fetchResponse: createFetchResponse(mockedEventStream),
+      stream: mockedEventStream as ReadableStream,
       abortController,
     });
 
@@ -135,40 +124,9 @@ describe('useGetChunksFromHTTPResponse', () => {
     });
   });
 
-  it('should be able to parse normal JSON response and dispatch normal response', async () => {
-    const { getConsumedChunk$FromHttpResponse } = useGetChunksFromHTTPResponse();
-    const abortController = new AbortController();
-    const chunk$ = await getConsumedChunk$FromHttpResponse({
-      fetchResponse: createFetchResponse({
-        messages: [],
-        interactions: [],
-      }),
-      abortController,
-    });
-
-    await waitFor(() => {
-      expect(chatStateDispatchMock).toHaveBeenNthCalledWith(1, {
-        type: 'updateResponseType',
-        payload: {
-          type: chatStateHookExports.LLMResponseType.TEXT,
-        },
-      });
-
-      expect(chunk$.getValue()).toEqual({
-        event: 'metadata',
-        data: {
-          messages: [],
-          interactions: [],
-        },
-      });
-
-      expect(chunk$.isStopped).toEqual(true);
-    });
-  });
-
   it('should abort reading streaming when abort controller get changed', async () => {
     const { getConsumedChunk$FromHttpResponse } = useGetChunksFromHTTPResponse();
-    const mockedEventStream = new ReadableStream({
+    const mockedEventStream = new NodeReadableStream({
       start(controller) {
         controller.enqueue(
           new TextEncoder().encode(
@@ -190,7 +148,7 @@ describe('useGetChunksFromHTTPResponse', () => {
 
     const abortController = new AbortController();
     const chunk$ = await getConsumedChunk$FromHttpResponse({
-      fetchResponse: createFetchResponse(mockedEventStream),
+      stream: mockedEventStream as ReadableStream,
       abortController,
     });
 
