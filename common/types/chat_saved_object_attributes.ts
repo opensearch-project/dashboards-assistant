@@ -99,7 +99,7 @@ export type StreamChunk =
       data: Partial<SendResponse>;
     }
   | {
-      event: 'appendMessage';
+      event: 'appendMessageContent';
       data: {
         messageId: string;
         content: string;

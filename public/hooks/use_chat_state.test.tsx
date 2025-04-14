@@ -267,7 +267,7 @@ describe('useChatState hook', () => {
     ]);
   });
 
-  it('should update state after `appendMessage`', () => {
+  it('should update state after `appendMessageContent`', () => {
     const { result } = renderHook(() => useChatState(), { wrapper: ChatStateProvider });
 
     act(() => {
@@ -290,7 +290,7 @@ describe('useChatState hook', () => {
         },
       });
       result.current.chatStateDispatch({
-        type: 'appendMessage',
+        type: 'appendMessageContent',
         payload: {
           messageId: 'bar',
           content: 'output',
@@ -298,7 +298,7 @@ describe('useChatState hook', () => {
       });
 
       result.current.chatStateDispatch({
-        type: 'appendMessage',
+        type: 'appendMessageContent',
         payload: {
           messageId: 'bar',
           content: ' mock',

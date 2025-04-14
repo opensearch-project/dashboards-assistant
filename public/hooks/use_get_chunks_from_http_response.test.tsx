@@ -41,7 +41,7 @@ describe('useGetChunksFromHTTPResponse', () => {
         controller.enqueue(
           new TextEncoder().encode(
             streamSerializer({
-              event: 'appendMessage',
+              event: 'appendMessageContent',
               data: {
                 messageId: 'a',
                 content: 'a'.repeat(20),
@@ -104,7 +104,7 @@ describe('useGetChunksFromHTTPResponse', () => {
       );
 
       expect(chatStateDispatchMock).toHaveBeenNthCalledWith(4, {
-        type: 'appendMessage',
+        type: 'appendMessageContent',
         payload: {
           messageId: 'a',
           content: 'a'.repeat(10),
@@ -112,7 +112,7 @@ describe('useGetChunksFromHTTPResponse', () => {
       });
 
       expect(chatStateDispatchMock).toHaveBeenNthCalledWith(5, {
-        type: 'appendMessage',
+        type: 'appendMessageContent',
         payload: {
           messageId: 'a',
           content: 'a'.repeat(10),

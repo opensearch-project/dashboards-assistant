@@ -60,7 +60,7 @@ type ChatStateAction =
       };
     }
   | {
-      type: 'appendMessage';
+      type: 'appendMessageContent';
       payload: {
         content: string;
         messageId: string;
@@ -165,7 +165,7 @@ const chatStateReducer: React.Reducer<ChatState, ChatStateAction> = (state, acti
         draft.llmError = undefined;
         break;
 
-      case 'appendMessage':
+      case 'appendMessageContent':
         const updatingMessage = state.messages.find(
           (message) => message.messageId === action.payload.messageId
         );

@@ -52,7 +52,7 @@ export const useGetChunksFromHTTPResponse = () => {
           try {
             const chunkObjects = streamDeserializer(chunk);
             for (const chunkObject of chunkObjects) {
-              if (chunkObject.event === 'appendMessage') {
+              if (chunkObject.event === 'appendMessageContent') {
                 messageContentPuller.addMessageContent(
                   chunkObject.data.messageId,
                   chunkObject.data.content
@@ -96,7 +96,7 @@ export const useGetChunksFromHTTPResponse = () => {
     const messageContentPullerSubscription = messageContentPuller.getOutput$().subscribe({
       next: (message) => {
         chunk$.next({
-          event: 'appendMessage',
+          event: 'appendMessageContent',
           data: {
             messageId: message.messageId,
             content: message.messageContent,
@@ -115,10 +115,10 @@ export const useGetChunksFromHTTPResponse = () => {
     chunk$.subscribe(
       (chunk) => {
         if (chunk) {
-          if (chunk.event === 'appendMessage') {
+          if (chunk.event === 'appendMessageContent') {
             const { data } = chunk;
             chatStateDispatch({
-              type: 'appendMessage',
+              type: 'appendMessageContent',
               payload: data,
             });
           } else if (chunk.event === 'updateOutputMessage') {
