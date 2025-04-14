@@ -4,11 +4,11 @@
  */
 
 import { waitFor } from '@testing-library/dom';
-import { MessageContentPool } from './message_content_pool';
+import { MessageContentPuller } from './message_content_puller';
 
 describe('MessageContentPool', () => {
   it('should output with buffered content', async () => {
-    const messageContentPool = new MessageContentPool();
+    const messageContentPool = new MessageContentPuller();
     const subscriptionMock = jest.fn();
     const completeSubscriptionMock = jest.fn();
     messageContentPool.addMessageContent('a', 'a'.repeat(20));

@@ -8,7 +8,7 @@ import { LLMResponseType, useChatState } from './use_chat_state';
 import { streamDeserializer } from '../../common/utils/stream/serializer';
 import { HttpResponse } from '../../../../src/core/public';
 import { SendResponse, StreamChunk } from '../../common/types/chat_saved_object_attributes';
-import { MessageContentPool } from '../utils/message_content_pool';
+import { MessageContentPuller } from '../utils/message_content_puller';
 
 export const useGetChunksFromHTTPResponse = () => {
   const { chatStateDispatch } = useChatState();
@@ -18,9 +18,9 @@ export const useGetChunksFromHTTPResponse = () => {
     abortController: AbortController;
   }) => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
-    const messageContentPool = new MessageContentPool();
+    const messageContentPuller = new MessageContentPuller();
     props.abortController.signal.addEventListener('abort', () => {
-      messageContentPool.stop();
+      messageContentPuller.stop();
     });
     if (props.fetchResponse.body?.getReader) {
       chatStateDispatch({
@@ -43,7 +43,7 @@ export const useGetChunksFromHTTPResponse = () => {
           const { done, value } = await reader.read();
 
           if (done) {
-            messageContentPool.inputComplete();
+            messageContentPuller.inputComplete();
             return;
           }
 
@@ -53,7 +53,7 @@ export const useGetChunksFromHTTPResponse = () => {
             const chunkObjects = streamDeserializer(chunk);
             for (const chunkObject of chunkObjects) {
               if (chunkObject.event === 'appendMessage') {
-                messageContentPool.addMessageContent(
+                messageContentPuller.addMessageContent(
                   chunkObject.data.messageId,
                   chunkObject.data.content
                 );
@@ -89,11 +89,11 @@ export const useGetChunksFromHTTPResponse = () => {
       // Complete right after next will only eat the emit value
       // add a setTimeout to delay it into next event loop
       setTimeout(() => {
-        messageContentPool.inputComplete();
+        messageContentPuller.inputComplete();
       }, 0);
     }
 
-    const messageContentPoolSubscription = messageContentPool.getOutput$().subscribe({
+    const messageContentPullerSubscription = messageContentPuller.getOutput$().subscribe({
       next: (message) => {
         chunk$.next({
           event: 'appendMessage',
@@ -105,12 +105,12 @@ export const useGetChunksFromHTTPResponse = () => {
       },
       complete: () => {
         chunk$.complete();
-        messageContentPool.stop();
-        messageContentPoolSubscription?.unsubscribe();
+        messageContentPuller.stop();
+        messageContentPullerSubscription?.unsubscribe();
       },
     });
 
-    messageContentPool.start();
+    messageContentPuller.start();
 
     chunk$.subscribe(
       (chunk) => {

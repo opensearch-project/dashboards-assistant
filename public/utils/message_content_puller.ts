@@ -8,7 +8,7 @@ import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 const JOB_INTERVAL = 50;
 const CONTENT_SLICE_LENGTH = 10;
 
-export class MessageContentPool {
+export class MessageContentPuller {
   // Backend may give large response in a single chunk,
   // use an observable here to buffer the large response.
   private messageContentChunk$: BehaviorSubject<Record<string, string>>;
