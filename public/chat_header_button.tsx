@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBadge, EuiFieldText, EuiIcon, EuiButtonIcon } from '@elastic/eui';
-import classNames from 'classnames';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEffectOnce, useObservable } from 'react-use';
 
@@ -110,29 +109,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     ]
   );
 
-  const onKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && inputRef.current && inputRef.current.value.trim().length > 0) {
-      // open chat window
-      setFlyoutVisible(true);
-      // clear conversations error
-      core.services.conversations.status$.next('idle');
-      // start a new chat
-      await props.assistantActions.loadChat();
-      // send message
-      props.assistantActions.send({
-        type: 'input',
-        contentType: 'text',
-        content: inputRef.current.value,
-        context: { appId },
-      });
-      // reset query to empty
-      inputRef.current.value = '';
-      if (inputRef.current) {
-        inputRef.current.blur();
-      }
-    }
-  };
-
   useEffect(() => {
     if (!flyoutLoadedRef.current && flyoutVisible) {
       const mountPoint = flyoutMountPoint.current;
@@ -153,12 +129,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       core.overlays.sidecar().hide();
     }
   }, [flyoutVisible]);
-
-  const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      inputRef.current?.blur();
-    }
-  };
 
   const setMountPoint = useCallback((mountPoint) => {
     flyoutMountPoint.current = mountPoint;
@@ -256,77 +226,29 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
   return (
     <>
-      {!inLegacyHeader && isSingleLineHeader && (
+      <EuiToolTip content={'ChatBot'}>
         <EuiButtonIcon
-          className={classNames(['eui-hideFor--xl', 'eui-hideFor--xxl', 'eui-hideFor--xxxl'])}
+          className={'llm-chat-header-text-input'}
           iconType={getLogoIcon('gradient')}
           onClick={toggleFlyoutAndloadLatestConversation}
-          display="base"
+          display={isSingleLineHeader ? 'base' : 'empty'}
           size="s"
-          aria-label="toggle chat flyout button icon"
-        />
-      )}
-      <div
-        className={classNames({
-          'llm-chat-header-icon-wrapper': true,
-          'eui-hideFor--l': isSingleLineHeader,
-          'eui-hideFor--m': isSingleLineHeader,
-          'eui-hideFor--s': isSingleLineHeader,
-          'eui-hideFor--xs': isSingleLineHeader,
-          'in-legacy-header': inLegacyHeader,
-        })}
-      >
-        <EuiFieldText
-          aria-label="chat input"
-          inputRef={inputRef}
-          compressed
-          onFocus={() => setInputFocus(true)}
-          onBlur={() => setInputFocus(false)}
-          placeholder="Ask a question"
-          onKeyPress={onKeyPress}
-          onKeyUp={onKeyUp}
-          className="llm-chat-header-text-input"
-        />
-        <EuiIcon
           aria-label="toggle chat flyout icon"
-          type={getLogoIcon(inputFocus ? 'gradient' : 'gray')}
-          size="m"
-          onClick={toggleFlyoutAndloadLatestConversation}
-          className="llm-chat-toggle-icon"
         />
-        <span className="llm-chat-header-shortcut">
-          {inputFocus ? (
-            <EuiBadge
-              color="hollow"
-              title="press enter to chat"
-              className="llm-chat-header-shortcut-enter"
-            >
-              ⏎
-            </EuiBadge>
-          ) : (
-            <EuiBadge
-              color="hollow"
-              title="press Ctrl + / to start typing"
-              className="llm-chat-header-shortcut-cmd"
-            >
-              Ctrl + /
-            </EuiBadge>
-          )}
-        </span>
-        <ChatContext.Provider value={chatContextValue}>
-          <ChatStateProvider>
-            <SetContext assistantActions={props.assistantActions} />
-            {/* Chatbot's DOM consists of two parts. One part is the headerButton inside the OSD, and the other part is the flyout/sidecar outside the OSD. This is to allow the context of the two parts to be shared. */}
-            <MountPointPortal setMountPoint={setMountPoint}>
-              <ChatFlyout
-                flyoutVisible={flyoutVisible}
-                overrideComponent={flyoutComponent}
-                flyoutFullScreen={flyoutFullScreen}
-              />
-            </MountPointPortal>
-          </ChatStateProvider>
-        </ChatContext.Provider>
-      </div>
+      </EuiToolTip>
+      <ChatContext.Provider value={chatContextValue}>
+        <ChatStateProvider>
+          <SetContext assistantActions={props.assistantActions} />
+          {/* Chatbot's DOM consists of two parts. One part is the headerButton inside the OSD, and the other part is the flyout/sidecar outside the OSD. This is to allow the context of the two parts to be shared. */}
+          <MountPointPortal setMountPoint={setMountPoint}>
+            <ChatFlyout
+              flyoutVisible={flyoutVisible}
+              overrideComponent={flyoutComponent}
+              flyoutFullScreen={flyoutFullScreen}
+            />
+          </MountPointPortal>
+        </ChatStateProvider>
+      </ChatContext.Provider>
     </>
   );
 };

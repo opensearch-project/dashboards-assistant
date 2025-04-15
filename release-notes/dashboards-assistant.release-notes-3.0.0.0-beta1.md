@@ -12,6 +12,8 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 - Render Icon based on the chat status ([#523](https://github.com/opensearch-project/dashboards-assistant/pull/523))
 - Add scroll load conversations ([#530](https://github.com/opensearch-project/dashboards-assistant/pull/530))
 - Refactor InContext style, add white logo and remove outdated code ([#529](https://github.com/opensearch-project/dashboards-assistant/pull/529))
+- Change chatbot entry point to a single button ([#540](https://github.com/opensearch-project/dashboards-assistant/pull/540))
+- Support streaming output([#493](https://github.com/opensearch-project/dashboards-assistant/pull/493))
 
 ### Bug Fixes
 

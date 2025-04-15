@@ -88,3 +88,27 @@ export interface SendResponse {
   messages: IMessage[];
   interactions: Interaction[];
 }
+
+export type StreamChunk =
+  | {
+      event: 'error';
+      data: string;
+    }
+  | {
+      event: 'metadata';
+      data: Partial<SendResponse>;
+    }
+  | {
+      event: 'appendMessageContent';
+      data: {
+        messageId: string;
+        content: string;
+      };
+    }
+  | {
+      event: 'updateOutputMessage';
+      data: {
+        messageId: string;
+        payload: Partial<Omit<IOutput, 'messageId'>>;
+      };
+    };

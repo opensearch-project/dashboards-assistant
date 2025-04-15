@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { TAB_ID } from '../utils/constants';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { findLastIndex } from '../utils';
@@ -10,11 +11,13 @@ import {
   IMessage,
   ISuggestedAction,
   SendResponse,
+  StreamChunk,
 } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
 import { AssistantActions } from '../types';
-import { useChatState } from './use_chat_state';
+import { LLMResponseType, useChatState } from './use_chat_state';
+import { useGetChunksFromHTTPResponse } from './use_get_chunks_from_http_response';
 
 let abortControllerRef: AbortController;
 
@@ -22,36 +25,28 @@ export const useChatActions = (): AssistantActions => {
   const chatContext = useChatContext();
   const core = useCore();
   const { chatState, chatStateDispatch } = useChatState();
+  const { getConsumedChunk$FromHttpResponse } = useGetChunksFromHTTPResponse();
 
-  const send = async (input: IMessage) => {
-    const abortController = new AbortController();
-    abortControllerRef = abortController;
-    chatStateDispatch({ type: 'send', payload: input });
-    try {
-      const response = await core.services.http.post<SendResponse>(ASSISTANT_API.SEND_MESSAGE, {
-        // do not send abort signal to http client to allow LLM call run in background
-        body: JSON.stringify({
-          conversationId: chatContext.conversationId,
-          ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
-          input,
-        }),
-        query: core.services.dataSource.getDataSourceQuery(),
-      });
-      if (abortController.signal.aborted) return;
-      // Refresh history list after new conversation created if new conversation saved and history list page visible
-      if (
-        !chatContext.conversationId &&
-        response.conversationId &&
-        core.services.conversations.options?.page === 1 &&
-        chatContext.selectedTabId === TAB_ID.HISTORY
-      ) {
-        core.services.conversations.reload();
-      }
-      chatContext.setConversationId(response.conversationId);
-      // set title for first time
-      if (response.title && !chatContext.title) {
-        chatContext.setTitle(response.title);
-      }
+  const sendMetadataHandler = (data: Partial<SendResponse>) => {
+    // Refresh history list after new conversation created if new conversation saved and history list page visible
+    if (
+      !chatContext.conversationId &&
+      data.conversationId &&
+      core.services.conversations.options?.page === 1 &&
+      chatContext.selectedTabId === TAB_ID.HISTORY
+    ) {
+      core.services.conversations.reload();
+    }
+    if (data.conversationId) {
+      chatContext.setConversationId(data.conversationId);
+    }
+
+    // set title for first time
+    if (data.title && !chatContext.title) {
+      chatContext.setTitle(data.title);
+    }
+
+    if (data.messages?.length && data.interactions?.length) {
       /**
        * Remove messages that do not have messageId
        * because they are used for displaying loading state
@@ -70,10 +65,68 @@ export const useChatActions = (): AssistantActions => {
       chatStateDispatch({
         type: 'patch',
         payload: {
-          messages: response.messages,
-          interactions: response.interactions,
+          messages: data.messages,
+          interactions: data.interactions,
         },
       });
+    }
+  };
+
+  const send = async (input: IMessage): Promise<void> => {
+    const abortController = new AbortController();
+    abortControllerRef = abortController;
+    chatStateDispatch({ type: 'send', payload: input });
+
+    try {
+      const fetchResponse = await core.services.http.post(ASSISTANT_API.SEND_MESSAGE, {
+        // do not send abort signal to http client to allow LLM call run in background
+        body: JSON.stringify({
+          conversationId: chatContext.conversationId,
+          ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
+          input,
+        }),
+        query: core.services.dataSource.getDataSourceQuery(),
+        asResponse: true,
+      });
+      if (fetchResponse.body?.getReader) {
+        const chunk$ = await getConsumedChunk$FromHttpResponse({
+          stream: fetchResponse.body,
+          abortController,
+        });
+
+        return new Promise((resolve) => {
+          chunk$.subscribe(
+            (chunk) => {
+              if (chunk?.event === 'metadata') {
+                const { data } = chunk;
+                sendMetadataHandler(data);
+              }
+            },
+            () => {
+              resolve(undefined);
+            },
+            () => {
+              resolve(undefined);
+            }
+          );
+        });
+      } else {
+        if (abortController.signal.aborted) return;
+        chatStateDispatch({
+          type: 'llmRespondingChange',
+          payload: {
+            flag: false,
+          },
+        });
+        chatStateDispatch({
+          type: 'updateResponseType',
+          payload: {
+            type: LLMResponseType.TEXT,
+          },
+        });
+        sendMetadataHandler(fetchResponse.body as SendResponse);
+        return;
+      }
     } catch (error) {
       if (abortController.signal.aborted) return;
       chatStateDispatch({ type: 'error', payload: error });
@@ -102,6 +155,13 @@ export const useChatActions = (): AssistantActions => {
           nextToken: conversation.nextToken,
           messages: conversation.messages,
           interactions: conversation.interactions,
+        },
+      });
+
+      chatStateDispatch({
+        type: 'llmRespondingChange',
+        payload: {
+          flag: false,
         },
       });
     }
@@ -178,54 +238,93 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
+  const regenerateMetadataHandler = (
+    data: Partial<SendResponse>,
+    input: {
+      interactionId: string;
+    }
+  ) => {
+    const findRegeratedMessageIndex = findLastIndex(
+      chatState.messages,
+      (message) => message.type === 'input'
+    );
+    /**
+     * Remove the regenerated interaction & message.
+     * In implementation of Agent framework, it will generate a new interactionId
+     * so need to remove the staled interaction in Frontend manually.
+     * And chatStateDispatch({ type: 'receive' }) here is used to delete the input message
+     */
+    if (findRegeratedMessageIndex > -1) {
+      chatStateDispatch({
+        type: 'receive',
+        payload: {
+          messages: [
+            ...chatState.messages
+              .slice(0, findRegeratedMessageIndex)
+              .filter((item) => item.messageId),
+            ...(data.messages || []),
+          ],
+          interactions: [
+            ...chatState.interactions.filter(
+              (interaction) => interaction.interaction_id !== input.interactionId
+            ),
+            ...(data.interactions || []),
+          ],
+        },
+      });
+    }
+  };
+
   const regenerate = async (interactionId: string) => {
     if (chatContext.conversationId) {
       const abortController = new AbortController();
       abortControllerRef = abortController;
+      let chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
       chatStateDispatch({ type: 'regenerate' });
 
       try {
-        const response = await core.services.http.put(`${ASSISTANT_API.REGENERATE}`, {
+        const fetchResponse = await core.services.http.put(`${ASSISTANT_API.REGENERATE}`, {
           body: JSON.stringify({
             conversationId: chatContext.conversationId,
             interactionId,
           }),
           query: core.services.dataSource.getDataSourceQuery(),
+          asResponse: true,
         });
 
-        if (abortController.signal.aborted) {
-          return;
-        }
-        /**
-         * Remove the regenerated interaction & message.
-         * In implementation of Agent framework, it will generate a new interactionId
-         * so need to remove the staled interaction in Frontend manually.
-         */
-        const findRegeratedMessageIndex = findLastIndex(
-          chatState.messages,
-          (message) => message.type === 'input'
-        );
-        if (findRegeratedMessageIndex > -1) {
+        if (fetchResponse.body?.getReader) {
+          chunk$ = await getConsumedChunk$FromHttpResponse({
+            stream: fetchResponse.body,
+            abortController,
+          });
+
+          chunk$.subscribe((chunk) => {
+            if (chunk?.event === 'metadata') {
+              regenerateMetadataHandler(chunk.data, {
+                interactionId,
+              });
+            }
+          });
+        } else {
+          if (abortController.signal.aborted) {
+            return;
+          }
           chatStateDispatch({
-            type: 'receive',
+            type: 'llmRespondingChange',
             payload: {
-              messages: chatState.messages
-                .slice(0, findRegeratedMessageIndex)
-                .filter((item) => item.messageId),
-              interactions: chatState.interactions.filter(
-                (interaction) => interaction.interaction_id !== interactionId
-              ),
+              flag: false,
             },
           });
+          chatStateDispatch({
+            type: 'updateResponseType',
+            payload: {
+              type: LLMResponseType.TEXT,
+            },
+          });
+          regenerateMetadataHandler(fetchResponse.body as SendResponse, {
+            interactionId,
+          });
         }
-
-        chatStateDispatch({
-          type: 'patch',
-          payload: {
-            messages: response.messages,
-            interactions: response.interactions,
-          },
-        });
       } catch (error) {
         if (abortController.signal.aborted) {
           return;
