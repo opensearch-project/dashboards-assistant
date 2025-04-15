@@ -50,16 +50,10 @@ export function addTitleTextLayer(json: VegaLiteSpec) {
   return layeredSpec;
 }
 
-export function checkSingleMetric(textContent: string) {
-  const metricsMatch = textContent.match(
-    /Number of metrics:\s*\[[^\]]*\]\s*<number of metrics\s*\{(\d+)\}>/
-  );
-  const dimensionsMatch = textContent.match(
-    /Number of dimensions:\s*\[[^\]]*\]\s*<number of dimension\s*\{(\d+)\}>/
-  );
+// the sample data format is like : "[{\"flight_count\":2033,\"dayOfWeek\":0}]"
+// will check if the string only contains one single key-value pair
 
-  const metricsCount = metricsMatch ? parseInt(metricsMatch[1], 10) : 0;
-  const dimensionsCount = dimensionsMatch ? parseInt(dimensionsMatch[1], 10) : 0;
-
-  return metricsCount === 1 && dimensionsCount === 0;
+export function checkSingleMetric(sampleData: string): boolean {
+  const regex = /^"\[\{\\?"[^"]+\\?":[^,}]+\}\]"$/;
+  return regex.test(sampleData);
 }

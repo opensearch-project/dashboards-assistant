@@ -6,16 +6,15 @@
 import { checkSingleMetric, addTitleTextLayer } from './style_single_metric';
 
 describe('checkSingleMetric', () => {
-  it('should return true when there is exactly 1 metric and 0 dimensions', () => {
-    const input = `
-      Number of metrics: [avg(sales)] <number of metrics {1}>
-      Number of dimensions: [] <number of dimension {0}>
-    `;
+  it('should return true when the input sample data only have one value', () => {
+    const input = '"[{\\"count()\\":13059}]"';
     expect(checkSingleMetric(input)).toBe(true);
   });
 
   it('should return false when the format is invalid', () => {
-    const input = `Invalid text`;
+    const input = `
+     "[{\"flight_count\":5,\"DestCountry\":\"AE\"},{\"flight_count\":55,\"DestCountry\":\"AR\"}]"
+    `;
     expect(checkSingleMetric(input)).toBe(false);
   });
 });
