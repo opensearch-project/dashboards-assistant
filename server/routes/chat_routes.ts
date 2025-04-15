@@ -290,12 +290,8 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         const getResponse = await storageService.getConversations(request.query);
         return response.ok({ body: getResponse });
       } catch (error) {
-        const errorBody = error?.meta?.body?.error;
-        // Ignore index not found exception for .plugins-ml-memory-meta index
-        if (
-          errorBody?.type === 'index_not_found_exception' &&
-          errorBody?.reason.includes('.plugins-ml-memory-meta')
-        ) {
+        // Return empty result for 404 errors
+        if (error?.meta?.statusCode === 404) {
           return response.ok({ body: { objects: [], total: 0 } });
         }
         context.assistant_plugin.logger.error(error);

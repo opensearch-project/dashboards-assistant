@@ -81,15 +81,10 @@ describe('getConversations route', () => {
     `);
   });
 
-  it('return empty result when ".plugins-ml-memory-meta" index not found', async () => {
+  it('return empty result when getConversations rejected with 404 status code', async () => {
     mockAgentFrameworkStorageService.getConversations.mockRejectedValueOnce({
       meta: {
-        body: {
-          error: {
-            type: 'index_not_found_exception',
-            reason: 'not found [.plugins-ml-memory-meta]',
-          },
-        },
+        statusCode: 404,
       },
     });
 
