@@ -80,4 +80,24 @@ describe('getConversations route', () => {
       }
     `);
   });
+
+  it('return empty result when getConversations rejected with 404 status code', async () => {
+    mockAgentFrameworkStorageService.getConversations.mockRejectedValueOnce({
+      meta: {
+        statusCode: 404,
+      },
+    });
+
+    expect(mockAgentFrameworkStorageService.deleteConversation).not.toHaveBeenCalled();
+    const result = (await getConversationsRequest({
+      perPage: 10,
+      page: 1,
+    })) as ResponseObject;
+    expect(result.source).toMatchInlineSnapshot(`
+      Object {
+        "objects": Array [],
+        "total": 0,
+      }
+    `);
+  });
 });

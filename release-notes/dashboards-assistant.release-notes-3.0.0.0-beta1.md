@@ -22,6 +22,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 - Fix vertically alignment of alert insights popover title ([#526](https://github.com/opensearch-project/dashboards-assistant/pull/526))
 - Change alert summary icon color to white ([#533](https://github.com/opensearch-project/dashboards-assistant/pull/533))
 - Fix query assistant menu disappear due to upstream method signature change([#541]https://github.com/opensearch-project/dashboards-assistant/pull/541)
+- Fix .plugins-ml-memory-meta not found when get conversations ([#542](https://github.com/opensearch-project/dashboards-assistant/pull/542))
 
 ### Infrastructure
 

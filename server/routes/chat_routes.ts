@@ -305,6 +305,10 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         const getResponse = await storageService.getConversations(request.query);
         return response.ok({ body: getResponse });
       } catch (error) {
+        // Return empty result for 404 errors
+        if (error?.meta?.statusCode === 404) {
+          return response.ok({ body: { objects: [], total: 0 } });
+        }
         context.assistant_plugin.logger.error(error);
         return handleError(error, response, context.assistant_plugin.logger);
       }
