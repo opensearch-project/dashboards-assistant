@@ -13,6 +13,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 - Add scroll load conversations ([#530](https://github.com/opensearch-project/dashboards-assistant/pull/530))
 - Refactor InContext style, add white logo and remove outdated code ([#529](https://github.com/opensearch-project/dashboards-assistant/pull/529))
 - Change chatbot entry point to a single button ([#540](https://github.com/opensearch-project/dashboards-assistant/pull/540))
+- Support streaming output([#493](https://github.com/opensearch-project/dashboards-assistant/pull/493))
 - Update event names for t2v and feedback ([#543](https://github.com/opensearch-project/dashboards-assistant/pull/543))
 
 ### Bug Fixes
