@@ -19,7 +19,7 @@ export const useGetChunksFromHTTPResponse = () => {
   }) => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
     const messageContentPuller = new MessageContentPuller();
-    const result = convertEventStreamToObservable(props.stream, props.abortController);
+    const result = convertEventStreamToObservable(props.stream);
     props.abortController.signal.addEventListener('abort', () => {
       messageContentPuller.stop();
       result.cancel();
@@ -46,8 +46,13 @@ export const useGetChunksFromHTTPResponse = () => {
           }
         } catch (e) {
           chunk$.error(e);
+          messageContentPuller.stop();
           return;
         }
+      },
+      error: (error) => {
+        chunk$.error(error);
+        messageContentPuller.stop();
       },
       complete: () => {
         messageContentPuller.inputComplete();
@@ -63,6 +68,9 @@ export const useGetChunksFromHTTPResponse = () => {
             content: message.messageContent,
           },
         });
+      },
+      error: (error) => {
+        chunk$.error(error);
       },
       complete: () => {
         chunk$.complete();

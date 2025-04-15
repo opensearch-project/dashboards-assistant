@@ -6,8 +6,7 @@
 import { Observable, Subscriber } from 'rxjs';
 
 export const convertEventStreamToObservable = (
-  stream: ReadableStream,
-  abortController: AbortController
+  stream: ReadableStream
 ): {
   output$: Observable<string>;
   cancel: () => void;
@@ -20,12 +19,6 @@ export const convertEventStreamToObservable = (
 
     async function processNextChunk() {
       try {
-        if (abortController.signal.aborted) {
-          // If the abort controller is aborted.
-          // stop reading the stream.
-          reader.cancel();
-          return;
-        }
         const { done, value } = await reader.read();
 
         if (done) {

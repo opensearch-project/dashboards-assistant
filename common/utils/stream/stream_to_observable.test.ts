@@ -9,14 +9,12 @@ import { waitFor } from '@testing-library/dom';
 
 describe('convertEventStreamToObservable', () => {
   it('should generate observable successfully', async () => {
-    const abortController = new AbortController();
     const { output$ } = convertEventStreamToObservable(
       new NodeReadableStream({
         start: (controller) => {
           controller.enqueue(new TextEncoder().encode('test'));
         },
-      }) as ReadableStream,
-      abortController
+      }) as ReadableStream
     );
     const mockedCallback = jest.fn();
     output$.subscribe(mockedCallback);
@@ -26,7 +24,6 @@ describe('convertEventStreamToObservable', () => {
   });
 
   it('should stop reader once cancel being called', async () => {
-    const abortController = new AbortController();
     const { output$, cancel } = convertEventStreamToObservable(
       new NodeReadableStream({
         start: async (controller) => {
@@ -34,8 +31,7 @@ describe('convertEventStreamToObservable', () => {
           await new Promise((resolve) => setTimeout(resolve, 1000));
           controller.enqueue(new TextEncoder().encode('test'));
         },
-      }) as ReadableStream,
-      abortController
+      }) as ReadableStream
     );
     const mockedCallback = jest.fn();
     const mockedCompleteCallback = jest.fn();
