@@ -16,9 +16,9 @@ interface Props {
 }
 
 export const FeedbackThumbs = ({ usageCollection, appName, className }: Props) => {
-  const [feedback, setFeedback] = useState<'thumbs_up' | 'thumbs_down' | undefined>();
+  const [feedback, setFeedback] = useState<'thumbup' | 'thumbdown' | undefined>();
 
-  const onFeedback = (eventName: 'thumbs_up' | 'thumbs_down') => {
+  const onFeedback = (eventName: 'thumbup' | 'thumbdown') => {
     // Only send metric if no current feedback set
     if (!feedback) {
       usageCollection.reportUiStats(
@@ -32,25 +32,25 @@ export const FeedbackThumbs = ({ usageCollection, appName, className }: Props) =
 
   return (
     <EuiFlexGroup gutterSize="none" className={className}>
-      {(!feedback || feedback === 'thumbs_up') && (
+      {(!feedback || feedback === 'thumbup') && (
         <EuiFlexItem>
           <EuiButtonIcon
             size="xs"
-            color={feedback === 'thumbs_up' ? 'primary' : 'text'}
+            color={feedback === 'thumbup' ? 'primary' : 'text'}
             iconType="thumbsUp"
             aria-label="ThumbsUp"
-            onClick={() => onFeedback('thumbs_up')}
+            onClick={() => onFeedback('thumbup')}
           />
         </EuiFlexItem>
       )}
-      {(!feedback || feedback === 'thumbs_down') && (
+      {(!feedback || feedback === 'thumbdown') && (
         <EuiFlexItem>
           <EuiButtonIcon
             size="xs"
-            color={feedback === 'thumbs_down' ? 'primary' : 'text'}
+            color={feedback === 'thumbdown' ? 'primary' : 'text'}
             iconType="thumbsDown"
             aria-label="ThumbsDown"
-            onClick={() => onFeedback('thumbs_down')}
+            onClick={() => onFeedback('thumbdown')}
           />
         </EuiFlexItem>
       )}
