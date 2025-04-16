@@ -206,7 +206,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (flyoutVisible) {
       return;
     }
-
     core.services.conversations
       .load({
         page: 1,
