@@ -201,9 +201,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
 
-  const fuc1 = () => {};
-  const fuc2 = () => {};
-
   const toggleFlyoutAndloadLatestConversation = () => {
     setFlyoutVisible(!flyoutVisible);
     if (flyoutVisible) {
