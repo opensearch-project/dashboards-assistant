@@ -53,7 +53,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-report-linux
-          path: ./OpenSearch-Dashboards/plugins/dashboards-assistant/coverage/clover.xml
+          path: ./OpenSearch-Dashboards/plugins/dashboards-assistant/coverage
 
   tests-windows-macos:
     name: Run unit tests
@@ -106,9 +106,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: coverage-report-linux
-          path: ./
+          path: ./coverage
       - name: Upload Coverage Report
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./clover.xml
+          directory: ./coverage
