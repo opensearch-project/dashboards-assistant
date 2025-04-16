@@ -28,6 +28,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 ### Infrastructure
 
 - Fix failed UTs with OSD 3.0 ([#527](https://github.com/opensearch-project/dashboards-assistant/pull/527))
+- Fix empty codecov report in CI([#547](https://github.com/opensearch-project/dashboards-assistant/pull/547))
 
 ### Maintenance
 
