@@ -8,6 +8,7 @@ import useAsync from 'react-use/lib/useAsync';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
   EuiPopover,
   EuiPopoverFooter,
   EuiSwitch,
@@ -38,6 +39,7 @@ export const ActionContextMenu = (props: Props) => {
   const uiActions = getUiActions();
   const actionsRef = useRef(uiActions.getTriggerActions(AI_ASSISTANT_QUERY_EDITOR_TRIGGER));
   const [open, setOpen] = useState(false);
+  const { search } = props.data;
   const [actionContext, setActionContext] = useState({
     datasetId: props.data.query.queryString.getQuery().dataset?.id ?? '',
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
@@ -47,7 +49,7 @@ export const ActionContextMenu = (props: Props) => {
   const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$, false);
   const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$, false);
   const shouldShowSummarizationAction = resultSummaryEnabled && isSummaryAgentAvailable;
-
+  const [panelValue, setPanelValue] = useState<EuiContextMenuPanelDescriptor[] | undefined>();
   useEffect(() => {
     if (!resultSummaryEnabled) return;
     props.isSummaryAgentAvailable$.next(false);
@@ -101,6 +103,10 @@ export const ActionContextMenu = (props: Props) => {
     [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
   );
 
+  useEffect(() => {
+    setPanelValue(panels.value);
+  }, [panels]);
+
   // The action button should be not displayed when there is no action and result summary disabled or there is no data2Summary agent
   if (!shouldShowSummarizationAction && actionsRef.current.length === 0) {
     return null;
@@ -109,6 +115,32 @@ export const ActionContextMenu = (props: Props) => {
   // The action button should be disabled when context menu has no item or result summary disabled or or no data2Summary agent is available
   const actionDisabled =
     !shouldShowSummarizationAction && (panels.value?.[0]?.items ?? []).length === 0;
+
+  const openSearchAssistantOnClick = () => {
+    if (search.df.df$.hasError || search.df.df$.value?.size === 0) {
+      const newPanelValue = panelValue;
+      newPanelValue?.forEach((panel) => {
+        panel.items?.forEach((item) => {
+          if (
+            item['data-test-subj'] ===
+            'embeddablePanelAction-assistant_generate_visualization_action'
+          ) {
+            item.disabled = true;
+            item.toolTipContent = i18n.translate(
+              'dashboardAssistant.queryAssist.generate.visualization.error.message',
+              {
+                defaultMessage:
+                  'Generate visualization button was disabled because of No Results/Error.',
+              }
+            );
+            item.onClick = () => {};
+          }
+        });
+      });
+      setPanelValue(newPanelValue);
+    }
+    setOpen(!open);
+  };
 
   return (
     <EuiPopover
@@ -130,7 +162,7 @@ export const ActionContextMenu = (props: Props) => {
             aria-label="OpenSearch assistant trigger button"
             size="xs"
             iconType="arrowDown"
-            onClick={() => setOpen(!open)}
+            onClick={openSearchAssistantOnClick}
             iconSide="right"
             flush="both"
             isDisabled={actionDisabled}
@@ -148,7 +180,7 @@ export const ActionContextMenu = (props: Props) => {
       anchorPosition="downRight"
       closePopover={() => setOpen(false)}
     >
-      <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panels.value} />
+      <EuiContextMenu size="s" initialPanelId={'mainMenu'} panels={panelValue} />
       {shouldShowSummarizationAction && (
         <EuiPopoverFooter paddingSize="s">
           <EuiSwitch
