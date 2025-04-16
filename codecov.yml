@@ -1,0 +1,6 @@
+# Copyright OpenSearch Contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# fix extra path prefix appended in yml to generate report correctly
+fixes:
+  - '/__w/dashboards-assistant/dashboards-assistant/OpenSearch-Dashboards/plugins/dashboards-assistant/::'
