@@ -201,6 +201,9 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
 
+  const fuc1 = () => {};
+  const fuc2 = () => {};
+
   const toggleFlyoutAndloadLatestConversation = () => {
     setFlyoutVisible(!flyoutVisible);
     if (flyoutVisible) {
@@ -226,6 +229,16 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
   return (
     <>
+      <EuiToolTip content={'ChatBot'}>
+        <EuiButtonIcon
+          className={'llm-chat-header-text-input'}
+          iconType={getLogoIcon('gradient')}
+          onClick={toggleFlyoutAndloadLatestConversation}
+          display={isSingleLineHeader ? 'base' : 'empty'}
+          size="s"
+          aria-label="toggle chat flyout icon"
+        />
+      </EuiToolTip>
       <ChatContext.Provider value={chatContextValue}>
         <ChatStateProvider>
           <SetContext assistantActions={props.assistantActions} />
