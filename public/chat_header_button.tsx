@@ -226,16 +226,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
 
   return (
     <>
-      <EuiToolTip content={'ChatBot'}>
-        <EuiButtonIcon
-          className={'llm-chat-header-text-input'}
-          iconType={getLogoIcon('gradient')}
-          onClick={toggleFlyoutAndloadLatestConversation}
-          display={isSingleLineHeader ? 'base' : 'empty'}
-          size="s"
-          aria-label="toggle chat flyout icon"
-        />
-      </EuiToolTip>
       <ChatContext.Provider value={chatContextValue}>
         <ChatStateProvider>
           <SetContext assistantActions={props.assistantActions} />
