@@ -144,6 +144,7 @@ export const ActionContextMenu = (props: Props) => {
 
   return (
     <EuiPopover
+      data-test-subj="popover-test-id"
       button={
         <EuiToolTip
           content={
