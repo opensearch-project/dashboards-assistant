@@ -10,7 +10,7 @@ import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
  * the speed looks good in practice so we make it as default.
  */
 const DEFAULT_JOB_INTERVAL = 50;
-const DEFAULT_CONTENT_SLICE_LENGTH = 30;
+const DEFAULT_CONTENT_SLICE_LENGTH = 10;
 
 /**
  * use 150 as default
