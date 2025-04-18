@@ -59,6 +59,10 @@ describe('MessageContentPool', () => {
     messageContentPool.addMessageContent('a', `a[hyberlink`);
     messageContentPool.addMessageContent('a', `](href`);
     messageContentPool.addMessageContent('a', `)`);
+
+    // should emit content when the length exceeds 50
+    messageContentPool.addMessageContent('b', `[link whose length is larger than 50]`);
+    messageContentPool.addMessageContent('b', `(${'a'.repeat(51)})`);
     const output$ = messageContentPool.getOutput$();
     output$.subscribe({
       next: subscriptionMock,
@@ -69,10 +73,19 @@ describe('MessageContentPool', () => {
 
     await waitFor(
       () => {
-        expect(subscriptionMock).toHaveBeenCalledTimes(1);
-        expect(subscriptionMock).toHaveBeenNthCalledWith(1, {
+        expect(subscriptionMock).toHaveBeenCalledTimes(3);
+        expect(subscriptionMock).toBeCalledWith({
           messageContent: 'a[hyberlink](href)',
           messageId: 'a',
+        });
+
+        expect(subscriptionMock).toBeCalledWith({
+          messageContent: '[link whose length is larger than 50](aaaaaaaaaaaa',
+          messageId: 'b',
+        });
+        expect(subscriptionMock).toBeCalledWith({
+          messageContent: `${'a'.repeat(39)})`,
+          messageId: 'b',
         });
         expect(completeSubscriptionMock).toHaveBeenCalledTimes(1);
       },

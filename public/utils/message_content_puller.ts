@@ -71,7 +71,7 @@ export class MessageContentPuller {
      */
     if (
       (this.inputCompleted && !restContent.length) ||
-      contentSliceLength >= this.options.maxBufferLength ||
+      messageContentCandidate.length >= this.options.maxBufferLength ||
       this.options.isContentReadyToUse(messageContentCandidate)
     ) {
       this.outputSubscriber?.next({
@@ -89,7 +89,7 @@ export class MessageContentPuller {
       this.messageContentChunk$.next(currentChunkMap);
       this.lastContentSliceLengthMap[messageId] = 0;
     } else {
-      this.lastContentSliceLengthMap[messageId] = contentSliceLength;
+      this.lastContentSliceLengthMap[messageId] = messageContentCandidate.length;
     }
   }
 
