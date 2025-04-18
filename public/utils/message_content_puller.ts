@@ -6,11 +6,12 @@
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 
 /**
- * Giving 10 chars every 50 miliseconds,
+ * Giving 10 chars every 40 miliseconds,
  * the speed looks good in practice so we make it as default.
  */
 const DEFAULT_JOB_INTERVAL = 50;
-const DEFAULT_CONTENT_SLICE_LENGTH = 10;
+const DEFAULT_CONTENT_SLICE_LENGTH = 20;
+const DEFAULT_MAX_BUFFER_LENGTH = 100;
 
 interface IMessageContentPullerOptions {
   jobInterval: number;
@@ -37,10 +38,10 @@ export class MessageContentPuller {
       jobInterval = DEFAULT_JOB_INTERVAL,
       contentSliceLength = DEFAULT_CONTENT_SLICE_LENGTH,
       /**
-       * use contentSliceLength * 5 as default
-       * since hyberlink usually occupy 20-30 length
+       * use 100 as default
+       * since hyberlink usually occupy 50-70 length.
        */
-      maxBufferLength = contentSliceLength * 5,
+      maxBufferLength = DEFAULT_MAX_BUFFER_LENGTH,
       isContentReadyToUse = () => true,
     } = options || {};
     this.messageContentChunk$ = new BehaviorSubject<Record<string, string>>({});

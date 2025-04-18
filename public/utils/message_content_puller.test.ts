@@ -8,7 +8,9 @@ import { MessageContentPuller } from './message_content_puller';
 
 describe('MessageContentPool', () => {
   it('should output with buffered content', async () => {
-    const messageContentPool = new MessageContentPuller();
+    const messageContentPool = new MessageContentPuller({
+      contentSliceLength: 10,
+    });
     const subscriptionMock = jest.fn();
     const completeSubscriptionMock = jest.fn();
     messageContentPool.addMessageContent('a', 'a'.repeat(20));
@@ -46,6 +48,7 @@ describe('MessageContentPool', () => {
 
   it('should buffer content when isContentReadyToUse returns false', async () => {
     const messageContentPool = new MessageContentPuller({
+      maxBufferLength: 50,
       isContentReadyToUse: (message: string) => {
         if (message.endsWith(')')) {
           return true;
@@ -80,11 +83,11 @@ describe('MessageContentPool', () => {
         });
 
         expect(subscriptionMock).toBeCalledWith({
-          messageContent: '[link whose length is larger than 50](aaaaaaaaaaaa',
+          messageContent: '[link whose length is larger than 50](aaaaaaaaaaaaaaaaaaaaaa',
           messageId: 'b',
         });
         expect(subscriptionMock).toBeCalledWith({
-          messageContent: `${'a'.repeat(39)})`,
+          messageContent: `${'a'.repeat(29)})`,
           messageId: 'b',
         });
         expect(completeSubscriptionMock).toHaveBeenCalledTimes(1);
