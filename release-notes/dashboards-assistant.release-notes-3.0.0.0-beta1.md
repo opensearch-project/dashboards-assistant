@@ -23,6 +23,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 - Change alert summary icon color to white ([#533](https://github.com/opensearch-project/dashboards-assistant/pull/533))
 - Fix query assistant menu disappear due to upstream method signature change([#541]https://github.com/opensearch-project/dashboards-assistant/pull/541)
 - Fix .plugins-ml-memory-meta not found when get conversations ([#542](https://github.com/opensearch-project/dashboards-assistant/pull/542))
+- Fix http request for insights to be triggered only after view insights button is clicked ([#520](https://github.com/opensearch-project/dashboards-assistant/pull/520))
 
 ### Infrastructure
 
