@@ -83,7 +83,7 @@ describe('MessageContentPool', () => {
         });
 
         expect(subscriptionMock).toBeCalledWith({
-          messageContent: '[link whose length is larger than 50](aaaaaaaaaaaaaaaaaaaaaa',
+          messageContent: `[link whose length is larger than 50](${'a'.repeat(22)}`,
           messageId: 'b',
         });
         expect(subscriptionMock).toBeCalledWith({

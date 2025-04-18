@@ -10,8 +10,13 @@ import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
  * the speed looks good in practice so we make it as default.
  */
 const DEFAULT_JOB_INTERVAL = 50;
-const DEFAULT_CONTENT_SLICE_LENGTH = 20;
-const DEFAULT_MAX_BUFFER_LENGTH = 100;
+const DEFAULT_CONTENT_SLICE_LENGTH = 30;
+
+/**
+ * use 150 as default
+ * since hyberlink usually occupy 80+ length.
+ */
+const DEFAULT_MAX_BUFFER_LENGTH = 150;
 
 interface IMessageContentPullerOptions {
   jobInterval: number;
@@ -37,10 +42,6 @@ export class MessageContentPuller {
     const {
       jobInterval = DEFAULT_JOB_INTERVAL,
       contentSliceLength = DEFAULT_CONTENT_SLICE_LENGTH,
-      /**
-       * use 100 as default
-       * since hyberlink usually occupy 50-70 length.
-       */
       maxBufferLength = DEFAULT_MAX_BUFFER_LENGTH,
       isContentReadyToUse = () => true,
     } = options || {};
