@@ -18,7 +18,18 @@ export const useGetChunksFromHTTPResponse = () => {
     abortController: AbortController;
   }) => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
-    const messageContentPuller = new MessageContentPuller();
+    const messageContentPuller = new MessageContentPuller({
+      isContentReadyToUse(message) {
+        const regexpForHyperlink = /\[([^\]\n]+)\]\(([^)\n]+)\)/;
+
+        // For message contains [, but not completely comply with hyperlink format
+        if (message.includes('[') && !regexpForHyperlink.test(message)) {
+          return false;
+        }
+
+        return true;
+      },
+    });
     const result = convertEventStreamToObservable(props.stream);
     props.abortController.signal.addEventListener('abort', () => {
       messageContentPuller.stop();
