@@ -20,10 +20,10 @@ export const useGetChunksFromHTTPResponse = () => {
     const chunk$ = new BehaviorSubject<StreamChunk | undefined>(undefined);
     const messageContentPuller = new MessageContentPuller({
       isContentReadyToUse(message) {
-        const regexpForHyberlink = /\[([^\]\n]+)\]\(([^)\n]+)\)/;
+        const regexpForHyperlink = /\[([^\]\n]+)\]\(([^)\n]+)\)/;
 
-        // For message contains [, but not completely comply with hyberlink format
-        if (message.includes('[') && !regexpForHyberlink.test(message)) {
+        // For message contains [, but not completely comply with hyperlink format
+        if (message.includes('[') && !regexpForHyperlink.test(message)) {
           return false;
         }
 

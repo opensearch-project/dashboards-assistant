@@ -59,7 +59,7 @@ describe('MessageContentPool', () => {
     });
     const subscriptionMock = jest.fn();
     const completeSubscriptionMock = jest.fn();
-    messageContentPool.addMessageContent('a', `a[hyberlink`);
+    messageContentPool.addMessageContent('a', `a[hyperlink`);
     messageContentPool.addMessageContent('a', `](href`);
     messageContentPool.addMessageContent('a', `)`);
 
@@ -78,7 +78,7 @@ describe('MessageContentPool', () => {
       () => {
         expect(subscriptionMock).toHaveBeenCalledTimes(3);
         expect(subscriptionMock).toBeCalledWith({
-          messageContent: 'a[hyberlink](href)',
+          messageContent: 'a[hyperlink](href)',
           messageId: 'a',
         });
 

@@ -14,7 +14,7 @@ const DEFAULT_CONTENT_SLICE_LENGTH = 30;
 
 /**
  * use 150 as default
- * since hyberlink usually occupy 80+ length.
+ * since hyperlink usually occupy 80+ length.
  */
 const DEFAULT_MAX_BUFFER_LENGTH = 150;
 
@@ -69,7 +69,7 @@ export class MessageContentPuller {
      *
      * 1. Input stream is closed and all the content has been pulled.
      * 2. The slice length exceeds the max buffer length client defined.
-     * 3. The content is good to emit without special characters like hyberlink.
+     * 3. The content is good to emit without special characters like hyperlink.
      */
     if (
       (this.inputCompleted && !restContent.length) ||
