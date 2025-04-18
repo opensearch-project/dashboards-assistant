@@ -14,6 +14,7 @@ import {
 } from '../../common/constants/llm';
 import { AssistantServiceSetup } from '../services/assistant_service';
 import { handleError } from './error_handler';
+import { checkSingleMetric, addTitleTextLayer } from '../utils/style_single_metric';
 
 const inputSchema = schema.string({
   maxLength: TEXT2VEGA_INPUT_SIZE_LIMIT,
@@ -56,6 +57,9 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         });
 
         let textContent = response.body.inference_results[0].output[0].result;
+        // Check if the visualization is single value:
+        // it should have exactly 1 metric and no dimensions.
+        let ifSingleMetric = checkSingleMetric(textContent);
 
         // extra content between tag <vega-lite></vega-lite>
         const startTag = '<vega-lite>';
@@ -68,7 +72,6 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
           // Extract the content between the tags
           textContent = textContent.substring(startIndex + startTag.length, endIndex).trim();
         }
-
         // extract json object
         const jsonMatch = textContent.match(/\{.*\}/s);
         if (jsonMatch) {
@@ -81,6 +84,9 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
           delete result.width;
           delete result.height;
 
+          if (ifSingleMetric) {
+            result = addTitleTextLayer(result);
+          }
           // make sure $schema field always been added, sometimes, LLM 'forgot' to add this field
           result.$schema = 'https://vega.github.io/schema/vega-lite/v5.json';
           return res.ok({ body: result });
