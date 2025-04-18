@@ -57,7 +57,7 @@ describe('useGetChunksFromHTTPResponse', () => {
               event: 'appendMessageContent',
               data: {
                 messageId: 'b',
-                content: '](https://playground.opensearch.org/)',
+                content: '](https://opensearch.org/)',
               },
             })
           )
@@ -136,7 +136,7 @@ describe('useGetChunksFromHTTPResponse', () => {
         type: 'appendMessageContent',
         payload: {
           messageId: 'b',
-          content: '[hyperlink](https://playground.opensearch.org/)',
+          content: '[hyperlink](https://opensearch.org/)',
         },
       });
 
