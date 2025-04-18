@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { IMessage, Interaction } from '../../../common/types/chat_saved_object_attributes';
 import { WelcomeMessage } from '../../components/chat_welcome_message';
 import { useChatContext } from '../../contexts';
@@ -44,12 +44,27 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const chatActions = useChatActions();
   const registry = getIncontextInsightRegistry();
   const configSchema = getConfigSchema();
+  const latestInputRef = useRef<HTMLDivElement>(null);
+  const [messageSpacerHeight, setMessageSpacerHeight] = useState(0);
 
   useLayoutEffect(() => {
-    if (!props.chatScrollTopRef.current) {
+    if (latestInputRef.current) {
+      setMessageSpacerHeight(window.innerHeight - latestInputRef.current.clientHeight - 135);
+
+      setTimeout(() => {
+        // Do the scrolling in the next loop to avoid page flashing
+        if (latestInputRef.current) {
+          latestInputRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 0);
+    }
+  }, [loading, latestInputRef, window.innerHeight]);
+
+  useEffect(() => {
+    if (pageEndRef.current) {
       pageEndRef.current?.scrollIntoView();
     }
-  }, [chatState.messages, loading]);
+  }, [pageEndRef.current]);
 
   if (props.conversationsError) {
     return (
@@ -143,6 +158,8 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
       )}
       <EuiSpacer />
       {chatState.messages.map((message, i) => {
+        // The latest user input, just after the last user input
+        const isLatestInput = lastInputIndex === i;
         // The latest llm output, just after the last user input
         const isLatestOutput = lastInputIndex >= 0 && i > lastInputIndex;
         // All the llm output in response to user's input, exclude outputs before user's first input
@@ -163,8 +180,27 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           (chatState.llmResponseType === LLMResponseType.TEXT ||
             (chatState.llmResponseType === LLMResponseType.STREAMING && !chatState.llmResponding));
 
+        // The latest llm output, after user sent a message and waiting for server's message (loading)
+        const isWaitingForRepsonse =
+          isLatestInput && loading && chatState.llmResponseType !== LLMResponseType.STREAMING;
+        // The latest llm output, after the llm has responded at least a message
+        const isStreaming =
+          isLatestOutput &&
+          chatState.llmResponseType === LLMResponseType.STREAMING &&
+          chatState.llmResponding;
+
         return (
-          <React.Fragment key={`${interaction?.conversation_id}-${i}`}>
+          <div
+            key={`${interaction?.conversation_id}-${i}`}
+            ref={isLatestInput && isWaitingForRepsonse ? latestInputRef : undefined}
+            style={
+              isLatestOutput
+                ? {
+                    minHeight: messageSpacerHeight,
+                  }
+                : {}
+            }
+          >
             <ToolsUsed message={message} />
             <MessageBubble
               message={message}
@@ -174,43 +210,36 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
               onRegenerate={chatActions.regenerate}
               interaction={interaction}
             >
-              <MessageContent
-                message={message}
-                loading={
-                  isLatestOutput &&
-                  chatState.llmResponseType === LLMResponseType.STREAMING &&
-                  chatState.llmResponding
-                }
-              />
+              <MessageContent message={message} loading={isStreaming} />
             </MessageBubble>
-            {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}
             <EuiSpacer />
-          </React.Fragment>
+            {showSuggestions && !isStreaming && (
+              <Suggestions message={message} inputDisabled={loading} />
+            )}
+          </div>
         );
       })}
-      {loading && chatState.llmResponseType === LLMResponseType.TEXT ? (
-        <>
-          <EuiSpacer />
-          <MessageBubble loading showActionBar={false} />
-        </>
-      ) : null}
-
-      {configSchema.chat.regenerateMessage &&
-        chatState.llmResponding &&
-        chatContext.conversationId && (
-          <div style={{ marginLeft: '8px', marginTop: 10 }}>
-            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
-              <EuiFlexItem>
-                <SuggestionBubble
-                  content="Stop generating response"
-                  color="default"
-                  iconType="crossInACircleFilled"
-                  onClick={() => chatActions.abortAction(chatContext.conversationId)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        )}
+      <LoadingPlaceholder
+        loading={loading && chatState.llmResponseType !== LLMResponseType.STREAMING}
+        height={messageSpacerHeight}
+      >
+        {configSchema.chat.regenerateMessage &&
+          chatState.llmResponding &&
+          chatContext.conversationId && (
+            <div style={{ marginLeft: '8px', marginTop: 10 }}>
+              <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
+                <EuiFlexItem>
+                  <SuggestionBubble
+                    content="Stop generating response"
+                    color="default"
+                    iconType="crossInACircleFilled"
+                    onClick={() => chatActions.abortAction(chatContext.conversationId)}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          )}
+      </LoadingPlaceholder>
       {chatState.llmError && (
         <EuiEmptyPrompt
           iconType="alert"
@@ -268,7 +297,7 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
   registry.setSuggestionsByInteractionId(interactionId, suggestedActions);
 
   return (
-    <div aria-label="chat suggestions" style={{ marginLeft: '8px', marginTop: '5px' }}>
+    <div aria-label="chat suggestions" style={{ marginLeft: '8px', marginBottom: '5px' }}>
       <EuiText color="subdued" size="xs" style={{ paddingLeft: 10 }}>
         <small>Available suggestions</small>
       </EuiText>
@@ -299,4 +328,40 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
       </EuiFlexGroup>
     </div>
   );
+};
+
+interface LoadingPlaceholderProps {
+  loading: boolean;
+  height: number;
+  children?: ReactNode;
+}
+
+const LoadingPlaceholder: React.FC<LoadingPlaceholderProps> = ({
+  loading,
+  height,
+  children,
+}: LoadingPlaceholderProps) => {
+  const [showLoadingPlaceholder, setShowLoadingPlaceholder] = useState(false);
+
+  useEffect(() => {
+    if (loading) {
+      setShowLoadingPlaceholder(true);
+    } else {
+      setShowLoadingPlaceholder(false);
+    }
+  }, [loading]);
+
+  if (showLoadingPlaceholder) {
+    return (
+      <div
+        style={{
+          minHeight: height,
+        }}
+      >
+        <MessageBubble loading showActionBar={false} />
+        {children}
+      </div>
+    );
+  }
+  return null;
 };
