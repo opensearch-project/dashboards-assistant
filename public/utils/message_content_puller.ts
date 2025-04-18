@@ -6,7 +6,7 @@
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 
 /**
- * Giving 10 chars every 40 miliseconds,
+ * Giving 10 chars every 50 miliseconds,
  * the speed looks good in practice so we make it as default.
  */
 const DEFAULT_JOB_INTERVAL = 50;
