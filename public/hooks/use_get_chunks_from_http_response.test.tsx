@@ -42,6 +42,30 @@ describe('useGetChunksFromHTTPResponse', () => {
         controller.enqueue(
           new TextEncoder().encode(
             streamSerializer({
+              event: 'appendMessageContent',
+              data: {
+                messageId: 'b',
+                content: '[hyperlink',
+              },
+            })
+          )
+        );
+
+        controller.enqueue(
+          new TextEncoder().encode(
+            streamSerializer({
+              event: 'appendMessageContent',
+              data: {
+                messageId: 'b',
+                content: '](https://opensearch.org/)',
+              },
+            })
+          )
+        );
+
+        controller.enqueue(
+          new TextEncoder().encode(
+            streamSerializer({
               event: 'updateOutputMessage',
               data: {
                 messageId: '',
@@ -105,6 +129,14 @@ describe('useGetChunksFromHTTPResponse', () => {
         payload: {
           messageId: 'a',
           content: 'a'.repeat(10),
+        },
+      });
+
+      expect(chatStateDispatchMock).toBeCalledWith({
+        type: 'appendMessageContent',
+        payload: {
+          messageId: 'b',
+          content: '[hyperlink](https://opensearch.org/)',
         },
       });
 
