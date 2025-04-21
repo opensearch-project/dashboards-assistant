@@ -9,7 +9,7 @@ import { AgentNotFoundError } from './errors';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleError = (e: any, res: OpenSearchDashboardsResponseFactory, logger: Logger) => {
-  logger.error('Error occurred', e);
+  logger.error('Error occurred', e.body || e.message);
   // Handle specific type of Errors
   if (e instanceof AgentNotFoundError) {
     return res.notFound({ body: 'Agent not found' });
