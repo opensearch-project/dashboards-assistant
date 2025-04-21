@@ -7,6 +7,9 @@ import { waitFor } from '@testing-library/dom';
 import { MessageContentPuller } from './message_content_puller';
 
 describe('MessageContentPool', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
   it('should output with buffered content', async () => {
     const messageContentPool = new MessageContentPuller({
       contentSliceLength: 10,
@@ -23,27 +26,22 @@ describe('MessageContentPool', () => {
     messageContentPool.start();
     messageContentPool.inputComplete();
 
-    await waitFor(
-      () => {
-        expect(subscriptionMock).toHaveBeenCalledTimes(3);
-        expect(subscriptionMock).toHaveBeenNthCalledWith(1, {
-          messageContent: 'a'.repeat(10),
-          messageId: 'a',
-        });
-        expect(subscriptionMock).toHaveBeenNthCalledWith(2, {
-          messageContent: 'b'.repeat(10),
-          messageId: 'b',
-        });
-        expect(subscriptionMock).toHaveBeenNthCalledWith(3, {
-          messageContent: 'a'.repeat(10),
-          messageId: 'a',
-        });
-        expect(completeSubscriptionMock).toHaveBeenCalledTimes(1);
-      },
-      {
-        timeout: 10000,
-      }
-    );
+    await waitFor(() => {
+      expect(subscriptionMock).toHaveBeenCalledTimes(3);
+      expect(subscriptionMock).toHaveBeenNthCalledWith(1, {
+        messageContent: 'a'.repeat(10),
+        messageId: 'a',
+      });
+      expect(subscriptionMock).toHaveBeenNthCalledWith(2, {
+        messageContent: 'b'.repeat(10),
+        messageId: 'b',
+      });
+      expect(subscriptionMock).toHaveBeenNthCalledWith(3, {
+        messageContent: 'a'.repeat(10),
+        messageId: 'a',
+      });
+      expect(completeSubscriptionMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should buffer content when isContentReadyToUse returns false', async () => {
@@ -74,27 +72,22 @@ describe('MessageContentPool', () => {
     messageContentPool.start();
     messageContentPool.inputComplete();
 
-    await waitFor(
-      () => {
-        expect(subscriptionMock).toHaveBeenCalledTimes(3);
-        expect(subscriptionMock).toBeCalledWith({
-          messageContent: 'a[hyperlink](href)',
-          messageId: 'a',
-        });
+    await waitFor(() => {
+      expect(subscriptionMock).toHaveBeenCalledTimes(3);
+      expect(subscriptionMock).toBeCalledWith({
+        messageContent: 'a[hyperlink](href)',
+        messageId: 'a',
+      });
 
-        expect(subscriptionMock).toBeCalledWith({
-          messageContent: `[link whose length is larger than 50](${'a'.repeat(12)}`,
-          messageId: 'b',
-        });
-        expect(subscriptionMock).toBeCalledWith({
-          messageContent: `${'a'.repeat(39)})`,
-          messageId: 'b',
-        });
-        expect(completeSubscriptionMock).toHaveBeenCalledTimes(1);
-      },
-      {
-        timeout: 10000,
-      }
-    );
+      expect(subscriptionMock).toBeCalledWith({
+        messageContent: `[link whose length is larger than 50](${'a'.repeat(12)}`,
+        messageId: 'b',
+      });
+      expect(subscriptionMock).toBeCalledWith({
+        messageContent: `${'a'.repeat(39)})`,
+        messageId: 'b',
+      });
+      expect(completeSubscriptionMock).toHaveBeenCalledTimes(1);
+    });
   });
 });
