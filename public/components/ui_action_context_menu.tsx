@@ -117,28 +117,26 @@ export const ActionContextMenu = (props: Props) => {
     !shouldShowSummarizationAction && (panels.value?.[0]?.items ?? []).length === 0;
 
   const openSearchAssistantOnClick = () => {
-    if (search.df.df$.hasError || search.df.df$.value?.size === 0) {
-      const newPanelValue = panelValue;
-      newPanelValue?.forEach((panel) => {
-        panel.items?.forEach((item) => {
-          if (
-            item['data-test-subj'] ===
-            'embeddablePanelAction-assistant_generate_visualization_action'
-          ) {
-            item.disabled = true;
-            item.toolTipContent = i18n.translate(
-              'dashboardAssistant.queryAssist.generate.visualization.error.message',
-              {
-                defaultMessage:
-                  'Generate visualization button was disabled because of No Results/Error.',
-              }
-            );
-            item.onClick = () => {};
-          }
-        });
+    const buttonDisabled = search.df.df$.hasError || search.df.df$.value?.size === 0;
+
+    const newPanelValue = panelValue;
+    newPanelValue?.forEach((panel) => {
+      panel.items?.forEach((item) => {
+        if (item.id === 'assistant_generate_visualization_action') {
+          item.disabled = buttonDisabled;
+          item.toolTipContent = buttonDisabled
+            ? i18n.translate(
+                'dashboardAssistant.queryAssist.generate.visualization.error.message',
+                {
+                  defaultMessage:
+                    'Generate visualization button was disabled because of No Results/Error.',
+                }
+              )
+            : '';
+        }
       });
-      setPanelValue(newPanelValue);
-    }
+    });
+    setPanelValue(newPanelValue);
     setOpen(!open);
   };
 
