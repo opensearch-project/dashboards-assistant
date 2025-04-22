@@ -241,12 +241,14 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           )}
       </LoadingPlaceholder>
       {chatState.llmError && (
-        <EuiEmptyPrompt
-          iconType="alert"
-          iconColor="danger"
-          title={<h2>Error from response</h2>}
-          body={chatState.llmError.message}
-        />
+        <div style={{ minHeight: messageSpacerHeight }}>
+          <EuiEmptyPrompt
+            iconType="alert"
+            iconColor="danger"
+            title={<h2>Error from response</h2>}
+            body={chatState.llmError.message}
+          />
+        </div>
       )}
       <div ref={pageEndRef} />
     </>
