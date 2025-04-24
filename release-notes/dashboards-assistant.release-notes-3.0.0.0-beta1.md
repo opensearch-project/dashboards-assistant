@@ -15,7 +15,6 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 - Change chatbot entry point to a single button ([#540](https://github.com/opensearch-project/dashboards-assistant/pull/540))
 - Support streaming output([#493](https://github.com/opensearch-project/dashboards-assistant/pull/493))
 - Update event names for t2v and feedback ([#543](https://github.com/opensearch-project/dashboards-assistant/pull/543))
-- Improve the chatbot UX by scroll the user input message to the top after sending ([#545](https://github.com/opensearch-project/dashboards-assistant/pull/545))
 
 ### Bug Fixes
 

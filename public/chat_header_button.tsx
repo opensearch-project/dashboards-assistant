@@ -264,23 +264,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     if (flyoutVisible) {
       return;
     }
-    core.services.conversationLoad.status$.next('loading');
-    core.services.conversations
-      .load({
-        page: 1,
-        perPage: 1,
-        fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
-        sortField: 'updatedTimeMs',
-        sortOrder: 'DESC',
-        searchFields: ['title'],
-      })
-      .then(() => {
-        const data = core.services.conversations.conversations$.getValue();
-        if (data?.objects?.length) {
-          const { id } = data.objects[0];
-          props.assistantActions.loadChat(id);
-        }
-      });
+    loadLatestConversation();
   };
 
   return (

@@ -25,6 +25,7 @@ import { SuggestionBubble } from './suggestions/suggestion_bubble';
 import { getIncontextInsightRegistry } from '../../services';
 import { getConfigSchema } from '../../services';
 import { LLMResponseType } from '../../hooks/use_chat_state';
+import { LoadingPlaceholder } from './loading_placeholder';
 
 interface ChatPageContentProps {
   messagesLoading: boolean;
@@ -36,6 +37,14 @@ interface ChatPageContentProps {
   onRefreshConversationsList: () => void;
 }
 
+/**
+ * This height is approximately the sum of header height, bottom input box and corresponding
+ * paddings. It is used to calculate the height of spacing when a user inputs a message as we
+ * want to achieve the behavior of the input message scrolling to the top. This value is
+ * hard-coded since these heights are non-responsive.
+ */
+const CHAT_PAGE_CONTENT_PADDING_HEIGHT = 135;
+
 export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props) => {
   const chatContext = useChatContext();
   const { chatState } = useChatState();
@@ -44,27 +53,34 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const chatActions = useChatActions();
   const registry = getIncontextInsightRegistry();
   const configSchema = getConfigSchema();
-  const latestInputRef = useRef<HTMLDivElement>(null);
+  const latestInputRef = useRef<HTMLDivElement | null>(null);
   const [messageSpacerHeight, setMessageSpacerHeight] = useState(0);
 
   useLayoutEffect(() => {
-    if (latestInputRef.current) {
-      setMessageSpacerHeight(window.innerHeight - latestInputRef.current.clientHeight - 135);
+    if (loading && latestInputRef.current) {
+      setMessageSpacerHeight(
+        window.innerHeight - latestInputRef.current.clientHeight - CHAT_PAGE_CONTENT_PADDING_HEIGHT
+      );
 
-      setTimeout(() => {
-        // Do the scrolling in the next loop to avoid page flashing
+      requestAnimationFrame(() => {
+        // Do the scrolling in the next tick to avoid page flashing
         if (latestInputRef.current) {
           latestInputRef.current.scrollIntoView({ behavior: 'smooth' });
+          // Since we only scroll once user send message, we can remove the ref directly after scroll
+          latestInputRef.current = null;
         }
-      }, 0);
+      });
     }
-  }, [loading, latestInputRef, window.innerHeight]);
+  }, [loading, window.innerHeight]);
 
   useEffect(() => {
+    // Always clear the height when reopen the chat window or load new chat
+    setMessageSpacerHeight(0);
+
     if (pageEndRef.current) {
-      pageEndRef.current?.scrollIntoView();
+      pageEndRef.current.scrollIntoView();
     }
-  }, [pageEndRef.current]);
+  }, [pageEndRef.current, setMessageSpacerHeight]);
 
   if (props.conversationsError) {
     return (
@@ -129,6 +145,9 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const firstInputIndex = chatState.messages.findIndex((msg) => msg.type === 'input');
   const lastInputIndex = findLastIndex(chatState.messages, (msg) => msg.type === 'input');
 
+  // The state after user sent a message and waiting for server's message (loading)
+  const isWaitingForRepsonse = loading && chatState.llmResponseType !== LLMResponseType.STREAMING;
+
   return (
     <>
       <MessageBubble
@@ -180,11 +199,8 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
           (chatState.llmResponseType === LLMResponseType.TEXT ||
             (chatState.llmResponseType === LLMResponseType.STREAMING && !chatState.llmResponding));
 
-        // The latest llm output, after user sent a message and waiting for server's message (loading)
-        const isWaitingForRepsonse =
-          isLatestInput && loading && chatState.llmResponseType !== LLMResponseType.STREAMING;
         // The latest llm output, after the llm has responded at least a message
-        const isStreaming =
+        const isStreamingMessage =
           isLatestOutput &&
           chatState.llmResponseType === LLMResponseType.STREAMING &&
           chatState.llmResponding;
@@ -210,19 +226,14 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
               onRegenerate={chatActions.regenerate}
               interaction={interaction}
             >
-              <MessageContent message={message} loading={isStreaming} />
+              <MessageContent message={message} loading={isStreamingMessage} />
             </MessageBubble>
             <EuiSpacer />
-            {showSuggestions && !isStreaming && (
-              <Suggestions message={message} inputDisabled={loading} />
-            )}
+            {showSuggestions && <Suggestions message={message} inputDisabled={loading} />}
           </div>
         );
       })}
-      <LoadingPlaceholder
-        loading={loading && chatState.llmResponseType !== LLMResponseType.STREAMING}
-        height={messageSpacerHeight}
-      >
+      <LoadingPlaceholder loading={isWaitingForRepsonse} height={messageSpacerHeight}>
         {configSchema.chat.regenerateMessage &&
           chatState.llmResponding &&
           chatContext.conversationId && (
@@ -330,40 +341,4 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
       </EuiFlexGroup>
     </div>
   );
-};
-
-interface LoadingPlaceholderProps {
-  loading: boolean;
-  height: number;
-  children?: ReactNode;
-}
-
-const LoadingPlaceholder: React.FC<LoadingPlaceholderProps> = ({
-  loading,
-  height,
-  children,
-}: LoadingPlaceholderProps) => {
-  const [showLoadingPlaceholder, setShowLoadingPlaceholder] = useState(false);
-
-  useEffect(() => {
-    if (loading) {
-      setShowLoadingPlaceholder(true);
-    } else {
-      setShowLoadingPlaceholder(false);
-    }
-  }, [loading]);
-
-  if (showLoadingPlaceholder) {
-    return (
-      <div
-        style={{
-          minHeight: height,
-        }}
-      >
-        <MessageBubble loading showActionBar={false} />
-        {children}
-      </div>
-    );
-  }
-  return null;
 };
