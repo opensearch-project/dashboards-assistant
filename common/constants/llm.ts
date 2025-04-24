@@ -34,10 +34,10 @@ export const SUMMARY_ASSISTANT_API = {
   INSIGHT: `${API_BASE}/insight`,
   DATA2SUMMARY: `${API_BASE}/data2summary`,
 };
-
 export const NOTEBOOK_API = {
-  CREATE_NOTEBOOK: `${NOTEBOOK_PREFIX}/note`,
-  SET_PARAGRAPH: `${NOTEBOOK_PREFIX}/set_paragraphs/`,
+  CREATE_NOTEBOOK: `${NOTEBOOK_PREFIX}/note/savedNotebook`,
+  SET_PARAGRAPH: `${NOTEBOOK_PREFIX}/savedNotebook/set_paragraphs`,
+  ADD_PARAGRAPH: `${NOTEBOOK_PREFIX}/savedNotebook/paragraph`,
 };
 
 export const DEFAULT_USER_NAME = 'User';
