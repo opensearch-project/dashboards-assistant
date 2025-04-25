@@ -197,19 +197,6 @@ describe('<ChatWindowHeaderTitle />', () => {
     });
   });
 
-  it('should hide save to notebook button when MDS enabled', async () => {
-    const { renderResult } = setup({
-      messages: [{ type: 'input', contentType: 'text', content: 'foo' }],
-      dataSource: new DataSourceServiceMock(true),
-    });
-
-    fireEvent.click(renderResult.getByLabelText('toggle chat context menu'));
-
-    expect(
-      renderResult.queryByRole('button', { name: 'Save to notebook' })
-    ).not.toBeInTheDocument();
-  });
-
   it('should disable "Save to notebook" button when message does not include input', async () => {
     const { renderResult } = setup({
       messages: [{ type: 'output', content: 'bar', contentType: 'markdown' }],
