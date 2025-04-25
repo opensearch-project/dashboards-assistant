@@ -41,8 +41,10 @@ export const ActionContextMenu = (props: Props) => {
   const [open, setOpen] = useState(false);
   const { search } = props.data;
   const [actionContext, setActionContext] = useState({
-    disabled: false,
-    tooltip: '',
+    searchState: {
+      hasError: search.df.df$.hasError,
+      results: search.df.df$.value?.size,
+    },
     datasetId: props.data.query.queryString.getQuery().dataset?.id ?? '',
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
     dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
@@ -103,21 +105,17 @@ export const ActionContextMenu = (props: Props) => {
       actionContext.datasetId,
       actionContext.datasetType,
       actionContext.dataSourceId,
-      actionContext.disabled,
+      actionContext.searchState,
     ]
   );
 
   useEffect(() => {
-    const buttonDisabled = search.df.df$.hasError || search.df.df$.value?.size === 0;
     setActionContext({
       ...actionContext,
-      disabled: buttonDisabled,
-      tooltip: buttonDisabled
-        ? i18n.translate('dashboardAssistant.queryAssist.generate.visualization.error.message', {
-            defaultMessage:
-              'Generate visualization button was disabled because of No Results/Error.',
-          })
-        : '',
+      searchState: {
+        hasError: search.df.df$.hasError,
+        results: search.df.df$.value?.size,
+      },
     });
   }, [search.df.df$.hasError, search.df.df$.value?.size]);
 

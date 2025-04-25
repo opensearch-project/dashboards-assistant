@@ -388,16 +388,22 @@ export class AssistantPlugin
         order: 1,
         getDisplayName: () => 'Generate visualization',
         getTooltip: (context) => {
-          if (context?.tooltip) {
-            return context.tooltip;
-          }
+          const { searchState } = context;
+          const { hasError, results } = searchState || {};
+          if (hasError || results === 0)
+            return i18n.translate(
+              'dashboardAssistant.queryAssist.generate.visualization.error.message',
+              {
+                defaultMessage:
+                  'Generate visualization button was disabled because of No Results/Error.',
+              }
+            );
           return '';
         },
         isDisabled: (context) => {
-          if (context?.disabled) {
-            return context.disabled;
-          }
-          return false;
+          const { searchState } = context;
+          const { hasError, results } = searchState || {};
+          return hasError || results === 0;
         },
         getIconType: () => 'visLine' as const,
         // T2Viz is only compatible with data sources that have certain agents configured
