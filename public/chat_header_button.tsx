@@ -113,18 +113,18 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
           setChatbotSidecarConfig(newSidecarConfig);
         }
       });
-    let timeoutId: number;
+    let rafId: number;
     if (flyoutVisible) {
-      // Add setTimeout here to avoid "container was removed without using React." error
-      timeoutId = window.setTimeout(() => {
+      // Add window.requestAnimationFrame here to avoid chatbot flyout not displayed after page switching
+      rafId = window.requestAnimationFrame(() => {
         if (flyoutMountPoint.current) {
           loadLatestConversation();
           openSidecar(flyoutMountPoint.current);
         }
-      }, 0);
+      });
     }
     return () => {
-      window.clearTimeout(timeoutId);
+      window.cancelAnimationFrame(rafId);
       subscription.unsubscribe();
       sidecarConfig$Subscription.unsubscribe();
     };
