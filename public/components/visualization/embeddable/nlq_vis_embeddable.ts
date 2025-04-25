@@ -114,7 +114,7 @@ export class NLQVisualizationEmbeddable extends Embeddable<
       dirty = true;
     }
 
-    if (this.handler && dirty) {
+    if (dirty) {
       this.updateHandler();
     }
   }
