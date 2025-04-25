@@ -4,6 +4,7 @@
  */
 
 import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
 import { Subscription } from 'rxjs';
 
 import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
@@ -66,6 +67,10 @@ export class NLQVisualizationEmbeddable extends Embeddable<
     // In the future, we may need to add something to ui state to trigger visualization to reload
     this.uiState = new PersistedState();
     this.visInput = initialInput.visInput;
+
+    this.getInput$().subscribe(() => {
+      this.handleChange();
+    });
   }
 
   /**
@@ -93,12 +98,27 @@ export class NLQVisualizationEmbeddable extends Embeddable<
     return pipeline;
   };
 
+  private handleChange() {
+    let dirty = false;
+
+    // Check if timerange has changed
+    if (!isEqual(this.input.timeRange, this.timeRange)) {
+      this.timeRange = cloneDeep(this.input.timeRange);
+      dirty = true;
+    }
+
+    if (this.handler && dirty) {
+      this.updateHandler();
+    }
+  }
+
   private updateHandler = async () => {
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
-        query: this.input.query,
-        filters: this.input.filters,
+        // for PPL+vega, we don't read query and fitlers from input, because these are already defined in vega
+        // query: this.input.query,
+        // filters: this.input.filters,
       },
       uiState: this.uiState,
     };

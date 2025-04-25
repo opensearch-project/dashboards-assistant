@@ -85,7 +85,7 @@ describe('PPLAutoSuggestTask', () => {
     const input = {
       ppl: 'source = test',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     // Mock successful search response
@@ -109,7 +109,7 @@ describe('PPLAutoSuggestTask', () => {
     const expected = {
       ppl: 'source = test | stats count() by span(timestamp, 1d)',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     const result = await pplAutoSuggestTask.execute(input);
@@ -131,7 +131,7 @@ describe('PPLAutoSuggestTask', () => {
     const input = {
       ppl: 'source = test | fields field1, field2',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     const mockResponse = {
@@ -154,7 +154,7 @@ describe('PPLAutoSuggestTask', () => {
     const expected = {
       ppl: 'source = test | stats count() by span(timestamp, 1d)',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     const result = await pplAutoSuggestTask.execute(input);
@@ -214,7 +214,7 @@ describe('PPLAutoSuggestTask', () => {
     const input = {
       ppl: 'source = test',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     // Mock empty search response
@@ -232,7 +232,7 @@ describe('PPLAutoSuggestTask', () => {
     const expected = {
       ppl: 'source = test | stats count()',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     const result = await pplAutoSuggestTask.execute(input);
@@ -243,7 +243,7 @@ describe('PPLAutoSuggestTask', () => {
     const input = {
       ppl: 'source = test',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     // Mock null search response
@@ -256,7 +256,7 @@ describe('PPLAutoSuggestTask', () => {
     const expected = {
       ppl: 'source = test | stats count()',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     const result = await pplAutoSuggestTask.execute(input);
@@ -267,7 +267,7 @@ describe('PPLAutoSuggestTask', () => {
     const input = {
       ppl: 'source = test',
       dataSourceId: 'test-source',
-      timeFiledName: 'timestamp',
+      timeFieldName: 'timestamp',
     };
 
     mockSearchClient.search.mockReturnValue({

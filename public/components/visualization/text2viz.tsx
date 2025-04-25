@@ -249,7 +249,7 @@ export const Text2Viz = () => {
         inputQuestion,
         inputInstruction,
         dataSourceId: indexPattern.dataSourceRef?.id,
-        timeFiledName: indexPattern.timeFieldName,
+        timeFieldName: indexPattern.timeFieldName,
       });
 
       if (usageCollection) {
