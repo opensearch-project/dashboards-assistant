@@ -20,6 +20,7 @@ import {
   toMountPoint,
 } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
+import { Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
 import {
@@ -44,6 +45,7 @@ import {
   setExpressions,
   setHttp,
   setAssistantService,
+  setLocalStorage,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
@@ -70,7 +72,7 @@ import {
   ASSISTANT_INPUT_URL_SEARCH_KEY,
   INDEX_PATTERN_URL_SEARCH_KEY,
 } from './components/visualization/text2viz';
-import { DEFAULT_DATA } from '../../../src/plugins/data/common';
+import { DEFAULT_DATA, createStorage } from '../../../src/plugins/data/common';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -381,6 +383,7 @@ export class AssistantPlugin
     setConfigSchema(this.config);
     setUiActions(uiActions);
     setAssistantService(assistantServiceStart);
+    setLocalStorage(createStorage({ engine: window.localStorage, prefix: 'dashboardsAssistant.' }));
 
     if (this.config.text2viz.enabled) {
       uiActions.addTriggerAction(AI_ASSISTANT_QUERY_EDITOR_TRIGGER, {
