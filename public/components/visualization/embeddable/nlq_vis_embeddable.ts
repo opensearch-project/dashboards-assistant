@@ -116,7 +116,7 @@ export class NLQVisualizationEmbeddable extends Embeddable<
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
-        // for PPL+vega, we don't read query and fitlers from input, because these are already defined in vega
+        // for PPL+vega, we don't read query and fitlers from input, because these are already defined by ppl
         // query: this.input.query,
         // filters: this.input.filters,
       },
