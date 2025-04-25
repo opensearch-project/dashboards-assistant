@@ -387,6 +387,18 @@ export class AssistantPlugin
         id: 'assistant_generate_visualization_action',
         order: 1,
         getDisplayName: () => 'Generate visualization',
+        getTooltip: (context) => {
+          if (context?.tooltip) {
+            return context.tooltip;
+          }
+          return '';
+        },
+        isDisabled: (context) => {
+          if (context?.disabled) {
+            return context.disabled;
+          }
+          return false;
+        },
         getIconType: () => 'visLine' as const,
         // T2Viz is only compatible with data sources that have certain agents configured
         isCompatible: async (context) => {

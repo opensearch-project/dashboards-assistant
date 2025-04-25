@@ -124,18 +124,6 @@ describe('ActionContextMenu', () => {
 
   it('should disable the button and show tooltip when there is an error or no results in search.df.df$', async () => {
     // mockProps.data.search.df.df$ = { hasError: true, value: { size: 0 } };
-    const initialPanelValue = [
-      {
-        items: [
-          {
-            'data-test-subj': 'embeddablePanelAction-assistant_generate_visualization_action',
-            disabled: false,
-            toolTipContent: '',
-            onClick: () => {},
-          },
-        ],
-      },
-    ];
     const newIsSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
     const newMockAgentConfigExists = jest.fn().mockResolvedValue({ exists: false });
     const newMockProps = {

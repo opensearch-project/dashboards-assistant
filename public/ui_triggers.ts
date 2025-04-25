@@ -13,6 +13,8 @@ declare module '../../../src/plugins/ui_actions/public' {
       datasetId: string;
       datasetType: string;
       dataSourceId?: string;
+      disabled?: boolean;
+      tooltip?: string;
     };
   }
 }
