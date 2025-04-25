@@ -37,7 +37,6 @@ export const SUMMARY_ASSISTANT_API = {
 export const NOTEBOOK_API = {
   CREATE_NOTEBOOK: `${NOTEBOOK_PREFIX}/note/savedNotebook`,
   SET_PARAGRAPH: `${NOTEBOOK_PREFIX}/savedNotebook/set_paragraphs`,
-  ADD_PARAGRAPH: `${NOTEBOOK_PREFIX}/savedNotebook/paragraph`,
 };
 
 export const DEFAULT_USER_NAME = 'User';
