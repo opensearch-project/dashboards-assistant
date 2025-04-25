@@ -9,10 +9,11 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { HeaderChatButton } from './chat_header_button';
 import { applicationServiceMock } from '../../../src/core/public/mocks';
-import { HeaderVariant } from '../../../src/core/public';
+import { HeaderVariant, ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
 import { AssistantActions } from './types';
 import * as coreContextExports from './contexts/core_context';
 import { MountWrapper } from '../../../src/core/public/utils';
+import * as persistedChatbotStateExports from './utils/persisted_chatbot_state';
 
 import { coreMock } from '../../../src/core/public/mocks';
 import { ConversationsService } from './services/conversations_service';
@@ -80,6 +81,10 @@ const dataSourceMock = {
 
 const conversationLoadMock = new ConversationLoadService(coreStartMock.http, dataSourceMock);
 
+const getSidecarConfig$Mock = jest.fn(
+  () => new BehaviorSubject<ISidecarConfig | undefined>(undefined)
+);
+
 // mock sidecar open,hide and show
 jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
   services: {
@@ -108,15 +113,21 @@ jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
             element.style.display = 'block';
           }
         },
-        getSidecarConfig$: () => {
-          return new BehaviorSubject(undefined);
-        },
+        getSidecarConfig$: getSidecarConfig$Mock,
       };
     },
   },
 });
 
 describe('<HeaderChatButton />', () => {
+  beforeAll(() => {
+    jest.spyOn(persistedChatbotStateExports, 'getChatbotOpenStatus').mockReturnValue(false);
+    jest.spyOn(persistedChatbotStateExports, 'setChatbotOpenStatus').mockImplementation();
+    jest.spyOn(persistedChatbotStateExports, 'getChatbotState').mockReturnValue(null);
+    jest.spyOn(persistedChatbotStateExports, 'setChatbotState').mockImplementation();
+    jest.spyOn(persistedChatbotStateExports, 'setChatbotSidecarConfig').mockImplementation();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -198,5 +209,93 @@ describe('<HeaderChatButton />', () => {
       />
     );
     expect(screen.getByLabelText('toggle chat flyout icon')).toBeInTheDocument();
+  });
+
+  it('should load latest conversion and display chat flyout', async () => {
+    jest.spyOn(persistedChatbotStateExports, 'getChatbotOpenStatus').mockReturnValueOnce(true);
+    jest.spyOn(conversationLoadMock, 'load');
+
+    expect(conversationLoadMock.load).not.toHaveBeenCalled();
+    const applicationStart = {
+      ...applicationServiceMock.createStartContract(),
+      currentAppId$: new BehaviorSubject(''),
+    };
+
+    render(
+      <HeaderChatButton
+        application={applicationStart}
+        messageRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={{} as AssistantActions}
+        currentAccount={{ username: 'test_user' }}
+      />
+    );
+
+    act(() => applicationStart.currentAppId$.next('mock_app_id'));
+
+    await waitFor(() => {
+      // chat flyout displayed
+      expect(screen.queryByLabelText('chat flyout mock')).toBeInTheDocument();
+      expect(conversationLoadMock.load).toHaveBeenCalled();
+    });
+  });
+
+  it('should call setChatbotSidecarConfig after sidecar config updated', async () => {
+    const sidecarConfig$ = new BehaviorSubject<ISidecarConfig | undefined>(undefined);
+    getSidecarConfig$Mock.mockReturnValue(sidecarConfig$);
+
+    const applicationStart = {
+      ...applicationServiceMock.createStartContract(),
+      currentAppId$: new BehaviorSubject(''),
+    };
+    render(
+      <HeaderChatButton
+        application={applicationStart}
+        messageRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={{} as AssistantActions}
+        currentAccount={{ username: 'test_user' }}
+      />
+    );
+
+    const newSidecarConfig = { dockedMode: SIDECAR_DOCKED_MODE.LEFT, paddingSize: 300 };
+    sidecarConfig$.next(newSidecarConfig);
+
+    await waitFor(() => {
+      expect(persistedChatbotStateExports.setChatbotSidecarConfig).toHaveBeenCalledWith(
+        newSidecarConfig
+      );
+    });
+  });
+
+  it('should call setChatbotStatus after sidecar config updated', async () => {
+    const sidecarConfig$ = new BehaviorSubject<ISidecarConfig | undefined>(undefined);
+    getSidecarConfig$Mock.mockReturnValue(sidecarConfig$);
+
+    const applicationStart = {
+      ...applicationServiceMock.createStartContract(),
+      currentAppId$: new BehaviorSubject(''),
+    };
+    const { getByLabelText } = render(
+      <HeaderChatButton
+        application={applicationStart}
+        messageRenderers={{}}
+        actionExecutors={{}}
+        assistantActions={{} as AssistantActions}
+        currentAccount={{ username: 'test_user' }}
+      />
+    );
+
+    fireEvent.click(getByLabelText('toggle chat flyout icon'));
+
+    await waitFor(() => {
+      expect(persistedChatbotStateExports.setChatbotOpenStatus).toHaveBeenCalledWith(true);
+    });
+
+    fireEvent.click(getByLabelText('toggle chat flyout icon'));
+
+    await waitFor(() => {
+      expect(persistedChatbotStateExports.setChatbotOpenStatus).toHaveBeenCalledWith(false);
+    });
   });
 });

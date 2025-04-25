@@ -5,9 +5,15 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useEffectOnce, useObservable } from 'react-use';
+import { useEffectOnce, useObservable, useUpdateEffect } from 'react-use';
+import { debounceTime } from 'rxjs/operators';
 
-import { ApplicationStart, HeaderVariant, SIDECAR_DOCKED_MODE } from '../../../src/core/public';
+import {
+  ApplicationStart,
+  HeaderVariant,
+  MountPoint,
+  SIDECAR_DOCKED_MODE,
+} from '../../../src/core/public';
 import { getIncontextInsightRegistry } from './services';
 import { ChatFlyout } from './chat_flyout';
 import { ChatContext, IChatContext } from './contexts/chat_context';
@@ -24,6 +30,12 @@ import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
 import { getLogoIcon } from './services';
+import {
+  getChatbotOpenStatus,
+  getChatbotState,
+  setChatbotOpenStatus,
+  setChatbotSidecarConfig,
+} from './utils/persisted_chatbot_state';
 
 interface HeaderChatButtonProps {
   application: ApplicationStart;
@@ -36,33 +48,86 @@ interface HeaderChatButtonProps {
 
 export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const core = useCore();
-  const { inLegacyHeader } = props;
   const sideCarRef = useRef<{ close: Function }>();
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
-  const [flyoutVisible, setFlyoutVisible] = useState(false);
+  const [flyoutVisible, setFlyoutVisible] = useState(() => getChatbotOpenStatus());
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
   const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
-  const [inputFocus, setInputFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const flyoutLoadedRef = useRef(false);
   const flyoutVisibleRef = useRef(flyoutVisible);
   flyoutVisibleRef.current = flyoutVisible;
   const registry = getIncontextInsightRegistry();
   const headerVariant = useObservable(core.services.chrome.getHeaderVariant$());
   const isSingleLineHeader = headerVariant === HeaderVariant.APPLICATION;
 
-  const [sidecarDockedMode, setSidecarDockedMode] = useState(DEFAULT_SIDECAR_DOCKED_MODE);
+  const [sidecarDockedMode, setSidecarDockedMode] = useState(
+    () => getChatbotState()?.sidecarConfig?.dockedMode || DEFAULT_SIDECAR_DOCKED_MODE
+  );
   const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
   const flyoutMountPoint = useRef(null);
   usePatchFixedStyle();
 
+  const loadLatestConversation = () => {
+    core.services.conversations
+      .load({
+        page: 1,
+        perPage: 1,
+        fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
+        sortField: 'updatedTimeMs',
+        sortOrder: 'DESC',
+        searchFields: ['title'],
+      })
+      .then(() => {
+        const data = core.services.conversations.conversations$.getValue();
+        if (data?.objects?.length) {
+          const { id } = data.objects[0];
+          props.assistantActions.loadChat(id);
+        }
+      });
+  };
+
+  const openSidecar = useCallback((mountPoint: MountPoint) => {
+    sideCarRef.current = core.overlays.sidecar().open(mountPoint, {
+      className: 'chatbot-sidecar',
+      config: {
+        dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+        paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+        ...getChatbotState()?.sidecarConfig,
+        isHidden: false,
+      },
+    });
+  }, []);
+
   useEffectOnce(() => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
-    return () => subscription.unsubscribe();
+    const sidecarConfig$Subscription = core.overlays
+      .sidecar()
+      .getSidecarConfig$()
+      .pipe(debounceTime(30))
+      .subscribe((newSidecarConfig) => {
+        if (newSidecarConfig) {
+          setChatbotSidecarConfig(newSidecarConfig);
+        }
+      });
+    let rafId: number;
+    if (flyoutVisible) {
+      // Add window.requestAnimationFrame here to avoid chatbot flyout not displayed after page switching
+      rafId = window.requestAnimationFrame(() => {
+        if (flyoutMountPoint.current) {
+          loadLatestConversation();
+          openSidecar(flyoutMountPoint.current);
+        }
+      });
+    }
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      subscription.unsubscribe();
+      sidecarConfig$Subscription.unsubscribe();
+    };
   });
 
   const chatContextValue: IChatContext = useMemo(
@@ -109,26 +174,19 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     ]
   );
 
-  useEffect(() => {
-    if (!flyoutLoadedRef.current && flyoutVisible) {
+  useUpdateEffect(() => {
+    if (flyoutVisible) {
       const mountPoint = flyoutMountPoint.current;
-      if (mountPoint) {
-        sideCarRef.current = core.overlays.sidecar().open(mountPoint, {
-          className: 'chatbot-sidecar',
-          config: {
-            dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
-            paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
-            isHidden: false,
-          },
-        });
-        flyoutLoadedRef.current = true;
+      if (sideCarRef.current) {
+        core.overlays.sidecar().show();
+      } else if (mountPoint) {
+        openSidecar(mountPoint);
       }
-    } else if (flyoutLoadedRef.current && flyoutVisible) {
-      core.overlays.sidecar().show();
-    } else if (flyoutLoadedRef.current && !flyoutVisible) {
+    } else if (sideCarRef.current) {
       core.overlays.sidecar().hide();
     }
-  }, [flyoutVisible]);
+    setChatbotOpenStatus(flyoutVisible);
+  }, [flyoutVisible, openSidecar]);
 
   const setMountPoint = useCallback((mountPoint) => {
     flyoutMountPoint.current = mountPoint;
@@ -201,27 +259,12 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     };
   }, [appId, flyoutVisible, props.assistantActions, registry]);
 
-  const toggleFlyoutAndloadLatestConversation = () => {
+  const toggleFlyoutAndLoadLatestConversation = () => {
     setFlyoutVisible(!flyoutVisible);
     if (flyoutVisible) {
       return;
     }
-    core.services.conversations
-      .load({
-        page: 1,
-        perPage: 1,
-        fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
-        sortField: 'updatedTimeMs',
-        sortOrder: 'DESC',
-        searchFields: ['title'],
-      })
-      .then(() => {
-        const data = core.services.conversations.conversations$.getValue();
-        if (data?.objects?.length) {
-          const { id } = data.objects[0];
-          props.assistantActions.loadChat(id);
-        }
-      });
+    loadLatestConversation();
   };
 
   return (
@@ -230,7 +273,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
         <EuiButtonIcon
           className={'llm-chat-header-text-input'}
           iconType={getLogoIcon('gradient')}
-          onClick={toggleFlyoutAndloadLatestConversation}
+          onClick={toggleFlyoutAndLoadLatestConversation}
           display={isSingleLineHeader ? 'base' : 'empty'}
           size="s"
           aria-label="toggle chat flyout icon"

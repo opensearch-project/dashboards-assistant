@@ -9,6 +9,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Enhancements
 
 - Buffer for special characters ([#549](https://github.com/opensearch-project/dashboards-assistant/pull/549))
+- Save chatbot flyout visualize state to local storage ([#553](https://github.com/opensearch-project/dashboards-assistant/pull/553))
 
 ### Bug Fixes
 
