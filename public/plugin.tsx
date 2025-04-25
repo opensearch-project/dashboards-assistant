@@ -44,6 +44,7 @@ import {
   setExpressions,
   setHttp,
   setAssistantService,
+  setTimeFilter,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
@@ -437,6 +438,7 @@ export class AssistantPlugin
     }
 
     setIndexPatterns(data.indexPatterns);
+    setTimeFilter(data.query.timefilter.timefilter);
     setExpressions(expressions);
     setHttp(core.http);
 

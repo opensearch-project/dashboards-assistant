@@ -8,7 +8,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { ChromeStart, HttpStart, NotificationsStart } from '../../../../src/core/public';
 import { IncontextInsightRegistry } from './incontext_insight';
 import { ConfigSchema } from '../../common/types/config';
-import { IndexPatternsContract } from '../../../../src/plugins/data/public';
+import { IndexPatternsContract, TimefilterContract } from '../../../../src/plugins/data/public';
 import { ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import { AssistantServiceStart } from './assistant_service';
 import chatIcon from '../assets/chat.svg';
@@ -38,6 +38,8 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
+
+export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContract>('TimeFilter');
 
 export const [getAssistantService, setAssistantService] = createGetterSetter<AssistantServiceStart>(
   'AssistantServiceStart'

@@ -13,7 +13,7 @@ import {
   ExpressionsStart,
   IExpressionLoaderParams,
 } from '../../../../../../src/plugins/expressions/public';
-import { TimeRange } from '../../../../../../src/plugins/data/public';
+import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
 import { NLQVisualizationInput, NLQVisualizationOutput } from './types';
 import { getExpressions } from '../../../services';
 import { VIS_NLQ_APP_ID, VIS_NLQ_SAVED_OBJECT } from '../../../../common/constants/vis_type_nlq';
@@ -47,6 +47,7 @@ export class NLQVisualizationEmbeddable extends Embeddable<
   private visInput?: NLQVisualizationInput['visInput'];
 
   constructor(
+    timeFilter: TimefilterContract,
     initialInput: NLQVisualizationInput,
     config?: NLQVisualizationEmbeddableConfig,
     parent?: IContainer
@@ -68,9 +69,15 @@ export class NLQVisualizationEmbeddable extends Embeddable<
     this.uiState = new PersistedState();
     this.visInput = initialInput.visInput;
 
-    this.getInput$().subscribe(() => {
-      this.handleChange();
-    });
+    this.subscriptions.push(
+      this.getInput$().subscribe(() => {
+        this.handleChange();
+      })
+    );
+
+    this.subscriptions.push(
+      timeFilter.getAutoRefreshFetch$().subscribe(() => this.updateHandler())
+    );
   }
 
   /**
