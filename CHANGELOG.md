@@ -6,6 +6,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Features
 
+- Integrate save to notebook with MDS ([#554](https://github.com/opensearch-project/dashboards-assistant/pull/554))
+
 ### Enhancements
 
 - Buffer for special characters ([#549](https://github.com/opensearch-project/dashboards-assistant/pull/549))
@@ -22,5 +24,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Documentation
 
 ### Maintenance
+
+- Upgrade derek-ho/start-opensearch to v6 and set java version to 21 for OS 3.0([#563](https://github.com/opensearch-project/dashboards-assistant/pull/563))
 
 ### Refactoring
