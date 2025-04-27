@@ -71,7 +71,10 @@ export class NLQVisualizationEmbeddable extends Embeddable<
 
     this.subscriptions.push(
       this.getInput$().subscribe(() => {
-        this.handleChange();
+        const dirty = this.dirtyCheck();
+        if (dirty) {
+          this.updateHandler();
+        }
       })
     );
 
@@ -105,7 +108,7 @@ export class NLQVisualizationEmbeddable extends Embeddable<
     return pipeline;
   };
 
-  private handleChange() {
+  private dirtyCheck() {
     let dirty = false;
 
     // Check if timerange has changed
@@ -113,10 +116,7 @@ export class NLQVisualizationEmbeddable extends Embeddable<
       this.timeRange = cloneDeep(this.input.timeRange);
       dirty = true;
     }
-
-    if (dirty) {
-      this.updateHandler();
-    }
+    return dirty;
   }
 
   private updateHandler = async () => {
