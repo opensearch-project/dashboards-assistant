@@ -6,6 +6,7 @@
 import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { ChromeStart, HttpStart, NotificationsStart } from '../../../../src/core/public';
+import { DataStorage } from '../../../../src/plugins/data/common';
 import { IncontextInsightRegistry } from './incontext_insight';
 import { ConfigSchema } from '../../common/types/config';
 import { IndexPatternsContract, TimefilterContract } from '../../../../src/plugins/data/public';
@@ -44,6 +45,8 @@ export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContr
 export const [getAssistantService, setAssistantService] = createGetterSetter<AssistantServiceStart>(
   'AssistantServiceStart'
 );
+
+export const [getLocalStorage, setLocalStorage] = createGetterSetter<DataStorage>('LocalStorage');
 
 export { DataSourceService, DataSourceServiceContract } from './data_source_service';
 
