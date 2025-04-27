@@ -43,7 +43,7 @@ export const ActionContextMenu = (props: Props) => {
   const [actionContext, setActionContext] = useState({
     searchState: {
       hasError: search.df.df$.hasError,
-      results: search.df.df$.value?.size,
+      results: search.df.df$.value,
     },
     datasetId: props.data.query.queryString.getQuery().dataset?.id ?? '',
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
@@ -114,10 +114,10 @@ export const ActionContextMenu = (props: Props) => {
       ...actionContext,
       searchState: {
         hasError: search.df.df$.hasError,
-        results: search.df.df$.value?.size,
+        results: search.df.df$.value,
       },
     });
-  }, [search.df.df$.hasError, search.df.df$.value?.size]);
+  }, [search.df.df$.hasError, search.df.df$.value]);
 
   // The action button should be not displayed when there is no action and result summary disabled or there is no data2Summary agent
   if (!shouldShowSummarizationAction && actionsRef.current.length === 0) {

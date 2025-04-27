@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IDataFrame } from '../../../src/plugins/data/common';
 import { Trigger, UiActionsSetup } from '../../../src/plugins/ui_actions/public';
 
 export const AI_ASSISTANT_QUERY_EDITOR_TRIGGER = 'AI_ASSISTANT_QUERY_EDITOR_TRIGGER';
@@ -15,7 +16,7 @@ declare module '../../../src/plugins/ui_actions/public' {
       dataSourceId?: string;
       searchState?: {
         hasError: boolean;
-        results: number | undefined;
+        results: IDataFrame | undefined;
       };
     };
   }

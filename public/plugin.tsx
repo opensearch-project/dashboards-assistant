@@ -393,7 +393,7 @@ export class AssistantPlugin
         getTooltip: (context) => {
           const { searchState } = context;
           const { hasError, results } = searchState || {};
-          if (hasError || results === 0)
+          if (hasError || results?.size === 0)
             return i18n.translate(
               'dashboardAssistant.queryAssist.generate.visualization.error.message',
               {
@@ -406,7 +406,7 @@ export class AssistantPlugin
         isDisabled: (context) => {
           const { searchState } = context;
           const { hasError, results } = searchState || {};
-          return hasError || results === 0;
+          return hasError || results?.size === 0;
         },
         getIconType: () => 'visLine' as const,
         // T2Viz is only compatible with data sources that have certain agents configured
