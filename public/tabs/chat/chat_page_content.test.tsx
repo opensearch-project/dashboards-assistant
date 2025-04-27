@@ -361,4 +361,36 @@ describe('<ChatPageContent />', () => {
     );
     expect(queryAllByTestId(`showRegenerate-false`).length).toEqual(2);
   });
+
+  it('should render error message when llmError exists', () => {
+    jest.spyOn(chatStateHookExports, 'useChatState').mockReturnValue({
+      chatState: {
+        messages: [],
+        llmResponding: false,
+        llmError: {
+          name: 'Test error',
+          message: 'Test error message',
+        },
+        interactions: [],
+      },
+      chatStateDispatch: jest.fn(),
+    });
+
+    render(
+      <ChatPageContent
+        messagesLoading={false}
+        conversationsLoading={false}
+        chatScrollTopRef={mockChatScrollTopRef}
+        onRefreshConversation={jest.fn()}
+        onRefreshConversationsList={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('Error from response')).toBeInTheDocument();
+    expect(screen.getByText('Test error message')).toBeInTheDocument();
+
+    // Verify the error message also contains minHeight (i.e. occupy the chat window)
+    const errorContainer = screen.getByText('Error from response').closest('div')?.parentElement;
+    expect(errorContainer).toHaveStyle({ minHeight: 0 });
+  });
 });
