@@ -12,17 +12,9 @@ import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 const DEFAULT_JOB_INTERVAL = 50;
 const DEFAULT_CONTENT_SLICE_LENGTH = 10;
 
-/**
- * use 150 as default
- * since hyperlink usually occupy 80+ length.
- */
-const DEFAULT_MAX_BUFFER_LENGTH = 150;
-
 interface IMessageContentPullerOptions {
   jobInterval: number;
   contentSliceLength: number;
-  maxBufferLength: number;
-  isContentReadyToUse: (messageContent: string) => boolean;
 }
 
 export class MessageContentPuller {
@@ -33,79 +25,51 @@ export class MessageContentPuller {
   private outputSubscriber: Subscriber<{ messageId: string; messageContent: string }> | null = null;
   private output$: Observable<{ messageId: string; messageContent: string }>;
   private inputCompleted: boolean = false;
-  /**
-   * This map is used to cache last slice length in case sliced content can not be flushed.
-   */
-  private lastContentSliceLengthMap: Record<string, number> = {};
   private options: IMessageContentPullerOptions;
-  constructor(options?: Partial<IMessageContentPullerOptions>) {
+  constructor(options?: IMessageContentPullerOptions) {
     const {
       jobInterval = DEFAULT_JOB_INTERVAL,
       contentSliceLength = DEFAULT_CONTENT_SLICE_LENGTH,
-      maxBufferLength = DEFAULT_MAX_BUFFER_LENGTH,
-      isContentReadyToUse = () => true,
     } = options || {};
     this.messageContentChunk$ = new BehaviorSubject<Record<string, string>>({});
     this.options = {
       jobInterval,
       contentSliceLength,
-      maxBufferLength,
-      isContentReadyToUse,
     };
     this.output$ = new Observable((subscriber) => {
       this.outputSubscriber = subscriber;
     });
   }
 
-  private handleSingleMessage(messageId: string) {
-    const messageContent = this.messageContentChunk$.getValue()[messageId];
-    const contentSliceLength =
-      (this.lastContentSliceLengthMap[messageId] || 0) + this.options.contentSliceLength;
-    const messageContentCandidate = messageContent.slice(0, contentSliceLength);
-    const restContent = messageContent.slice(contentSliceLength);
-
-    /**
-     * We will emit the content when:
-     *
-     * 1. Input stream is closed and all the content has been pulled.
-     * 2. The slice length exceeds the max buffer length client defined.
-     * 3. The content is good to emit without special characters like hyperlink.
-     */
-    if (
-      (this.inputCompleted && !restContent.length) ||
-      messageContentCandidate.length >= this.options.maxBufferLength ||
-      this.options.isContentReadyToUse(messageContentCandidate)
-    ) {
-      this.outputSubscriber?.next({
-        messageId,
-        messageContent: messageContentCandidate,
-      });
-
-      const currentChunkMap = { ...this.messageContentChunk$.getValue() };
-      if (restContent.length > 0) {
-        currentChunkMap[messageId] = restContent;
-      } else {
-        delete currentChunkMap[messageId];
-      }
-
-      this.messageContentChunk$.next(currentChunkMap);
-      this.lastContentSliceLengthMap[messageId] = 0;
-    } else {
-      this.lastContentSliceLengthMap[messageId] = messageContentCandidate.length;
-    }
-  }
-
   private startMessageContentJob() {
     this.messageContentTimer = setTimeout(() => {
       try {
-        Object.keys(this.messageContentChunk$.getValue()).forEach((messageId) => {
-          this.handleSingleMessage(messageId);
-        });
+        const restContents = Object.entries(this.messageContentChunk$.getValue()).reduce(
+          (acc, cur) => {
+            const [messageId, messageContent] = cur;
+            this.outputSubscriber?.next({
+              messageId,
+              messageContent: messageContent.slice(0, this.options.contentSliceLength),
+            });
+            const restContent = messageContent.slice(this.options.contentSliceLength);
+            if (restContent.length > 0) {
+              return {
+                ...acc,
+                [messageId]: restContent,
+              };
+            }
+            return acc;
+          },
+          {}
+        );
 
-        if (this.inputCompleted && !Object.keys(this.messageContentChunk$.getValue()).length) {
+        // Update the content pool with remaining content
+        this.messageContentChunk$.next(restContents);
+
+        if (this.inputCompleted && !Object.keys(restContents).length) {
           this.stop();
         } else {
-          // Schedule next processing cycle
+          // Schedule the next processing cycle
           this.startMessageContentJob();
         }
       } catch (e) {
@@ -147,8 +111,6 @@ export class MessageContentPuller {
       this.messageContentChunk$.complete();
       this.messageContentChunk$.unsubscribe();
     }
-
-    this.lastContentSliceLengthMap = {};
   }
 
   /**
