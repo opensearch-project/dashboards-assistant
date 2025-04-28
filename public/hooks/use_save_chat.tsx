@@ -11,7 +11,7 @@ import { convertMessagesToParagraphs, Paragraphs } from '../utils';
 import { useChatContext } from '../contexts/chat_context';
 
 interface SetParagraphResponse {
-  objectId: string;
+  id: string;
 }
 
 export const useSaveChat = () => {
@@ -47,7 +47,7 @@ export const useSaveChat = () => {
           }),
         }
       );
-      const { objectId } = response;
+      const { id: objectId } = response;
       if (!objectId) {
         throw new Error('set paragraphs error');
       }
