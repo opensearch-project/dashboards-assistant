@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, cleanup, fireEvent, waitFor, screen } from '@testing-library/react';
+import { render, cleanup, fireEvent, waitFor, screen, act } from '@testing-library/react';
 import { getConfigSchema, getNotifications } from '../../services';
 import { GeneratePopoverBody } from './generate_popover_body';
 import { HttpSetup } from '../../../../../src/core/public';
@@ -143,16 +143,21 @@ describe('GeneratePopoverBody', () => {
       'count',
       expect.stringMatching(/^generated/)
     );
+    // insight API should not be called yet
+    expect(mockPost).not.toHaveBeenCalledWith(SUMMARY_ASSISTANT_API.INSIGHT, expect.any(Object));
 
     // insight button is visible
     const insightButton = screen.getAllByText('View insights')[0];
     expect(insightButton).toBeInTheDocument();
-
     // 2. Click insight button to view insights
     fireEvent.click(insightButton);
     // title is back button + 'Insight With RAG'
-    let backButton = getByLabelText('back-to-summary');
-    expect(backButton).toBeInTheDocument();
+    let backButton;
+    await waitFor(() => {
+      backButton = getByLabelText('back-to-summary');
+      expect(backButton).toBeInTheDocument();
+    });
+
     expect(getByText('Insight With RAG')).toBeInTheDocument();
 
     // Wait for loading to complete and insight to render
@@ -271,22 +276,28 @@ describe('GeneratePopoverBody', () => {
       return Promise.resolve(value);
     });
 
-    const { getByText, queryByLabelText } = render(
-      <GeneratePopoverBody
-        aria-label="test-generated-popover"
-        incontextInsight={incontextInsightMock}
-        httpSetup={mockHttpSetup}
-        closePopover={closePopoverMock}
-      />
-    );
+    await act(async () => {
+      render(
+        <GeneratePopoverBody
+          aria-label="test-generated-popover"
+          incontextInsight={incontextInsightMock}
+          httpSetup={mockHttpSetup}
+          closePopover={closePopoverMock}
+        />
+      );
+    });
 
-    expect(getByText('Summary')).toBeInTheDocument();
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+
+    // Insight button to view insights
+    fireEvent.click(screen.getAllByText('View insights')[0]);
+
     // Wait for loading to complete and summary to render
     await waitFor(() => {
       expect(mockToasts.addDanger).toHaveBeenCalledWith('Generate insight error');
     });
     // Show summary content although insight generation failed
-    expect(getByText('Generated summary content')).toBeInTheDocument();
+    expect(screen.getByText('Generated summary content')).toBeInTheDocument();
     // insight button is not visible for this alert
     expect(screen.queryAllByLabelText('View insights')).toHaveLength(0);
   });
