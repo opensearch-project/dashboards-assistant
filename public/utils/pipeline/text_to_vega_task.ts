@@ -7,7 +7,6 @@ import { Task } from './task';
 import { HttpSetup, SavedObjectsStart } from '../../../../../src/core/public';
 import { TEXT2VIZ_API } from '../../../common/constants/llm';
 import { DataSourceAttributes } from '../../../../../src/plugins/data_source/common/data_sources';
-import { TimeField } from '../../../../../src/plugins/index_pattern_management/public/components/create_index_pattern_wizard/components/step_time_field/components/time_field';
 
 interface Input {
   inputQuestion: string;
