@@ -22,8 +22,17 @@ jest.mock('./controls/chat_input_controls', () => {
 
 jest.mock('./chat_page_content', () => {
   return {
-    ChatPageContent: ({ onRefreshConversation }: { onRefreshConversation: () => void }) => (
-      <button onClick={onRefreshConversation}>refresh</button>
+    ChatPageContent: ({
+      onRefreshConversation,
+      onRefreshConversationsList,
+    }: {
+      onRefreshConversation: () => void;
+      onRefreshConversationsList: () => void;
+    }) => (
+      <>
+        <button onClick={onRefreshConversation}>refresh</button>
+        <button onClick={onRefreshConversationsList}>Refresh conversations list</button>
+      </>
     ),
   };
 });
@@ -94,5 +103,40 @@ describe('<ChatPage />', () => {
     fireEvent.click(screen.getByText('refresh'));
 
     expect(loadMock).not.toHaveBeenCalled();
+  });
+
+  it('should reload the conversations and get conversation when user click "Refresh conversations list"', async () => {
+    const mockMessages = [
+      { messageId: '1', content: 'test', type: 'output', contentType: 'text' } as const,
+    ];
+    const mockConversationId = 'latest-conversation-id';
+    jest.spyOn(chatContextExports, 'useChatContext').mockReturnValue({
+      conversationId: undefined,
+      chatEnabled: true,
+    });
+    jest
+      .spyOn(conversationLoadService, 'getLatestConversationId')
+      .mockResolvedValueOnce(mockConversationId);
+
+    const loadLatestMock = jest.spyOn(conversationLoadService, 'load').mockResolvedValueOnce({
+      title: 'conversation title',
+      version: 1,
+      createdTimeMs: new Date().getTime(),
+      updatedTimeMs: new Date().getTime(),
+      messages: mockMessages,
+      interactions: [],
+    });
+
+    render(<ChatPage />);
+
+    fireEvent.click(screen.getByText('Refresh conversations list'));
+
+    await waitFor(() => {
+      expect(loadLatestMock).toHaveBeenCalledWith(mockConversationId);
+      expect(dispatchMock).toHaveBeenCalledWith({
+        type: 'receive',
+        payload: { messages: mockMessages, interactions: [] },
+      });
+    });
   });
 });
