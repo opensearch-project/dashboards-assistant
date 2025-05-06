@@ -11,7 +11,7 @@ interface Input {
   inputQuestion: string;
   index: string;
   dataSourceId?: string;
-  timeFiledName?: string;
+  timeFieldName?: string;
 }
 
 export class Text2PPLTask extends Task<Input, Input & { ppl: string }> {

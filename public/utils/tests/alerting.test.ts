@@ -12,7 +12,7 @@ describe('extractTimeRangeDSL', () => {
     );
   });
 
-  it('should return undefined timeFiledName if no time range filter', () => {
+  it('should return undefined timeFieldName if no time range filter', () => {
     expect(
       extractTimeRangeDSL([
         {
@@ -22,7 +22,7 @@ describe('extractTimeRangeDSL', () => {
     ).toBe(undefined);
   });
 
-  it('should extract timeFiledName normally', () => {
+  it('should extract timeFieldName normally', () => {
     expect(
       extractTimeRangeDSL([
         {

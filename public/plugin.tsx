@@ -45,6 +45,7 @@ import {
   setExpressions,
   setHttp,
   setAssistantService,
+  setTimeFilter,
   setLocalStorage,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
@@ -458,6 +459,7 @@ export class AssistantPlugin
     }
 
     setIndexPatterns(data.indexPatterns);
+    setTimeFilter(data.query.timefilter.timefilter);
     setExpressions(expressions);
     setHttp(core.http);
 

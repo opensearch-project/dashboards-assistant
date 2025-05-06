@@ -9,7 +9,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 interface Input {
   ppl: string;
   dataSourceId: string | undefined;
-  timeFiledName?: string;
+  timeFieldName?: string;
 }
 
 export class PPLAggsAutoSuggestTask extends Task<Input, Input> {
@@ -34,8 +34,8 @@ export class PPLAggsAutoSuggestTask extends Task<Input, Input> {
 
       // if no aggregation, will try auto suggest one
       if (!pplHasAgg) {
-        if (v.timeFiledName) {
-          const dateRangePPL = `${ppl} | stats min(${v.timeFiledName}) as min, max(${v.timeFiledName}) as max`;
+        if (v.timeFieldName) {
+          const dateRangePPL = `${ppl} | stats min(${v.timeFieldName}) as min, max(${v.timeFieldName}) as max`;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let res: any;
           try {
@@ -56,7 +56,7 @@ export class PPLAggsAutoSuggestTask extends Task<Input, Input> {
               const interval =
                 this.searchClient.aggs.calculateAutoTimeExpression({ from: min, to: max }) || '1d';
 
-              ppl = `${ppl} | stats count() by span(${v.timeFiledName}, ${interval})`;
+              ppl = `${ppl} | stats count() by span(${v.timeFieldName}, ${interval})`;
             }
           } catch (e) {
             ppl = `${ppl} | stats count()`;
