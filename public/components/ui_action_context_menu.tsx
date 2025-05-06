@@ -8,6 +8,7 @@ import useAsync from 'react-use/lib/useAsync';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
   EuiPopover,
   EuiPopoverFooter,
   EuiSwitch,
@@ -38,7 +39,12 @@ export const ActionContextMenu = (props: Props) => {
   const uiActions = getUiActions();
   const actionsRef = useRef(uiActions.getTriggerActions(AI_ASSISTANT_QUERY_EDITOR_TRIGGER));
   const [open, setOpen] = useState(false);
+  const { search } = props.data;
   const [actionContext, setActionContext] = useState({
+    searchState: {
+      hasError: search.df.df$.hasError,
+      results: search.df.df$.value,
+    },
     datasetId: props.data.query.queryString.getQuery().dataset?.id ?? '',
     datasetType: props.data.query.queryString.getQuery().dataset?.type ?? '',
     dataSourceId: props.data.query.queryString.getQuery().dataset?.dataSource?.id,
@@ -47,7 +53,6 @@ export const ActionContextMenu = (props: Props) => {
   const isQuerySummaryCollapsed = useObservable(props.isQuerySummaryCollapsed$, false);
   const isSummaryAgentAvailable = useObservable(props.isSummaryAgentAvailable$, false);
   const shouldShowSummarizationAction = resultSummaryEnabled && isSummaryAgentAvailable;
-
   useEffect(() => {
     if (!resultSummaryEnabled) return;
     props.isSummaryAgentAvailable$.next(false);
@@ -88,9 +93,7 @@ export const ActionContextMenu = (props: Props) => {
         actions: actionsRef.current.map((action) => ({
           action,
           context: {
-            datasetId: actionContext.datasetId,
-            datasetType: actionContext.datasetType,
-            dataSourceId: actionContext.dataSourceId,
+            ...actionContext,
           },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           trigger: AI_ASSISTANT_QUERY_EDITOR_TRIGGER as any,
@@ -98,8 +101,23 @@ export const ActionContextMenu = (props: Props) => {
         closeMenu: () => setOpen(false),
         title: props.label ? `${props.label.toUpperCase()} FEATURES` : '',
       }),
-    [actionContext.datasetId, actionContext.datasetType, actionContext.dataSourceId]
+    [
+      actionContext.datasetId,
+      actionContext.datasetType,
+      actionContext.dataSourceId,
+      actionContext.searchState,
+    ]
   );
+
+  useEffect(() => {
+    setActionContext({
+      ...actionContext,
+      searchState: {
+        hasError: search.df.df$.hasError,
+        results: search.df.df$.value,
+      },
+    });
+  }, [search.df.df$.hasError, search.df.df$.value]);
 
   // The action button should be not displayed when there is no action and result summary disabled or there is no data2Summary agent
   if (!shouldShowSummarizationAction && actionsRef.current.length === 0) {
@@ -112,6 +130,7 @@ export const ActionContextMenu = (props: Props) => {
 
   return (
     <EuiPopover
+      data-test-subj="popover-test-id"
       button={
         <EuiToolTip
           content={

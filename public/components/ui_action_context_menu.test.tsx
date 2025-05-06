@@ -39,7 +39,14 @@ describe('ActionContextMenu', () => {
     mockProps = {
       label: 'OpenSearch Assistant',
       httpSetup: httpServiceMock.createSetupContract(),
-      data: dataPluginMock.createSetupContract(),
+      data: {
+        ...dataPluginMock.createSetupContract(),
+        search: {
+          df: {
+            df$: { hasError: true, value: { size: 0 } },
+          },
+        },
+      },
       resultSummaryEnabled$,
       isQuerySummaryCollapsed$,
       isSummaryAgentAvailable$,
@@ -113,5 +120,40 @@ describe('ActionContextMenu', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('queryAssist_summary_switch')).not.toBeInTheDocument();
     });
+  });
+
+  it('should disable the button and show tooltip when there is an error or no results in search.df.df$', async () => {
+    // mockProps.data.search.df.df$ = { hasError: true, value: { size: 0 } };
+    const newIsSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
+    const newMockAgentConfigExists = jest.fn().mockResolvedValue({ exists: false });
+    const newMockProps = {
+      ...mockProps,
+      isSummaryAgentAvailable$: newIsSummaryAgentAvailable$,
+      assistantServiceStart: {
+        ...mockProps.assistantServiceStart,
+        client: ({
+          ...mockProps.assistantServiceStart.client,
+          agentConfigExists: newMockAgentConfigExists,
+        } as unknown) as AssistantClient,
+      },
+      data: {
+        aaa: 1111,
+        ...dataPluginMock.createSetupContract(),
+        search: {
+          df: {
+            df$: { hasError: true, value: { size: 0 } },
+          },
+        },
+      },
+    };
+    render(<ActionContextMenu {...newMockProps} />);
+
+    const button1 = screen.getByLabelText('OpenSearch assistant trigger button');
+    fireEvent.click(button1);
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    expect(consoleLogSpy);
+    consoleLogSpy.mockRestore();
+    const popover = await screen.findByTestId('popover-test-id', {}, { timeout: 3000 });
+    expect(popover).toBeInTheDocument();
   });
 });
