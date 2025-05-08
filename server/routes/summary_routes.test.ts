@@ -18,6 +18,8 @@ import { postProcessing } from './summary_routes';
 import * as AgentHelpers from './get_agent';
 const mockedLogger = loggerMock.create();
 
+import * as indexTypeDetectUtils from './index_type_detect';
+
 export const createMockedAssistantClient = (
   request: OpenSearchDashboardsRequest
 ): AssistantClient => {
@@ -327,6 +329,42 @@ describe('test summary route', () => {
         "statusCode": 500,
       }
     `);
+  });
+
+  it('call LOG_PATTERN_DATA2SUMMARY_AGENT_CONFIG_ID agent for data2Summary API', async () => {
+    jest.spyOn(indexTypeDetectUtils, 'detectIndexType').mockResolvedValue(true);
+
+    const result = (await dataToSummaryRequest({
+      sample_data: '223.87.60.27 - - [2018-07-22T00:39:02.912Z',
+      sample_count: 1,
+      total_count: 1,
+      question: 'Are there any errors in my logs?',
+      ppl: 'source=opensearch_dashboards_sample_data_logs| head 1',
+      index: 'opensearch_dashboards_sample_data_logs',
+    })) as Boom;
+
+    expect(mockedAssistantClient.executeAgentByConfigName).toHaveBeenCalledWith(
+      'os_data2summary_with_log_pattern',
+      expect.any(Object)
+    );
+  });
+
+  it('call DATA2SUMMARY_AGENT_CONFIG_ID agent for data2Summary API', async () => {
+    jest.spyOn(indexTypeDetectUtils, 'detectIndexType').mockResolvedValue(false);
+
+    const result = (await dataToSummaryRequest({
+      sample_data: '223.87.60.27 - - [2018-07-22T00:39:02.912Z',
+      sample_count: 1,
+      total_count: 1,
+      question: 'How many unique customers placed orders this day?',
+      ppl: 'source=opensearch_dashboards_sample_data_ecommerce| head 1',
+      index: 'opensearch_dashboards_sample_data_ecommerce',
+    })) as Boom;
+
+    expect(mockedAssistantClient.executeAgentByConfigName).toHaveBeenCalledWith(
+      'os_data2summary',
+      expect.any(Object)
+    );
   });
 
   describe('postprocessing', () => {
