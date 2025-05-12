@@ -15,7 +15,11 @@ export class ConversationLoadService {
     'idle' | 'loading' | { status: 'error'; error: Error }
   > = new BehaviorSubject<'idle' | 'loading' | { status: 'error'; error: Error }>('idle');
   abortController?: AbortController;
-  readonly conversationsService: ConversationsService;
+  private readonly conversationsService: ConversationsService;
+
+  public get latestIdStatus$() {
+    return this.conversationsService.status$;
+  }
 
   constructor(private _http: HttpStart, private _dataSource: DataSourceService) {
     this.conversationsService = new ConversationsService(_http, _dataSource);

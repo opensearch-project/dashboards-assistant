@@ -21,9 +21,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
   const conversationLoadStatus = useObservable(core.services.conversationLoad.status$);
-  const conversationsStatus = useObservable(
-    core.services.conversationLoad.conversationsService.status$
-  );
+  const conversationsStatus = useObservable(core.services.conversationLoad.latestIdStatus$);
   const messagesLoading = conversationLoadStatus === 'loading';
   const conversationsLoading = conversationsStatus === 'loading';
 
