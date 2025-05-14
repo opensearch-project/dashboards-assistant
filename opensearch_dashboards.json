@@ -15,7 +15,14 @@
     "savedObjects",
     "uiActions"
   ],
-  "optionalPlugins": ["dataSource", "dataSourceManagement", "usageCollection", "queryEnhancements"],
+  "optionalPlugins": [
+    "dataSource",
+    "dataSourceManagement",
+    "usageCollection",
+    "queryEnhancements"
+  ],
   "requiredBundles": [],
-  "configPath": ["assistant"]
+  "configPath": [
+    "assistant"
+  ]
 }
