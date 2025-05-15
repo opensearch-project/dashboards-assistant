@@ -111,11 +111,33 @@ export const GeneratePopoverBody: React.FC<{
   }, [contextObject, setDisplayDiscoverButton]);
 
   useEffectOnce(() => {
-    onGenerateSummary(
+    const summaryInstructions =
       incontextInsight.suggestions && incontextInsight.suggestions.length > 0
         ? incontextInsight.suggestions[0]
-        : 'Please summarize the input'
-    );
+        : 'Please summarize the input';
+
+    // append format instructions
+    const finalInstructions = `${summaryInstructions}, And output should follow format instructions defined in \`output_format\` tag
+    <output_format>
+    **Summary**
+    - Provide a concise paragraph that:
+      1. States the core issue/alert
+      2. Describes the impact/severity
+      3. Highlights key metrics or thresholds breached
+    Please don't use bullet points for summary, use paragraph instead.
+
+    **Action Items**
+    - List 3-5 specific, actionable recommendations:
+      1. Mitigation steps
+      2. Investigation points
+
+    Notes:
+    - Include specific numbers/metrics where applicable
+    - Keep technical terms consistent
+    - Link to relevant documentation when available
+    </output_format>`;
+
+    onGenerateSummary(finalInstructions);
   });
 
   const onGenerateSummary = (summarizationQuestion: string) => {
