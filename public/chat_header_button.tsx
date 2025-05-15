@@ -72,35 +72,27 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   usePatchFixedStyle();
 
   const loadLatestConversation = () => {
-    core.services.conversations
-      .load({
-        page: 1,
-        perPage: 1,
-        fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
-        sortField: 'updatedTimeMs',
-        sortOrder: 'DESC',
-        searchFields: ['title'],
-      })
-      .then(() => {
-        const data = core.services.conversations.conversations$.getValue();
-        if (data?.objects?.length) {
-          const { id } = data.objects[0];
-          props.assistantActions.loadChat(id);
-        }
-      });
+    core.services.conversationLoad.getLatestConversationId().then((latestConversationId) => {
+      if (latestConversationId) {
+        props.assistantActions.loadChat(latestConversationId);
+      }
+    });
   };
 
-  const openSidecar = useCallback((mountPoint: MountPoint) => {
-    sideCarRef.current = core.overlays.sidecar().open(mountPoint, {
-      className: 'chatbot-sidecar',
-      config: {
-        dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
-        paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
-        ...getChatbotState()?.sidecarConfig,
-        isHidden: false,
-      },
-    });
-  }, []);
+  const openSidecar = useCallback(
+    (mountPoint: MountPoint) => {
+      sideCarRef.current = core.overlays.sidecar().open(mountPoint, {
+        className: 'chatbot-sidecar',
+        config: {
+          dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+          paddingSize: DEFAULT_SIDECAR_LEFT_OR_RIGHT_SIZE,
+          ...getChatbotState()?.sidecarConfig,
+          isHidden: false,
+        },
+      });
+    },
+    [core.overlays]
+  );
 
   useEffectOnce(() => {
     const subscription = props.application.currentAppId$.subscribe((id) => setAppId(id));
@@ -212,7 +204,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       }
       sideCarRef.current?.close();
     };
-  }, []);
+  }, [core.overlays]);
 
   useEffect(() => {
     const handleSuggestion = async (event: {
