@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { AssistantClient } from 'server/services/assistant_client';
 import { IRouter, OpenSearchClient } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
@@ -208,19 +209,23 @@ export function registerData2SummaryRoutes(
           dataSourceId: req.query.dataSourceId,
         });
 
-        let isLogIndex = false;
+        let agentConfigId = DATA2SUMMARY_AGENT_CONFIG_ID;
         if (req.body.index) {
-          isLogIndex = await detectIndexType(
+          const isLogIndex = await detectIndexType(
             client,
             assistantClient,
             req.body.index,
             req.query.dataSourceId
           );
-        }
 
-        const agentConfigId = isLogIndex
-          ? LOG_PATTERN_DATA2SUMMARY_AGENT_CONFIG_ID
-          : DATA2SUMMARY_AGENT_CONFIG_ID;
+          if (isLogIndex) {
+            const isAgentExist = await detectAgentIdExist(
+              assistantClient,
+              LOG_PATTERN_DATA2SUMMARY_AGENT_CONFIG_ID
+            );
+            agentConfigId = isAgentExist ? LOG_PATTERN_DATA2SUMMARY_AGENT_CONFIG_ID : agentConfigId;
+          }
+        }
 
         const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
           sample_data: req.body.sample_data,
@@ -247,4 +252,13 @@ export function registerData2SummaryRoutes(
       }
     })
   );
+}
+
+async function detectAgentIdExist(assistantClient: AssistantClient, configName: string) {
+  try {
+    const result = await assistantClient.getAgentIdByConfigName(configName);
+    return Boolean(result);
+  } catch (e) {
+    return false;
+  }
 }
