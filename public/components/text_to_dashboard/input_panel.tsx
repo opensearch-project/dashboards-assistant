@@ -312,7 +312,6 @@ export const InputPanel = () => {
 
   // Set breadcrumbs
   useEffect(() => {
-    // const useUpdatedUX = uiSettings.get('home:useNewHomePage');
     const pageTitle = i18n.translate('dashboardAssistant.feature.text2dash.title', {
       defaultMessage: 'New Dashboard',
     });
@@ -384,37 +383,21 @@ export const InputPanel = () => {
   }
 
   return (
-    <EuiPage className="text2dash__page" direction="column">
+    <EuiPage
+      className="text2dash__page"
+      direction="column"
+      style={{ width: '65%', margin: '0 auto' }}
+    >
       <MountPointPortal setMountPoint={setHeaderActionMenu}>
         <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0, paddingTop: '4px' }}>
           <EuiHeaderLinks data-test-subj="text2dash-top-nav">
-            {/* {useUpdatedUX && ( */}
             <EuiText size="s">
               {i18n.translate('dashboardAssistant.feature.text2dash.title', {
                 defaultMessage: 'New Dashboard',
               })}
             </EuiText>
-            {/* )} */}
-            {/* <EuiButtonIcon
-              title={i18n.translate('dashboardAssistant.feature.text2dash.generate', {
-                defaultMessage: 'Generate dashboard',
-              })}
-              aria-label="generate"
-              display="base"
-              iconType="save"
-              size="s"
-              color={useUpdatedUX ? 'text' : 'primary'}
-              onClick={onGenerate}
-              isDisabled={
-                selectedInsights.length === 0 ||
-                !indexPattern ||
-                panelStatus === 'DASHBOARDS_CREATING'
-              }
-            /> */}
           </EuiHeaderLinks>
-          {/* {useUpdatedUX && */}
           {getInputSection()}
-          {/* } */}
         </EuiFlexGroup>
       </MountPointPortal>
       {!useUpdatedUX && (
