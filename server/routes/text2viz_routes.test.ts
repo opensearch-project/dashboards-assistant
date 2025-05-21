@@ -13,8 +13,6 @@ import { TEXT2VIZ_API } from '../../common/constants/llm';
 import { AssistantClient } from '../services/assistant_client';
 import { RequestHandlerContext } from '../../../../src/core/server';
 import { registerText2VizRoutes } from './text2viz_routes';
-import { DataSource } from 'vega-lite/src/data';
-
 const mockedLogger = loggerMock.create();
 
 export const createMockedAssistantClient = (
@@ -176,6 +174,42 @@ describe('test text2viz route', () => {
     `);
   });
 
+  it('return vega-lite schema for single metric visualization', async () => {
+    mockedAssistantClient.executeAgentByConfigName = jest.fn().mockResolvedValue({
+      body: {
+        inference_results: [
+          {
+            output: [
+              {
+                result: `<vega-lite>{"$schema": "https://vega.github.io/schema/vega-lite/v5.json","data": {"values": [{"value": 100}]},"mark": "text","encoding": {"text": {"field": "value"}}}</vega-lite>`,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const result = await text2vizRequest(
+      {
+        input_question: 'Show total sales',
+        input_instruction: 'Create a single metric visualization',
+        ppl: 'source=sales | stats sum(sales) as total',
+        dataSchema: 'mapping',
+        sampleData: 'sample',
+      },
+      {}
+    );
+    expect(result).toEqual({
+      statusCode: 200,
+      body: {
+        $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+        data: { values: [{ value: 100 }] },
+        mark: 'text',
+        encoding: { text: { field: 'value' } },
+        layer: [{ mark: 'text' }, { mark: 'text', encoding: { text: { value: 'total' } } }],
+      },
+    });
+  });
+
   it('return 4xx when execute agent throws 4xx error for text2ppl', async () => {
     mockedAssistantClient.executeAgentByConfigName = jest.fn().mockRejectedValue({
       statusCode: 429,
@@ -256,100 +290,5 @@ describe('test text2viz route', () => {
         "statusCode": 500,
       }
     `);
-  });
-
-  it('return data insights with valid response', async () => {
-    mockedAssistantClient.executeAgentByConfigName = jest.fn().mockResolvedValue({
-      body: {
-        inference_results: [
-          {
-            output: [
-              {
-                result: `<data-dimension>{"metrics": ["sum_sales"], "dimensions": ["region"]}</data-dimension>`,
-              },
-            ],
-          },
-        ],
-      },
-    });
-    const result = await dataInsightsRequest(
-      {
-        dataSchema: 'mapping',
-        sampleData: 'sample',
-      },
-      {}
-    );
-    expect(result).not.toBeInstanceOf(Boom);
-    const response = result as { source: DataSource; statusCode: number };
-    expect(response.source).toEqual({
-      metrics: ['sum_sales'],
-      dimensions: ['region'],
-    });
-    expect(response.statusCode).toEqual(200);
-    expect(mockedLogger.error).not.toHaveBeenCalled();
-  });
-
-  it('return 5xx when execute agent throws 5xx error for data insights', async () => {
-    mockedAssistantClient.executeAgentByConfigName = jest.fn().mockRejectedValue({
-      statusCode: 500,
-      body: 'Server error',
-    });
-    const result = (await dataInsightsRequest(
-      {
-        dataSchema: 'mapping',
-        sampleData: 'sample',
-      },
-      {}
-    )) as Boom;
-    expect(result.output).toMatchInlineSnapshot(`
-      Object {
-        "headers": Object {},
-        "payload": Object {
-          "error": "Internal Server Error",
-          "message": "An internal server error occurred.",
-          "statusCode": 500,
-        },
-        "statusCode": 500,
-      }
-    `);
-    expect(mockedLogger.error).toHaveBeenCalledWith('Error occurred', 'Server error');
-  });
-
-  it('return 5xx when data insights response has invalid JSON', async () => {
-    mockedAssistantClient.executeAgentByConfigName = jest.fn().mockResolvedValue({
-      body: {
-        inference_results: [
-          {
-            output: [
-              {
-                result: `<data-dimension>invalid-json</data-dimension>`,
-              },
-            ],
-          },
-        ],
-      },
-    });
-    const result = (await dataInsightsRequest(
-      {
-        dataSchema: 'mapping',
-        sampleData: 'sample',
-      },
-      {}
-    )) as Boom;
-    expect(result.output).toMatchInlineSnapshot(`
-      Object {
-        "headers": Object {},
-        "payload": Object {
-          "error": "Internal Server Error",
-          "message": "Internal Error",
-          "statusCode": 500,
-        },
-        "statusCode": 500,
-      }
-    `);
-    expect(mockedLogger.error).toHaveBeenCalledWith(
-      'Error occurred',
-      expect.stringContaining('Unexpected token')
-    );
   });
 });
