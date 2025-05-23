@@ -10,5 +10,6 @@ export const capabilitiesProvider = () => ({
   assistant: {
     enabled: true,
     chatEnabled: false,
+    queryAssistEnabled: true,
   },
 });
