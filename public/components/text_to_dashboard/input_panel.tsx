@@ -23,9 +23,15 @@ import {
   EuiText,
   EuiBreadcrumb,
   EuiHeaderLinks,
-  EuiButtonIcon,
   EuiSpacer,
-  EuiPanel,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiIcon,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useLocation } from 'react-router-dom';
@@ -40,7 +46,10 @@ import { Text2VegaTask } from '../../utils/pipeline/text_to_vega_task';
 import { getVisNLQSavedObjectLoader } from '../../vis_nlq/saved_object_loader';
 import { VisNLQSavedObject } from '../../vis_nlq/types';
 import { createDashboard } from './create_dashboard';
-import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { MountPointPortal } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { StartServices } from '../../types';
 import { SourceSelector } from '../visualization/source_selector';
@@ -58,6 +67,7 @@ export const InputPanel = () => {
       uiSettings,
       savedObjects,
       setHeaderActionMenu,
+      overlays,
     },
   } = useOpenSearchDashboards<StartServices>();
   const { search } = useLocation();
@@ -91,6 +101,10 @@ export const InputPanel = () => {
         });
     }
   }, [indexPatternId, data.indexPatterns, notifications]);
+
+  useEffect(() => {
+    console.log('panelStatus changed:', panelStatus);
+  }, [panelStatus]);
 
   if (dataInsightsPipeline.current === null && indexPattern) {
     dataInsightsPipeline.current = new Pipeline([
@@ -172,18 +186,30 @@ export const InputPanel = () => {
     [selectedInsights]
   );
 
+  const onSelectAll = useCallback(() => {
+    const allInsights = Object.values(dataInsights).flat();
+    const allSelected = allInsights.every((insight) => selectedInsights.includes(insight));
+    if (allSelected) {
+      setSelectedInsights([]);
+    } else {
+      setSelectedInsights(allInsights);
+    }
+  }, [dataInsights, selectedInsights]);
+
   const onGenerate = useCallback(async () => {
     if (!indexPattern) return;
     setPanelStatus('DASHBOARDS_CREATING');
-    setUpdateMessages([
-      {
-        username: 'Dashboards assistant',
-        event: 'started to create visualization',
-        type: 'update',
-        timelineIcon: 'sparkleFilled',
-      },
-    ]);
+    const initialMessage: EuiCommentProps = {
+      username: 'Dashboards assistant',
+      event: 'started to create visualization',
+      type: 'update',
+      timelineIcon: 'sparkleFilled',
+    };
+    setUpdateMessages([initialMessage]);
+    const newMessages: EuiCommentProps[] = [initialMessage];
     const visualizations: Array<{ id: string; type: string }> = [];
+    let successCount = 0;
+    let failureCount = 0;
 
     for (const insight of selectedInsights) {
       const pipeline = new Pipeline([
@@ -227,62 +253,118 @@ export const InputPanel = () => {
           path: `edit/${id}`,
         });
 
-        setUpdateMessages((messages) => [
-          ...messages,
-          {
-            username: 'Dashboards assistant',
-            event: (
-              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiText>created visualization</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="success">success</EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            type: 'update',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {insight}{' '}
-                  <EuiLink href={url} target="_blank">
-                    view
-                  </EuiLink>
-                </p>
-              </EuiText>
-            ),
-            timelineIcon: 'check',
-          },
-        ]);
+        const newMessage: EuiCommentProps = {
+          username: 'Dashboards assistant',
+          event: (
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText>created visualization</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="success">success</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          type: 'update',
+          children: (
+            <EuiText size="s">
+              <p>
+                {insight}{' '}
+                <EuiLink href={url} target="_blank">
+                  view
+                </EuiLink>
+              </p>
+            </EuiText>
+          ),
+          timelineIcon: 'check',
+        };
+        newMessages.push(newMessage);
+        setUpdateMessages((prevMessages) => [...prevMessages, newMessage]);
+        successCount++;
       } catch (e) {
-        setUpdateMessages((messages) => [
-          ...messages,
-          {
-            username: 'Dashboards assistant',
-            event: (
-              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiText>created visualization</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="danger">fail</EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            children: (
-              <EuiText size="s">
-                <p>{insight}</p>
-              </EuiText>
-            ),
-            timelineIcon: 'cross',
-          },
-        ]);
+        const newMessage: EuiCommentProps = {
+          username: 'Dashboards assistant',
+          event: (
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText>created visualization</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="danger">fail</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          children: (
+            <EuiText size="s">
+              <p>{insight}</p>
+            </EuiText>
+          ),
+          timelineIcon: 'cross',
+        };
+        newMessages.push(newMessage);
+        setUpdateMessages((prevMessages) => [...prevMessages, newMessage]);
+        failureCount++;
       }
     }
 
+    notifications.toasts.addWarning({
+      title: `${successCount} succeeded, ${failureCount} failed`,
+      text: toMountPoint(
+        <div>
+          <EuiText size="s">
+            <p>Failed workspace name: failedGenerationName</p>
+          </EuiText>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                onClick={() => {
+                  const modal = overlays.openModal(
+                    toMountPoint(
+                      <>
+                        <EuiModalHeader>
+                          <EuiTitle size="m">
+                            <h2>Generation Details</h2>
+                          </EuiTitle>
+                        </EuiModalHeader>
+                        <EuiModalBody>
+                          <EuiCommentList comments={newMessages} />
+                        </EuiModalBody>
+                        <EuiModalFooter>
+                          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                            <EuiFlexItem grow={false}>
+                              <EuiFlexGroup alignItems="center" gutterSize="s">
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon type="help" color="subdued" />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiText size="s" color="subdued">
+                                    {successCount} succeeded, {failureCount} failed
+                                  </EuiText>
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButton fill onClick={() => modal.close()}>
+                                <EuiText size="xs">Close</EuiText>
+                              </EuiButton>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiModalFooter>
+                      </>
+                    )
+                  );
+                }}
+              >
+                View generation details
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      ),
+    });
+
     try {
-      // create dashboard
       const dashboard = await createDashboard(visualizations);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       application.navigateToUrl(dashboard.url);
@@ -386,7 +468,7 @@ export const InputPanel = () => {
     <EuiPage
       className="text2dash__page"
       direction="column"
-      style={{ width: '65%', margin: '0 auto' }}
+      style={{ width: '70%', margin: '0 auto' }}
     >
       <MountPointPortal setMountPoint={setHeaderActionMenu}>
         <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0, paddingTop: '4px' }}>
@@ -412,11 +494,36 @@ export const InputPanel = () => {
         {panelStatus === 'INSIGHTS_LOADING' && (
           <EuiEmptyPrompt
             icon={<EuiLoadingLogo logo="visPie" size="xl" />}
-            title={<h2>Generating Insights</h2>}
+            title={<h2>Exploring data</h2>}
+            style={{ marginTop: '10%' }}
           />
         )}
         {panelStatus === 'INSIGHTS_LOADED' && (
           <>
+            <EuiTitle size="m">
+              <div style={{ fontWeight: 500 }}>Suggested visualization</div>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <span>
+                Select visualizations that will help you explore the data. The visualizations will
+                be generated by AI into a new dashboard.
+              </span>
+            </EuiText>
+            <EuiHorizontalRule margin="xs" />
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  onClick={onSelectAll}
+                  color="primary"
+                  disabled={Object.keys(dataInsights).length === 0}
+                  style={{ fontSize: '14px' }}
+                >
+                  {selectedInsights.length === Object.values(dataInsights).flat().length
+                    ? 'Deselect All'
+                    : 'Select All'}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {Object.keys(dataInsights).map((key) => (
               <CheckableDataList
                 key={key}
@@ -429,25 +536,53 @@ export const InputPanel = () => {
           </>
         )}
         {(panelStatus === 'DASHBOARDS_CREATING' || panelStatus === 'DASHBOARDS_CREATED') && (
-          <EuiCommentList comments={updateMessages} />
-        )}
-        {panelStatus === 'DASHBOARDS_CREATING' && <EuiLoadingContent lines={2} />}
-        {panelStatus === 'DASHBOARDS_CREATING' && <EuiProgress size="xs" color="accent" />}
-        {panelStatus !== 'INSIGHTS_LOADING' && (
           <>
-            <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexGroup
+              justifyContent="center"
+              alignItems="center"
+              style={{ color: '$ouiColorDarkShade', paddingTop: '10%' }}
+            >
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={onGenerate}
-                  isLoading={panelStatus === 'DASHBOARDS_CREATING'}
-                  isDisabled={selectedInsights.length === 0 || !indexPattern}
-                >
-                  Generate dashboard
-                </EuiButton>
+                <EuiLoadingSpinner size="xl" />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiFlexGroup
+              justifyContent="center"
+              alignItems="center"
+              style={{ color: '$ouiColorDarkShade', paddingTop: '8px' }}
+            >
+              <EuiText>
+                <h3>Generating response...</h3>
+              </EuiText>
+            </EuiFlexGroup>
+            <EuiText style={{ color: '$ouiColorDarkShade', paddingTop: '10%' }}>
+              <h3>Generation details</h3>
+            </EuiText>
+            <EuiHorizontalRule margin="xs" />
+            <EuiCommentList comments={updateMessages} />
           </>
+        )}
+        {panelStatus === 'INSIGHTS_LOADED' && (
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {selectedInsights.length === 0
+                  ? ''
+                  : selectedInsights.length === 1
+                  ? '1 insight selected'
+                  : `${selectedInsights.length} insights selected`}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={onGenerate}
+                isDisabled={selectedInsights.length === 0 || !indexPattern}
+              >
+                Generate dashboard
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </EuiPageBody>
     </EuiPage>

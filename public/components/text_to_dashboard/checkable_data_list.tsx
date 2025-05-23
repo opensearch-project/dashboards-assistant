@@ -6,8 +6,10 @@
 import {
   EuiCheckableCard,
   EuiFormFieldset,
+  EuiIcon,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import React from 'react';
@@ -32,17 +34,26 @@ export const CheckableDataList = (props: Props) => {
         }}
       >
         {props.items.map((item) => (
-          <>
+          <div key={item}>
             <EuiCheckableCard
               id={htmlIdGenerator()()}
-              label={item}
+              label={
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <span>{item}</span>
+                  <EuiToolTip content="Preview insight">
+                    <EuiIcon type="eye" style={{ marginLeft: '8px', cursor: 'pointer' }} />
+                  </EuiToolTip>
+                </div>
+              }
               checkableType="checkbox"
               value={item}
               checked={props.selection.includes(item)}
               onChange={() => props.onToggle(item)}
             />
             <EuiSpacer size="m" />
-          </>
+          </div>
         ))}
       </EuiFormFieldset>
     </div>
