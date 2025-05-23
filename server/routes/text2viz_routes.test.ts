@@ -13,6 +13,8 @@ import { TEXT2VIZ_API } from '../../common/constants/llm';
 import { AssistantClient } from '../services/assistant_client';
 import { RequestHandlerContext } from '../../../../src/core/server';
 import { registerText2VizRoutes } from './text2viz_routes';
+import { DataSource } from 'vega-lite/src/data';
+
 const mockedLogger = loggerMock.create();
 
 export const createMockedAssistantClient = (
@@ -30,6 +32,17 @@ describe('test text2viz route', () => {
     enhanceWithContext({
       assistant_plugin: {
         logger: mockedLogger,
+      },
+      core: {
+        opensearch: {
+          client: {
+            asCurrentUser: {
+              indices: {
+                getMapping: jest.fn().mockResolvedValue({}),
+              },
+            },
+          },
+        },
       },
     })
   );
@@ -53,6 +66,15 @@ describe('test text2viz route', () => {
     triggerHandler(router, {
       method: 'post',
       path: TEXT2VIZ_API.TEXT2PPL,
+      req: httpServerMock.createRawRequest({
+        payload: JSON.stringify(payload),
+        query,
+      }),
+    });
+  const dataInsightsRequest = (payload: {}, query: {}) =>
+    triggerHandler(router, {
+      method: 'post',
+      path: TEXT2VIZ_API.DATA_INSIGHTS,
       req: httpServerMock.createRawRequest({
         payload: JSON.stringify(payload),
         query,
@@ -234,5 +256,62 @@ describe('test text2viz route', () => {
         "statusCode": 500,
       }
     `);
+  });
+
+  it('return data insights with valid response', async () => {
+    mockedAssistantClient.executeAgentByConfigName = jest.fn().mockResolvedValue({
+      body: {
+        inference_results: [
+          {
+            output: [
+              {
+                result: `<data-dimension>{"metrics": ["sum_sales"], "dimensions": ["region"]}</data-dimension>`,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const result = await dataInsightsRequest(
+      {
+        dataSchema: 'mapping',
+        sampleData: 'sample',
+      },
+      {}
+    );
+    expect(result).not.toBeInstanceOf(Boom);
+    const response = result as { source: DataSource; statusCode: number };
+    expect(response.source).toEqual({
+      metrics: ['sum_sales'],
+      dimensions: ['region'],
+    });
+    expect(response.statusCode).toEqual(200);
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  it('return 5xx when execute agent throws 5xx error for data insights', async () => {
+    mockedAssistantClient.executeAgentByConfigName = jest.fn().mockRejectedValue({
+      statusCode: 500,
+      body: 'Server error',
+    });
+    const result = (await dataInsightsRequest(
+      {
+        dataSchema: 'mapping',
+        sampleData: 'sample',
+      },
+      {}
+    )) as Boom;
+    expect(result.output).toMatchInlineSnapshot(`
+      Object {
+        "headers": Object {},
+        "payload": Object {
+          "error": "Internal Server Error",
+          "message": "Execute agent failed!",
+          "statusCode": 500,
+        },
+        "statusCode": 500,
+      }
+    `);
+    expect(mockedLogger.error).toHaveBeenCalledWith('Execute agent failed!', expect.any(Object));
   });
 });
