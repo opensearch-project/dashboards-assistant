@@ -15,11 +15,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiLoadingContent,
   EuiLoadingLogo,
   EuiPage,
   EuiPageBody,
-  EuiProgress,
   EuiText,
   EuiBreadcrumb,
   EuiHeaderLinks,
@@ -31,7 +29,6 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiIcon,
-  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useLocation } from 'react-router-dom';
@@ -53,6 +50,7 @@ import {
 import { MountPointPortal } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { StartServices } from '../../types';
 import { SourceSelector } from '../visualization/source_selector';
+import './input_panel.scss';
 
 type Status = 'INSIGHTS_LOADING' | 'INSIGHTS_LOADED' | 'DASHBOARDS_CREATING' | 'DASHBOARDS_CREATED';
 
@@ -102,10 +100,6 @@ export const InputPanel = () => {
     }
   }, [indexPatternId, data.indexPatterns, notifications]);
 
-  useEffect(() => {
-    console.log('panelStatus changed:', panelStatus);
-  }, [panelStatus]);
-
   if (dataInsightsPipeline.current === null && indexPattern) {
     dataInsightsPipeline.current = new Pipeline([
       new PPLSampleTask(data.search),
@@ -123,8 +117,14 @@ export const InputPanel = () => {
         error: (err) => {
           setPanelStatus('INSIGHTS_LOADED');
           notifications.toasts.addDanger({
-            title: 'Failed to generate insights',
-            text: err.message || 'An error occurred while generating insights',
+            title: i18n.translate('dashboardAssistant.feature.text2dash.insightsFailed', {
+              defaultMessage: 'Failed to generate insights',
+            }),
+            text:
+              err.message ||
+              i18n.translate('dashboardAssistant.feature.text2dash.insightsError', {
+                defaultMessage: 'An error occurred while generating insights',
+              }),
           });
         },
         complete: () => {
@@ -148,8 +148,14 @@ export const InputPanel = () => {
         },
         error: (err) => {
           notifications.toasts.addDanger({
-            title: 'Failed to generate insights',
-            text: err.message || 'An error occurred while generating insights',
+            title: i18n.translate('dashboardAssistant.feature.text2dash.insightsFailed', {
+              defaultMessage: 'Failed to generate insights',
+            }),
+            text:
+              err.message ||
+              i18n.translate('dashboardAssistant.feature.text2dash.insightsError', {
+                defaultMessage: 'An error occurred while generating insights',
+              }),
           });
         },
         complete: () => {
@@ -173,18 +179,17 @@ export const InputPanel = () => {
     }
   }, [indexPattern, dataSourceId]);
 
-  const onToggle = useCallback(
-    (item: string) => {
-      const selection = new Set(selectedInsights);
+  const onToggle = useCallback((item: string) => {
+    setSelectedInsights((prevSelectedInsights) => {
+      const selection = new Set(prevSelectedInsights);
       if (selection.has(item)) {
         selection.delete(item);
       } else {
         selection.add(item);
       }
-      setSelectedInsights([...selection]);
-    },
-    [selectedInsights]
-  );
+      return [...selection];
+    });
+  }, []);
 
   const onSelectAll = useCallback(() => {
     const allInsights = Object.values(dataInsights).flat();
@@ -254,14 +259,24 @@ export const InputPanel = () => {
         });
 
         const newMessage: EuiCommentProps = {
-          username: 'Dashboards assistant',
+          username: i18n.translate('dashboardAssistant.feature.text2dash.assistantName', {
+            defaultMessage: 'Dashboards assistant',
+          }),
           event: (
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiText>created visualization</EuiText>
+                <EuiText>
+                  {i18n.translate('dashboardAssistant.feature.text2dash.createdVisualization', {
+                    defaultMessage: 'created visualization',
+                  })}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="success">success</EuiBadge>
+                <EuiBadge color="success">
+                  {i18n.translate('dashboardAssistant.feature.text2dash.success', {
+                    defaultMessage: 'Success',
+                  })}
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
@@ -271,7 +286,9 @@ export const InputPanel = () => {
               <p>
                 {insight}{' '}
                 <EuiLink href={url} target="_blank">
-                  view
+                  {i18n.translate('dashboardAssistant.feature.text2dash.viewLink', {
+                    defaultMessage: 'view',
+                  })}
                 </EuiLink>
               </p>
             </EuiText>
@@ -283,14 +300,24 @@ export const InputPanel = () => {
         successCount++;
       } catch (e) {
         const newMessage: EuiCommentProps = {
-          username: 'Dashboards assistant',
+          username: i18n.translate('dashboardAssistant.feature.text2dash.assistantName', {
+            defaultMessage: 'Dashboards assistant',
+          }),
           event: (
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiText>created visualization</EuiText>
+                <EuiText>
+                  {i18n.translate('dashboardAssistant.feature.text2dash.createdVisualization', {
+                    defaultMessage: 'created visualization',
+                  })}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="danger">fail</EuiBadge>
+                <EuiBadge color="danger">
+                  {i18n.translate('dashboardAssistant.feature.text2dash.fail', {
+                    defaultMessage: 'Fail',
+                  })}
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
@@ -308,29 +335,38 @@ export const InputPanel = () => {
     }
 
     notifications.toasts.addWarning({
-      title: `${successCount} succeeded, ${failureCount} failed`,
+      title: i18n.translate('dashboardAssistant.feature.text2dash.generationSummary', {
+        defaultMessage: '{successCount} succeeded, {failureCount} failed',
+        values: { successCount, failureCount },
+      }),
       text: toMountPoint(
         <div>
-          <EuiText size="s">
-            <p>Failed workspace name: failedGenerationName</p>
-          </EuiText>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
                 size="s"
+                color="warning"
                 onClick={() => {
                   const modal = overlays.openModal(
                     toMountPoint(
                       <>
                         <EuiModalHeader>
                           <EuiTitle size="m">
-                            <h2>Generation Details</h2>
+                            <h2>
+                              {i18n.translate(
+                                'dashboardAssistant.feature.text2dash.generationDetailsTitle',
+                                {
+                                  defaultMessage: 'Generation details',
+                                }
+                              )}
+                            </h2>
                           </EuiTitle>
                         </EuiModalHeader>
                         <EuiModalBody>
                           <EuiCommentList comments={newMessages} />
                         </EuiModalBody>
-                        <EuiModalFooter>
+                        <EuiModalFooter className="text2dash__modalFooter">
+                          <EuiSpacer size="m" />
                           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                             <EuiFlexItem grow={false}>
                               <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -339,24 +375,45 @@ export const InputPanel = () => {
                                 </EuiFlexItem>
                                 <EuiFlexItem grow={false}>
                                   <EuiText size="s" color="subdued">
-                                    {successCount} succeeded, {failureCount} failed
+                                    {i18n.translate(
+                                      'dashboardAssistant.feature.text2dash.generationSummaryModal',
+                                      {
+                                        defaultMessage:
+                                          '{successCount} succeeded, {failureCount} failed',
+                                        values: { successCount, failureCount },
+                                      }
+                                    )}
                                   </EuiText>
                                 </EuiFlexItem>
                               </EuiFlexGroup>
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
-                              <EuiButton fill onClick={() => modal.close()}>
-                                <EuiText size="xs">Close</EuiText>
+                              <EuiButton
+                                className="text2dash__modalClose"
+                                fill
+                                onClick={() => modal.close()}
+                              >
+                                <EuiText size="s">
+                                  {i18n.translate(
+                                    'dashboardAssistant.feature.text2dash.closeButton',
+                                    {
+                                      defaultMessage: 'Close',
+                                    }
+                                  )}
+                                </EuiText>
                               </EuiButton>
                             </EuiFlexItem>
                           </EuiFlexGroup>
+                          <EuiSpacer size="s" />
                         </EuiModalFooter>
                       </>
                     )
                   );
                 }}
               >
-                View generation details
+                {i18n.translate('dashboardAssistant.feature.text2dash.viewGenerationDetails', {
+                  defaultMessage: 'View generation details',
+                })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -372,14 +429,24 @@ export const InputPanel = () => {
       setUpdateMessages((messages) => [
         ...messages,
         {
-          username: 'Dashboards assistant',
+          username: i18n.translate('dashboardAssistant.feature.text2dash.assistantName', {
+            defaultMessage: 'Dashboards assistant',
+          }),
           event: (
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiText>created dashboard</EuiText>
+                <EuiText>
+                  {i18n.translate('dashboardAssistant.feature.text2dash.createdDashboard', {
+                    defaultMessage: 'created dashboard',
+                  })}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="danger">fail</EuiBadge>
+                <EuiBadge color="danger">
+                  {i18n.translate('dashboardAssistant.feature.text2dash.fail', {
+                    defaultMessage: 'Fail',
+                  })}
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
@@ -392,11 +459,12 @@ export const InputPanel = () => {
     setPanelStatus('DASHBOARDS_CREATED');
   }, [http, savedObjects, data, selectedInsights, dataSourceId, indexPattern, application]);
 
+  const pageTitle = i18n.translate('dashboardAssistant.feature.text2dash.title', {
+    defaultMessage: 'New dashboard',
+  });
+
   // Set breadcrumbs
   useEffect(() => {
-    const pageTitle = i18n.translate('dashboardAssistant.feature.text2dash.title', {
-      defaultMessage: 'New Dashboard',
-    });
     const breadcrumbs: EuiBreadcrumb[] = [
       {
         text: i18n.translate('dashboardAssistant.feature.text2dash.breadcrumbs.dashboards', {
@@ -426,17 +494,27 @@ export const InputPanel = () => {
     return (
       <>
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={2} style={{ width: 0 }}>
+          <EuiFlexItem grow={2}>
             <SourceSelector
               selectedSourceId={indexPatternId}
               onChange={(ds) => {
-                const newParams = new URLSearchParams(search);
-                newParams.set('indexPatternId', ds.value);
-                application.navigateToUrl(
-                  application.getUrlForApp('dashboards', {
-                    path: `/text2dash?${newParams.toString()}`,
+                const url = new URL(
+                  application.getUrlForApp('text2dash', {
+                    absolute: true,
+                    path: '/',
                   })
                 );
+                url.searchParams.set('indexPatternId', ds.value);
+                const firstUnderscoreIndex = ds.value.indexOf('_');
+                const secondUnderscoreIndex = ds.value.indexOf('_', firstUnderscoreIndex + 1);
+                if (firstUnderscoreIndex === -1 || secondUnderscoreIndex === -1) {
+                  throw new Error('Invalid ds.value format: missing underscores');
+                }
+                const dataSource = ds.value.slice(firstUnderscoreIndex + 1, secondUnderscoreIndex);
+                if (dataSource) {
+                  url.searchParams.set('dataSourceId', dataSource);
+                }
+                application.navigateToUrl(url.toString());
               }}
             />
           </EuiFlexItem>
@@ -445,82 +523,74 @@ export const InputPanel = () => {
     );
   };
 
-  if (!indexPattern) {
-    return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiEmptyPrompt
-            iconType="alert"
-            iconColor="danger"
-            title={<h2>Index Pattern Not Found</h2>}
-            body={
-              <EuiText size="s">
-                <p>Unable to load the specified index pattern.</p>
-              </EuiText>
-            }
-          />
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
-
   return (
-    <EuiPage
-      className="text2dash__page"
-      direction="column"
-      style={{ width: '70%', margin: '0 auto' }}
-    >
+    <EuiPage className="text2dash__page" direction="column">
       <MountPointPortal setMountPoint={setHeaderActionMenu}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0, paddingTop: '4px' }}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" className="text2dash__headerContainer">
           <EuiHeaderLinks data-test-subj="text2dash-top-nav">
-            <EuiText size="s">
-              {i18n.translate('dashboardAssistant.feature.text2dash.title', {
-                defaultMessage: 'New Dashboard',
-              })}
+            <EuiText size="xs">
+              <h4>{pageTitle}</h4>
             </EuiText>
           </EuiHeaderLinks>
           {getInputSection()}
         </EuiFlexGroup>
       </MountPointPortal>
-      {!useUpdatedUX && (
-        <>
-          <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
-            {getInputSection()}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
       <EuiPageBody>
         {panelStatus === 'INSIGHTS_LOADING' && (
           <EuiEmptyPrompt
             icon={<EuiLoadingLogo logo="visPie" size="xl" />}
-            title={<h2>Exploring data</h2>}
-            style={{ marginTop: '10%' }}
+            title={
+              <EuiTitle size="m">
+                <h2>
+                  {i18n.translate('dashboardAssistant.feature.text2dash.exploringDataTitle', {
+                    defaultMessage: 'Exploring data',
+                  })}
+                </h2>
+              </EuiTitle>
+            }
+            className="text2dash__loadingPrompt"
           />
         )}
         {panelStatus === 'INSIGHTS_LOADED' && (
           <>
-            <EuiTitle size="m">
-              <div style={{ fontWeight: 500 }}>Suggested visualization</div>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <span>
-                Select visualizations that will help you explore the data. The visualizations will
-                be generated by AI into a new dashboard.
-              </span>
-            </EuiText>
-            <EuiHorizontalRule margin="xs" />
-            <EuiFlexGroup justifyContent="flexEnd">
+            <div className="text2dash__suggestionsHeader">
+              <EuiTitle size="m">
+                <h2>
+                  {i18n.translate(
+                    'dashboardAssistant.feature.text2dash.suggestedVisualizationsTitle',
+                    {
+                      defaultMessage: 'Suggested visualizations',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
+              <EuiText size="s" color="subdued">
+                {i18n.translate(
+                  'dashboardAssistant.feature.text2dash.suggestedVisualizationDescription',
+                  {
+                    defaultMessage:
+                      'Select visualizations that will help you explore the data. The visualizations will be generated by AI into a new dashboard.',
+                  }
+                )}
+              </EuiText>
+            </div>
+            <EuiHorizontalRule margin="none" />
+            <EuiFlexGroup justifyContent="flexEnd" className="text2dash__selectAllContainer">
               <EuiFlexItem grow={false}>
                 <EuiLink
                   onClick={onSelectAll}
                   color="primary"
                   disabled={Object.keys(dataInsights).length === 0}
-                  style={{ fontSize: '14px' }}
                 >
-                  {selectedInsights.length === Object.values(dataInsights).flat().length
-                    ? 'Deselect All'
-                    : 'Select All'}
+                  <EuiText size="s">
+                    {selectedInsights.length === Object.values(dataInsights).flat().length
+                      ? i18n.translate('dashboardAssistant.feature.text2dash.deselectAll', {
+                          defaultMessage: 'Deselect all',
+                        })
+                      : i18n.translate('dashboardAssistant.feature.text2dash.selectAll', {
+                          defaultMessage: 'Select all',
+                        })}
+                  </EuiText>
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -540,7 +610,7 @@ export const InputPanel = () => {
             <EuiFlexGroup
               justifyContent="center"
               alignItems="center"
-              style={{ color: '$ouiColorDarkShade', paddingTop: '10%' }}
+              className="text2dash__generatingContainer"
             >
               <EuiFlexItem grow={false}>
                 <EuiLoadingSpinner size="xl" />
@@ -549,28 +619,44 @@ export const InputPanel = () => {
             <EuiFlexGroup
               justifyContent="center"
               alignItems="center"
-              style={{ color: '$ouiColorDarkShade', paddingTop: '8px' }}
+              className="text2dash__generatingText"
             >
-              <EuiText>
-                <h3>Generating response...</h3>
+              <EuiText size="s">
+                <h4>
+                  {i18n.translate('dashboardAssistant.feature.text2dash.generatingResponse', {
+                    defaultMessage: 'Generating response...',
+                  })}
+                </h4>
               </EuiText>
             </EuiFlexGroup>
-            <EuiText style={{ color: '$ouiColorDarkShade', paddingTop: '10%' }}>
-              <h3>Generation details</h3>
+            <EuiText size="s" className="text2dash__generationHeader">
+              <h4>
+                {i18n.translate('dashboardAssistant.feature.text2dash.generationDetailsHeader', {
+                  defaultMessage: 'GENERATION DETAILS',
+                })}
+              </h4>
             </EuiText>
             <EuiHorizontalRule margin="xs" />
-            <EuiCommentList comments={updateMessages} />
+            <EuiCommentList comments={updateMessages} className="text2dash__generationDetails" />
           </>
         )}
         {panelStatus === 'INSIGHTS_LOADED' && (
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween" className="text2dash__footerContainer">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 {selectedInsights.length === 0
                   ? ''
                   : selectedInsights.length === 1
-                  ? '1 insight selected'
-                  : `${selectedInsights.length} insights selected`}
+                  ? i18n.translate('dashboardAssistant.feature.text2dash.oneInsightSelected', {
+                      defaultMessage: '1 insight selected',
+                    })
+                  : i18n.translate(
+                      'dashboardAssistant.feature.text2dash.multipleInsightsSelected',
+                      {
+                        defaultMessage: '{count} insights selected',
+                        values: { count: selectedInsights.length },
+                      }
+                    )}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -579,7 +665,11 @@ export const InputPanel = () => {
                 onClick={onGenerate}
                 isDisabled={selectedInsights.length === 0 || !indexPattern}
               >
-                Generate dashboard
+                <EuiText size="s">
+                  {i18n.translate('dashboardAssistant.feature.text2dash.generateDashboardButton', {
+                    defaultMessage: 'Generate dashboard',
+                  })}
+                </EuiText>
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

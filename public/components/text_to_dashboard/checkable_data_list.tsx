@@ -6,13 +6,14 @@
 import {
   EuiCheckableCard,
   EuiFormFieldset,
-  EuiIcon,
+  // EuiIcon,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
+  // EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import React from 'react';
+import './checkable_data_list.scss';
 
 interface Props {
   title: string;
@@ -23,7 +24,7 @@ interface Props {
 
 export const CheckableDataList = (props: Props) => {
   return (
-    <div>
+    <div className="checkable__page">
       <EuiFormFieldset
         legend={{
           children: (
@@ -37,16 +38,15 @@ export const CheckableDataList = (props: Props) => {
           <div key={item}>
             <EuiCheckableCard
               id={htmlIdGenerator()()}
-              label={
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <span>{item}</span>
-                  <EuiToolTip content="Preview insight">
-                    <EuiIcon type="eye" style={{ marginLeft: '8px', cursor: 'pointer' }} />
-                  </EuiToolTip>
-                </div>
-              }
+              label={item}
+              // Temporarily hide the preview icon
+              // <div
+              //   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              // >
+              //   <EuiToolTip content="Preview insight">
+              //     <EuiIcon type="eye" style={{ marginLeft: '8px', cursor: 'pointer' }} />
+              //   </EuiToolTip>
+              // </div>
               checkableType="checkbox"
               value={item}
               checked={props.selection.includes(item)}
