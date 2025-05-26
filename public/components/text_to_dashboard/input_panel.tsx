@@ -5,7 +5,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Subscription } from 'rxjs';
 import {
   EuiBadge,
   EuiButton,
@@ -77,8 +76,8 @@ export const InputPanel = () => {
   const [selectedInsights, setSelectedInsights] = useState<string[]>([]);
   const [updateMessages, setUpdateMessages] = useState<EuiCommentProps[]>([]);
   const [panelStatus, setPanelStatus] = useState<Status>('INSIGHTS_LOADING');
-  const dataInsightsPipeline = useRef<Pipeline | null>(null);
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+  const indexInIndexPattern = indexPattern?.getIndex();
 
   // Load index pattern from URL parameter
   useEffect(() => {
@@ -100,17 +99,17 @@ export const InputPanel = () => {
     }
   }, [indexPatternId, data.indexPatterns, notifications]);
 
-  if (dataInsightsPipeline.current === null && indexPattern) {
-    dataInsightsPipeline.current = new Pipeline([
+  useEffect(() => {
+    if (!indexInIndexPattern || !dataSourceId) {
+      return;
+    }
+    const dataInsightsPipeline = new Pipeline([
       new PPLSampleTask(data.search),
       new DataInsightsTask(http),
     ]);
-  }
 
-  useEffect(() => {
-    let subscription: Subscription;
-    if (dataInsightsPipeline.current) {
-      subscription = dataInsightsPipeline.current.status$.subscribe({
+    const subscriptions = [
+      dataInsightsPipeline.status$.subscribe({
         next: (status) => {
           setPanelStatus(status === 'RUNNING' ? 'INSIGHTS_LOADING' : 'INSIGHTS_LOADED');
         },
@@ -120,29 +119,14 @@ export const InputPanel = () => {
             title: i18n.translate('dashboardAssistant.feature.text2dash.insightsFailed', {
               defaultMessage: 'Failed to generate insights',
             }),
-            text:
-              err.message ||
-              i18n.translate('dashboardAssistant.feature.text2dash.insightsError', {
-                defaultMessage: 'An error occurred while generating insights',
-              }),
+            text: err.message || 'An error occurred while generating insights',
           });
         },
         complete: () => {
           console.log('Pipeline status$ completed');
         },
-      });
-    }
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
-  }, [indexPattern]);
-
-  useEffect(() => {
-    let subscription: Subscription;
-    if (dataInsightsPipeline.current) {
-      subscription = dataInsightsPipeline.current.output$.subscribe({
+      }),
+      dataInsightsPipeline.output$.subscribe({
         next: (output) => {
           setDataInsights(output.dataInsights);
         },
@@ -151,33 +135,23 @@ export const InputPanel = () => {
             title: i18n.translate('dashboardAssistant.feature.text2dash.insightsFailed', {
               defaultMessage: 'Failed to generate insights',
             }),
-            text:
-              err.message ||
-              i18n.translate('dashboardAssistant.feature.text2dash.insightsError', {
-                defaultMessage: 'An error occurred while generating insights',
-              }),
+            text: err.message || 'An error occurred while generating insights',
           });
         },
         complete: () => {
           console.log('Pipeline output$ completed');
         },
-      });
-    }
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
-  }, [indexPattern]);
+      }),
+    ];
 
-  useEffect(() => {
-    if (dataInsightsPipeline.current && indexPattern) {
-      dataInsightsPipeline.current.run({
-        ppl: `source=${indexPattern.getIndex()}`,
-        dataSourceId,
-      });
-    }
-  }, [indexPattern, dataSourceId]);
+    dataInsightsPipeline.run({
+      ppl: `source=${indexInIndexPattern}`,
+      dataSourceId,
+    });
+    return () => {
+      subscriptions.forEach((subscription) => subscription.unsubscribe());
+    };
+  }, [indexInIndexPattern, dataSourceId, notifications.toasts.addDanger]);
 
   const onToggle = useCallback((item: string) => {
     setSelectedInsights((prevSelectedInsights) => {
