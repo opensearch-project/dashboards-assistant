@@ -6,8 +6,10 @@
 import {
   EuiCheckableCard,
   EuiFormFieldset,
+  EuiLink,
   // EuiIcon,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   // EuiToolTip,
   htmlIdGenerator,
@@ -20,16 +22,29 @@ interface Props {
   items: string[];
   selection: string[];
   onToggle: (item: string) => void;
+  onSelectAllForCategory: () => void;
 }
 
 export const CheckableDataList = (props: Props) => {
+  const allSelected = props.items.every((item) => props.selection.includes(item));
+
   return (
     <div className="checkable__page">
       <EuiFormFieldset
         legend={{
           children: (
             <EuiTitle size="xs">
-              <span>{props.title}</span>
+              <span>
+                {props.title}{' '}
+                <EuiLink
+                  className="checkable__selectAllContainer"
+                  onClick={props.onSelectAllForCategory}
+                  color="primary"
+                  disabled={props.items.length === 0}
+                >
+                  <EuiText size="s">{allSelected ? 'Deselect all' : 'Select all'}</EuiText>
+                </EuiLink>
+              </span>
             </EuiTitle>
           ),
         }}

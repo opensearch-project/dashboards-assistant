@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   EuiBadge,
@@ -31,8 +31,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useLocation } from 'react-router-dom';
-import { CoreStart, HeaderVariant } from '../../../../../src/core/public';
-import { DataPublicPluginStart, IndexPattern } from '../../../../../src/plugins/data/public';
+import { HeaderVariant } from '../../../../../src/core/public';
+import { IndexPattern } from '../../../../../src/plugins/data/public';
 import { Pipeline } from '../../utils/pipeline/pipeline';
 import { PPLSampleTask } from '../../utils/pipeline/ppl_sample_task';
 import { DataInsightsTask } from '../../utils/pipeline/data_insights_task';
@@ -79,7 +79,6 @@ export const InputPanel = () => {
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
   const indexInIndexPattern = indexPattern?.getIndex();
 
-  // Load index pattern from URL parameter
   useEffect(() => {
     if (indexPatternId) {
       data.indexPatterns
@@ -174,6 +173,27 @@ export const InputPanel = () => {
       setSelectedInsights(allInsights);
     }
   }, [dataInsights, selectedInsights]);
+
+  const onSelectAllForCategory = useCallback(
+    (category: string) => {
+      setSelectedInsights((prevSelectedInsights) => {
+        const categoryInsights = dataInsights[category] || [];
+        const allSelectedInCategory = categoryInsights.every((insight) =>
+          prevSelectedInsights.includes(insight)
+        );
+        const selection = new Set(prevSelectedInsights);
+
+        if (allSelectedInCategory) {
+          categoryInsights.forEach((insight) => selection.delete(insight));
+        } else {
+          categoryInsights.forEach((insight) => selection.add(insight));
+        }
+
+        return [...selection];
+      });
+    },
+    [dataInsights]
+  );
 
   const onGenerate = useCallback(async () => {
     if (!indexPattern) return;
@@ -308,92 +328,103 @@ export const InputPanel = () => {
       }
     }
 
-    notifications.toasts.addWarning({
-      title: i18n.translate('dashboardAssistant.feature.text2dash.generationSummary', {
-        defaultMessage: '{successCount} succeeded, {failureCount} failed',
-        values: { successCount, failureCount },
-      }),
-      text: toMountPoint(
-        <div>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                color="warning"
-                onClick={() => {
-                  const modal = overlays.openModal(
-                    toMountPoint(
-                      <>
-                        <EuiModalHeader>
-                          <EuiTitle size="m">
-                            <h2>
-                              {i18n.translate(
-                                'dashboardAssistant.feature.text2dash.generationDetailsTitle',
-                                {
-                                  defaultMessage: 'Generation details',
-                                }
-                              )}
-                            </h2>
-                          </EuiTitle>
-                        </EuiModalHeader>
-                        <EuiModalBody>
-                          <EuiCommentList comments={newMessages} />
-                        </EuiModalBody>
-                        <EuiModalFooter className="text2dash__modalFooter">
-                          <EuiSpacer size="m" />
-                          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                            <EuiFlexItem grow={false}>
-                              <EuiFlexGroup alignItems="center" gutterSize="s">
-                                <EuiFlexItem grow={false}>
-                                  <EuiIcon type="help" color="subdued" />
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false}>
-                                  <EuiText size="s" color="subdued">
-                                    {i18n.translate(
-                                      'dashboardAssistant.feature.text2dash.generationSummaryModal',
-                                      {
-                                        defaultMessage:
-                                          '{successCount} succeeded, {failureCount} failed',
-                                        values: { successCount, failureCount },
-                                      }
-                                    )}
-                                  </EuiText>
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiButton
-                                className="text2dash__modalClose"
-                                fill
-                                onClick={() => modal.close()}
-                              >
-                                <EuiText size="s">
+    const toastContent = (
+      <div>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color={failureCount > 0 ? 'warning' : 'success'}
+              onClick={() => {
+                const modal = overlays.openModal(
+                  toMountPoint(
+                    <>
+                      <EuiModalHeader>
+                        <EuiTitle size="m">
+                          <h2>
+                            {i18n.translate(
+                              'dashboardAssistant.feature.text2dash.generationDetailsTitle',
+                              {
+                                defaultMessage: 'Generation details',
+                              }
+                            )}
+                          </h2>
+                        </EuiTitle>
+                      </EuiModalHeader>
+                      <EuiModalBody>
+                        <EuiCommentList comments={newMessages} />
+                      </EuiModalBody>
+                      <EuiModalFooter className="text2dash__modalFooter">
+                        <EuiSpacer size="m" />
+                        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup alignItems="center" gutterSize="s">
+                              <EuiFlexItem grow={false}>
+                                <EuiIcon type="help" color="subdued" />
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiText size="s" color="subdued">
                                   {i18n.translate(
-                                    'dashboardAssistant.feature.text2dash.closeButton',
+                                    'dashboardAssistant.feature.text2dash.generationSummaryModal',
                                     {
-                                      defaultMessage: 'Close',
+                                      defaultMessage:
+                                        '{successCount} succeeded, {failureCount} failed',
+                                      values: { successCount, failureCount },
                                     }
                                   )}
                                 </EuiText>
-                              </EuiButton>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                          <EuiSpacer size="s" />
-                        </EuiModalFooter>
-                      </>
-                    )
-                  );
-                }}
-              >
-                {i18n.translate('dashboardAssistant.feature.text2dash.viewGenerationDetails', {
-                  defaultMessage: 'View generation details',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      ),
-    });
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              className="text2dash__modalClose"
+                              fill
+                              onClick={() => modal.close()}
+                            >
+                              <EuiText size="s">
+                                {i18n.translate(
+                                  'dashboardAssistant.feature.text2dash.closeButton',
+                                  {
+                                    defaultMessage: 'Close',
+                                  }
+                                )}
+                              </EuiText>
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                        <EuiSpacer size="s" />
+                      </EuiModalFooter>
+                    </>
+                  )
+                );
+              }}
+            >
+              {i18n.translate('dashboardAssistant.feature.text2dash.viewGenerationDetails', {
+                defaultMessage: 'View generation details',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+
+    if (failureCount > 0) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('dashboardAssistant.feature.text2dash.generationWarning', {
+          defaultMessage: '{successCount} succeeded, {failureCount} failed',
+          values: { successCount, failureCount },
+        }),
+        text: toMountPoint(toastContent),
+      });
+    } else if (successCount > 0) {
+      notifications.toasts.addSuccess({
+        title: i18n.translate('dashboardAssistant.feature.text2dash.generationSuccess', {
+          defaultMessage: 'All visualizations generated successfully',
+        }),
+        text: toMountPoint(toastContent),
+      });
+    }
 
     try {
       const dashboard = await createDashboard(visualizations);
@@ -575,6 +606,7 @@ export const InputPanel = () => {
                 items={dataInsights[key]}
                 selection={selectedInsights}
                 onToggle={onToggle}
+                onSelectAllForCategory={() => onSelectAllForCategory(key)}
               />
             ))}
           </>

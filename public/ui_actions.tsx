@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import {
   TEXT2PPL_AGENT_CONFIG_ID,
   TEXT2VEGA_RULE_BASED_AGENT_CONFIG_ID,
@@ -60,7 +59,7 @@ export function registerGenerateDashboardUIAction(services: Services) {
         if (context.dataSourceId) {
           url.searchParams.set('dataSourceId', context.dataSourceId);
         }
-        services.core.application.navigateToUrl(url.toString());
+        window.open(url.toString(), '_blank');
       }
     },
   });
