@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   EuiBadge,
-  EuiButton,
+  EuiSmallButton,
   EuiCommentList,
   EuiCommentProps,
   EuiEmptyPrompt,
@@ -332,8 +332,7 @@ export const InputPanel = () => {
       <div>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
+            <EuiSmallButton
               color={failureCount > 0 ? 'warning' : 'success'}
               onClick={() => {
                 const modal = overlays.openModal(
@@ -377,7 +376,7 @@ export const InputPanel = () => {
                             </EuiFlexGroup>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <EuiButton
+                            <EuiSmallButton
                               className="text2dash__modalClose"
                               fill
                               onClick={() => modal.close()}
@@ -390,7 +389,7 @@ export const InputPanel = () => {
                                   }
                                 )}
                               </EuiText>
-                            </EuiButton>
+                            </EuiSmallButton>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                         <EuiSpacer size="s" />
@@ -403,7 +402,7 @@ export const InputPanel = () => {
               {i18n.translate('dashboardAssistant.feature.text2dash.viewGenerationDetails', {
                 defaultMessage: 'View generation details',
               })}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
@@ -666,7 +665,7 @@ export const InputPanel = () => {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiSmallButton
                 fill
                 onClick={onGenerate}
                 isDisabled={selectedInsights.length === 0 || !indexPattern}
@@ -676,7 +675,7 @@ export const InputPanel = () => {
                     defaultMessage: 'Generate dashboard',
                   })}
                 </EuiText>
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

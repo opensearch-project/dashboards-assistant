@@ -142,7 +142,6 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      context.core.opensearch.client.asCurrentUser.indices.getMapping();
       const assistantClient = assistantService.getScopedClient(req, context);
       try {
         const response = await assistantClient.executeAgentByConfigName(
