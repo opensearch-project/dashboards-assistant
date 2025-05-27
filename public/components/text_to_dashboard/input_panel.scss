@@ -31,10 +31,10 @@
 
     &__generatingText {
         margin-top: 8px;
+    }
 
-        h4 {
-            color: $ouiColorDarkShade;
-        }
+    &__subduedHeading {
+        color: inherit !important;
     }
 
     &__generationHeader {

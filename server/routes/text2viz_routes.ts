@@ -168,20 +168,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
 
         return res.ok({ body: JSON.parse(textContent) });
       } catch (e) {
-        context.assistant_plugin.logger.error('Execute agent failed!', e);
-        if (e.statusCode >= 400 && e.statusCode <= 499) {
-          return res.customError({
-            body: e.body,
-            statusCode: e.statusCode,
-            headers: e.headers,
-          });
-        } else {
-          return res.customError({
-            body: 'Execute agent failed!',
-            statusCode: 500,
-            headers: e.headers,
-          });
-        }
+        return handleError(e, res, context.assistant_plugin.logger);
       }
     })
   );

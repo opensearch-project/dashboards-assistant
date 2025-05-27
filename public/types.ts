@@ -85,6 +85,7 @@ export interface AssistantSetup {
     chat: boolean;
     next: boolean;
     text2viz: boolean;
+    text2dash: boolean;
     alertInsight: boolean;
     smartAnomalyDetector: boolean;
   };

@@ -112,15 +112,6 @@ export const InputPanel = () => {
         next: (status) => {
           setPanelStatus(status === 'RUNNING' ? 'INSIGHTS_LOADING' : 'INSIGHTS_LOADED');
         },
-        error: (err) => {
-          setPanelStatus('INSIGHTS_LOADED');
-          notifications.toasts.addDanger({
-            title: i18n.translate('dashboardAssistant.feature.text2dash.insightsFailed', {
-              defaultMessage: 'Failed to generate insights',
-            }),
-            text: err.message || 'An error occurred while generating insights',
-          });
-        },
         complete: () => {
           console.log('Pipeline status$ completed');
         },
@@ -128,14 +119,6 @@ export const InputPanel = () => {
       dataInsightsPipeline.output$.subscribe({
         next: (output) => {
           setDataInsights(output.dataInsights);
-        },
-        error: (err) => {
-          notifications.toasts.addDanger({
-            title: i18n.translate('dashboardAssistant.feature.text2dash.insightsFailed', {
-              defaultMessage: 'Failed to generate insights',
-            }),
-            text: err.message || 'An error occurred while generating insights',
-          });
         },
         complete: () => {
           console.log('Pipeline output$ completed');
@@ -617,8 +600,8 @@ export const InputPanel = () => {
               alignItems="center"
               className="text2dash__generatingText"
             >
-              <EuiText size="s">
-                <h4>
+              <EuiText size="s" color="subdued">
+                <h4 className="text2dash__subduedHeading">
                   {i18n.translate('dashboardAssistant.feature.text2dash.generatingResponse', {
                     defaultMessage: 'Generating response...',
                   })}
@@ -642,17 +625,11 @@ export const InputPanel = () => {
               <EuiText size="s" color="subdued">
                 {selectedInsights.length === 0
                   ? ''
-                  : selectedInsights.length === 1
-                  ? i18n.translate('dashboardAssistant.feature.text2dash.oneInsightSelected', {
-                      defaultMessage: '1 insight selected',
-                    })
-                  : i18n.translate(
-                      'dashboardAssistant.feature.text2dash.multipleInsightsSelected',
-                      {
-                        defaultMessage: '{count} insights selected',
-                        values: { count: selectedInsights.length },
-                      }
-                    )}
+                  : i18n.translate('dashboardAssistant.feature.text2dash.insightsSelected', {
+                      defaultMessage:
+                        '{count, plural, one {1 insight selected} other {# insights selected}}',
+                      values: { count: selectedInsights.length },
+                    })}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
