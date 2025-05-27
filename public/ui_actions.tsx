@@ -56,9 +56,6 @@ export function registerGenerateDashboardUIAction(services: Services) {
           })
         );
         url.searchParams.set('indexPatternId', context.datasetId);
-        if (context.dataSourceId) {
-          url.searchParams.set('dataSourceId', context.dataSourceId);
-        }
         window.open(url.toString(), '_blank');
       }
     },

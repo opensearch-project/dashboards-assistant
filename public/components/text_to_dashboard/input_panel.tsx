@@ -70,7 +70,6 @@ export const InputPanel = () => {
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
   const indexPatternId = searchParams.get('indexPatternId') || '';
-  const dataSourceId = searchParams.get('dataSourceId');
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
   const [dataInsights, setDataInsights] = useState<Record<string, string[]>>({});
   const [selectedInsights, setSelectedInsights] = useState<string[]>([]);
@@ -78,6 +77,7 @@ export const InputPanel = () => {
   const [panelStatus, setPanelStatus] = useState<Status>('INSIGHTS_LOADING');
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
   const indexInIndexPattern = indexPattern?.getIndex();
+  const dataSourceId = indexPattern?.dataSourceRef?.id;
 
   useEffect(() => {
     if (indexPatternId) {
@@ -509,15 +509,6 @@ export const InputPanel = () => {
                   })
                 );
                 url.searchParams.set('indexPatternId', ds.value);
-                const firstUnderscoreIndex = ds.value.indexOf('_');
-                const secondUnderscoreIndex = ds.value.indexOf('_', firstUnderscoreIndex + 1);
-                if (firstUnderscoreIndex === -1 || secondUnderscoreIndex === -1) {
-                  throw new Error('Invalid ds.value format: missing underscores');
-                }
-                const dataSource = ds.value.slice(firstUnderscoreIndex + 1, secondUnderscoreIndex);
-                if (dataSource) {
-                  url.searchParams.set('dataSourceId', dataSource);
-                }
                 application.navigateToUrl(url.toString());
               }}
             />
