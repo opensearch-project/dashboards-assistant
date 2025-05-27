@@ -9,6 +9,7 @@ import {
   CoreSetup,
   CoreStart,
   Logger,
+  OpenSearchDashboardsRequest,
   Plugin,
   PluginInitializerContext,
 } from '../../../src/core/server';
@@ -26,6 +27,8 @@ import {
 import { capabilitiesProvider as visNLQCapabilitiesProvider } from './vis_type_nlq/capabilities_provider';
 import { visNLQSavedObjectType } from './vis_type_nlq/saved_object_type';
 import { capabilitiesProvider } from './capabilities';
+import { adminUiSettings } from './settings/admin_ui_settings';
+import { ENABLE_DASHBOARD_ASSISTANT_FEATURE } from './utils/constants';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
@@ -76,25 +79,43 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
 
     core.capabilities.registerProvider(capabilitiesProvider);
     // register UI capabilities from dynamic config service
-    core.capabilities.registerSwitcher(async () => {
-      const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
-      const store = dynamicConfigServiceStart.getAsyncLocalStore();
-      const client = dynamicConfigServiceStart.getClient();
-      try {
-        const dynamicConfig = await client.getConfig(
-          { pluginConfigPath: 'assistant' },
-          { asyncLocalStorageContext: store! }
-        );
-        return {
-          assistant: {
-            chatEnabled: dynamicConfig.chat.enabled,
-          },
-        };
-      } catch (e) {
-        this.logger.error(e);
-        return {};
+    core.capabilities.registerSwitcher(
+      async (opensearchDashboardsRequest: OpenSearchDashboardsRequest) => {
+        const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
+        const store = dynamicConfigServiceStart.getAsyncLocalStore();
+        const client = dynamicConfigServiceStart.getClient();
+
+        try {
+          const dynamicConfig = await client.getConfig(
+            { pluginConfigPath: 'assistant' },
+            { asyncLocalStorageContext: store! }
+          );
+
+          const coreStart = (await core.getStartServices())[0];
+          const savedObjectsClient = coreStart.savedObjects.getScopedClient(
+            opensearchDashboardsRequest
+          );
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+          const isAssistantEnabledBySetting = await uiSettingsClient.get(
+            ENABLE_DASHBOARD_ASSISTANT_FEATURE
+          );
+
+          const isPluginEnabled = dynamicConfig.chat.enabled && isAssistantEnabledBySetting;
+
+          return {
+            assistant: {
+              enabled: isPluginEnabled,
+              chatEnabled: isPluginEnabled,
+              // text2ppl feature should remain enable even dashboard assistant plugin is off
+              queryAssistEnabled: isAssistantEnabledBySetting,
+            },
+          };
+        } catch (e) {
+          this.logger.error(e);
+          return {};
+        }
       }
-    });
+    );
 
     // Register router for discovery summary
     registerData2SummaryRoutes(router, assistantServiceSetup);
@@ -110,6 +131,8 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
 
     registerMessageParser(BasicInputOutputParser);
     registerMessageParser(VisualizationCardParser);
+
+    core.uiSettings.register(adminUiSettings);
 
     return {
       assistantService: assistantServiceSetup,
