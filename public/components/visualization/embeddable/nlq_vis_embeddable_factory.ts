@@ -29,6 +29,10 @@ export class NLQVisualizationEmbeddableFactory implements EmbeddableFactoryDefin
     return true;
   }
 
+  public canCreateNew() {
+    return false;
+  }
+
   public getDisplayName() {
     return i18n.translate('nlq.vis.displayName', {
       defaultMessage: 'Visualization with natural language',

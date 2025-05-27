@@ -17,6 +17,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Bug Fixes
 
+- Fix unnessary embeddable in create new dropdown ([#579](https://github.com/opensearch-project/dashboards-assistant/pull/579))
+
 - log error body or message instead of the entire error object ([#548](https://github.com/opensearch-project/dashboards-assistant/pull/548))
 - Fix http request for insights to be triggered only after view insights button is clicked ([#520](https://github.com/opensearch-project/dashboards-assistant/pull/520))
 - Fix chat page conversation loading state ([#569](https://github.com/opensearch-project/dashboards-assistant/pull/569))
