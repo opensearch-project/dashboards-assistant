@@ -80,6 +80,10 @@ export const InputPanel = () => {
   const dataSourceId = indexPattern?.dataSourceRef?.id;
 
   useEffect(() => {
+    setSelectedInsights([]);
+  }, [indexPatternId]);
+
+  useEffect(() => {
     if (indexPatternId) {
       data.indexPatterns
         .get(indexPatternId)
