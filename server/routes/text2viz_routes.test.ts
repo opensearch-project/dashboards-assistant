@@ -306,12 +306,50 @@ describe('test text2viz route', () => {
         "headers": Object {},
         "payload": Object {
           "error": "Internal Server Error",
-          "message": "Execute agent failed!",
+          "message": "An internal server error occurred.",
           "statusCode": 500,
         },
         "statusCode": 500,
       }
     `);
-    expect(mockedLogger.error).toHaveBeenCalledWith('Execute agent failed!', expect.any(Object));
+    expect(mockedLogger.error).toHaveBeenCalledWith('Error occurred', 'Server error');
+  });
+
+  it('return 5xx when data insights response has invalid JSON', async () => {
+    mockedAssistantClient.executeAgentByConfigName = jest.fn().mockResolvedValue({
+      body: {
+        inference_results: [
+          {
+            output: [
+              {
+                result: `<data-dimension>invalid-json</data-dimension>`,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const result = (await dataInsightsRequest(
+      {
+        dataSchema: 'mapping',
+        sampleData: 'sample',
+      },
+      {}
+    )) as Boom;
+    expect(result.output).toMatchInlineSnapshot(`
+      Object {
+        "headers": Object {},
+        "payload": Object {
+          "error": "Internal Server Error",
+          "message": "Internal Error",
+          "statusCode": 500,
+        },
+        "statusCode": 500,
+      }
+    `);
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      'Error occurred',
+      expect.stringContaining('Unexpected token')
+    );
   });
 });
