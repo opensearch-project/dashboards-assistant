@@ -196,6 +196,7 @@ export const InputPanel = () => {
     const visualizations: Array<{ id: string; type: string }> = [];
     let successCount = 0;
     let failureCount = 0;
+    const failedVisualizationNames: string[] = [];
 
     for (const insight of selectedInsights) {
       const pipeline = new Pipeline([
@@ -280,6 +281,7 @@ export const InputPanel = () => {
         setUpdateMessages((prevMessages) => [...prevMessages, newMessage]);
         successCount++;
       } catch (e) {
+        failedVisualizationNames.push(insight);
         const newMessage: EuiCommentProps = {
           username: i18n.translate('dashboardAssistant.feature.text2dash.assistantName', {
             defaultMessage: 'Dashboards assistant',
@@ -317,6 +319,20 @@ export const InputPanel = () => {
 
     const toastContent = (
       <div>
+        {failureCount > 0 && (
+          <>
+            <EuiText size="s">
+              <div>
+                {i18n.translate('dashboardAssistant.feature.text2dash.failedVisualizationNames', {
+                  defaultMessage: 'Failed visualization name:',
+                })}
+              </div>
+              {failedVisualizationNames.map((name, index) => (
+                <div key={index}>{name}</div>
+              ))}
+            </EuiText>
+          </>
+        )}
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiSmallButton
@@ -454,7 +470,6 @@ export const InputPanel = () => {
     defaultMessage: 'New dashboard',
   });
 
-  // Set breadcrumbs
   useEffect(() => {
     const breadcrumbs: EuiBreadcrumb[] = [
       {
@@ -466,11 +481,6 @@ export const InputPanel = () => {
         },
       },
     ];
-    if (!useUpdatedUX) {
-      breadcrumbs.push({
-        text: pageTitle,
-      });
-    }
     chrome.setBreadcrumbs(breadcrumbs);
   }, [chrome, application, uiSettings]);
 
