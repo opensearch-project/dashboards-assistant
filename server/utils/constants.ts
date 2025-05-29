@@ -5,3 +5,4 @@
 
 export const ML_COMMONS_BASE_API = '/_plugins/_ml';
 export const ROOT_AGENT_CONFIG_ID = 'os_chat';
+export const ENABLE_AI_FEATURES = 'enableAIFeatures';

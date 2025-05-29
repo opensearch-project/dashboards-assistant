@@ -7,7 +7,7 @@ import { ApiResponse, errors } from '@opensearch-project/opensearch';
 import { handleError } from './error_handler';
 import { loggerMock } from '../../../../src/core/server/logging/logger.mock';
 import { AgentNotFoundError } from './errors';
-import { opensearchDashboardsResponseFactory } from '../../../../src/core/server';
+import { opensearchDashboardsResponseFactory } from '../../../../src/core/server/http/router/response';
 
 describe('Error handler', () => {
   it('should return 404 not found response if error is AgentNotFoundError', () => {
