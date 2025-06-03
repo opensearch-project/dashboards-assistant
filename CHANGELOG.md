@@ -25,6 +25,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Infrastructure
 
+- fix(ci): fixed failed ci due to path alias ([#580](https://github.com/opensearch-project/dashboards-assistant/pull/580))
+
 ### Documentation
 
 ### Maintenance
