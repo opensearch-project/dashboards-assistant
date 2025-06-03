@@ -1,5 +1,11 @@
 .text2dash {
-    &__page {
+    &__panel {
+        height: calc(100vh - 64px);
+        margin: 8px;
+        overflow-y: auto;
+    }
+
+    &__mainContent {
         width: 70%;
         margin: 0 auto;
     }
@@ -18,7 +24,7 @@
     }
 
     &__suggestionsHeader {
-        margin: 0 21px;
+        margin: 18px 21px 0 21px;
     }
 
     &__selectAllContainer {

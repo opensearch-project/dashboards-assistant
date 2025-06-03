@@ -57,7 +57,6 @@ export function registerGenerateDashboardUIAction(services: Services) {
         );
         url.searchParams.set('indexPatternId', context.datasetId);
         window.open(url.toString(), '_blank', 'noopener noreferrer');
-        // window.open(url.toString(), '_blank');
       }
     },
   });

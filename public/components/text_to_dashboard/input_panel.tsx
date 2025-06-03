@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingLogo,
-  EuiPage,
   EuiPageBody,
   EuiText,
   EuiBreadcrumb,
@@ -28,6 +27,8 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiIcon,
+  EuiLoadingContent,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useLocation } from 'react-router-dom';
@@ -515,7 +516,7 @@ export const InputPanel = () => {
   };
 
   return (
-    <EuiPage className="text2dash__page" direction="column">
+    <EuiPanel className="text2dash__panel" borderRadius="l" color="plain">
       <MountPointPortal setMountPoint={setHeaderActionMenu}>
         <EuiFlexGroup alignItems="center" gutterSize="s" className="text2dash__headerContainer">
           <EuiHeaderLinks data-test-subj="text2dash-top-nav">
@@ -526,7 +527,7 @@ export const InputPanel = () => {
           {getInputSection()}
         </EuiFlexGroup>
       </MountPointPortal>
-      <EuiPageBody>
+      <EuiPageBody className="text2dash__mainContent">
         {panelStatus === 'INSIGHTS_LOADING' && (
           <EuiEmptyPrompt
             icon={<EuiLoadingLogo logo="visPie" size="xl" />}
@@ -632,6 +633,7 @@ export const InputPanel = () => {
             <EuiCommentList comments={updateMessages} className="text2dash__generationDetails" />
           </>
         )}
+        {panelStatus === 'DASHBOARDS_CREATING' && <EuiLoadingContent lines={2} />}
         {panelStatus === 'INSIGHTS_LOADED' && (
           <EuiFlexGroup justifyContent="spaceBetween" className="text2dash__footerContainer">
             <EuiFlexItem grow={false}>
@@ -661,6 +663,6 @@ export const InputPanel = () => {
           </EuiFlexGroup>
         )}
       </EuiPageBody>
-    </EuiPage>
+    </EuiPanel>
   );
 };
