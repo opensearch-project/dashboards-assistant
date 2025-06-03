@@ -75,7 +75,6 @@ export const InputPanel = () => {
   const [selectedInsights, setSelectedInsights] = useState<string[]>([]);
   const [updateMessages, setUpdateMessages] = useState<EuiCommentProps[]>([]);
   const [panelStatus, setPanelStatus] = useState<Status>('INSIGHTS_LOADING');
-  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
   const indexInIndexPattern = indexPattern?.getIndex();
   const dataSourceId = indexPattern?.dataSourceRef?.id;
 
