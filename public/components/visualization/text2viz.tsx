@@ -87,6 +87,9 @@ export const Text2Viz = () => {
     },
   } = useOpenSearchDashboards<StartServices>();
 
+  const [savedObjectTitle, setSavedObjectTitle] = useState('');
+  const [savedObjectDescription, setSavedObjectDescription] = useState('');
+
   /**
    * Report metrics when the application is loaded
    */
@@ -187,6 +190,8 @@ export const Text2Viz = () => {
             if (indexId) {
               setSelectedSource(indexId);
             }
+            setSavedObjectTitle(savedVis.title || '');
+            setSavedObjectDescription(savedVis.description || '');
           }
           if (savedVis?.uiState) {
             setInputQuestion(JSON.parse(savedVis.uiState ?? '{}').input ?? '');
@@ -275,12 +280,26 @@ export const Text2Viz = () => {
       const indexPattern = currentUsedIndexPatternRef.current;
       const loader = getVisNLQSavedObjectLoader();
       const savedVis: VisNLQSavedObject = await loader.get();
-
+      const updatedVegaSpec = {
+        ...vegaSpec,
+        title: onSaveProps.newTitle,
+        description: onSaveProps.newDescription,
+      };
+      try {
+        setEditorInput(JSON.stringify(updatedVegaSpec, undefined, 4));
+      } catch (e) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('dashboardAssistant.feature.text2viz.updateEditorInputFailed', {
+            defaultMessage: 'Failed to update editor input',
+          }),
+        });
+        return;
+      }
       savedVis.visualizationState = JSON.stringify({
         title: onSaveProps.newTitle,
         type: 'vega-lite',
         params: {
-          spec: vegaSpec,
+          spec: updatedVegaSpec,
         },
       });
       savedVis.uiState = JSON.stringify({
@@ -299,6 +318,8 @@ export const Text2Viz = () => {
           onTitleDuplicate: onSaveProps.onTitleDuplicate,
         });
         if (id) {
+          setSavedObjectTitle(onSaveProps.newTitle);
+          setSavedObjectDescription(onSaveProps.newDescription);
           notifications.toasts.addSuccess({
             title: i18n.translate('dashboardAssistant.feature.text2viz.saveSuccess', {
               defaultMessage: `Saved '{title}'`,
@@ -335,8 +356,8 @@ export const Text2Viz = () => {
         <SavedObjectSaveModalOrigin
           documentInfo={{
             id: savedObjectId ?? '',
-            title: vegaSpec.title ?? '',
-            description: vegaSpec.description,
+            title: savedObjectTitle || vegaSpec?.title || '',
+            description: savedObjectDescription || vegaSpec?.description || '',
           }}
           objectType={VIS_NLQ_SAVED_OBJECT}
           onClose={() => dialog.close()}
