@@ -229,6 +229,42 @@ export class AssistantPlugin
       });
     }
 
+    if (this.config.text2dash.enabled) {
+      core.application.register({
+        id: TEXT2DASH_APP_ID,
+        title: i18n.translate('dashboardAssistant.feature.text2dash', {
+          defaultMessage: 'Data Insights Dashboard',
+        }),
+        navLinkStatus: AppNavLinkStatus.hidden,
+        mount: async (params: AppMountParameters) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+          if (assistantEnabled) {
+            const { renderText2DashApp } = await import('./text2dash');
+            const unmount = renderText2DashApp(params, {
+              ...pluginsStart,
+              ...coreStart,
+              setHeaderActionMenu: params.setHeaderActionMenu,
+              config: this.config,
+            });
+
+            return () => {
+              unmount();
+            };
+          } else {
+            const { renderAppNotFound } = await import('./text2dash');
+            return renderAppNotFound(params);
+          }
+        },
+      });
+
+      registerGenerateDashboardUIAction({
+        core,
+        data: setupDeps.data,
+        dashboard: setupDeps.dashboard,
+        assistantService: this.assistantService,
+      });
+    }
     (async () => {
       const [coreStart, startDeps] = await core.getStartServices();
       if (!coreStart.application.capabilities.assistant?.chatEnabled) {
@@ -456,6 +492,11 @@ export class AssistantPlugin
         overlays: core.overlays,
       });
       setVisNLQSavedObjectLoader(savedVisNLQLoader);
+    }
+
+    if (this.config.text2dash.enabled) {
+      const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
+      setDashboardVersion({ version: opensearchDashboardsVersion });
     }
 
     setIndexPatterns(data.indexPatterns);
