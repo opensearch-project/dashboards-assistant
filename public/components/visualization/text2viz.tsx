@@ -61,7 +61,6 @@ export const INDEX_PATTERN_URL_SEARCH_KEY = 'indexPatternId';
 export const ASSISTANT_INPUT_URL_SEARCH_KEY = 'assistantInput';
 
 export const Text2Viz = () => {
-  const { savedObjectId } = useParams<{ savedObjectId?: string }>();
   const { search } = useLocation();
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const [selectedSource, setSelectedSource] = useState(
@@ -70,6 +69,10 @@ export const Text2Viz = () => {
   const [savedObjectLoading, setSavedObjectLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isNewVisualization, setIsNewVisualization] = useState(false);
+  const [savedObjectId, setSavedObjectId] = useState(
+    useParams<{ savedObjectId?: string }>().savedObjectId
+  );
   const {
     services: {
       application,
@@ -150,6 +153,7 @@ export const Text2Viz = () => {
           setErrorMessage(msg);
         } else {
           setEditorInput(JSON.stringify(result.vega, undefined, 4));
+          setIsNewVisualization(true);
 
           // Report metric when visualization generated successfully
           if (usageCollection) {
@@ -290,8 +294,8 @@ export const Text2Viz = () => {
       savedVis.searchSourceFields = { index: indexPattern };
       savedVis.title = onSaveProps.newTitle;
       savedVis.description = onSaveProps.newDescription;
-      savedVis.copyOnSave = onSaveProps.newCopyOnSave;
-      savedVis.id = savedObjectId ?? '';
+      savedVis.copyOnSave = isNewVisualization || onSaveProps.newCopyOnSave;
+      savedVis.id = isNewVisualization ? '' : savedObjectId ?? '';
 
       try {
         const id = await savedVis.save({
@@ -309,6 +313,11 @@ export const Text2Viz = () => {
           });
           dialog.close();
 
+          if (isNewVisualization) {
+            setSavedObjectId(id);
+            setIsNewVisualization(false);
+          }
+
           // Report metric when a new visualization is saved.
           if (usageCollection) {
             usageCollection.reportUiStats(
@@ -317,6 +326,7 @@ export const Text2Viz = () => {
               `created-${uuidv4()}`
             );
           }
+          setIsNewVisualization(false);
         }
       } catch (e) {
         notifications.toasts.addDanger({
@@ -330,13 +340,35 @@ export const Text2Viz = () => {
       }
     };
 
+    let title = vegaSpec.title ?? '';
+    let description = vegaSpec.description ?? '';
+    const id = savedObjectId ?? '';
+
+    if (!isNewVisualization && savedObjectId) {
+      try {
+        const loader = getVisNLQSavedObjectLoader();
+        const savedVis = await loader.get(savedObjectId);
+        title = savedVis.title ?? title;
+        description = savedVis.description ?? description;
+      } catch (e) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('dashboardAssistant.feature.text2viz.loadFailed', {
+            defaultMessage: `Failed to load saved object: '{title}'`,
+            values: {
+              title: savedObjectId,
+            },
+          }),
+        });
+      }
+    }
+
     const dialog = overlays.openModal(
       toMountPoint(
         <SavedObjectSaveModalOrigin
           documentInfo={{
-            id: savedObjectId ?? '',
-            title: vegaSpec.title ?? '',
-            description: vegaSpec.description,
+            id,
+            title,
+            description,
           }}
           objectType={VIS_NLQ_SAVED_OBJECT}
           onClose={() => dialog.close()}
@@ -353,6 +385,7 @@ export const Text2Viz = () => {
     savedObjectId,
     usageCollection,
     currentInstruction,
+    isNewVisualization,
   ]);
 
   const pageTitle = savedObjectId
