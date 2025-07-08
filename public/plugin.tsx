@@ -261,6 +261,13 @@ export class AssistantPlugin
           }
         },
       });
+
+      registerGenerateDashboardUIAction({
+        core,
+        data: setupDeps.data,
+        dashboard: setupDeps.dashboard,
+        assistantService: this.assistantService,
+      });
     }
     (async () => {
       const [coreStart, startDeps] = await core.getStartServices();
@@ -494,15 +501,7 @@ export class AssistantPlugin
     }
 
     if (this.config.text2dash.enabled) {
-      registerGenerateDashboardUIAction({
-        core,
-        data,
-        uiActions,
-        assistantService: assistantServiceStart,
-      });
-
       const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
-
       setDashboardVersion({ version: opensearchDashboardsVersion });
     }
 
