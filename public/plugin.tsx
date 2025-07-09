@@ -252,13 +252,19 @@ export class AssistantPlugin
         },
       });
 
-      registerGenerateDashboardUIAction({
-        core,
-        data: setupDeps.data,
-        dashboard: setupDeps.dashboard,
-        assistantService: this.assistantService,
+      core.getStartServices().then(([coreStart]) => {
+        const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+        if (assistantEnabled) {
+          registerGenerateDashboardUIAction({
+            core,
+            data: setupDeps.data,
+            dashboard: setupDeps.dashboard,
+            assistantService: this.assistantService,
+          });
+        }
       });
     }
+
     (async () => {
       const [coreStart, startDeps] = await core.getStartServices();
       if (!coreStart.application.capabilities.assistant?.chatEnabled) {
