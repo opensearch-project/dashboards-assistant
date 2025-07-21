@@ -7,7 +7,6 @@ import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import { of, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
 import {
   AppMountParameters,
   AppNavLinkStatus,
