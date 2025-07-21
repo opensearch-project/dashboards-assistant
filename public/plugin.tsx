@@ -7,6 +7,7 @@ import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import { of, Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 import {
   AppMountParameters,
   AppNavLinkStatus,
@@ -140,60 +141,55 @@ export class AssistantPlugin
     });
 
     if (this.config.text2viz.enabled) {
+      setupDeps.visualizations.registerAlias({
+        name: 'text2viz',
+        aliasPath: '#/',
+        aliasApp: VIS_NLQ_APP_ID,
+        title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
+          defaultMessage: 'Natural language',
+        }),
+        description: i18n.translate('dashboardAssistant.feature.text2viz.description', {
+          defaultMessage: 'Generate visualization with a natural language question.',
+        }),
+        icon: 'chatRight',
+        isClassic: true,
+        stage: 'production',
+        appExtensions: {
+          visualizations: {
+            docTypes: [VIS_NLQ_SAVED_OBJECT],
+            toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
+              description: attributes?.description,
+              editApp: VIS_NLQ_APP_ID,
+              editUrl: `/edit/${encodeURIComponent(id)}`,
+              icon: 'chatRight',
+              id,
+              savedObjectType: VIS_NLQ_SAVED_OBJECT,
+              title: attributes?.title,
+              typeTitle: 'NLQ',
+              updated_at: updatedAt,
+              stage: 'production',
+            }),
+          },
+        },
+      });
+
       const checkSubscriptionAndRegisterText2VizButton = async () => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
         const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+
         if (assistantEnabled) {
           setupDeps.embeddable.registerEmbeddableFactory(
             NLQ_VISUALIZATION_EMBEDDABLE_TYPE,
             new NLQVisualizationEmbeddableFactory()
           );
-
-          setupDeps.visualizations.registerAlias({
-            name: 'text2viz',
-            aliasPath: '#/',
-            aliasApp: VIS_NLQ_APP_ID,
-            title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
-              defaultMessage: 'Natural language',
-            }),
-            description: i18n.translate('dashboardAssistant.feature.text2viz.description', {
-              defaultMessage: 'Generate visualization with a natural language question.',
-            }),
-            icon: 'chatRight',
-            stage: 'production',
-            promotion: {
-              buttonText: i18n.translate(
-                'dashboardAssistant.feature.text2viz.promotion.buttonText',
-                {
-                  defaultMessage: 'Natural language previewer',
-                }
-              ),
-              description: i18n.translate(
-                'dashboardAssistant.feature.text2viz.promotion.description',
-                {
-                  defaultMessage:
-                    'Not sure which visualization to choose? Generate visualization previews with a natural language question.',
-                }
-              ),
-            },
-            appExtensions: {
-              visualizations: {
-                docTypes: [VIS_NLQ_SAVED_OBJECT],
-                toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
-                  description: attributes?.description,
-                  editApp: VIS_NLQ_APP_ID,
-                  editUrl: `/edit/${encodeURIComponent(id)}`,
-                  icon: 'chatRight',
-                  id,
-                  savedObjectType: VIS_NLQ_SAVED_OBJECT,
-                  title: attributes?.title,
-                  typeTitle: 'NLQ',
-                  updated_at: updatedAt,
-                  stage: 'production',
-                }),
-              },
-            },
-          });
+        } else {
+          const registeredVisAlias = pluginsStart.visualizations
+            .getAliases()
+            .find((v) => v.name === 'text2viz');
+          if (registeredVisAlias) {
+            // Do not display it in the create vis modal if assistant disenabled
+            registeredVisAlias.hidden = true;
+          }
         }
       };
       checkSubscriptionAndRegisterText2VizButton();
