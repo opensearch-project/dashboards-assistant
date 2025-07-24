@@ -173,7 +173,7 @@ export class AssistantPlugin
       });
 
       const checkSubscriptionAndRegisterText2VizButton = async () => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [coreStart] = await core.getStartServices();
         const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
 
         if (assistantEnabled) {
@@ -182,13 +182,8 @@ export class AssistantPlugin
             new NLQVisualizationEmbeddableFactory()
           );
         } else {
-          const registeredVisAlias = pluginsStart.visualizations
-            .getAliases()
-            .find((v) => v.name === 'text2viz');
-          if (registeredVisAlias) {
-            // Do not display it in the create vis modal if assistant disenabled
-            registeredVisAlias.hidden = true;
-          }
+          // Do not display it in the create vis modal if assistant disabled
+          setupDeps.visualizations.hideTypes(['text2viz']);
         }
       };
       checkSubscriptionAndRegisterText2VizButton();
