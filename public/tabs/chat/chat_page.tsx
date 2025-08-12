@@ -21,7 +21,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const chatContext = useChatContext();
   const { chatState, chatStateDispatch } = useChatState();
   const conversationLoadStatus = useObservable(core.services.conversationLoad.status$);
-  const conversationsStatus = useObservable(core.services.conversations.status$);
+  const conversationsStatus = useObservable(core.services.conversationLoad.latestIdStatus$);
   const messagesLoading = conversationLoadStatus === 'loading';
   const conversationsLoading = conversationsStatus === 'loading';
 
@@ -46,7 +46,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         },
       });
     }
-  }, [chatContext.conversationId, chatStateDispatch]);
+  }, [chatContext.conversationId, chatStateDispatch, core.services.conversationLoad]);
 
   const { loadChat } = useChatActions();
   const chatScrollTopRef = useRef<{ scrollTop: number; height: number } | null>(null);
@@ -64,33 +64,22 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   };
   const refreshConversationsList = useCallback(async () => {
     if (!chatContext.conversationId) {
-      core.services.conversations
-        .load({
-          page: 1,
-          perPage: 1,
-          fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
-          sortField: 'updatedTimeMs',
-          sortOrder: 'DESC',
-          searchFields: ['title'],
-        })
-        .then(async () => {
-          const data = core.services.conversations.conversations$.getValue();
-          if (data?.objects?.length) {
-            const { id } = data.objects[0];
-            const conversation = await core.services.conversationLoad.load(id);
-            if (conversation) {
-              chatStateDispatch({
-                type: 'receive',
-                payload: {
-                  messages: conversation.messages,
-                  interactions: conversation.interactions,
-                },
-              });
-            }
+      core.services.conversationLoad.getLatestConversationId().then(async (conversationId) => {
+        if (conversationId) {
+          const conversation = await core.services.conversationLoad.load(conversationId);
+          if (conversation) {
+            chatStateDispatch({
+              type: 'receive',
+              payload: {
+                messages: conversation.messages,
+                interactions: conversation.interactions,
+              },
+            });
           }
-        });
+        }
+      });
     }
-  }, [chatStateDispatch]);
+  }, [chatStateDispatch, core.services.conversationLoad]);
 
   return (
     <>

@@ -19,7 +19,7 @@ import {
 } from './nlq_vis_embeddable';
 import { VIS_NLQ_APP_ID, VIS_NLQ_SAVED_OBJECT } from '../../../../common/constants/vis_type_nlq';
 import { SavedObjectMetaData } from '../../../../../../src/plugins/saved_objects/public';
-import { getHttp } from '../../../services';
+import { getHttp, getTimeFilter } from '../../../services';
 
 export class NLQVisualizationEmbeddableFactory implements EmbeddableFactoryDefinition {
   public readonly type = NLQ_VISUALIZATION_EMBEDDABLE_TYPE;
@@ -27,6 +27,10 @@ export class NLQVisualizationEmbeddableFactory implements EmbeddableFactoryDefin
   // TODO: it may need control on whether it's editable or not
   public async isEditable() {
     return true;
+  }
+
+  public canCreateNew() {
+    return false;
   }
 
   public getDisplayName() {
@@ -54,6 +58,7 @@ export class NLQVisualizationEmbeddableFactory implements EmbeddableFactoryDefin
     try {
       const savedObject: VisNLQSavedObject = await loader.get(savedObjectId);
       return new NLQVisualizationEmbeddable(
+        getTimeFilter(),
         {
           ...input,
           visInput: {
@@ -78,7 +83,12 @@ export class NLQVisualizationEmbeddableFactory implements EmbeddableFactoryDefin
     if (input.visInput) {
       const editPath = `/edit/${input.savedObjectId}`;
       const editUrl = getHttp().basePath.prepend(`/app/${VIS_NLQ_APP_ID}${editPath}`);
-      return new NLQVisualizationEmbeddable(input, { editUrl, editPath, editable: true }, parent);
+      return new NLQVisualizationEmbeddable(
+        getTimeFilter(),
+        input,
+        { editUrl, editPath, editable: true },
+        parent
+      );
     } else {
       return undefined;
     }

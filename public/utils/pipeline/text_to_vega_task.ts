@@ -15,6 +15,7 @@ interface Input {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sample: any;
   dataSourceId: string | undefined;
+  timeFieldName?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,15 +38,21 @@ export class Text2VegaTask extends Task<Input, Input & { vega: any }> {
       dataSchema: JSON.stringify(v.sample.schema),
       dataSourceId: v.dataSourceId,
     });
-    const dataSource = await this.getDataSourceById(v.dataSourceId);
-    const dataSourceName = dataSource?.attributes.title;
+    const dataSourceName = await this.getDataSourceNameById(v.dataSourceId);
     result.data = {
       url: {
         '%type%': 'ppl',
         body: { query: v.ppl },
-        data_source_name: dataSourceName,
       },
     };
+
+    if (dataSourceName) {
+      result.data.url.data_source_name = dataSourceName;
+    }
+    if (v.timeFieldName) {
+      result.data.url['%timefield%'] = v.timeFieldName;
+    }
+
     return { ...v, vega: result };
   }
 
@@ -95,7 +102,7 @@ export class Text2VegaTask extends Task<Input, Input & { vega: any }> {
     return res;
   }
 
-  async getDataSourceById(id?: string) {
+  async getDataSourceNameById(id?: string) {
     if (!id) {
       return null;
     }
@@ -104,6 +111,6 @@ export class Text2VegaTask extends Task<Input, Input & { vega: any }> {
     if (res.error) {
       return null;
     }
-    return res;
+    return res.attributes.title;
   }
 }

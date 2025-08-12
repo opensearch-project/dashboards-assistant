@@ -106,4 +106,13 @@ describe('Error handler', () => {
     expect(error.status).toBe(400);
     expect(error.payload).toEqual('ConnectionError');
   });
+
+  it('should log error body or error message', () => {
+    const mockedLogger = loggerMock.create();
+    handleError({ body: 'test body' }, opensearchDashboardsResponseFactory, mockedLogger);
+    expect(mockedLogger.error).toHaveBeenCalledWith('Error occurred', 'test body');
+
+    handleError(new Error('error message'), opensearchDashboardsResponseFactory, mockedLogger);
+    expect(mockedLogger.error).toHaveBeenCalledWith('Error occurred', 'error message');
+  });
 });

@@ -91,7 +91,7 @@ export interface AssistantSetup {
   assistantActions: Omit<AssistantActions, 'executeAction'>;
   assistantTriggers: { AI_ASSISTANT_QUERY_EDITOR_TRIGGER: string };
   registerIncontextInsight: IncontextInsightRegistry['register'];
-  renderIncontextInsight: (component: React.ReactNode) => React.ReactNode;
+  renderIncontextInsight: (component: React.ReactNode) => React.ReactElement;
 }
 
 export interface AssistantStart {
@@ -117,7 +117,7 @@ export type IncontextInsights = Map<string, IncontextInsight>;
 
 export interface ContextObj {
   context: string;
-  additionalInfo: Record<string, string>;
+  additionalInfo: Record<string, unknown>;
   dataSourceId?: string;
 }
 

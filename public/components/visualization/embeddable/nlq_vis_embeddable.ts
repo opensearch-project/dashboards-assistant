@@ -4,6 +4,7 @@
  */
 
 import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
 import { Subscription } from 'rxjs';
 
 import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
@@ -12,7 +13,7 @@ import {
   ExpressionsStart,
   IExpressionLoaderParams,
 } from '../../../../../../src/plugins/expressions/public';
-import { TimeRange } from '../../../../../../src/plugins/data/public';
+import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
 import { NLQVisualizationInput, NLQVisualizationOutput } from './types';
 import { getExpressions } from '../../../services';
 import { VIS_NLQ_APP_ID, VIS_NLQ_SAVED_OBJECT } from '../../../../common/constants/vis_type_nlq';
@@ -46,6 +47,7 @@ export class NLQVisualizationEmbeddable extends Embeddable<
   private visInput?: NLQVisualizationInput['visInput'];
 
   constructor(
+    timeFilter: TimefilterContract,
     initialInput: NLQVisualizationInput,
     config?: NLQVisualizationEmbeddableConfig,
     parent?: IContainer
@@ -66,6 +68,19 @@ export class NLQVisualizationEmbeddable extends Embeddable<
     // In the future, we may need to add something to ui state to trigger visualization to reload
     this.uiState = new PersistedState();
     this.visInput = initialInput.visInput;
+
+    this.subscriptions.push(
+      this.getInput$().subscribe(() => {
+        const dirty = this.dirtyCheck();
+        if (dirty) {
+          this.updateHandler();
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      timeFilter.getAutoRefreshFetch$().subscribe(() => this.updateHandler())
+    );
   }
 
   /**
@@ -93,12 +108,24 @@ export class NLQVisualizationEmbeddable extends Embeddable<
     return pipeline;
   };
 
+  private dirtyCheck() {
+    let dirty = false;
+
+    // Check if timerange has changed
+    if (!isEqual(this.input.timeRange, this.timeRange)) {
+      this.timeRange = cloneDeep(this.input.timeRange);
+      dirty = true;
+    }
+    return dirty;
+  }
+
   private updateHandler = async () => {
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
-        query: this.input.query,
-        filters: this.input.filters,
+        // for PPL+vega, we don't read query and fitlers from input, because these are already defined by ppl
+        // query: this.input.query,
+        // filters: this.input.filters,
       },
       uiState: this.uiState,
     };

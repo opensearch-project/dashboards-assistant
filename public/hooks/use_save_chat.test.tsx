@@ -97,7 +97,7 @@ describe('useSaveChat hook', () => {
         if (((path as unknown) as string) === NOTEBOOK_API.CREATE_NOTEBOOK) {
           resolve(mockId);
         } else {
-          resolve({ objectId: mockId });
+          resolve({ id: mockId });
         }
       });
     });

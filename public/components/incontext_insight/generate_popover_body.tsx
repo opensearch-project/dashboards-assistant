@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
@@ -34,6 +34,30 @@ import { buildUrlQuery, createIndexPatterns, extractTimeRangeDSL } from '../../u
 import { AssistantPluginStartDependencies } from '../../types';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { formatUrlWithWorkspaceId } from '../../../../../src/core/public/utils';
+
+const getInsightParams = (
+  contextObj: ContextObj | undefined,
+  incontextInsight: IncontextInsightInput
+) => {
+  const contextContent = contextObj?.context || '';
+  const dataSourceId = contextObj?.dataSourceId;
+  const dataSourceQuery = dataSourceId ? { dataSourceId } : {};
+  let summaryType: string;
+  const endIndex = incontextInsight.key.indexOf('_', 0);
+  if (endIndex !== -1) {
+    summaryType = incontextInsight.key.substring(0, endIndex);
+  } else {
+    summaryType = incontextInsight.key;
+  }
+  const insightType = summaryType === 'alerts' ? 'user_insight' : undefined;
+
+  return {
+    contextContent,
+    dataSourceQuery,
+    summaryType,
+    insightType,
+  };
+};
 
 export const GeneratePopoverBody: React.FC<{
   incontextInsight: IncontextInsightInput;
@@ -87,11 +111,33 @@ export const GeneratePopoverBody: React.FC<{
   }, [contextObject, setDisplayDiscoverButton]);
 
   useEffectOnce(() => {
-    onGenerateSummary(
+    const summaryInstructions =
       incontextInsight.suggestions && incontextInsight.suggestions.length > 0
         ? incontextInsight.suggestions[0]
-        : 'Please summarize the input'
-    );
+        : 'Please summarize the input';
+
+    // append format instructions
+    const finalInstructions = `${summaryInstructions}, And output should follow format instructions defined in \`output_format\` tag
+    <output_format>
+    **Summary**
+    - Provide a concise paragraph that:
+      1. States the core issue/alert
+      2. Describes the impact/severity
+      3. Highlights key metrics or thresholds breached
+    Please don't use bullet points for summary, use paragraph instead.
+
+    **Action Items**
+    - List 3-5 specific, actionable recommendations:
+      1. Mitigation steps
+      2. Investigation points
+
+    Notes:
+    - Include specific numbers/metrics where applicable
+    - Keep technical terms consistent
+    - Link to relevant documentation when available
+    </output_format>`;
+
+    onGenerateSummary(finalInstructions);
   });
 
   const onGenerateSummary = (summarizationQuestion: string) => {
@@ -111,17 +157,10 @@ export const GeneratePopoverBody: React.FC<{
       }
       // onGenerateSummary will get contextObj when mounted, use this returned value to set state to avoid re-fetch.
       setContextObject(contextObj);
-      const contextContent = contextObj?.context || '';
-      const dataSourceId = contextObj?.dataSourceId;
-      const dataSourceQuery = dataSourceId ? { dataSourceId } : {};
-      let summaryType: string;
-      const endIndex = incontextInsight.key.indexOf('_', 0);
-      if (endIndex !== -1) {
-        summaryType = incontextInsight.key.substring(0, endIndex);
-      } else {
-        summaryType = incontextInsight.key;
-      }
-      const insightType = summaryType === 'alerts' ? 'user_insight' : undefined;
+      const { contextContent, dataSourceQuery, summaryType, insightType } = getInsightParams(
+        contextObj,
+        incontextInsight
+      );
       const index = contextObj?.additionalInfo?.index;
       const dsl = contextObj?.additionalInfo?.dsl;
       const topNLogPatternData = contextObj?.additionalInfo?.topNLogPatternData;
@@ -144,16 +183,6 @@ export const GeneratePopoverBody: React.FC<{
           setSummary(summaryContent);
           const insightAgentIdExists = !!insightType && response.insightAgentIdExists;
           setInsightAvailable(insightAgentIdExists);
-          if (insightAgentIdExists) {
-            onGenerateInsightBasedOnSummary(
-              dataSourceQuery,
-              summaryType,
-              insightType,
-              summaryContent,
-              contextContent,
-              `Please provide your insight on this ${summaryType}.`
-            );
-          }
           reportMetric(usageCollection, metricAppName, 'generated', METRIC_TYPE.COUNT);
         })
         .catch((error) => {
@@ -170,23 +199,21 @@ export const GeneratePopoverBody: React.FC<{
     return summarize();
   };
 
-  const onGenerateInsightBasedOnSummary = (
-    dataSourceQuery: {},
-    summaryType: string,
-    insightType: string,
-    summaryContent: string,
-    context: string,
-    insightQuestion: string
-  ) => {
+  const onGenerateInsightBasedOnSummary = () => {
+    const { contextContent, dataSourceQuery, summaryType, insightType } = getInsightParams(
+      contextObject,
+      incontextInsight
+    );
+
     const generateInsight = async () => {
       httpSetup
         ?.post(SUMMARY_ASSISTANT_API.INSIGHT, {
           body: JSON.stringify({
             summaryType,
             insightType,
-            summary: summaryContent,
-            context,
-            question: insightQuestion,
+            summary,
+            context: contextContent,
+            question: `Please provide your insight on this ${summaryType}.`,
           }),
           query: dataSourceQuery,
         })
@@ -205,6 +232,13 @@ export const GeneratePopoverBody: React.FC<{
     };
 
     return generateInsight();
+  };
+
+  const handleInsightClick = () => {
+    setShowInsight(!showInsight);
+    if (!showInsight && insight === '') {
+      onGenerateInsightBasedOnSummary();
+    }
   };
 
   const handleNavigateToDiscover = async () => {
@@ -341,12 +375,7 @@ export const GeneratePopoverBody: React.FC<{
           </EuiButton>
         )}
         {insightAvailable && (
-          <TraceButton
-            onClick={() => {
-              setShowInsight(!showInsight);
-            }}
-            size="s"
-          >
+          <TraceButton onClick={handleInsightClick} size="s">
             {showInsight
               ? i18n.translate('assistantDashboards.incontextInsight.backToSummary', {
                   defaultMessage: 'Back to summary',

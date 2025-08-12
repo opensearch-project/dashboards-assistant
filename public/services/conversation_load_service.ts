@@ -8,14 +8,22 @@ import { HttpStart } from '../../../../src/core/public';
 import { IConversation } from '../../common/types/chat_saved_object_attributes';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { DataSourceService } from './data_source_service';
+import { ConversationsService } from './conversations_service';
 
 export class ConversationLoadService {
   status$: BehaviorSubject<
     'idle' | 'loading' | { status: 'error'; error: Error }
   > = new BehaviorSubject<'idle' | 'loading' | { status: 'error'; error: Error }>('idle');
   abortController?: AbortController;
+  private readonly conversationsService: ConversationsService;
 
-  constructor(private _http: HttpStart, private _dataSource: DataSourceService) {}
+  public get latestIdStatus$() {
+    return this.conversationsService.status$;
+  }
+
+  constructor(private _http: HttpStart, private _dataSource: DataSourceService) {
+    this.conversationsService = new ConversationsService(_http, _dataSource);
+  }
 
   load = async (conversationId: string, nextToken?: string) => {
     this.abortController?.abort();
@@ -37,5 +45,20 @@ export class ConversationLoadService {
     } catch (error) {
       this.status$.next({ status: 'error', error });
     }
+  };
+
+  getLatestConversationId = () => {
+    return this.conversationsService
+      .load({
+        page: 1,
+        perPage: 1,
+        fields: ['createdTimeMs', 'updatedTimeMs', 'title'],
+        sortField: 'updatedTimeMs',
+        sortOrder: 'DESC',
+        searchFields: ['title'],
+      })
+      .then(() => {
+        return this.conversationsService.conversations$.getValue()?.objects[0].id;
+      });
   };
 }

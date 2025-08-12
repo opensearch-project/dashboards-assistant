@@ -15,6 +15,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
 - Change chatbot entry point to a single button ([#540](https://github.com/opensearch-project/dashboards-assistant/pull/540))
 - Support streaming output([#493](https://github.com/opensearch-project/dashboards-assistant/pull/493))
 - Update event names for t2v and feedback ([#543](https://github.com/opensearch-project/dashboards-assistant/pull/543))
+- Prevent user from navigating to t2viz from discover if ppl cannot be run or return 0 result ([#546](https://github.com/opensearch-project/dashboards-assistant/pull/546))
 
 ### Bug Fixes
 

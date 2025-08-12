@@ -20,6 +20,7 @@ import {
   toMountPoint,
 } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
+import { Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
 import {
@@ -44,6 +45,8 @@ import {
   setExpressions,
   setHttp,
   setAssistantService,
+  setTimeFilter,
+  setLocalStorage,
 } from './services';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
@@ -70,7 +73,7 @@ import {
   ASSISTANT_INPUT_URL_SEARCH_KEY,
   INDEX_PATTERN_URL_SEARCH_KEY,
 } from './components/visualization/text2viz';
-import { DEFAULT_DATA } from '../../../src/plugins/data/common';
+import { DEFAULT_DATA, createStorage } from '../../../src/plugins/data/common';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -137,60 +140,50 @@ export class AssistantPlugin
     });
 
     if (this.config.text2viz.enabled) {
+      setupDeps.visualizations.registerAlias({
+        name: 'text2viz',
+        aliasPath: '#/',
+        aliasApp: VIS_NLQ_APP_ID,
+        title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
+          defaultMessage: 'Natural language',
+        }),
+        description: i18n.translate('dashboardAssistant.feature.text2viz.description', {
+          defaultMessage: 'Generate visualization with a natural language question.',
+        }),
+        icon: 'chatRight',
+        isClassic: true,
+        stage: 'production',
+        appExtensions: {
+          visualizations: {
+            docTypes: [VIS_NLQ_SAVED_OBJECT],
+            toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
+              description: attributes?.description,
+              editApp: VIS_NLQ_APP_ID,
+              editUrl: `/edit/${encodeURIComponent(id)}`,
+              icon: 'chatRight',
+              id,
+              savedObjectType: VIS_NLQ_SAVED_OBJECT,
+              title: attributes?.title,
+              typeTitle: 'NLQ',
+              updated_at: updatedAt,
+              stage: 'production',
+            }),
+          },
+        },
+      });
+
       const checkSubscriptionAndRegisterText2VizButton = async () => {
         const [coreStart] = await core.getStartServices();
         const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+
         if (assistantEnabled) {
           setupDeps.embeddable.registerEmbeddableFactory(
             NLQ_VISUALIZATION_EMBEDDABLE_TYPE,
             new NLQVisualizationEmbeddableFactory()
           );
-
-          setupDeps.visualizations.registerAlias({
-            name: 'text2viz',
-            aliasPath: '#/',
-            aliasApp: VIS_NLQ_APP_ID,
-            title: i18n.translate('dashboardAssistant.feature.text2viz.title', {
-              defaultMessage: 'Natural language',
-            }),
-            description: i18n.translate('dashboardAssistant.feature.text2viz.description', {
-              defaultMessage: 'Generate visualization with a natural language question.',
-            }),
-            icon: 'chatRight',
-            stage: 'production',
-            promotion: {
-              buttonText: i18n.translate(
-                'dashboardAssistant.feature.text2viz.promotion.buttonText',
-                {
-                  defaultMessage: 'Natural language previewer',
-                }
-              ),
-              description: i18n.translate(
-                'dashboardAssistant.feature.text2viz.promotion.description',
-                {
-                  defaultMessage:
-                    'Not sure which visualization to choose? Generate visualization previews with a natural language question.',
-                }
-              ),
-            },
-            appExtensions: {
-              visualizations: {
-                docTypes: [VIS_NLQ_SAVED_OBJECT],
-                toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
-                  description: attributes?.description,
-                  editApp: VIS_NLQ_APP_ID,
-                  editUrl: `/edit/${encodeURIComponent(id)}`,
-                  icon: 'chatRight',
-                  id,
-                  savedObjectType: VIS_NLQ_SAVED_OBJECT,
-                  title: attributes?.title,
-                  typeTitle: 'NLQ',
-                  updated_at: updatedAt,
-                  stage: 'production',
-                }),
-              },
-            },
-          });
+        } else {
+          // Do not display it in the create vis modal if assistant disabled
+          setupDeps.visualizations.hideTypes(['text2viz']);
         }
       };
       checkSubscriptionAndRegisterText2VizButton();
@@ -381,12 +374,31 @@ export class AssistantPlugin
     setConfigSchema(this.config);
     setUiActions(uiActions);
     setAssistantService(assistantServiceStart);
+    setLocalStorage(createStorage({ engine: window.localStorage, prefix: 'dashboardsAssistant.' }));
 
     if (this.config.text2viz.enabled) {
       uiActions.addTriggerAction(AI_ASSISTANT_QUERY_EDITOR_TRIGGER, {
         id: 'assistant_generate_visualization_action',
         order: 1,
         getDisplayName: () => 'Generate visualization',
+        getTooltip: (context) => {
+          const { searchState } = context;
+          const { hasError, results } = searchState || {};
+          if (hasError || results?.size === 0)
+            return i18n.translate(
+              'dashboardAssistant.queryAssist.generate.visualization.error.message',
+              {
+                defaultMessage:
+                  'Generate visualization button was disabled because of No Results/Error.',
+              }
+            );
+          return '';
+        },
+        isDisabled: (context) => {
+          const { searchState } = context;
+          const { hasError, results } = searchState || {};
+          return hasError || results?.size === 0;
+        },
         getIconType: () => 'visLine' as const,
         // T2Viz is only compatible with data sources that have certain agents configured
         isCompatible: async (context) => {
@@ -437,6 +449,7 @@ export class AssistantPlugin
     }
 
     setIndexPatterns(data.indexPatterns);
+    setTimeFilter(data.query.timefilter.timefilter);
     setExpressions(expressions);
     setHttp(core.http);
 
