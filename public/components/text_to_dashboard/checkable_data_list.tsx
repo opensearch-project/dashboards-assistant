@@ -7,11 +7,9 @@ import {
   EuiCheckableCard,
   EuiFormFieldset,
   EuiLink,
-  // EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  // EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import React from 'react';
@@ -54,14 +52,6 @@ export const CheckableDataList = (props: Props) => {
             <EuiCheckableCard
               id={htmlIdGenerator()()}
               label={item}
-              // Temporarily hide the preview icon
-              // <div
-              //   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-              // >
-              //   <EuiToolTip content="Preview insight">
-              //     <EuiIcon type="eye" style={{ marginLeft: '8px', cursor: 'pointer' }} />
-              //   </EuiToolTip>
-              // </div>
               checkableType="checkbox"
               value={item}
               checked={props.selection.includes(item)}
