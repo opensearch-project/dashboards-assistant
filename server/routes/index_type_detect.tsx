@@ -84,7 +84,7 @@ export async function detectIndexType(
     }
     return false;
   } catch (error) {
-    console.error('Error detecting index type:', error);
+    console.error('Error detecting index type:', error.body || error.message);
     // Can not detect index type and return default as is not log related
     return false;
   }
