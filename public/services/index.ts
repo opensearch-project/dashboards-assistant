@@ -15,6 +15,7 @@ import { AssistantServiceStart } from './assistant_service';
 import chatIcon from '../assets/chat.svg';
 
 export * from './incontext_insight';
+export * from './suggestion';
 export { ConversationLoadService } from './conversation_load_service';
 export { ConversationsService } from './conversations_service';
 
@@ -47,6 +48,10 @@ export const [getAssistantService, setAssistantService] = createGetterSetter<Ass
 );
 
 export const [getLocalStorage, setLocalStorage] = createGetterSetter<DataStorage>('LocalStorage');
+
+export const [getSuggestionService, setSuggestionService] = createGetterSetter<
+  import('./suggestion').SuggestionServiceContract
+>('SuggestionService');
 
 export { DataSourceService, DataSourceServiceContract } from './data_source_service';
 

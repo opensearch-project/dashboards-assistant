@@ -77,6 +77,10 @@ export type ISuggestedAction = ISuggestedActionBase &
         actionType: 'view_trace';
         metadata: { interactionId: string };
       }
+    | {
+        actionType: 'customize';
+        action: () => Promise<boolean>;
+      }
   );
 export interface SendFeedbackBody {
   satisfaction: boolean;
