@@ -27,6 +27,7 @@ import {
 import { QueryEnhancementsPluginSetup } from '../../../src/plugins/query_enhancements/public';
 
 import { ConfigSchema } from '../common/types/config';
+import { ISuggestionProvider } from './services/suggestion';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -92,6 +93,7 @@ export interface AssistantSetup {
   assistantTriggers: { AI_ASSISTANT_QUERY_EDITOR_TRIGGER: string };
   registerIncontextInsight: IncontextInsightRegistry['register'];
   renderIncontextInsight: (component: React.ReactNode) => React.ReactElement;
+  registerSuggestionProvider: (provider: ISuggestionProvider) => void;
 }
 
 export interface AssistantStart {
