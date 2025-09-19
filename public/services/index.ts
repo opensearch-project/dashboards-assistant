@@ -13,8 +13,11 @@ import { IndexPatternsContract, TimefilterContract } from '../../../../src/plugi
 import { ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import { AssistantServiceStart } from './assistant_service';
 import chatIcon from '../assets/chat.svg';
+import { SuggestionServiceContract } from './suggestion';
+import { ContextProviderStart } from '../../../../src/plugins/context_provider/public';
 
 export * from './incontext_insight';
+export * from './suggestion';
 export { ConversationLoadService } from './conversation_load_service';
 export { ConversationsService } from './conversations_service';
 
@@ -47,6 +50,14 @@ export const [getAssistantService, setAssistantService] = createGetterSetter<Ass
 );
 
 export const [getLocalStorage, setLocalStorage] = createGetterSetter<DataStorage>('LocalStorage');
+
+export const [getSuggestionService, setSuggestionService] = createGetterSetter<
+  SuggestionServiceContract
+>('SuggestionService');
+
+export const [getContextProvider, setContextProvider] = createGetterSetter<ContextProviderStart>(
+  'ContextProvider'
+);
 
 export { DataSourceService, DataSourceServiceContract } from './data_source_service';
 

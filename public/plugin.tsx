@@ -20,7 +20,6 @@ import {
   toMountPoint,
 } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
-import { Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
 import { HeaderChatButton } from './chat_header_button';
 import { AssistantServices } from './contexts/core_context';
 import {
@@ -47,7 +46,10 @@ import {
   setAssistantService,
   setTimeFilter,
   setLocalStorage,
+  setSuggestionService,
+  setContextProvider,
 } from './services';
+import { ISuggestionProvider, SuggestionService } from './services/suggestion';
 import { ConfigSchema } from '../common/types/config';
 import { DataSourceService } from './services/data_source_service';
 import {
@@ -103,6 +105,7 @@ export class AssistantPlugin
   private dataSourceService: DataSourceService;
   private resetChatSubscription: Subscription | undefined;
   private assistantService = new AssistantService();
+  private suggestionService = new SuggestionService();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -114,6 +117,7 @@ export class AssistantPlugin
     setupDeps: AssistantPluginSetupDependencies
   ): AssistantSetup {
     this.assistantService.setup();
+    this.suggestionService.setup();
     this.incontextInsightRegistry = new IncontextInsightRegistry();
     this.incontextInsightRegistry?.setIsEnabled(this.config.incontextInsight.enabled);
     setIncontextInsightRegistry(this.incontextInsightRegistry);
@@ -360,20 +364,28 @@ export class AssistantPlugin
           />
         );
       },
+      registerSuggestionProvider: (provider: ISuggestionProvider) => {
+        this.suggestionService.registerProvider(provider);
+      },
     };
   }
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions }: AssistantPluginStartDependencies
+    { data, expressions, uiActions, contextProvider }: AssistantPluginStartDependencies
   ): AssistantStart {
     const assistantServiceStart = this.assistantService.start(core.http);
+    const suggestionServiceContract = this.suggestionService.start();
     setCoreStart(core);
     setChrome(core.chrome);
     setNotifications(core.notifications);
     setConfigSchema(this.config);
     setUiActions(uiActions);
     setAssistantService(assistantServiceStart);
+    setSuggestionService(suggestionServiceContract);
+    if (contextProvider) {
+      setContextProvider(contextProvider);
+    }
     setLocalStorage(createStorage({ engine: window.localStorage, prefix: 'dashboardsAssistant.' }));
 
     if (this.config.text2viz.enabled) {
@@ -462,6 +474,7 @@ export class AssistantPlugin
   public stop() {
     this.dataSourceService.stop();
     this.assistantService.stop();
+    this.suggestionService.stop();
     this.resetChatSubscription?.unsubscribe();
   }
 }

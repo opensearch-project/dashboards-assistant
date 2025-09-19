@@ -4,13 +4,16 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import cs from 'classnames';
-import { useObservable } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
+import { Subscription } from 'rxjs';
 import { useChatContext, useCore } from '../../contexts';
 import { useChatState, useChatActions } from '../../hooks';
 import { ChatPageContent } from './chat_page_content';
 import { ChatInputControls } from './controls/chat_input_controls';
+import { ContextPins } from './components/context_pins';
+import { getContextProvider } from '../../services';
 
 interface ChatPageProps {
   className?: string;
@@ -79,7 +82,41 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         }
       });
     }
-  }, [chatStateDispatch, core.services.conversationLoad]);
+  }, [chatContext.conversationId, chatStateDispatch, core.services.conversationLoad]);
+
+  useEffectOnce(() => {
+    let sub: Subscription;
+    const getCurrentContext = async () => {
+      try {
+        const contextProvider = getContextProvider();
+        if (contextProvider) {
+          sub = contextProvider.getStaticContext$().subscribe((staticContext) => {
+            console.log('staticContext', staticContext);
+            if (staticContext === null) return;
+            if (staticContext?.appId === chatContext.appId) {
+              // hardcode for investigation
+              chatContext.setSessionContext({
+                investigation: staticContext.data.investigation,
+              });
+            } else {
+              chatContext.setSessionContext({});
+            }
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to get context from contextProvider:', error);
+      }
+    };
+
+    getCurrentContext();
+
+    // unsubscrible
+    return () => {
+      if (sub) {
+        sub.unsubscribe();
+      }
+    };
+  });
 
   return (
     <>
@@ -108,6 +145,8 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         </EuiPage>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
+        <EuiSpacer size="xs" />
+        <ContextPins />
         <EuiSpacer size="xs" />
         <ChatInputControls
           loading={chatState.llmResponding}
