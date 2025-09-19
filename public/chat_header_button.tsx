@@ -57,6 +57,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
   const [interactionId, setInteractionId] = useState<string | undefined>(undefined);
+  const [sessionContext, setSessionContext] = useState<Record<string, unknown> | undefined>();
   const inputRef = useRef<HTMLInputElement>(null);
   const flyoutVisibleRef = useRef(flyoutVisible);
   flyoutVisibleRef.current = flyoutVisible;
@@ -146,6 +147,8 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       setInteractionId,
       sidecarDockedMode,
       setSidecarDockedMode,
+      sessionContext,
+      setSessionContext,
     }),
     [
       appId,
@@ -163,6 +166,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       setInteractionId,
       sidecarDockedMode,
       setSidecarDockedMode,
+      sessionContext,
     ]
   );
 
@@ -205,6 +209,26 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       sideCarRef.current?.close();
     };
   }, [core.overlays]);
+
+  // Refresh session context when app changes
+  useEffect(() => {
+    const refreshContext = async () => {
+      try {
+        const { getContextProvider } = await import('./services');
+        const contextProvider = getContextProvider();
+        if (contextProvider && appId) {
+          const context = await contextProvider.getContext(appId);
+          setSessionContext(context);
+        }
+      } catch (error) {
+        console.warn('Failed to refresh context:', error);
+      }
+    };
+
+    if (appId) {
+      refreshContext();
+    }
+  }, [appId]);
 
   useEffect(() => {
     const handleSuggestion = async (event: {

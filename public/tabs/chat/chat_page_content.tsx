@@ -384,8 +384,9 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
               <EuiFlexItem grow={false}>
                 <SuggestionBubble
                   onClick={
-                    suggestedAction.action ||
-                    (() => !props.inputDisabled && executeAction(suggestedAction, props.message))
+                    suggestedAction.actionType === 'customize'
+                      ? suggestedAction.action
+                      : () => !props.inputDisabled && executeAction(suggestedAction, props.message)
                   }
                   color={props.inputDisabled ? 'subdued' : 'default'}
                   content={suggestedAction.message}

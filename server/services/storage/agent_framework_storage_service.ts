@@ -55,9 +55,19 @@ export class AgentFrameworkStorageService implements StorageService {
         }>
       >,
     ]);
-    const finalInteractions = interactionsResp.body.messages.map((item) =>
-      formatInteractionFromBackend(item)
-    );
+    const finalInteractions = interactionsResp.body.messages
+      .map((item) => formatInteractionFromBackend(item))
+      .map((item) => {
+        return {
+          ...item,
+          input: item.input
+            .replace(
+              /Here is the background information for current chat:.*User asked a question: /,
+              ''
+            )
+            .replace(/Based on the context: .*, answer question: /, ''),
+        };
+      });
 
     return {
       title: conversation.body.name,

@@ -12,7 +12,7 @@ interface SuggestionBubbleProps {
   color: TextColor;
   content: string;
   iconType?: IconType;
-  actionType: string;
+  actionType?: string;
 }
 
 export const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({

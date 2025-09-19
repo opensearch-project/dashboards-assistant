@@ -47,6 +47,7 @@ import {
   setTimeFilter,
   setLocalStorage,
   setSuggestionService,
+  setContextProvider,
 } from './services';
 import { ISuggestionProvider, SuggestionService } from './services/suggestion';
 import { ConfigSchema } from '../common/types/config';
@@ -371,7 +372,7 @@ export class AssistantPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions }: AssistantPluginStartDependencies
+    { data, expressions, uiActions, contextProvider }: AssistantPluginStartDependencies
   ): AssistantStart {
     const assistantServiceStart = this.assistantService.start(core.http);
     const suggestionServiceContract = this.suggestionService.start();
@@ -382,6 +383,9 @@ export class AssistantPlugin
     setUiActions(uiActions);
     setAssistantService(assistantServiceStart);
     setSuggestionService(suggestionServiceContract);
+    if (contextProvider) {
+      setContextProvider(contextProvider);
+    }
     setLocalStorage(createStorage({ engine: window.localStorage, prefix: 'dashboardsAssistant.' }));
 
     if (this.config.text2viz.enabled) {

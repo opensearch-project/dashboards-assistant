@@ -19,7 +19,8 @@
     "dataSource",
     "dataSourceManagement",
     "usageCollection",
-    "queryEnhancements"
+    "queryEnhancements",
+    "contextProvider"
   ],
   "requiredBundles": [],
   "configPath": [
