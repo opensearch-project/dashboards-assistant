@@ -25,6 +25,7 @@ import {
   UsageCollectionSetup,
 } from '../../../src/plugins/usage_collection/public';
 import { QueryEnhancementsPluginSetup } from '../../../src/plugins/query_enhancements/public';
+import { ContextProviderStart } from '../../../src/plugins/context_provider/public';
 
 import { ConfigSchema } from '../common/types/config';
 import { ISuggestionProvider } from './services/suggestion';
@@ -55,6 +56,7 @@ export interface AssistantPluginStartDependencies {
   expressions: ExpressionsStart;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionStart;
+  contextProvider?: ContextProviderStart;
 }
 
 export interface AssistantPluginSetupDependencies {

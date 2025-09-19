@@ -6,6 +6,7 @@
 import React, { useContext } from 'react';
 import { ActionExecutor, UserAccount, TabId, MessageRenderer } from '../types';
 import { ISidecarConfig } from '../../../../src/core/public';
+import { StaticContext } from '../../../../src/plugins/context_provider/public';
 
 export interface IChatContext {
   appId?: string;
@@ -27,6 +28,8 @@ export interface IChatContext {
   setInteractionId: React.Dispatch<React.SetStateAction<string | undefined>>;
   sidecarDockedMode: ISidecarConfig['dockedMode'];
   setSidecarDockedMode: React.Dispatch<React.SetStateAction<ISidecarConfig['dockedMode']>>;
+  sessionContext?: Record<string, string>;
+  setSessionContext: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 export const ChatContext = React.createContext<IChatContext | null>(null);
 

@@ -101,7 +101,8 @@ export class OllyChatService implements ChatService {
 
     let llmInput = input.content;
     if (input.context?.content) {
-      llmInput = `Based on the context: ${input.context?.content}, answer question: ${input.content}`;
+      // llmInput = `Based on the context: ${input.context?.content}, answer question: ${input.content}`;
+      llmInput = `Here is the background information for current chat: ${input.context?.content}, User asked a question: ${input.content}`;
     }
     const parametersPayload: Pick<
       AgentRunPayload,
