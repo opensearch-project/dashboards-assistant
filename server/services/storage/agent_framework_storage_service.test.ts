@@ -170,11 +170,24 @@ describe('AgentFrameworkStorageService', () => {
             "body": Object {
               "from": 0,
               "query": Object {
-                "multi_match": Object {
-                  "fields": Array [
-                    "name",
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "application_type": Object {
+                          "value": "chatbot",
+                        },
+                      },
+                    },
+                    Object {
+                      "multi_match": Object {
+                        "fields": Array [
+                          "name",
+                        ],
+                        "query": "foo",
+                      },
+                    },
                   ],
-                  "query": "foo",
                 },
               },
               "size": 10,
@@ -188,11 +201,24 @@ describe('AgentFrameworkStorageService', () => {
             "body": Object {
               "from": 0,
               "query": Object {
-                "multi_match": Object {
-                  "fields": Array [
-                    "name",
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "application_type": Object {
+                          "value": "chatbot",
+                        },
+                      },
+                    },
+                    Object {
+                      "multi_match": Object {
+                        "fields": Array [
+                          "name",
+                        ],
+                        "query": "foo",
+                      },
+                    },
                   ],
-                  "query": "foo",
                 },
               },
               "size": 10,
