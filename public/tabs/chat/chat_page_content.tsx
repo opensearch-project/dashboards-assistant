@@ -13,8 +13,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { IMessage, Interaction } from '../../../common/types/chat_saved_object_attributes';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  IMessage,
+  Interaction,
+  ISuggestedAction,
+} from '../../../common/types/chat_saved_object_attributes';
 import { WelcomeMessage } from '../../components/chat_welcome_message';
 import { useChatContext } from '../../contexts';
 import { useChatState, useChatActions } from '../../hooks';
@@ -22,10 +26,11 @@ import { findLastIndex } from '../../utils';
 import { MessageBubble } from './messages/message_bubble';
 import { MessageContent } from './messages/message_content';
 import { SuggestionBubble } from './suggestions/suggestion_bubble';
-import { getIncontextInsightRegistry } from '../../services';
+import { getIncontextInsightRegistry, getSuggestionService } from '../../services';
 import { getConfigSchema } from '../../services';
 import { LLMResponseType } from '../../hooks/use_chat_state';
 import { LoadingPlaceholder } from './loading_placeholder';
+import { ChatContext } from '../../services/suggestion/types';
 
 interface ChatPageContentProps {
   messagesLoading: boolean;
@@ -80,7 +85,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
     if (pageEndRef.current) {
       pageEndRef.current.scrollIntoView();
     }
-  }, [pageEndRef.current, setMessageSpacerHeight]);
+  }, [setMessageSpacerHeight]);
 
   if (props.conversationsError) {
     return (
@@ -293,21 +298,70 @@ interface SuggestionsProps {
 
 const Suggestions: React.FC<SuggestionsProps> = (props) => {
   const chatContext = useChatContext();
+  const { chatState } = useChatState();
   const { executeAction } = useChatActions();
   const registry = getIncontextInsightRegistry();
+  const suggestionService = getSuggestionService();
 
+  const [customSuggestions, setCustomSuggestions] = useState<ISuggestedAction[]>([]);
+  const [isLoadingCustomSuggestions, setIsLoadingCustomSuggestions] = useState(false);
+
+  // Load custom suggestions when component mounts or context changes
+  useEffect(() => {
+    const loadCustomSuggestions = async () => {
+      try {
+        setIsLoadingCustomSuggestions(true);
+
+        // Create ChatContext object from current chat state
+        const context: ChatContext = {
+          conversationId: chatContext.conversationId,
+          currentMessage: props.message,
+          messageHistory: chatState.messages,
+          dataSourceId: undefined, // TODO: Add data source ID when available
+        };
+
+        console.log('======');
+        const customSuggestionResults = await suggestionService.getCustomSuggestions(context);
+        setCustomSuggestions(customSuggestionResults);
+      } catch (error) {
+        console.error('Error loading custom suggestions:', error);
+        setCustomSuggestions([]);
+      } finally {
+        setIsLoadingCustomSuggestions(false);
+      }
+    };
+
+    loadCustomSuggestions();
+  }, [
+    suggestionService,
+    chatContext.conversationId,
+    props.message,
+    chatState.messages.length,
+    chatState.messages,
+  ]);
+
+  // Early return after all hooks are called
   if (props.message.type !== 'output') {
     return null;
   }
+
   const interactionId = props.message.interactionId;
+  const defaultSuggestions = structuredClone(props.message.suggestedActions) || [];
 
-  const suggestedActions = structuredClone(props.message.suggestedActions) || [];
+  // Merge custom suggestions with default suggestions
+  const allSuggestions = [...customSuggestions, ...defaultSuggestions];
 
-  if (!suggestedActions.length) {
+  // Don't render if no suggestions at all
+  if (!allSuggestions.length && !isLoadingCustomSuggestions) {
     return null;
   }
 
-  registry.setSuggestionsByInteractionId(interactionId, suggestedActions);
+  // Don't render if only loading custom suggestions but no default suggestions exist
+  if (!defaultSuggestions.length && !customSuggestions.length) {
+    return null;
+  }
+
+  registry.setSuggestionsByInteractionId(interactionId, allSuggestions);
 
   return (
     <div aria-label="chat suggestions" style={{ marginLeft: '8px', marginBottom: '5px' }}>
@@ -315,7 +369,7 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
         <small>Available suggestions</small>
       </EuiText>
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
-        {suggestedActions
+        {allSuggestions
           // remove actions that are not supported by the current chat context
           .filter(
             (suggestedAction) =>
@@ -329,11 +383,14 @@ const Suggestions: React.FC<SuggestionsProps> = (props) => {
               <EuiSpacer size="xs" />
               <EuiFlexItem grow={false}>
                 <SuggestionBubble
-                  onClick={() =>
-                    !props.inputDisabled && executeAction(suggestedAction, props.message)
+                  onClick={
+                    suggestedAction.actionType === 'customize'
+                      ? suggestedAction.action
+                      : () => !props.inputDisabled && executeAction(suggestedAction, props.message)
                   }
                   color={props.inputDisabled ? 'subdued' : 'default'}
                   content={suggestedAction.message}
+                  actionType={suggestedAction.actionType}
                 />
               </EuiFlexItem>
             </div>

@@ -10,3 +10,5 @@ common/query_manager/antlr/output
 .logs
 .env
 .idea/
+.kiro/
+.vscode/

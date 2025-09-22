@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { useEffect } from 'react';
 import { TAB_ID } from '../utils/constants';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { findLastIndex } from '../utils';
 import {
+  IInput,
   IMessage,
   ISuggestedAction,
   SendResponse,
@@ -15,6 +17,7 @@ import {
 } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
+import { getContextProvider } from '../services';
 import { AssistantActions } from '../types';
 import { LLMResponseType, useChatState } from './use_chat_state';
 import { useGetChunksFromHTTPResponse } from './use_get_chunks_from_http_response';
@@ -83,7 +86,16 @@ export const useChatActions = (): AssistantActions => {
         body: JSON.stringify({
           conversationId: chatContext.conversationId,
           ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
-          input,
+          input: {
+            ...input,
+            context: {
+              ...(input as IInput).context,
+              appId: chatContext.appId,
+              ...(chatContext.sessionContext
+                ? { content: JSON.stringify(chatContext.sessionContext) }
+                : {}),
+            },
+          },
         }),
         query: core.services.dataSource.getDataSourceQuery(),
         asResponse: true,

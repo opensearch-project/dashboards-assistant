@@ -25,8 +25,10 @@ import {
   UsageCollectionSetup,
 } from '../../../src/plugins/usage_collection/public';
 import { QueryEnhancementsPluginSetup } from '../../../src/plugins/query_enhancements/public';
+import { ContextProviderStart } from '../../../src/plugins/context_provider/public';
 
 import { ConfigSchema } from '../common/types/config';
+import { ISuggestionProvider } from './services/suggestion';
 
 export interface RenderProps {
   props: MessageContentProps;
@@ -54,6 +56,7 @@ export interface AssistantPluginStartDependencies {
   expressions: ExpressionsStart;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionStart;
+  contextProvider?: ContextProviderStart;
 }
 
 export interface AssistantPluginSetupDependencies {
@@ -92,6 +95,7 @@ export interface AssistantSetup {
   assistantTriggers: { AI_ASSISTANT_QUERY_EDITOR_TRIGGER: string };
   registerIncontextInsight: IncontextInsightRegistry['register'];
   renderIncontextInsight: (component: React.ReactNode) => React.ReactElement;
+  registerSuggestionProvider: (provider: ISuggestionProvider) => void;
 }
 
 export interface AssistantStart {
