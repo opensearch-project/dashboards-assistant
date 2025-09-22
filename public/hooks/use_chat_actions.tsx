@@ -91,7 +91,9 @@ export const useChatActions = (): AssistantActions => {
             context: {
               ...(input as IInput).context,
               appId: chatContext.appId,
-              content: JSON.stringify(chatContext.sessionContext),
+              ...(chatContext.sessionContext
+                ? { content: JSON.stringify(chatContext.sessionContext) }
+                : {}),
             },
           },
         }),

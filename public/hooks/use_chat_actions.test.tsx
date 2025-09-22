@@ -42,6 +42,7 @@ const INPUT_MESSAGE = {
   type: 'input' as const,
   contentType: 'text' as const,
   content: 'what indices are in my cluster?',
+  context: {},
 };
 const SEND_MESSAGE_RESPONSE = {
   conversationId: 'conversation_id_mock',
@@ -211,7 +212,12 @@ describe('useChatActions hook', () => {
     expect(httpMock.post).toHaveBeenCalledWith(ASSISTANT_API.SEND_MESSAGE, {
       body: JSON.stringify({
         messages: [],
-        input: { type: 'input', content: 'message that send as input', contentType: 'text' },
+        input: {
+          type: 'input',
+          content: 'message that send as input',
+          contentType: 'text',
+          context: {},
+        },
       }),
       query: dataSourceServiceMock.getDataSourceQuery(),
       asResponse: true,
