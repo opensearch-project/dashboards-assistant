@@ -97,19 +97,29 @@ export class AgentFrameworkStorageService implements StorageService {
     const requestParams = {
       from: (query.page - 1) * query.perPage,
       size: query.perPage,
-      ...(searchFields.length > 0 && {
-        query: {
-          multi_match: {
-            query: query.search,
-            fields: searchFields,
-          },
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                application_type: {
+                  value: 'chatbot',
+                },
+              },
+            },
+            ...(searchFields.length > 0
+              ? [
+                  {
+                    multi_match: {
+                      query: query.search,
+                      fields: searchFields,
+                    },
+                  },
+                ]
+              : []),
+          ],
         },
-      }),
-      ...(searchFields.length === 0 && {
-        query: {
-          match_all: {},
-        },
-      }),
+      },
       ...(sortField && query.sortOrder && { sort: [{ [sortField]: query.sortOrder }] }),
     };
 
