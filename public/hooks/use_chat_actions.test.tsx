@@ -32,6 +32,7 @@ jest.mock('../services/conversation_load_service', () => {
           conversationLoadMock.abortController = new AbortController();
           return { messages: [], interactions: [] };
         }),
+        getLatestConversationId: jest.fn().mockResolvedValue(''),
       };
       return conversationLoadMock;
     }),

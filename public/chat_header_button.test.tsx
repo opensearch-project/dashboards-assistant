@@ -121,7 +121,6 @@ jest.spyOn(coreContextExports, 'useCore').mockReturnValue({
 
 describe('<HeaderChatButton />', () => {
   beforeAll(() => {
-    jest.spyOn(persistedChatbotStateExports, 'getChatbotOpenStatus').mockReturnValue(false);
     jest.spyOn(persistedChatbotStateExports, 'setChatbotOpenStatus').mockImplementation();
     jest.spyOn(persistedChatbotStateExports, 'getChatbotState').mockReturnValue(null);
     jest.spyOn(persistedChatbotStateExports, 'setChatbotState').mockImplementation();
@@ -145,6 +144,7 @@ describe('<HeaderChatButton />', () => {
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user' }}
+        flyoutVisible$={new BehaviorSubject(false)}
       />
     );
 
@@ -177,6 +177,7 @@ describe('<HeaderChatButton />', () => {
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user' }}
+        flyoutVisible$={new BehaviorSubject(false)}
       />
     );
 
@@ -206,13 +207,13 @@ describe('<HeaderChatButton />', () => {
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user' }}
         inLegacyHeader={false}
+        flyoutVisible$={new BehaviorSubject(false)}
       />
     );
     expect(screen.getByLabelText('toggle chat flyout icon')).toBeInTheDocument();
   });
 
   it('should load latest conversion and display chat flyout', async () => {
-    jest.spyOn(persistedChatbotStateExports, 'getChatbotOpenStatus').mockReturnValueOnce(true);
     jest.spyOn(conversationLoadMock, 'load');
 
     expect(conversationLoadMock.load).not.toHaveBeenCalled();
@@ -228,6 +229,7 @@ describe('<HeaderChatButton />', () => {
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user' }}
+        flyoutVisible$={new BehaviorSubject(true)}
       />
     );
 
@@ -255,6 +257,7 @@ describe('<HeaderChatButton />', () => {
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user' }}
+        flyoutVisible$={new BehaviorSubject(false)}
       />
     );
 
@@ -283,6 +286,7 @@ describe('<HeaderChatButton />', () => {
         actionExecutors={{}}
         assistantActions={{} as AssistantActions}
         currentAccount={{ username: 'test_user' }}
+        flyoutVisible$={new BehaviorSubject(false)}
       />
     );
 
