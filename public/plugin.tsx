@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import { of, Subscription } from 'rxjs';
+import { BehaviorSubject, of, Subscription } from 'rxjs';
 import {
   AppMountParameters,
   AppNavLinkStatus,
@@ -76,6 +76,7 @@ import {
   INDEX_PATTERN_URL_SEARCH_KEY,
 } from './components/visualization/text2viz';
 import { DEFAULT_DATA, createStorage } from '../../../src/plugins/data/common';
+import { getChatbotOpenStatus } from './utils/persisted_chatbot_state';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -104,12 +105,15 @@ export class AssistantPlugin
   incontextInsightRegistry: IncontextInsightRegistry | undefined;
   private dataSourceService: DataSourceService;
   private resetChatSubscription: Subscription | undefined;
+  private flyoutVisible$: BehaviorSubject<boolean>;
   private assistantService = new AssistantService();
   private suggestionService = new SuggestionService();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
     this.dataSourceService = new DataSourceService();
+    setLocalStorage(createStorage({ engine: window.localStorage, prefix: 'dashboardsAssistant.' }));
+    this.flyoutVisible$ = new BehaviorSubject(getChatbotOpenStatus());
   }
 
   public setup(
@@ -256,6 +260,7 @@ export class AssistantPlugin
                 actionExecutors={actionExecutors}
                 assistantActions={assistantActions}
                 currentAccount={{ username }}
+                flyoutVisible$={this.flyoutVisible$}
               />
             </CoreContext.Provider>
           ),
@@ -272,6 +277,7 @@ export class AssistantPlugin
                 assistantActions={assistantActions}
                 currentAccount={{ username }}
                 inLegacyHeader
+                flyoutVisible$={this.flyoutVisible$}
               />
             </CoreContext.Provider>
           ),
@@ -386,7 +392,6 @@ export class AssistantPlugin
     if (contextProvider) {
       setContextProvider(contextProvider);
     }
-    setLocalStorage(createStorage({ engine: window.localStorage, prefix: 'dashboardsAssistant.' }));
 
     if (this.config.text2viz.enabled) {
       uiActions.addTriggerAction(AI_ASSISTANT_QUERY_EDITOR_TRIGGER, {
@@ -468,6 +473,7 @@ export class AssistantPlugin
     return {
       dataSource: this.dataSourceService.start(),
       assistantClient: assistantServiceStart.client,
+      updateChatbotVisible: (flag: boolean) => this.flyoutVisible$.next(flag),
     };
   }
 

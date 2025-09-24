@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { TAB_ID } from '../utils/constants';
 import { ASSISTANT_API } from '../../common/constants/llm';
 import { findLastIndex } from '../utils';
@@ -17,7 +16,6 @@ import {
 } from '../../common/types/chat_saved_object_attributes';
 import { useChatContext } from '../contexts/chat_context';
 import { useCore } from '../contexts/core_context';
-import { getContextProvider } from '../services';
 import { AssistantActions } from '../types';
 import { LLMResponseType, useChatState } from './use_chat_state';
 import { useGetChunksFromHTTPResponse } from './use_get_chunks_from_http_response';
@@ -186,6 +184,11 @@ export const useChatActions = (): AssistantActions => {
     chatContext.setTitle(undefined);
     chatContext.setFlyoutComponent(null);
     chatStateDispatch({ type: 'reset' });
+    core.services.conversationLoad.getLatestConversationId().then((latestConversationId) => {
+      if (latestConversationId) {
+        loadChat(latestConversationId);
+      }
+    });
   };
 
   const openChatUI = () => {
