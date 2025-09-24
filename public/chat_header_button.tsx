@@ -54,9 +54,12 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
   const flyoutVisible = useObservable(props.flyoutVisible$, props.flyoutVisible$.getValue());
-  const setFlyoutVisible = useCallback((flag) => {
-    props.flyoutVisible$.next(flag);
-  }, []);
+  const setFlyoutVisible = useCallback(
+    (flag) => {
+      props.flyoutVisible$.next(flag);
+    },
+    [props.flyoutVisible$]
+  );
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);
@@ -171,6 +174,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
       sidecarDockedMode,
       setSidecarDockedMode,
       sessionContext,
+      setFlyoutVisible,
     ]
   );
 
@@ -258,7 +262,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     return () => {
       registry.off('onSuggestion', handleSuggestion);
     };
-  }, [appId, flyoutVisible, props.assistantActions, registry]);
+  }, [appId, flyoutVisible, props.assistantActions, registry, setFlyoutVisible]);
 
   useEffect(() => {
     const handleChatContinuation = (event: {
@@ -277,7 +281,7 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
     return () => {
       registry.off('onChatContinuation', handleChatContinuation);
     };
-  }, [appId, flyoutVisible, props.assistantActions, registry]);
+  }, [appId, flyoutVisible, props.assistantActions, registry, setFlyoutVisible]);
 
   const toggleFlyoutAndLoadLatestConversation = () => {
     setFlyoutVisible(!flyoutVisible);
