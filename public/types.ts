@@ -101,6 +101,7 @@ export interface AssistantSetup {
 export interface AssistantStart {
   dataSource: DataSourceServiceContract;
   assistantClient: AssistantClient;
+  updateChatbotVisible: (flag: boolean) => void;
 }
 
 export type StartServices = CoreStart &

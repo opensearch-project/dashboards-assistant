@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useEffectOnce, useObservable, useUpdateEffect } from 'react-use';
 import { debounceTime } from 'rxjs/operators';
 
+import { BehaviorSubject } from 'rxjs';
 import {
   ApplicationStart,
   HeaderVariant,
@@ -31,7 +32,6 @@ import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_rea
 import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
 import { getLogoIcon } from './services';
 import {
-  getChatbotOpenStatus,
   getChatbotState,
   setChatbotOpenStatus,
   setChatbotSidecarConfig,
@@ -44,6 +44,7 @@ interface HeaderChatButtonProps {
   assistantActions: AssistantActions;
   currentAccount: UserAccount;
   inLegacyHeader?: boolean;
+  flyoutVisible$: BehaviorSubject<boolean>;
 }
 
 export const HeaderChatButton = (props: HeaderChatButtonProps) => {
@@ -52,7 +53,10 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   const [appId, setAppId] = useState<string>();
   const [conversationId, setConversationId] = useState<string>();
   const [title, setTitle] = useState<string>();
-  const [flyoutVisible, setFlyoutVisible] = useState(() => getChatbotOpenStatus());
+  const flyoutVisible = useObservable(props.flyoutVisible$, props.flyoutVisible$.getValue());
+  const setFlyoutVisible = useCallback((flag) => {
+    props.flyoutVisible$.next(flag);
+  }, []);
   const [flyoutComponent, setFlyoutComponent] = useState<React.ReactNode | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_ID.CHAT);
   const [preSelectedTabId, setPreSelectedTabId] = useState<TabId | undefined>(undefined);

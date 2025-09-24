@@ -186,6 +186,11 @@ export const useChatActions = (): AssistantActions => {
     chatContext.setTitle(undefined);
     chatContext.setFlyoutComponent(null);
     chatStateDispatch({ type: 'reset' });
+    core.services.conversationLoad.getLatestConversationId().then((latestConversationId) => {
+      if (latestConversationId) {
+        loadChat(latestConversationId);
+      }
+    });
   };
 
   const openChatUI = () => {
