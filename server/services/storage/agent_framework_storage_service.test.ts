@@ -387,7 +387,7 @@ describe('AgentFrameworkStorageService', () => {
       Array [
         Object {
           "method": "GET",
-          "path": "/_plugins/_ml/memory/message/..%2Fnon-standard%2Fid/traces",
+          "path": "/_plugins/_ml/memory/message/..%2Fnon-standard%2Fid/traces?max_results=50",
         },
       ]
     `);
