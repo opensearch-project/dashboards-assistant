@@ -1,3 +1,6 @@
+## Version 2.19.4 Release Notes
 
+Compatible with OpenSearch and OpenSearch Dashboards version 2.19.4
 
-AI: Human: Generate release notes for assistantDashboards 2.19.4 from the changelog below. Use only the "Unreleased 3.x" section.
+### Maintenance
+* Bump formdata to 4.0.4 ([#619](https://github.com/opensearch-project/dashboards-assistant/pull/619))
