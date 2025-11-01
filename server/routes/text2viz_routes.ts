@@ -15,6 +15,10 @@ import {
 import { AssistantServiceSetup } from '../services/assistant_service';
 import { handleError } from './error_handler';
 import { checkSingleMetric, addTitleTextLayer } from '../utils/style_single_metric';
+import {
+  DataSourceEngineType,
+  DataSourceAttributes,
+} from '../../../../src/plugins/data_source/common/data_sources';
 
 const inputSchema = schema.string({
   maxLength: TEXT2VEGA_INPUT_SIZE_LIMIT,
@@ -54,12 +58,13 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
           ppl: req.body.ppl,
           dataSchema: req.body.dataSchema,
           sampleData: req.body.sampleData,
+          dataSourceId: req.query.dataSourceId,
         });
 
         let textContent = response.body.inference_results[0].output[0].result;
         // Check if the visualization is single value:
         // it should have exactly 1 metric and no dimensions.
-        let ifSingleMetric = checkSingleMetric(textContent);
+        const ifSingleMetric = checkSingleMetric(textContent);
 
         // extra content between tag <vega-lite></vega-lite>
         const startTag = '<vega-lite>';
@@ -117,6 +122,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         const response = await assistantClient.executeAgentByConfigName(TEXT2PPL_AGENT_CONFIG_ID, {
           question: req.body.question,
           index: req.body.index,
+          dataSourceId: req.query.dataSourceId,
         });
 
         const result = JSON.parse(response.body.inference_results[0].output[0].result);
