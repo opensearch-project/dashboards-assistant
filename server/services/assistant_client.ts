@@ -12,6 +12,10 @@ import {
 } from '../../../../src/core/server';
 import { ML_COMMONS_BASE_API } from '../utils/constants';
 import { getAgentIdByConfigName } from '../routes/get_agent';
+import {
+  DataSourceEngineType,
+  DataSourceAttributes,
+} from '../../../../src/plugins/data_source/common/data_sources';
 
 interface AgentExecuteResponse {
   inference_results: Array<{
@@ -64,7 +68,19 @@ export class AssistantClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parameters: Record<string, any>
   ) => {
-    const agentId = await this.getAgentIdByConfigName(agentConfigName);
+    let isServerlessDatasource = false;
+    if (parameters?.dataSourceId) {
+      const saveObject = await this.context.core.savedObjects.client.get<DataSourceAttributes>(
+        'data-source',
+        parameters?.dataSourceId
+      );
+      isServerlessDatasource =
+        saveObject.attributes?.dataSourceEngineType === DataSourceEngineType.OpenSearchServerless;
+    }
+
+    const agentId = isServerlessDatasource
+      ? agentConfigName
+      : await this.getAgentIdByConfigName(agentConfigName);
     return this.executeAgent(agentId, parameters);
   };
 

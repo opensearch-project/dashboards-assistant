@@ -76,6 +76,7 @@ export function registerSummaryAssistantRoutes(
           index: req.body.index,
           input: req.body.dsl,
           topNLogPatternData: req.body.topNLogPatternData,
+          dataSourceId: req.query.dataSourceId,
         });
 
         let insightAgentIdExists = false;
@@ -209,6 +210,7 @@ export function registerData2SummaryRoutes(
             sample_count: req.body.sample_count,
             ppl: req.body.ppl,
             question: req.body.question,
+            dataSourceId: req.query.dataSourceId,
           }
         );
 
