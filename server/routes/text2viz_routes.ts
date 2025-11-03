@@ -15,10 +15,6 @@ import {
 import { AssistantServiceSetup } from '../services/assistant_service';
 import { handleError } from './error_handler';
 import { checkSingleMetric, addTitleTextLayer } from '../utils/style_single_metric';
-import {
-  DataSourceEngineType,
-  DataSourceAttributes,
-} from '../../../../src/plugins/data_source/common/data_sources';
 
 const inputSchema = schema.string({
   maxLength: TEXT2VEGA_INPUT_SIZE_LIMIT,

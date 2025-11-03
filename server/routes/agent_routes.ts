@@ -40,7 +40,7 @@ export function registerAgentRoutes(router: IRouter, assistantService: Assistant
         }
         const response = await assistantClient.executeAgentByConfigName(req.query.agentConfigName, {
           dataSourceId: req.query.dataSourceId,
-          body: req.body,
+          ...req.body,
         });
         return res.ok({ body: response });
       } catch (e) {
