@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test CONFIG_EXISTS route should detect serverless data source 1`] = `
+Object {
+  "_contentType": "application/json",
+  "_error": null,
+  "_events": null,
+  "_payload": null,
+  "_processors": Object {
+    "close": undefined,
+    "marshal": undefined,
+    "prepare": undefined,
+  },
+  "_state": "init",
+  "_statusCode": true,
+  "_takeover": false,
+  "app": Object {},
+  "headers": Object {},
+  "plugins": Object {},
+  "request": undefined,
+  "settings": Object {
+    "charset": "utf-8",
+    "compressed": null,
+    "encoding": "utf8",
+    "message": null,
+    "passThrough": true,
+    "stringify": null,
+    "ttl": null,
+    "varyEtag": false,
+  },
+  "source": Object {
+    "exists": true,
+  },
+  "statusCode": 200,
+  "variety": "plain",
+}
+`;
