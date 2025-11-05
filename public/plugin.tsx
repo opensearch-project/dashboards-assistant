@@ -221,7 +221,10 @@ export class AssistantPlugin
 
     (async () => {
       const [coreStart, startDeps] = await core.getStartServices();
-      if (!coreStart.application.capabilities.assistant?.chatEnabled) {
+      if (
+        !coreStart.application.capabilities.assistant?.chatEnabled ||
+        coreStart.application.capabilities.investigation?.agenticFeaturesEnabled
+      ) {
         return;
       }
       const CoreContext = createOpenSearchDashboardsReactContext<AssistantServices>({
