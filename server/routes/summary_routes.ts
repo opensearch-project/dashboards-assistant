@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { AssistantClient } from 'server/services/assistant_client';
 import { IRouter, OpenSearchClient } from '../../../../src/core/server';
 import { SUMMARY_ASSISTANT_API } from '../../common/constants/llm';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
@@ -16,6 +17,7 @@ import { AgentNotFoundError } from './errors';
 const SUMMARY_AGENT_CONFIG_ID = 'os_summary';
 const LOG_PATTERN_SUMMARY_AGENT_CONFIG_ID = 'os_summary_with_log_pattern';
 const DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary';
+const LOG_PATTERN_DATA2SUMMARY_AGENT_CONFIG_ID = 'os_data2summary_with_log_pattern';
 
 export function postProcessing(output: string) {
   const pattern = /<summarization>(.*?)<\/summarization>.*?<final insights>(.*?)<\/final insights>/s;
@@ -192,6 +194,7 @@ export function registerData2SummaryRoutes(
           total_count: schema.maybe(schema.number()),
           question: schema.maybe(schema.string()),
           ppl: schema.maybe(schema.string()),
+          index: schema.maybe(schema.string()),
         }),
         query: schema.object({
           dataSourceId: schema.maybe(schema.string()),
@@ -201,16 +204,36 @@ export function registerData2SummaryRoutes(
     router.handleLegacyErrors(async (context, req, res) => {
       const assistantClient = assistantService.getScopedClient(req, context);
       try {
-        const response = await assistantClient.executeAgentByConfigName(
-          DATA2SUMMARY_AGENT_CONFIG_ID,
-          {
-            sample_data: req.body.sample_data,
-            total_count: req.body.total_count,
-            sample_count: req.body.sample_count,
-            ppl: req.body.ppl,
-            question: req.body.question,
+        const client = await getOpenSearchClientTransport({
+          context,
+          dataSourceId: req.query.dataSourceId,
+        });
+
+        let agentConfigId = DATA2SUMMARY_AGENT_CONFIG_ID;
+        if (req.body.index) {
+          const isLogIndex = await detectIndexType(
+            client,
+            assistantClient,
+            req.body.index,
+            req.query.dataSourceId
+          );
+
+          if (isLogIndex) {
+            const isAgentExist = await detectAgentIdExist(
+              assistantClient,
+              LOG_PATTERN_DATA2SUMMARY_AGENT_CONFIG_ID
+            );
+            agentConfigId = isAgentExist ? LOG_PATTERN_DATA2SUMMARY_AGENT_CONFIG_ID : agentConfigId;
           }
-        );
+        }
+
+        const response = await assistantClient.executeAgentByConfigName(agentConfigId, {
+          sample_data: req.body.sample_data,
+          total_count: req.body.total_count,
+          sample_count: req.body.sample_count,
+          ppl: req.body.ppl,
+          question: req.body.question,
+        });
 
         let result = response.body.inference_results[0].output[0].result;
 
@@ -229,4 +252,13 @@ export function registerData2SummaryRoutes(
       }
     })
   );
+}
+
+async function detectAgentIdExist(assistantClient: AssistantClient, configName: string) {
+  try {
+    const result = await assistantClient.getAgentIdByConfigName(configName);
+    return Boolean(result);
+  } catch (e) {
+    return false;
+  }
 }
