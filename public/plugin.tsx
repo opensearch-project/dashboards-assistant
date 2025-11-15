@@ -45,6 +45,8 @@ import {
   setExpressions,
   setHttp,
   setAssistantService,
+  setDashboard,
+  setDashboardVersion,
   setTimeFilter,
   setLocalStorage,
 } from './services';
@@ -62,6 +64,7 @@ import { AssistantService } from './services/assistant_service';
 import { ActionContextMenu } from './components/ui_action_context_menu';
 import { AI_ASSISTANT_QUERY_EDITOR_TRIGGER, bootstrap } from './ui_triggers';
 import { TEXT2VIZ_APP_ID } from './text2viz';
+import { TEXT2DASH_APP_ID } from './text2dash';
 import { VIS_NLQ_APP_ID, VIS_NLQ_SAVED_OBJECT } from '../common/constants/vis_type_nlq';
 import {
   createVisNLQSavedObjectLoader,
@@ -74,6 +77,7 @@ import {
   INDEX_PATTERN_URL_SEARCH_KEY,
 } from './components/visualization/text2viz';
 import { DEFAULT_DATA, createStorage } from '../../../src/plugins/data/common';
+import { registerGenerateDashboardUIAction } from './ui_actions';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -104,7 +108,7 @@ export class AssistantPlugin
   private resetChatSubscription: Subscription | undefined;
   private assistantService = new AssistantService();
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
     this.dataSourceService = new DataSourceService();
   }
@@ -216,6 +220,48 @@ export class AssistantPlugin
             return renderAppNotFound(params);
           }
         },
+      });
+    }
+
+    if (this.config.text2dash.enabled) {
+      core.application.register({
+        id: TEXT2DASH_APP_ID,
+        title: i18n.translate('dashboardAssistant.feature.text2dash', {
+          defaultMessage: 'Data Insights Dashboard',
+        }),
+        navLinkStatus: AppNavLinkStatus.hidden,
+        mount: async (params: AppMountParameters) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+          if (assistantEnabled) {
+            const { renderText2DashApp } = await import('./text2dash');
+            const unmount = renderText2DashApp(params, {
+              ...pluginsStart,
+              ...coreStart,
+              setHeaderActionMenu: params.setHeaderActionMenu,
+              config: this.config,
+            });
+
+            return () => {
+              unmount();
+            };
+          } else {
+            const { renderAppNotFound } = await import('./text2dash');
+            return renderAppNotFound(params);
+          }
+        },
+      });
+
+      core.getStartServices().then(([coreStart]) => {
+        const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
+        if (assistantEnabled) {
+          registerGenerateDashboardUIAction({
+            core,
+            data: setupDeps.data,
+            dashboard: setupDeps.dashboard,
+            assistantService: this.assistantService,
+          });
+        }
       });
     }
 
@@ -334,6 +380,7 @@ export class AssistantPlugin
         chat: this.config.chat.enabled,
         next: this.config.next.enabled,
         text2viz: this.config.text2viz.enabled,
+        text2dash: this.config.text2dash.enabled,
         alertInsight: this.config.alertInsight.enabled,
         smartAnomalyDetector: this.config.smartAnomalyDetector.enabled,
       }),
@@ -368,7 +415,7 @@ export class AssistantPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions }: AssistantPluginStartDependencies
+    { data, expressions, uiActions, dashboard }: AssistantPluginStartDependencies
   ): AssistantStart {
     const assistantServiceStart = this.assistantService.start(core.http);
     setCoreStart(core);
@@ -377,6 +424,7 @@ export class AssistantPlugin
     setConfigSchema(this.config);
     setUiActions(uiActions);
     setAssistantService(assistantServiceStart);
+    setDashboard(dashboard);
     setLocalStorage(createStorage({ engine: window.localStorage, prefix: 'dashboardsAssistant.' }));
 
     if (this.config.text2viz.enabled) {
@@ -449,6 +497,11 @@ export class AssistantPlugin
         overlays: core.overlays,
       });
       setVisNLQSavedObjectLoader(savedVisNLQLoader);
+    }
+
+    if (this.config.text2dash.enabled) {
+      const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
+      setDashboardVersion({ version: opensearchDashboardsVersion });
     }
 
     setIndexPatterns(data.indexPatterns);
