@@ -31,6 +31,17 @@ describe('test text2viz route', () => {
       assistant_plugin: {
         logger: mockedLogger,
       },
+      core: {
+        opensearch: {
+          client: {
+            asCurrentUser: {
+              indices: {
+                getMapping: jest.fn().mockResolvedValue({}),
+              },
+            },
+          },
+        },
+      },
     })
   );
   registerText2VizRoutes(router, {
@@ -53,6 +64,15 @@ describe('test text2viz route', () => {
     triggerHandler(router, {
       method: 'post',
       path: TEXT2VIZ_API.TEXT2PPL,
+      req: httpServerMock.createRawRequest({
+        payload: JSON.stringify(payload),
+        query,
+      }),
+    });
+  const dataInsightsRequest = (payload: {}, query: {}) =>
+    triggerHandler(router, {
+      method: 'post',
+      path: TEXT2VIZ_API.DATA_INSIGHTS,
       req: httpServerMock.createRawRequest({
         payload: JSON.stringify(payload),
         query,
@@ -152,6 +172,42 @@ describe('test text2viz route', () => {
         "statusCode": 500,
       }
     `);
+  });
+
+  it('return vega-lite schema for single metric visualization', async () => {
+    mockedAssistantClient.executeAgentByConfigName = jest.fn().mockResolvedValue({
+      body: {
+        inference_results: [
+          {
+            output: [
+              {
+                result: `<vega-lite>{"$schema": "https://vega.github.io/schema/vega-lite/v5.json","data": {"values": [{"value": 100}]},"mark": "text","encoding": {"text": {"field": "value"}}}</vega-lite>`,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const result = await text2vizRequest(
+      {
+        input_question: 'Show total sales',
+        input_instruction: 'Create a single metric visualization',
+        ppl: 'source=sales | stats sum(sales) as total',
+        dataSchema: 'mapping',
+        sampleData: 'sample',
+      },
+      {}
+    );
+    expect(result).toEqual({
+      statusCode: 200,
+      body: {
+        $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+        data: { values: [{ value: 100 }] },
+        mark: 'text',
+        encoding: { text: { field: 'value' } },
+        layer: [{ mark: 'text' }, { mark: 'text', encoding: { text: { value: 'total' } } }],
+      },
+    });
   });
 
   it('return 4xx when execute agent throws 4xx error for text2ppl', async () => {

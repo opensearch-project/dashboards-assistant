@@ -7,19 +7,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters } from '../../../src/core/public';
-import { Text2Viz } from './components/visualization/text2viz';
+import { InputPanel } from './components/text_to_dashboard/input_panel';
 import { OpenSearchDashboardsContextProvider } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { StartServices } from './types';
 import { renderAppNotFound } from './renderAppNotFound';
 
-export const TEXT2VIZ_APP_ID = 'text2viz';
+export const TEXT2DASH_APP_ID = 'text2dash';
 
-export const renderText2VizApp = (params: AppMountParameters, services: StartServices) => {
+export const renderText2DashApp = (params: AppMountParameters, services: StartServices) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <Router history={params.history}>
         <Switch>
-          <Route path={['/edit/:savedObjectId', '/']} component={Text2Viz} />
+          <Route path={['/']} component={InputPanel} />
         </Switch>
       </Router>
     </OpenSearchDashboardsContextProvider>,
