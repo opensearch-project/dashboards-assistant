@@ -421,13 +421,13 @@ export const Text2Viz = () => {
   const getInputSection = () => {
     return (
       <>
-        <EuiFlexItem grow={1} style={{ width: 0 }}>
+        <EuiFlexItem grow={2} style={{ width: 0 }}>
           <SourceSelector
             selectedSourceId={selectedSource}
             onChange={(ds) => setSelectedSource(ds.value)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={1}>
           <EuiFieldText
             value={inputQuestion}
             onChange={(e) => setInputQuestion(e.target.value)}
