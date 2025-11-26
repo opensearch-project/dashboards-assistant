@@ -460,7 +460,7 @@ export const Text2Viz = () => {
   return (
     <EuiPage className="text2viz__page" direction="column">
       <MountPointPortal setMountPoint={setHeaderActionMenu}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 1 }}>
           <EuiHeaderLinks data-test-subj="text2viz-top-nav">
             {useUpdatedUX && <EuiText size="s">{pageTitle}</EuiText>}
             <EuiButtonIcon
@@ -481,7 +481,7 @@ export const Text2Viz = () => {
       </MountPointPortal>
       {!useUpdatedUX && (
         <>
-          <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 1 }}>
             {getInputSection()}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
