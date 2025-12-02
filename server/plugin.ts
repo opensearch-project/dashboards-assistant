@@ -95,7 +95,9 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
             opensearchDashboardsRequest
           );
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
-          const isAssistantEnabledBySetting = await uiSettingsClient.get(ENABLE_AI_FEATURES);
+          const isAssistantEnabledBySetting = Boolean(
+            await uiSettingsClient.get(ENABLE_AI_FEATURES).catch(() => false)
+          );
 
           return {
             assistant: {
