@@ -49,6 +49,10 @@ const mockChatScrollTopRef = {
   },
 };
 
+const mockChatFlyoutRef = {
+  current: document.createElement('div'),
+} as React.RefObject<HTMLDivElement>;
+
 describe('<ChatPageContent />', () => {
   const abortActionMock = jest.fn();
   const executeActionMock = jest.fn();
@@ -99,6 +103,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(1);
@@ -113,6 +118,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(1);
@@ -144,6 +150,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryAllByLabelText('chat message bubble')).toHaveLength(3);
@@ -185,6 +192,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(1);
@@ -216,6 +224,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(0);
@@ -251,6 +260,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryAllByLabelText('chat suggestions')).toHaveLength(0);
@@ -264,6 +274,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryByText('Loading conversation')).toBeInTheDocument();
@@ -280,6 +291,7 @@ describe('<ChatPageContent />', () => {
         messagesLoadingError={new Error('failed to get response')}
         onRefreshConversation={onRefreshMock}
         onRefreshConversationsList={onRefreshMock}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryByText('failed to get response')).toBeInTheDocument();
@@ -301,6 +313,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(screen.queryByText('Stop generating response')).toBeInTheDocument();
@@ -316,6 +329,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     fireEvent.click(screen.getByText('What are the indices in my cluster?'));
@@ -357,6 +371,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
     expect(queryAllByTestId(`showRegenerate-false`).length).toEqual(2);
@@ -383,6 +398,7 @@ describe('<ChatPageContent />', () => {
         chatScrollTopRef={mockChatScrollTopRef}
         onRefreshConversation={jest.fn()}
         onRefreshConversationsList={jest.fn()}
+        chatFlyoutRef={mockChatFlyoutRef}
       />
     );
 
