@@ -225,6 +225,54 @@ describe('AssistantPlugin', () => {
         },
       });
     });
+
+    it('should handle uiSettingsClient.get error and return false', async () => {
+      // Mock router
+      const mockRouter = ({
+        get: jest.fn(),
+        post: jest.fn(),
+        put: jest.fn(),
+        delete: jest.fn(),
+        handleLegacyErrors: jest.fn((handler) => handler),
+        getRoutes: jest.fn().mockReturnValue([]),
+      } as unknown) as IRouter;
+      mockCoreSetup.http.createRouter.mockReturnValue(mockRouter);
+
+      mockCoreSetup.dynamicConfigService.getStartService = jest.fn().mockResolvedValue({
+        getAsyncLocalStore: jest.fn().mockReturnValue({}),
+        getClient: jest.fn().mockReturnValue({
+          getConfig: jest.fn().mockResolvedValue({
+            enabled: true,
+            chat: {
+              enabled: true,
+            },
+          }),
+        }),
+      });
+
+      // Mock UI settings client to throw error for ENABLE_AI_FEATURES
+      const mockUiSettingsClient = {
+        get: jest.fn().mockRejectedValue(new Error('Settings error')),
+      };
+      mockCoreStart.uiSettings.asScopedToClient = jest.fn().mockReturnValue(mockUiSettingsClient);
+
+      // Execute setup
+      await plugin.setup(mockCoreSetup);
+
+      // Execute the registered switcher function
+      const switcherFn = mockCoreSetup.capabilities.registerSwitcher.mock.calls[0][0];
+      const mockRequest = {} as OpenSearchDashboardsRequest;
+      const mockCapabilities = {} as Capabilities;
+      const result = await switcherFn(mockRequest, mockCapabilities);
+
+      // Verify that when uiSettingsClient.get throws, it catches and uses false
+      expect(result).toEqual({
+        assistant: {
+          enabled: false, // dynamicConfig.enabled (true) && isAssistantEnabledBySetting (false)
+          chatEnabled: false, // dynamicConfig.chat.enabled (true) && isAssistantEnabledBySetting (false)
+        },
+      });
+    });
   });
 
   describe('start and stop', () => {
