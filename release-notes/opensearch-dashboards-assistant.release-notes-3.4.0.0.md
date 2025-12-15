@@ -11,6 +11,3 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.4.0
 ### Bug Fixes
 * Detect serverless data source ([#627](https://github.com/opensearch-project/dashboards-assistant/pull/627))
 * Fix capability services access settings before login and show dialog ([#628](https://github.com/opensearch-project/dashboards-assistant/pull/628))
-
-### Infrastructure
-* Add delete_backport_branch workflow to automatically delete branches that start with "backport/" or "release-chores/" after they are merged
