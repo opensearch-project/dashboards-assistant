@@ -43,6 +43,10 @@ export class ConversationLoadService {
       this.status$.next('idle');
       return payload;
     } catch (error) {
+      if (error.name === 'AbortError') {
+        this.status$.next('idle');
+        return;
+      }
       this.status$.next({ status: 'error', error });
     }
   };

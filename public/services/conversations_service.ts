@@ -50,6 +50,10 @@ export class ConversationsService {
       );
       this.status$.next('idle');
     } catch (error) {
+      if (error.name === 'AbortError') {
+        this.status$.next('idle');
+        return;
+      }
       this.conversations$.next(null);
       this.status$.next({ error });
     }
