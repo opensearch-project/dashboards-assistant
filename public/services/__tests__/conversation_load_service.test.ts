@@ -44,9 +44,9 @@ describe('ConversationLoadService', () => {
     expect(conversationLoad.status$.getValue()).toBe('idle');
   });
 
-  it('should emit error after loading aborted', async () => {
+  it('should emit idle status after loading aborted', async () => {
     const { conversationLoad, http } = setup();
-    const abortError = new Error('Aborted');
+    const abortError = new DOMException('The operation was aborted.', 'AbortError');
     http.get.mockImplementation(((_path, options) => {
       return new Promise((_resolve, reject) => {
         if (options?.signal) {
@@ -64,6 +64,16 @@ describe('ConversationLoadService', () => {
 
     await loadResult;
 
-    expect(conversationLoad.status$.getValue()).toEqual({ status: 'error', error: abortError });
+    expect(conversationLoad.status$.getValue()).toBe('idle');
+  });
+
+  it('should emit error for non-abort errors', async () => {
+    const { conversationLoad, http } = setup();
+    const networkError = new Error('Network error');
+    http.get.mockRejectedValue(networkError);
+
+    await conversationLoad.load('foo');
+
+    expect(conversationLoad.status$.getValue()).toEqual({ status: 'error', error: networkError });
   });
 });
