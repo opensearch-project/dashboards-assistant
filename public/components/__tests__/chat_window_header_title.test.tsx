@@ -43,6 +43,9 @@ const setup = ({
         }),
         reload: jest.fn(),
       },
+      conversationLoad: {
+        status$: new BehaviorSubject('idle'),
+      },
       dataSource: rest.dataSource ?? new DataSourceServiceMock(false),
     },
   };
