@@ -4,7 +4,7 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import React, { RefObject, useCallback, useRef } from 'react';
 import cs from 'classnames';
 import { useObservable } from 'react-use';
 import { useChatContext, useCore } from '../../contexts';
@@ -14,6 +14,7 @@ import { ChatInputControls } from './controls/chat_input_controls';
 
 interface ChatPageProps {
   className?: string;
+  chatFlyoutRef: RefObject<HTMLDivElement>;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = (props) => {
@@ -51,13 +52,14 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
   const { loadChat } = useChatActions();
   const chatScrollTopRef = useRef<{ scrollTop: number; height: number } | null>(null);
   const handleScroll = async (event: React.UIEvent<HTMLElement>) => {
-    const scrollTop = event.target.scrollTop;
+    const scrollTop = (event.target as HTMLElement).scrollTop;
     if (!messagesLoading && chatState?.nextToken && chatState?.nextToken !== '') {
       if (scrollTop < 150) {
         const html = event.target;
-        chatScrollTopRef.current = { scrollTop, height: html.scrollHeight };
+        chatScrollTopRef.current = { scrollTop, height: (html as HTMLElement).scrollHeight };
         await loadChat(chatContext.conversationId, chatState.nextToken);
-        html.scrollTop = html.scrollHeight - chatScrollTopRef.current.height;
+        (html as HTMLElement).scrollTop =
+          (html as HTMLElement).scrollHeight - chatScrollTopRef.current.height;
         chatScrollTopRef.current = null;
       }
     }
@@ -90,6 +92,7 @@ export const ChatPage: React.FC<ChatPageProps> = (props) => {
         <EuiPage paddingSize="s">
           <EuiPageBody component="div">
             <ChatPageContent
+              chatFlyoutRef={props.chatFlyoutRef}
               messagesLoading={messagesLoading}
               conversationsLoading={conversationsLoading}
               messagesLoadingError={
