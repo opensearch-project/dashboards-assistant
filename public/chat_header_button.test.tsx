@@ -152,7 +152,9 @@ describe('<HeaderChatButton />', () => {
 
     fireEvent.click(getByLabelText('toggle chat flyout icon'));
     // chat flyout displayed
-    expect(screen.queryByLabelText('chat flyout mock')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByLabelText('chat flyout mock')).toBeInTheDocument();
+    });
 
     // sidecar show
     const toggleButton = screen.getByLabelText('toggle chat flyout icon');

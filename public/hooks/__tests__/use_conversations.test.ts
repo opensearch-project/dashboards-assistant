@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useCore } from '../../contexts/core_context';
 import { HttpHandler } from '../../../../../src/core/public';
@@ -28,7 +28,7 @@ describe('useDeleteConversation', () => {
   });
 
   it('should be loading after deleteConversation called', async () => {
-    const { result, waitFor } = renderHook(() => useDeleteConversation());
+    const { result } = renderHook(() => useDeleteConversation());
     useCoreMocked.mock.results[0].value.services.http.delete.mockReturnValue(new Promise(() => {}));
 
     act(() => {
@@ -41,7 +41,7 @@ describe('useDeleteConversation', () => {
   });
 
   it('should return data after delete success', async () => {
-    const { result, waitFor } = renderHook(() => useDeleteConversation());
+    const { result } = renderHook(() => useDeleteConversation());
     useCoreMocked.mock.results[0].value.services.http.delete.mockReturnValue(
       Promise.resolve('deleted')
     );
@@ -57,7 +57,7 @@ describe('useDeleteConversation', () => {
   });
 
   it('should throw error after abort', async () => {
-    const { result, waitFor } = renderHook(() => useDeleteConversation());
+    const { result } = renderHook(() => useDeleteConversation());
     const abortErrorMock = new Error('Abort');
     useCoreMocked.mock.results[0].value.services.http.delete.mockImplementation(((
       _path,
@@ -117,7 +117,7 @@ describe('usePatchConversation', () => {
   });
 
   it('should be loading after patchConversation called', async () => {
-    const { result, waitFor } = renderHook(() => usePatchConversation());
+    const { result } = renderHook(() => usePatchConversation());
     useCoreMocked.mock.results[0].value.services.http.put.mockReturnValue(new Promise(() => {}));
 
     act(() => {
@@ -130,7 +130,7 @@ describe('usePatchConversation', () => {
   });
 
   it('should return data after patch conversation success', async () => {
-    const { result, waitFor } = renderHook(() => usePatchConversation());
+    const { result } = renderHook(() => usePatchConversation());
     useCoreMocked.mock.results[0].value.services.http.put.mockReturnValue(
       Promise.resolve({
         title: 'new-title',
@@ -148,7 +148,7 @@ describe('usePatchConversation', () => {
   });
 
   it('should throw error after abort', async () => {
-    const { result, waitFor } = renderHook(() => usePatchConversation());
+    const { result } = renderHook(() => usePatchConversation());
     const abortErrorMock = new Error('Abort');
     useCoreMocked.mock.results[0].value.services.http.put.mockImplementation(((_path, options) => {
       return new Promise((_resolve, reject) => {

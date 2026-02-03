@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useChatContext, ChatContext } from '../chat_context';
 
 describe('useChatContext', () => {
@@ -33,8 +33,6 @@ describe('useChatContext', () => {
   });
 
   it('should return error if context provider missed', () => {
-    const { result } = renderHook(useChatContext);
-
-    expect(result.error).toMatchInlineSnapshot(`[Error: ChatContext is not set]`);
+    expect(() => renderHook(useChatContext)).toThrow('ChatContext is not set');
   });
 });
