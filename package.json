@@ -27,7 +27,6 @@
   },
   "devDependencies": {
     "@types/autosize": "^4.0.1",
-    "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jsdom": "^21.1.2",
     "@types/react-test-renderer": "^16.9.1",
     "eslint": "^6.8.0",

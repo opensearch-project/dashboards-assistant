@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useFetchAgentFrameworkTraces } from './use_fetch_agentframework_traces';
 import { createOpenSearchDashboardsReactContext } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpHandler } from '../../../../src/core/public';
 import { AbortError } from '../../../../src/plugins/data/common';
 import { DataSourceServiceMock } from '../services/data_source_service.mock';
-import { waitFor } from '@testing-library/dom';
 
 describe('useFetchAgentFrameworkTraces hook', () => {
   const interactionId = 'foo';
@@ -43,12 +42,9 @@ describe('useFetchAgentFrameworkTraces hook', () => {
     ];
 
     services.http.get.mockResolvedValueOnce(traces);
-    const { result, waitForNextUpdate } = renderHook(
-      () => useFetchAgentFrameworkTraces(interactionId),
-      wrapper
-    );
+    const { result } = renderHook(() => useFetchAgentFrameworkTraces(interactionId), wrapper);
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.loading).toBe(false));
     expect(services.http.get).toHaveBeenCalledWith(
       `/api/assistant/trace/${interactionId}`,
       expect.objectContaining({
@@ -64,12 +60,9 @@ describe('useFetchAgentFrameworkTraces hook', () => {
 
   it('return error when fetch trace error happend', async () => {
     services.http.get.mockRejectedValue(new Error('trace not found'));
-    const { result, waitForNextUpdate } = renderHook(
-      () => useFetchAgentFrameworkTraces(interactionId),
-      wrapper
-    );
+    const { result } = renderHook(() => useFetchAgentFrameworkTraces(interactionId), wrapper);
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(services.http.get).toHaveBeenCalledWith(
       `/api/assistant/trace/${interactionId}`,

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { usePatchFixedStyle } from './use_patch_fixed_style';
 import * as coreHookExports from '../contexts/core_context';

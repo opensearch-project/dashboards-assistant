@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useChatActions } from './use_chat_actions';
 import * as chatContextHookExports from '../contexts/chat_context';
 import * as coreHookExports from '../contexts/core_context';
