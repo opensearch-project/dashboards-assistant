@@ -23,6 +23,7 @@ interface ChatFlyoutProps {
 export const ChatFlyout = (props: ChatFlyoutProps) => {
   const chatContext = useChatContext();
   const chatHistoryPageLoadedRef = useRef(false);
+  const chatFlyOutRef = useRef<HTMLDivElement>(null);
 
   let chatPageVisible = false;
   let chatHistoryPageVisible = false;
@@ -89,6 +90,7 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
         },
         { 'llm-chatbot-border-top': sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER }
       )}
+      ref={chatFlyOutRef}
     >
       <>
         <div className={cs('llm-chat-flyout-header')}>
@@ -109,7 +111,7 @@ export const ChatFlyout = (props: ChatFlyoutProps) => {
                 initialSize={resizable ? 70 : undefined}
                 paddingSize="none"
               >
-                <ChatPage />
+                <ChatPage chatFlyoutRef={chatFlyOutRef} />
               </Panel>
               <>
                 {resizable && <Resizer />}
