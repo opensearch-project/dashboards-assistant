@@ -25,6 +25,9 @@ export const configSchema = schema.object({
   text2viz: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  text2dash: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   alertInsight: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),

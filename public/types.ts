@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DashboardStart } from '../../../src/plugins/dashboard/public';
+import { DashboardSetup, DashboardStart } from '../../../src/plugins/dashboard/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { IMessage, ISuggestedAction } from '../common/types/chat_saved_object_attributes';
 import { IChatContext } from './contexts/chat_context';
@@ -65,6 +65,7 @@ export interface AssistantPluginSetupDependencies {
   uiActions: UiActionsSetup;
   expressions: ExpressionsSetup;
   queryEnhancements: QueryEnhancementsPluginSetup;
+  dashboard: DashboardSetup;
 }
 
 export interface AssistantSetup {
@@ -85,6 +86,7 @@ export interface AssistantSetup {
     chat: boolean;
     next: boolean;
     text2viz: boolean;
+    text2dash: boolean;
     alertInsight: boolean;
     smartAnomalyDetector: boolean;
   };

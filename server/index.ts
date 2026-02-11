@@ -13,6 +13,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     incontextInsight: true,
     next: true,
     text2viz: true,
+    text2dash: true,
     alertInsight: true,
     smartAnomalyDetector: true,
     branding: true,
