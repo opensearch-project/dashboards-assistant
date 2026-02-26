@@ -14,6 +14,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - detect serverless data source ([#627](https://github.com/opensearch-project/dashboards-assistant/pull/627))
 - Fix capability services access settings before login and show dialog ([#628](https://github.com/opensearch-project/dashboards-assistant/pull/628))
 - disable input panel and allow user click new conversation in error mode ([#639](https://github.com/opensearch-project/dashboards-assistant/pull/639))
+- bump ajv to 6.14.0 / lodash to 4.17.23 / minimatch to 3.1.5 ([#656](https://github.com/opensearch-project/dashboards-assistant/pull/656))
 
 ### Infrastructure
 - Add delete_backport_branch workflow to automatically delete branches that start with "backport/" or "release-chores/" after they are merged
