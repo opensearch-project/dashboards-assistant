@@ -61,7 +61,8 @@ export const INDEX_PATTERN_URL_SEARCH_KEY = 'indexPatternId';
 export const ASSISTANT_INPUT_URL_SEARCH_KEY = 'assistantInput';
 
 export const Text2Viz = () => {
-  const { savedObjectId } = useParams<{ savedObjectId?: string }>();
+  const { savedObjectId: initialSavedObjectId } = useParams<{ savedObjectId?: string }>();
+  const [savedObjectId, setSavedObjectId] = useState(initialSavedObjectId);
   const { search } = useLocation();
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const [selectedSource, setSelectedSource] = useState(
@@ -299,6 +300,7 @@ export const Text2Viz = () => {
           onTitleDuplicate: onSaveProps.onTitleDuplicate,
         });
         if (id) {
+          setSavedObjectId(id);
           notifications.toasts.addSuccess({
             title: i18n.translate('dashboardAssistant.feature.text2viz.saveSuccess', {
               defaultMessage: `Saved '{title}'`,
@@ -330,13 +332,34 @@ export const Text2Viz = () => {
       }
     };
 
+    let modalTitle = vegaSpec.title ?? '';
+    let modalDescription = vegaSpec.description ?? '';
+
+    if (savedObjectId) {
+      try {
+        const loader = getVisNLQSavedObjectLoader();
+        const savedVis = await loader.get(savedObjectId);
+        modalTitle = savedVis.title ?? vegaSpec.title ?? '';
+        modalDescription = savedVis.description ?? vegaSpec.description ?? '';
+      } catch (e) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('dashboardAssistant.feature.text2viz.loadFailed', {
+            defaultMessage: `Failed to load saved object: '{title}'`,
+            values: {
+              title: savedObjectId,
+            },
+          }),
+        });
+      }
+    }
+
     const dialog = overlays.openModal(
       toMountPoint(
         <SavedObjectSaveModalOrigin
           documentInfo={{
             id: savedObjectId ?? '',
-            title: vegaSpec.title ?? '',
-            description: vegaSpec.description,
+            title: modalTitle,
+            description: modalDescription,
           }}
           objectType={VIS_NLQ_SAVED_OBJECT}
           onClose={() => dialog.close()}
