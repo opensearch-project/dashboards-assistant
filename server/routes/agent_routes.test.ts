@@ -23,6 +23,83 @@ export const createMockedAssistantClient = (
 
 const mockedAssistantClient = createMockedAssistantClient({} as OpenSearchDashboardsRequest);
 
+const mockSavedObjectsClient = {
+  get: jest.fn(),
+};
+
+jest.mock('../../../../src/core/server/mocks', () => {
+  const original = jest.requireActual('../../../../src/core/server/mocks');
+  return {
+    ...original,
+    coreMock: {
+      ...original.coreMock,
+      createInternalStart: () => {
+        const start = original.coreMock.createInternalStart();
+        start.savedObjects.getScopedClient.mockReturnValue(mockSavedObjectsClient);
+        return start;
+      },
+    },
+  };
+});
+
+describe('test agentConfigExists route', () => {
+  const router = new Router(
+    '',
+    mockedLogger,
+    enhanceWithContext({
+      assistant_plugin: {
+        logger: mockedLogger,
+      },
+    })
+  );
+  registerAgentRoutes(router, {
+    getScopedClient: jest.fn(() => mockedAssistantClient),
+  });
+  const agentConfigExistsRequest = (query: {}) =>
+    triggerHandler(router, {
+      method: 'get',
+      path: AGENT_API.CONFIG_EXISTS,
+      req: httpServerMock.createRawRequest({ query }),
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetMocks();
+  });
+
+  it('returns exists:false when data source is AnalyticEngine and config is os_suggest_ad', async () => {
+    mockSavedObjectsClient.get.mockResolvedValue({
+      attributes: { dataSourceEngineType: 'AnalyticEngine' },
+    });
+    const result = (await agentConfigExistsRequest({
+      dataSourceId: 'ds-1',
+      agentConfigName: 'os_suggest_ad',
+    })) as { source: { exists: boolean } };
+    expect(result.source).toEqual({ exists: false });
+  });
+
+  it('proceeds with normal check when data source is not AnalyticEngine', async () => {
+    mockSavedObjectsClient.get.mockResolvedValue({
+      attributes: { dataSourceEngineType: 'OpenSearch' },
+    });
+    mockedAssistantClient.getAgentIdByConfigName = jest.fn().mockResolvedValue('agent-id');
+    const result = (await agentConfigExistsRequest({
+      dataSourceId: 'ds-1',
+      agentConfigName: 'os_suggest_ad',
+    })) as { source: { exists: boolean } };
+    expect(result.source).toEqual({ exists: true });
+  });
+
+  it('proceeds with normal check when no dataSourceId is provided', async () => {
+    mockedAssistantClient.getAgentIdByConfigName = jest.fn().mockResolvedValue('agent-id');
+    const result = (await agentConfigExistsRequest({
+      agentConfigName: 'os_suggest_ad',
+    })) as { source: { exists: boolean } };
+    expect(result.source).toEqual({ exists: true });
+    expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+  });
+});
+
 describe('test execute agent route', () => {
   const router = new Router(
     '',

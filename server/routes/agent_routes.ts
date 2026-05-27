@@ -59,10 +59,28 @@ export function registerAgentRoutes(router: IRouter, assistantService: Assistant
     },
     router.handleLegacyErrors(async (context, req, res) => {
       try {
+        const { dataSourceId, agentConfigName } = req.query;
+        // Hide os_suggest_ad for AnalyticEngine data sources
+        const configNames = Array<string>().concat(agentConfigName);
+        if (dataSourceId && configNames.includes('os_suggest_ad')) {
+          try {
+            const savedObjectsClient = context.core.savedObjects.client;
+            const ds = await savedObjectsClient.get<{ dataSourceEngineType?: string }>(
+              'data-source',
+              dataSourceId
+            );
+            if (ds?.attributes?.dataSourceEngineType === 'AnalyticEngine') {
+              return res.ok({ body: { exists: false } });
+            }
+          } catch {
+            // Ignore errors, proceed with normal agent check
+          }
+        }
+
         const assistantClient = assistantService.getScopedClient(req, context);
-        const promises = Array<string>()
-          .concat(req.query.agentConfigName)
-          .map((configName) => assistantClient.getAgentIdByConfigName(configName));
+        const promises = configNames.map((configName) =>
+          assistantClient.getAgentIdByConfigName(configName)
+        );
         const results = await Promise.all(promises);
         const exists = results.every((r) => Boolean(r));
         return res.ok({ body: { exists } });
