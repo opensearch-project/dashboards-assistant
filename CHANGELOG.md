@@ -18,6 +18,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - bump ajv to 6.14.0 / lodash to 4.17.23 / minimatch to 3.1.5 ([#656](https://github.com/opensearch-project/dashboards-assistant/pull/656))
 - fix: Bump dependency versions and fix lint errors ([#684](https://github.com/opensearch-project/dashboards-assistant/pull/684))
 
+- Fix Text2Viz Save Logic to Synchronize Title and Description ([#588](https://github.com/opensearch-project/dashboards-assistant/pull/588))
+
 ### Infrastructure
 - Add delete_backport_branch workflow to automatically delete branches that start with "backport/" or "release-chores/" after they are merged
 
