@@ -1,0 +1,72 @@
+.text2dash {
+    &__panel {
+        height: calc(100vh - 64px);
+        margin: 8px;
+        overflow-y: auto;
+    }
+
+    &__mainContent {
+        width: 70%;
+        margin: 0 auto;
+    }
+
+    &__headerContainer {
+        flex-grow: 0;
+        padding-top: 4px;
+    }
+
+    &__inputContainer {
+        flex-grow: 0;
+    }
+
+    &__loadingPrompt {
+        margin-top: 10%;
+    }
+
+    &__suggestionsHeader {
+        margin: 18px 21px 0 21px;
+    }
+
+    &__selectAllContainer {
+        padding: 4px 12px 0 0;
+    }
+
+    &__generatingContainer {
+        padding-top: 10%;
+    }
+
+    &__generatingText {
+        margin-top: 8px;
+    }
+
+    &__subduedHeading {
+        color: inherit !important;
+    }
+
+    &__generationHeader {
+        padding-top: 10%;
+
+        h4 {
+            margin: 16px 8px;
+        }
+    }
+
+    &__generationDetails {
+        padding-top: 8px;
+    }
+
+    &__footerContainer {
+        padding: 0 21px;
+    }
+
+    &__modalFooter>*+* {
+        margin-left: 0;
+    }
+
+    &__modalClose {
+        padding: 4px;
+        min-width: auto;
+        width: auto;
+        white-space: nowrap;
+    }
+}

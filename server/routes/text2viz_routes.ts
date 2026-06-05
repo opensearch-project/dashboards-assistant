@@ -11,6 +11,7 @@ import {
   TEXT2VEGA_INPUT_SIZE_LIMIT,
   TEXT2VEGA_WITH_INSTRUCTIONS_AGENT_CONFIG_ID,
   TEXT2VIZ_API,
+  TEXT2DASHBOARD_AGENT_CONFIG_ID,
 } from '../../common/constants/llm';
 import { AssistantServiceSetup } from '../services/assistant_service';
 import { handleError } from './error_handler';
@@ -59,7 +60,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         let textContent = response.body.inference_results[0].output[0].result;
         // Check if the visualization is single value:
         // it should have exactly 1 metric and no dimensions.
-        let ifSingleMetric = checkSingleMetric(textContent);
+        const ifSingleMetric = checkSingleMetric(textContent);
 
         // extra content between tag <vega-lite></vega-lite>
         const startTag = '<vega-lite>';
@@ -121,6 +122,51 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
 
         const result = JSON.parse(response.body.inference_results[0].output[0].result);
         return res.ok({ body: result });
+      } catch (e) {
+        return handleError(e, res, context.assistant_plugin.logger);
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: TEXT2VIZ_API.DATA_INSIGHTS,
+      validate: {
+        body: schema.object({
+          dataSchema: schema.string(),
+          sampleData: schema.string(),
+        }),
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const assistantClient = assistantService.getScopedClient(req, context);
+      try {
+        const response = await assistantClient.executeAgentByConfigName(
+          TEXT2DASHBOARD_AGENT_CONFIG_ID,
+          {
+            dataSchema: req.body.dataSchema,
+            sampleData: req.body.sampleData,
+          }
+        );
+
+        let textContent = response.body.inference_results[0].output[0].result;
+
+        // extra content between tag <vega-lite></vega-lite>
+        const startTag = '<data-dimension>';
+        const endTag = '</data-dimension>';
+
+        const startIndex = textContent.indexOf(startTag);
+        const endIndex = textContent.indexOf(endTag);
+
+        if (startIndex !== -1 && endIndex !== -1 && startIndex < endIndex) {
+          // Extract the content between the tags
+          textContent = textContent.substring(startIndex + startTag.length, endIndex).trim();
+        }
+
+        return res.ok({ body: JSON.parse(textContent) });
       } catch (e) {
         return handleError(e, res, context.assistant_plugin.logger);
       }
