@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { IMessage, Interaction } from '../../../common/types/chat_saved_object_attributes';
 import { WelcomeMessage } from '../../components/chat_welcome_message';
 import { useChatContext } from '../../contexts';
@@ -28,6 +28,7 @@ import { LLMResponseType } from '../../hooks/use_chat_state';
 import { LoadingPlaceholder } from './loading_placeholder';
 
 interface ChatPageContentProps {
+  chatFlyoutRef: RefObject<HTMLDivElement>;
   messagesLoading: boolean;
   conversationsLoading: boolean;
   messagesLoadingError?: Error;
@@ -57,9 +58,11 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
   const [messageSpacerHeight, setMessageSpacerHeight] = useState(0);
 
   useLayoutEffect(() => {
-    if (loading && latestInputRef.current) {
+    if (loading && latestInputRef.current && props.chatFlyoutRef.current) {
       setMessageSpacerHeight(
-        window.innerHeight - latestInputRef.current.clientHeight - CHAT_PAGE_CONTENT_PADDING_HEIGHT
+        props.chatFlyoutRef.current?.clientHeight! -
+          latestInputRef.current.clientHeight -
+          CHAT_PAGE_CONTENT_PADDING_HEIGHT
       );
 
       requestAnimationFrame(() => {
@@ -71,7 +74,7 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
         }
       });
     }
-  }, [loading, window.innerHeight]);
+  }, [loading, props.chatFlyoutRef]);
 
   useEffect(() => {
     // Always clear the height when reopen the chat window or load new chat

@@ -37,6 +37,10 @@ jest.mock('./chat_page_content', () => {
   };
 });
 
+const mockChatFlyoutRef = {
+  current: document.createElement('div'),
+} as React.RefObject<HTMLDivElement>;
+
 describe('<ChatPage />', () => {
   const dispatchMock = jest.fn();
   const loadMock = jest.fn().mockResolvedValue({
@@ -82,7 +86,7 @@ describe('<ChatPage />', () => {
   });
 
   it('should reload the current conversation when user click refresh', async () => {
-    render(<ChatPage />);
+    render(<ChatPage chatFlyoutRef={mockChatFlyoutRef} />);
     fireEvent.click(screen.getByText('refresh'));
 
     expect(loadMock).toHaveBeenCalledWith('mocked_conversation_id');
@@ -99,7 +103,7 @@ describe('<ChatPage />', () => {
       conversationId: undefined,
       chatEnabled: true,
     });
-    render(<ChatPage />);
+    render(<ChatPage chatFlyoutRef={mockChatFlyoutRef} />);
     fireEvent.click(screen.getByText('refresh'));
 
     expect(loadMock).not.toHaveBeenCalled();
@@ -127,7 +131,7 @@ describe('<ChatPage />', () => {
       interactions: [],
     });
 
-    render(<ChatPage />);
+    render(<ChatPage chatFlyoutRef={mockChatFlyoutRef} />);
 
     fireEvent.click(screen.getByText('Refresh conversations list'));
 
