@@ -36,7 +36,8 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: opensearch-project/OpenSearch-Dashboards
-          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          # ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          ref: 41bae50d52a7e641df1c7d839812075a99494ec3 # use it temporarily to unblock CI
           path: OpenSearch-Dashboards
       - name: Checkout dashboards-assistant plugin
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
