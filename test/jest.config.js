@@ -25,6 +25,7 @@ module.exports = {
     '\\.(css|less|sass|scss)$': '<rootDir>/test/__mocks__/styleMock.js',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__mocks__/fileMock.js',
     '^!!raw-loader!.*': 'jest-raw-loader',
+    '@hapi/hoek/(?!lib/)(.*)': '<rootDir>/../../node_modules/@hapi/hoek/lib/$1',
   },
   testEnvironment: 'jsdom',
   transformIgnorePatterns: [
