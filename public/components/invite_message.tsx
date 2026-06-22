@@ -7,7 +7,6 @@ import { EuiSmallButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 export const InviteMessage: React.FC = () => {
-  // using https://mailtolinkgenerator.com/
   const mailtoLink =
     'mailto:opensearch-assistant@amazon.com?subject=Requesting%20invite%20to%20OpenSearch%20Assistant%20Playground';
 
