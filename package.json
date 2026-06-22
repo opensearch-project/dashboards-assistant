@@ -20,7 +20,7 @@
   "dependencies": {
     "autosize": "^6.0.1",
     "csv-parser": "^3.0.0",
-    "dompurify": "^3.2.4",
+    "dompurify": "^3.4.11",
     "jsdom": "^21.1.2",
     "postinstall": "^0.7.4"
   },
@@ -42,6 +42,15 @@
   "resolutions": {
     "braces": "^3.0.3",
     "micromatch": "^4.0.8",
-    "cross-spawn": "^7.0.5"
+    "cross-spawn": "^7.0.5",
+    "minimatch": "^3.1.4",
+    "lodash": "^4.18.0",
+    "flatted": "^3.4.2",
+    "ajv": "^6.14.0",
+    "brace-expansion": "^1.1.13",
+    "yaml": "^2.8.3",
+    "picomatch": "^2.3.2",
+    "ws": "^8.21.0",
+    "form-data": "^4.0.6"
   }
 }
