@@ -2,7 +2,6 @@ name: 'Install Dashboards with Plugin via Binary'
 
 on: [push, pull_request]
 env:
-  OPENSEARCH_VERSION: '3.0.0'
   CI: 1
   # avoid warnings like "tput: No value for $TERM and no -T specified"
   TERM: xterm
@@ -16,7 +15,7 @@ jobs:
         os: [ubuntu-latest]
         # TODO: add windows support when OSD core is stable on windows
     runs-on: ${{ matrix.os }}
-    steps:  
+    steps:
       - name: Checkout Branch
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
@@ -29,14 +28,15 @@ jobs:
         shell: bash
 
       - name: Run Opensearch
-        uses: derek-ho/start-opensearch@28a7ce5aa29e82a4b426b202d92af4ed2bb9003b # v2
+        uses: opensearch-project/opensearch-build/.github/actions/start-opensearch@643b632712710159088d5f0798de7e91c1f2b8f7
         with:
           opensearch-version: ${{ env.OPENSEARCH_VERSION }}
           security-enabled: false
+          jdk-version: 21
 
       - name: Run Dashboard
         id: setup-dashboards
-        uses: derek-ho/setup-opensearch-dashboards@eee8e92484c4b05a68f363bb662e704f1d2295bc # v2
+        uses: opensearch-project/opensearch-build/.github/actions/setup-opensearch-dashboards@643b632712710159088d5f0798de7e91c1f2b8f7
         with:
           plugin_name: dashboards-assistant
           built_plugin_name: assistantDashboards
@@ -44,12 +44,12 @@ jobs:
           install_zip: true
 
       - name: Start the binary
-        run: | 
+        run: |
           nohup ./bin/opensearch-dashboards &
         working-directory: ${{ steps.setup-dashboards.outputs.dashboards-binary-directory }}
         shell: bash
 
-      - name: Health check 
+      - name: Health check
         run: |
           timeout 300 bash -c 'while [[ "$(curl http://localhost:5601/api/status | jq -r '.status.overall.state')" != "green" ]]; do sleep 5; done'
         shell: bash
