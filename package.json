@@ -42,6 +42,10 @@
   "resolutions": {
     "braces": "^3.0.3",
     "micromatch": "^4.0.8",
-    "cross-spawn": "^7.0.5"
+    "cross-spawn": "^7.0.5",
+    "flatted": "^3.4.2",
+    "yaml": "^2.8.3",
+    "dompurify": "^3.4.11",
+    "minimist": "^1.2.6"
   }
 }
