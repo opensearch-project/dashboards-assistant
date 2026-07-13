@@ -32,10 +32,6 @@
     "jest-dom": "^4.0.0",
     "lint-staged": "^15.2.10"
   },
-  "eslintIgnore": [
-    "node_modules/*",
-    "target/*"
-  ],
   "resolutions": {
     "braces": "^3.0.3",
     "micromatch": "^4.0.8",
