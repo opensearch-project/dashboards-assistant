@@ -28,7 +28,6 @@ import {
 } from './utils/constants';
 import { useCore } from './contexts/core_context';
 import { MountPointPortal } from '../../../src/plugins/opensearch_dashboards_react/public';
-import { usePatchFixedStyle } from './hooks/use_patch_fixed_style';
 import { getLogoIcon } from './services';
 import {
   getChatbotOpenStatus,
@@ -69,7 +68,6 @@ export const HeaderChatButton = (props: HeaderChatButtonProps) => {
   );
   const flyoutFullScreen = sidecarDockedMode === SIDECAR_DOCKED_MODE.TAKEOVER;
   const flyoutMountPoint = useRef(null);
-  usePatchFixedStyle();
 
   const loadLatestConversation = () => {
     core.services.conversationLoad.getLatestConversationId().then((latestConversationId) => {
