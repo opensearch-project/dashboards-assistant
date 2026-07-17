@@ -3,3 +3,6 @@ https?://.+\$$
 
 https://bedrock-runtime.*.amazonaws.com/*
 https://link
+
+# local dev/test URLs (jest testEnvironmentOptions.url / process.env.HOST) are not reachable
+https?://localhost.*

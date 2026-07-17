@@ -458,7 +458,7 @@ describe('AgentFrameworkStorageService', () => {
     expect(agentFrameworkService.getInteraction('_id', '')).rejects.toMatchInlineSnapshot(
       `[Error: interactionId is required]`
     );
-    expect(mockedTransportRequest).toBeCalledTimes(0);
+    expect(mockedTransportRequest).toHaveBeenCalledTimes(0);
     expect(agentFrameworkService.getInteraction('_id', 'interaction_id')).resolves
       .toMatchInlineSnapshot(`
       Object {
@@ -468,7 +468,7 @@ describe('AgentFrameworkStorageService', () => {
         "response": "response",
       }
     `);
-    expect(mockedTransportRequest).toBeCalledTimes(1);
+    expect(mockedTransportRequest).toHaveBeenCalledTimes(1);
   });
 
   it('should encode id when calls getInteraction with non-standard params in request payload', async () => {

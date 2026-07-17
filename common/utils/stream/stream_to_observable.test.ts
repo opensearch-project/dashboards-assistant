@@ -19,7 +19,7 @@ describe('convertEventStreamToObservable', () => {
     const mockedCallback = jest.fn();
     output$.subscribe(mockedCallback);
     await waitFor(() => {
-      expect(mockedCallback).toBeCalledWith('test');
+      expect(mockedCallback).toHaveBeenCalledWith('test');
     });
   });
 
@@ -42,8 +42,8 @@ describe('convertEventStreamToObservable', () => {
     await new Promise((resolve) => setTimeout(resolve, 500));
     cancel();
     await waitFor(() => {
-      expect(mockedCallback).toBeCalledTimes(1);
-      expect(mockedCompleteCallback).toBeCalledTimes(1);
+      expect(mockedCallback).toHaveBeenCalledTimes(1);
+      expect(mockedCompleteCallback).toHaveBeenCalledTimes(1);
     });
   });
 });

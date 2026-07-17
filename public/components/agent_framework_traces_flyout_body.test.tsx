@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { waitFor, render, screen, fireEvent } from '@testing-library/react';
 import * as chatContextExports from '../contexts/chat_context';
 import * as coreContextExports from '../contexts/core_context';

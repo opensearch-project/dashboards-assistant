@@ -77,7 +77,7 @@ describe('test send_message route', () => {
         "title": "foo",
       }
     `);
-    expect(mockAgentFrameworkStorageService.getConversation).toBeCalledTimes(1);
+    expect(mockAgentFrameworkStorageService.getConversation).toHaveBeenCalledTimes(1);
   });
 
   it('should call getInteraction when conversationId is provided in request payload', async () => {
@@ -138,7 +138,7 @@ describe('test send_message route', () => {
         context: {},
       },
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     expect(result.output).toMatchInlineSnapshot(`
       Object {
         "headers": Object {},
@@ -168,7 +168,7 @@ describe('test send_message route', () => {
         context: {},
       },
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     expect(result.output).toMatchInlineSnapshot(`
       Object {
         "headers": Object {},
@@ -209,7 +209,7 @@ describe('test send_message route', () => {
       },
       conversationId: 'foo',
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledWith(new Error('something went wrong'));
+    expect(mockedLogger.error).toHaveBeenCalledWith(new Error('something went wrong'));
     expect(result.output).toMatchInlineSnapshot(`
       Object {
         "headers": Object {},
@@ -244,8 +244,8 @@ describe('test send_message route', () => {
         },
       },
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
-    expect(mockedLogger.error).toBeCalledWith(new Error('foo'));
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockedLogger.error).toHaveBeenCalledWith(new Error('foo'));
     expect(result.output).toMatchInlineSnapshot(`
         Object {
           "headers": Object {},

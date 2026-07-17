@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import { AgentFrameworkTraces } from './agent_framework_traces';
 import * as GetTraces from '../hooks/use_fetch_agentframework_traces';
@@ -53,7 +53,7 @@ describe('<AgentFrameworkTraces/> spec', () => {
     jest.spyOn(GetTraces, 'useFetchAgentFrameworkTraces').mockReturnValue(mockedGetTracesResult);
 
     render(<AgentFrameworkTraces interactionId="test-interaction-id" />);
-    expect(GetTraces.useFetchAgentFrameworkTraces).toBeCalledTimes(1);
+    expect(GetTraces.useFetchAgentFrameworkTraces).toHaveBeenCalledTimes(1);
     expect(document.body.children).toMatchSnapshot();
   });
 
