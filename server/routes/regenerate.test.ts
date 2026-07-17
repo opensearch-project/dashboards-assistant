@@ -119,7 +119,7 @@ describe('test regenerate route', () => {
       conversationId: 'foo',
       interactionId: 'bar',
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     expect(result.output).toMatchInlineSnapshot(`
       Object {
         "headers": Object {},
@@ -148,8 +148,8 @@ describe('test regenerate route', () => {
       conversationId: 'foo',
       interactionId: 'bar',
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
-    expect(mockedLogger.error).toBeCalledWith(new Error('foo'));
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockedLogger.error).toHaveBeenCalledWith(new Error('foo'));
     expect(result.output).toMatchInlineSnapshot(`
         Object {
           "headers": Object {},

@@ -74,16 +74,16 @@ describe('MessageContentPool', () => {
 
     await waitFor(() => {
       expect(subscriptionMock).toHaveBeenCalledTimes(3);
-      expect(subscriptionMock).toBeCalledWith({
+      expect(subscriptionMock).toHaveBeenCalledWith({
         messageContent: 'a[hyperlink](href)',
         messageId: 'a',
       });
 
-      expect(subscriptionMock).toBeCalledWith({
+      expect(subscriptionMock).toHaveBeenCalledWith({
         messageContent: `[link whose length is larger than 50](${'a'.repeat(12)}`,
         messageId: 'b',
       });
-      expect(subscriptionMock).toBeCalledWith({
+      expect(subscriptionMock).toHaveBeenCalledWith({
         messageContent: `${'a'.repeat(39)})`,
         messageId: 'b',
       });

@@ -132,7 +132,7 @@ describe('useGetChunksFromHTTPResponse', () => {
         },
       });
 
-      expect(chatStateDispatchMock).toBeCalledWith({
+      expect(chatStateDispatchMock).toHaveBeenCalledWith({
         type: 'appendMessageContent',
         payload: {
           messageId: 'b',

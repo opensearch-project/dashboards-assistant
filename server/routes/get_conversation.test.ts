@@ -71,7 +71,7 @@ describe('getConversation route', () => {
     const result = (await getConversationRequest({
       conversationId: '1',
     })) as Boom;
-    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     expect(result.output).toMatchInlineSnapshot(`
       Object {
         "headers": Object {},

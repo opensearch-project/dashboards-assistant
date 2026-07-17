@@ -17,7 +17,7 @@ window.URL.createObjectURL = () => '';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 HTMLCanvasElement.prototype.getContext = () => '' as any;
 Element.prototype.scrollIntoView = jest.fn();
-window.IntersectionObserver = (class IntersectionObserver {
+window.IntersectionObserver = class IntersectionObserver {
   constructor() {}
 
   disconnect() {
@@ -35,7 +35,7 @@ window.IntersectionObserver = (class IntersectionObserver {
   unobserve() {
     return null;
   }
-} as unknown) as typeof window.IntersectionObserver;
+} as unknown as typeof window.IntersectionObserver;
 
 jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'random-id');
 
@@ -47,9 +47,15 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 
 jest.setTimeout(30000);
 
+// jest-location-mock uses process.env.HOST as the base URL for its window.location mock.
+// Set it to match testEnvironmentOptions.url so window.location.origin is 'http://localhost:5601'
+// in all jsdom tests, consistent with the rest of the suite.
+process.env.HOST = 'http://localhost:5601';
+
 // Mock window.matchMedia for Monaco editor
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
+  configurable: true,
   value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
@@ -60,4 +66,18 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
+});
+
+// jsdom 26 marks window.localStorage and window.sessionStorage as non-configurable.
+// Re-declare them as configurable once here so individual tests can override them
+// with Object.defineProperty without hitting "Cannot redefine property" errors.
+['localStorage', 'sessionStorage'].forEach((key) => {
+  const descriptor = Object.getOwnPropertyDescriptor(window, key);
+  if (descriptor && !descriptor.configurable) {
+    Object.defineProperty(window, key, {
+      configurable: true,
+      writable: true,
+      value: descriptor.value,
+    });
+  }
 });

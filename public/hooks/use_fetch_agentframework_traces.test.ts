@@ -114,7 +114,7 @@ describe('useFetchAgentFrameworkTraces hook', () => {
       );
 
       // expect the mock to be called
-      expect(abortFn).toBeCalledTimes(1);
+      expect(abortFn).toHaveBeenCalledTimes(1);
     });
   });
 });
