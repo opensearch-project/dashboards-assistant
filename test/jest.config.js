@@ -45,6 +45,6 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|weak-lru-cache|ordered-binary|d3-color|axios|query-string|decode-uri-component|filter-obj|split-on-first))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|weak-lru-cache|ordered-binary|d3-color|axios|query-string|decode-uri-component|filter-obj|split-on-first|@elastic[/\\\\]charts|uuid))[/\\\\].+\\.js$',
   ],
 };
