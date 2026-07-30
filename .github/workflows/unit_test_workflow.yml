@@ -111,7 +111,7 @@ jobs:
           name: coverage-report-linux
           path: ./coverage
       - name: Upload Coverage Report
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage
