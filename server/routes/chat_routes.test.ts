@@ -38,6 +38,11 @@ const router = new Router(
   enhanceWithContext({
     assistant_plugin: {
       logger: mockedLogger,
+      config: {
+        chat: {
+          traceMaxResults: 10,
+        },
+      },
     },
   })
 );
@@ -257,7 +262,7 @@ describe('chat routes', () => {
       expect(mockAgentFrameworkStorageService.getTraces).not.toHaveBeenCalled();
       const result = (await triggerGetTrace('interaction-1')) as ResponseObject;
       expect(getOpenSearchClientTransport.mock.results[0].value).toBe('client');
-      expect(mockAgentFrameworkStorageService.getTraces).toHaveBeenCalledWith('interaction-1');
+      expect(mockAgentFrameworkStorageService.getTraces).toHaveBeenCalledWith('interaction-1', 10);
       expect(result.source).toEqual(getTraceResultMock);
     });
 
@@ -277,7 +282,7 @@ describe('chat routes', () => {
       expect(mockAgentFrameworkStorageService.getTraces).not.toHaveBeenCalled();
       const result = (await triggerGetTrace('interaction-1', 'data_source_id')) as ResponseObject;
       expect(getOpenSearchClientTransport.mock.results[0].value).toBe('dataSource-client');
-      expect(mockAgentFrameworkStorageService.getTraces).toHaveBeenCalledWith('interaction-1');
+      expect(mockAgentFrameworkStorageService.getTraces).toHaveBeenCalledWith('interaction-1', 10);
       expect(result.source).toEqual(getTraceResultMock);
     });
 
