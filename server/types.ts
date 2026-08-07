@@ -5,6 +5,7 @@
 
 import { IMessage, Interaction } from '../common/types/chat_saved_object_attributes';
 import { Logger, HttpAuth } from '../../../src/core/server';
+import { ConfigSchema } from '../common/types/config';
 import { AssistantServiceSetup } from './services/assistant_service';
 
 export interface AssistantPluginSetup {
@@ -49,6 +50,7 @@ declare module '../../../src/core/server' {
   interface RequestHandlerContext {
     assistant_plugin: {
       logger: Logger;
+      config: ConfigSchema;
     };
   }
 }

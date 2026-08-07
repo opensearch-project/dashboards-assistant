@@ -10,6 +10,7 @@ export const configSchema = schema.object({
   chat: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     trace: schema.boolean({ defaultValue: true }),
+    traceMaxResults: schema.number({ defaultValue: 10, min: 1 }),
     feedback: schema.boolean({ defaultValue: true }),
     allowRenameConversation: schema.boolean({ defaultValue: true }),
     deleteConversation: schema.boolean({ defaultValue: true }),

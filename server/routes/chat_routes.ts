@@ -364,9 +364,13 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const storageService = await createStorageService(context, request.query.dataSourceId);
+      const maxResults = context.assistant_plugin.config.chat.traceMaxResults;
 
       try {
-        const getResponse = await storageService.getTraces(request.params.interactionId);
+        const getResponse = await storageService.getTraces(
+          request.params.interactionId,
+          maxResults
+        );
         return response.ok({ body: getResponse });
       } catch (error) {
         context.assistant_plugin.logger.error(error);

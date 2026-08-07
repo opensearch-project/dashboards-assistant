@@ -361,10 +361,22 @@ describe('AgentFrameworkStorageService', () => {
       Array [
         Object {
           "method": "GET",
-          "path": "/_plugins/_ml/memory/message/..%2Fnon-standard%2Fid/traces",
+          "path": "/_plugins/_ml/memory/message/..%2Fnon-standard%2Fid/traces?max_results=10",
         },
       ]
     `);
+  });
+
+  it('passes maxResults to the traces request', async () => {
+    mockedTransportRequest.mockResolvedValueOnce({
+      body: {
+        traces: [],
+      },
+    });
+    await agentFrameworkService.getTraces('foo', 1000);
+    expect(mockedTransportRequest.mock.calls[0][0].path).toEqual(
+      '/_plugins/_ml/memory/message/foo/traces?max_results=1000'
+    );
   });
 
   it('updateInteraction', async () => {

@@ -187,10 +187,12 @@ export class AgentFrameworkStorageService implements StorageService {
     }
   }
 
-  async getTraces(interactionId: string): Promise<AgentFrameworkTrace[]> {
+  async getTraces(interactionId: string, maxResults = 10): Promise<AgentFrameworkTrace[]> {
     const response = (await this.clientTransport.request({
       method: 'GET',
-      path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(interactionId)}/traces`,
+      path: `${ML_COMMONS_BASE_API}/memory/message/${encodeURIComponent(
+        interactionId
+      )}/traces?max_results=${maxResults}`,
     })) as ApiResponse<{
       traces: Array<{
         message_id: string;
