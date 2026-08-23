@@ -4,7 +4,6 @@
   "compilerOptions": {
     "jsx": "react",
     "allowJs": true,
-    "baseUrl": ".",
     "target": "esnext",
     "module": "commonjs",
     "outDir": "./target",
