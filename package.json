@@ -46,6 +46,7 @@
     "cross-spawn": "^7.0.5",
     "flatted": "^3.4.2",
     "yaml": "^2.8.3",
-    "minimist": "^1.2.6"
+    "minimist": "^1.2.6",
+    "tmp": "^0.2.6"
   }
 }
