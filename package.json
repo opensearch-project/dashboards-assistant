@@ -40,12 +40,12 @@
     "target/*"
   ],
   "resolutions": {
-    "brace-expansion": "1.1.18",
     "braces": "^3.0.3",
     "micromatch": "^4.0.8",
     "cross-spawn": "^7.0.5",
     "flatted": "^3.4.2",
     "yaml": "^2.8.3",
-    "minimist": "^1.2.6"
+    "minimist": "^1.2.6",
+    "tmp": "^0.2.6"
   }
 }
